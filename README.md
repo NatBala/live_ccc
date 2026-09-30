@@ -82,9 +82,6 @@ npm run dev:mock    # terminal 2: the app, pointed at the stand-in
 ```
 The stand-in always returns one fixed plan, so use the prompt *Compare BFA and AMBAL for Rachel and schedule a meeting with her next month*. On Windows, set `OPENAI_API_KEY=mock` and `OPENAI_BASE_URL=http://localhost:9999/v1` in `.env` and run `npm start` instead of `dev:mock`.
 
-### Option 4: inside claude.ai
-`public/index.html` also runs as a claude.ai artifact, using Claude with no key or server.
-
 ---
 
 ## Configuration
