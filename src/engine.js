@@ -327,7 +327,7 @@ function fallbackPlan(run) {
   if (/link|access|won.?t open|issue|problem|unclear/.test(t)) add('service.resolve', 'Resolve the advisor’s issue', ['service.get_cases']);
   if (/said|profile|from now on|prefers/.test(t)) add('marketing.voc', 'Capture the advisor statement and propose memory under the rules', ['crm.get_call_notes']);
   if (!tasks.length) add(run.advisor ? 'sales.prep' : 'product.qar', run.advisor ? 'Summarize what the foundation knows for this request' : 'Answer the request from verified knowledge', []);
-  return tasks.slice(0, 5);
+  return tasks;
 }
 
 /* ---------- AI runtime ---------- */
@@ -360,16 +360,17 @@ function openAISampler() {
     const stream = typeof o.onText === 'function';
     const r = await post({ tier: tierOf(o), messages: [{ role: 'user', content: prompt }], stream }, o.signal);
     if (!stream) { const d = await r.json(); const text = d.choices?.[0]?.message?.content || ''; if (!text) throw err('empty_completion'); return { text }; }
-    const reader = r.body.getReader(), dec = new TextDecoder(); let buf = '', text = '';
+    const reader = r.body.getReader(), dec = new TextDecoder(); let buf = '', text = '', finishReason = null;
     try {
       for (;;) {
         const { value, done } = await reader.read(); if (done) break;
         buf += dec.decode(value, { stream: true });
         const lines = buf.split('\n'); buf = lines.pop();
         for (const ln of lines) { const s = ln.trim(); if (!s.startsWith('data:')) continue; const p = s.slice(5).trim(); if (p === '[DONE]') continue;
-          try { const delta = JSON.parse(p).choices?.[0]?.delta?.content || ''; if (delta) { text += delta; o.onText({ text, delta }); } } catch (e) { } }
+          try { const choice = JSON.parse(p).choices?.[0]; if (choice?.finish_reason) finishReason = choice.finish_reason; const delta = choice?.delta?.content || ''; if (delta) { text += delta; o.onText({ text, delta }); } } catch (e) { } }
       }
     } catch (e) { if (e.name === 'AbortError' || (o.signal && o.signal.aborted)) throw err('cancelled'); throw err('upstream_error', 'Stream interrupted', text); }
+    if (finishReason === 'length') throw err('output_truncated', 'The AI plan exceeded its output budget', text);
     if (!text) throw err('empty_completion');
     return { text };
   }
@@ -381,6 +382,7 @@ function openAISampler() {
       const r = await post({ tier: tierOf(o), messages, tools: defs.length ? defs : undefined, json: true }, o.signal);
       const d = await r.json(), msg = d.choices?.[0]?.message;
       if (!msg) throw err('empty_completion');
+      if (d.choices[0].finish_reason === 'length') throw err('output_truncated', 'The AI reply exceeded its output budget');
       if (msg.tool_calls && msg.tool_calls.length) {
         messages.push({ role: 'assistant', content: msg.content || null, tool_calls: msg.tool_calls });
         for (const tc of msg.tool_calls) {
@@ -447,14 +449,14 @@ Output ONLY newline-delimited JSON, one object per line, no prose and no code fe
 {"k":"decision","type":"missing","title":"...","detail":"..."}
 {"k":"decision","type":"memory","title":"...","detail":"...","class":"read_only|task_requirement|lasting_preference_candidate|none"}
 {"k":"decision","type":"controls","title":"...","detail":"..."}
-then 2 to 5 lines {"k":"task","id":"T1","agent":"registry id","objective":"one sentence","depends_on":[],"reads":["memory","knowledge","policy","models","events","feedback"],"tools":["tool names from that agent's list"],"why":"why this specialist"}
+then as many task lines as needed {"k":"task","id":"T1","agent":"registry id","objective":"one sentence","depends_on":[],"reads":["memory","knowledge","policy","models","events","feedback"],"tools":["tool names from that agent's list"],"why":"why this specialist"}
 {"k":"decision","type":"success","title":"...","detail":"..."}
 {"k":"end"}
 Requests can be about one advisor, a territory, a product, or internal work with colleagues. Not every request needs an advisor: for a territory set advisor null and territory; for product-only or internal work set both null.
 Ask for clarification only if acting would be unsafe or impossible: emit {"k":"clarify","question":"..."} after the entity decision, then {"k":"end"}. Otherwise make a sensible assumption and state it in the "missing" decision.
 ${run.clarified ? `You already asked: "${run.clarified.question}". The user answered: "${run.clarified.answer}". Do NOT ask again. Proceed, interpreting the answer as best you can, and state your assumption.` : ''}
 Be precise: titles of 3 to 6 words, details of at most 16 words, no filler. Reuse foundation records instead of redoing work.
-Tell the story a real team would: choose the specialists who genuinely own each part (usually 3 to 5, across teams when the work crosses teams), and chain them with depends_on so later specialists build on what earlier ones publish to the foundation. Tasks that don't depend on each other run in parallel.
+Tell the story a real team would: choose the specialists who genuinely own each part (across teams when the work crosses teams; no fixed task count), and chain them with depends_on so later specialists build on what earlier ones publish to the foundation. Tasks that don't depend on each other run in parallel. List tasks in dependency order. For a fund comparison and meeting request, obtain the comparison and approved resources, schedule the meeting, then produce the final meeting brief. The final brief must depend on every comparison, resource-gathering and scheduling task whose result it uses. Do not prepare the final brief before its supporting material exists.
 Classify new information about the advisor strictly: an employee's request is not an advisor preference.`;
 }
 function agentPrompt(task, run, packet, upstream, withTools) {
@@ -483,7 +485,7 @@ RULES
 - Knowledge: publish only reusable, evidence-backed findings with evidence ids.
 
 Reply with only a JSON object:
-{"says":"one first-person sentence, at most 22 words: what you did and whose work you built on","output":{"kind":"brief|email|finding|answer|plan|content_pick|post|case_update|note","title":"...","body":"under 150 words; '- ' bullets; blank line between paragraphs"},"used":["ids"],"knowledge":[{"label":"...","value":"...","evidence":["ids"]}],"memory":[{"attribute":"...","value":"...","scope":"BU-...|advisor","category":"content_pref|communication_pref|priority|relationship","basis":"advisor_statement|employee_request|task_requirement|inference","evidence":["ids"]}],"commitments":[{"title":"...","owner":"...","due":"..."}],"needs_approval":false,"open_questions":[]}
+{"says":"one first-person sentence, at most 22 words: what you did and whose work you built on","output":{"kind":"brief|email|finding|answer|plan|content_pick|post|case_update|note","title":"...","body":"Readable Markdown: use a pipe table for fund comparisons and other tabular data, headings for briefs, numbered steps for plans, bullets for findings, and short paragraphs for emails. Separate blocks with blank lines; keep it concise."},"used":["ids"],"knowledge":[{"label":"...","value":"...","evidence":["ids"]}],"memory":[{"attribute":"...","value":"...","scope":"BU-...|advisor","category":"content_pref|communication_pref|priority|relationship","basis":"advisor_statement|employee_request|task_requirement|inference","evidence":["ids"]}],"commitments":[{"title":"...","owner":"...","due":"..."}],"needs_approval":false,"open_questions":[]}
 Use empty arrays when nothing applies.`;
 }
 function toolDefs(task, onCall) {

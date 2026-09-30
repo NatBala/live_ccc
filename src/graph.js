@@ -72,6 +72,16 @@ function kgLayout(g, W, H, hide, changesOnly) {
     x.items.forEach((it, k) => { const t = n === 1 ? mid : ang + span * (.1 + .8 * k / (n - 1)); const r = R2 + (k % tiers) * 62; pos[it.id] = { x: cx + Math.cos(t) * r * SX, y: cy + Math.sin(t) * r * SY, a: t, hub }; });
     ang += span; return hub;
   });
+  // Reserve two label columns and separate neighboring rows vertically.
+  for (const right of [false, true]) {
+    const rows = Object.values(pos).filter(p => (Math.cos(p.a) >= -0.05) === right).sort((a, b) => a.y - b.y);
+    const gap = 44;
+    rows.forEach((p, i) => { p.x = right ? W - 355 : 355; p.y = Math.max(60, p.y, i ? rows[i - 1].y + gap : 60); });
+    if (rows.length && rows[rows.length - 1].y > H - 60) {
+      const offset = rows[rows.length - 1].y - (H - 60);
+      rows.forEach(p => p.y -= offset);
+    }
+  }
   return { cx, cy, hubs, pos, groups };
 }
 
@@ -92,13 +102,15 @@ function kgSVG(g, opt) {
       <text x="${f(hub.x + Math.cos(hub.a) * 34)}" y="${f(hub.y + Math.sin(hub.a) * 30 + (Math.sin(hub.a) > .3 ? 12 : Math.sin(hub.a) < -.3 ? -4 : 4))}" text-anchor="${Math.cos(hub.a) > .35 ? 'start' : Math.cos(hub.a) < -.35 ? 'end' : 'middle'}" class="kghl" fill="${C.color}">${esc(C.label)} · ${cnt}</text></g>`; }
   for (const gr of L.groups) for (const n of gr.items) {
     const p = L.pos[n.id], col = KG_CLUSTERS[n.cluster].color, right = Math.cos(p.a) >= -0.05, r = full ? 9 : 8;
-    const ring = { new: '#ffd27a', updated: '#ffd27a', session: '#e8c877', read: '#7fd4ab', pending: '#ffb347', superseded: '#6a7f94', locked: '#6a7f94', unknown: '#8aa3bb', none: 'none' }[n.state];
+    const ring = { new: '#7fe8c5', updated: '#ffbb70', session: '#e8c877', read: '#7fd4ab', pending: '#ffb347', superseded: '#6a7f94', locked: '#6a7f94', unknown: '#8aa3bb', none: 'none' }[n.state];
     const showLabel = full || ['new', 'updated', 'pending'].includes(n.state);
     h += `<g class="kgn ${n.state} ${KG.sel === n.id ? 'sel' : ''}" data-node="${esc(n.id)}" tabindex="0">
       ${['new', 'updated'].includes(n.state) ? `<circle cx="${f(p.x)}" cy="${f(p.y)}" r="${r + 9}" fill="#ffd27a" opacity=".22" class="kgpulse" filter="url(#kgglow)"/>` : ''}
-      <circle cx="${f(p.x)}" cy="${f(p.y)}" r="${r}" fill="${col}" style="${['pending', 'unknown'].includes(n.state) ? 'fill:var(--s1)' : n.state === 'locked' || n.state === 'superseded' ? 'fill:var(--kg-dim)' : ''}" stroke="${ring}" stroke-width="${ring === 'none' ? 0 : 2.5}" ${['pending', 'unknown', 'superseded'].includes(n.state) ? 'stroke-dasharray="3 3"' : ''}/>
+      <circle cx="${f(p.x)}" cy="${f(p.y)}" r="${r}" fill="${col}" style="${['pending', 'unknown'].includes(n.state) ? 'fill:var(--s1)' : n.state === 'locked' || n.state === 'superseded' ? 'fill:var(--kg-dim)' : ''}" stroke="${ring}" stroke-width="${ring === 'none' ? 0 : 3}" ${['pending', 'unknown', 'superseded'].includes(n.state) ? 'stroke-dasharray="3 3"' : ''}/>
+      ${n.state === 'read' ? `<text x="${f(p.x)}" y="${f(p.y + 4)}" text-anchor="middle" class="kgmarker">✓</text>` : n.state === 'session' ? `<circle cx="${f(p.x)}" cy="${f(p.y)}" r="3" fill="#10273a"/>` : ''}
+      ${n.state === 'updated' ? `<text x="${f(p.x)}" y="${f(p.y + 4)}" text-anchor="middle" class="kgmarker">↻</text>` : n.state === 'new' ? `<text x="${f(p.x)}" y="${f(p.y + 4)}" text-anchor="middle" class="kgmarker">+</text>` : n.state === 'superseded' ? `<path d="M${f(p.x - 6)} ${f(p.y)}h12" stroke="#fff" stroke-width="2"/>` : ''}
       ${n.state === 'locked' ? `<svg x="${f(p.x - 6)}" y="${f(p.y - 6)}" width="12" height="12" viewBox="0 0 24 24" fill="none" style="stroke:var(--nt)" stroke-width="2.4"><path d="M6 11h12v9H6zM8 11V8a4 4 0 018 0v3"/></svg>` : ''}
-      ${showLabel ? `<text x="${f(p.x + (right ? 15 : -15))}" y="${f(p.y - 1)}" text-anchor="${right ? 'start' : 'end'}" class="kgl">${esc(n.label)}</text><text x="${f(p.x + (right ? 15 : -15))}" y="${f(p.y + 13)}" text-anchor="${right ? 'start' : 'end'}" class="kgs">${esc(n.sub)}</text>` : ''}
+      ${showLabel ? `<text x="${f(p.x + (right ? 15 : -15))}" y="${f(p.y - 1)}" text-anchor="${right ? 'start' : 'end'}" class="kgl">${esc(n.label.length > 38 ? n.label.slice(0, 36) + '…' : n.label)}</text><text x="${f(p.x + (right ? 15 : -15))}" y="${f(p.y + 13)}" text-anchor="${right ? 'start' : 'end'}" class="kgs">${esc(n.sub.length > 45 ? n.sub.slice(0, 43) + '…' : n.sub)}</text>` : ''}
       ${['new', 'updated'].includes(n.state) && full ? `<text x="${f(p.x)}" y="${f(p.y - 16)}" text-anchor="middle" class="kgbadge">${n.state === 'new' ? 'NEW' : 'UPDATED'}</text>` : ''}
       <title>${esc(n.label)} · ${esc(STATE_TXT[n.state] || n.state)}</title></g>`;
   }
@@ -117,7 +129,7 @@ function kgCompact(advId) {
 
 /* ---------- full-screen explorer ---------- */
 function openKG(advId) {
-  KG.open = true; KG.adv = advId || UI.memAdv || F.session.advisor || 'ADV-101'; KG.sel = null; KG.vb = { x: -90, y: -20, w: 1580, h: 940 };
+  KG.open = true; KG.adv = advId || UI.memAdv || F.session.advisor || 'ADV-101'; KG.sel = null; KG.vb = { x: 0, y: 0, w: 1400, h: 900 };
   $('kg').hidden = false; renderKG(true);
 }
 function closeKG() { KG.open = false; $('kg').hidden = true; }
@@ -156,13 +168,13 @@ function kgInit() {
   $('kg').addEventListener('click', e => {
     const el = e.target.closest('[data-node],[data-kgadv],[data-kgcl],[data-kgact]'); if (!el) return; const d = el.dataset;
     if (d.node) { if (d.node) { KG.sel = d.node; renderKG(); } return; }
-    if (d.kgadv) { KG.adv = d.kgadv; KG.sel = null; KG.vb = { x: -90, y: -20, w: 1580, h: 940 }; renderKG(); return; }
+    if (d.kgadv) { KG.adv = d.kgadv; KG.sel = null; KG.vb = { x: 0, y: 0, w: 1400, h: 900 }; renderKG(); return; }
     if (d.kgcl) { KG.hide.has(d.kgcl) ? KG.hide.delete(d.kgcl) : KG.hide.add(d.kgcl); renderKG(); return; }
     const a = d.kgact;
     if (a === 'changes') { KG.changesOnly = !KG.changesOnly; renderKG(); }
     else if (a === 'back') { KG.sel = null; renderKG(); }
     else if (a === 'close') closeKG();
     else if (a === 'in') kgZoom(1 / 1.25); else if (a === 'out') kgZoom(1.25);
-    else if (a === 'fit') { KG.vb = { x: -90, y: -20, w: 1580, h: 940 }; kgApplyVB(); }
+    else if (a === 'fit') { KG.vb = { x: 0, y: 0, w: 1400, h: 900 }; kgApplyVB(); }
   });
 }

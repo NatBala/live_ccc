@@ -14,7 +14,32 @@ const ICONS = {
   check: '<path d="M5 12l5 5 9-10"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>', arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>'
 };
 const icon = n => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ICONS.file}</svg>`;
-const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/^#{1,4}\s*(.+)$/gm, '<b>$1</b>');
+function md(value) {
+  const inline = text => esc(text).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  const lines = String(value || '').replace(/\r\n?/g, '\n').split('\n');
+  const cells = line => line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(x => x.trim());
+  const separator = line => line.includes('|') && cells(line).every(x => /^:?-{3,}:?$/.test(x));
+  const block = (line, next) => !line.trim() || /^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>|```)/.test(line) || (line.includes('|') && next && separator(next));
+  const html = [];
+  for (let i = 0; i < lines.length;) {
+    const line = lines[i];
+    if (!line.trim()) { i++; continue; }
+    if (/^\s*```/.test(line)) { const code = []; i++; while (i < lines.length && !/^\s*```/.test(lines[i])) code.push(lines[i++]); i++; html.push('<pre><code>' + esc(code.join('\n')) + '</code></pre>'); continue; }
+    if (line.includes('|') && lines[i + 1] && separator(lines[i + 1])) {
+      const headers = cells(line), align = cells(lines[i + 1]).map(x => x.startsWith(':') && x.endsWith(':') ? 'center' : x.endsWith(':') ? 'right' : 'left'); i += 2;
+      const rows = []; while (i < lines.length && lines[i].trim() && lines[i].includes('|')) rows.push(cells(lines[i++]));
+      const cell = (x, j, tag) => '<' + tag + ' style="text-align:' + align[j] + '">' + inline(x || '') + '</' + tag + '>';
+      html.push('<div class="output-table"><table><thead><tr>' + headers.map((x,j) => cell(x,j,'th')).join('') + '</tr></thead><tbody>' + rows.map(row => '<tr>' + headers.map((_,j) => cell(row[j],j,'td')).join('') + '</tr>').join('') + '</tbody></table></div>'); continue;
+    }
+    const heading = line.match(/^\s*(#{1,6})\s+(.+)$/);
+    if (heading) { const level = Math.min(heading[1].length + 2, 6); html.push('<h' + level + '>' + inline(heading[2]) + '</h' + level + '>'); i++; continue; }
+    const list = line.match(/^\s*(?:([-*+])|(\d+)[.)])\s+(.+)$/);
+    if (list) { const tag = list[2] ? 'ol' : 'ul', items = []; while (i < lines.length) { const item = lines[i].match(tag === 'ol' ? /^\s*\d+[.)]\s+(.+)$/ : /^\s*[-*+]\s+(.+)$/); if (!item) break; items.push('<li>' + inline(item[1]) + '</li>'); i++; } html.push('<' + tag + '>' + items.join('') + '</' + tag + '>'); continue; }
+    if (/^\s*>/.test(line)) { const quote = []; while (i < lines.length && /^\s*>/.test(lines[i])) quote.push(lines[i++].replace(/^\s*>\s?/,'')); html.push('<blockquote>' + inline(quote.join(' ')) + '</blockquote>'); continue; }
+    const paragraph = [line]; i++; while (i < lines.length && !block(lines[i], lines[i + 1])) paragraph.push(lines[i++]); html.push('<p>' + inline(paragraph.join(' ')) + '</p>');
+  }
+  return html.join('');
+}
 const agentName = id => AGENTS[id] ? AGENTS[id].name : id === 'orch' ? 'Orchestration' : EMPLOYEES[id] ? EMPLOYEES[id].name : id;
 const UI = { requester: 'EMP-PRIYA', tab: 'decisions', view: 'live', memAdv: null, ops: [], raf: 0, run: null, ctl: null, recordings: [], totals: { runs: 0, reused: 0, committed: 0, pending: 0, blocked: 0, calls: 0, mcp: 0 } };
 
@@ -84,7 +109,7 @@ function renderOrch() {
     if (r.status === 'thinking') think = `<span class="spin"></span><b>${act ? act.name : 'Thinking'}</b>${last ? ' · ' + esc(last.title) : ''}`;
     else if (r.status === 'running') { const run = r.tasks.filter(t => t.state === 'running').map(t => AGENTS[t.agent].name); think = `<span class="spin"></span><b>Execute</b> · ${run.length ? esc(run.join(' and ')) + ' working' : 'routing'} · ${r.tasks.filter(t => t.state === 'done').length} of ${r.tasks.length} done`; }
     else if (r.status === 'clarify') think = '<b>Gaps</b> · waiting for your answer';
-    else if (r.status === 'done') think = `<b>Complete</b> · ${r.tasks.length} specialists in ${Math.round((r.t1 - r.t0) / 1000)} s`;
+    else if (r.status === 'done') think = `<b>${r.awaitingApproval ? 'Ready for approval' : 'Complete'}</b> · ${r.tasks.length} specialists in ${Math.round((r.t1 - r.t0) / 1000)} s`;
     else if (r.status === 'failed') think = `<b>Stopped</b> · ${esc(r.error || '')}`;
   }
   setHTML($('othink'), think);
@@ -115,12 +140,7 @@ function renderStats() {
   if (!box._built) { box.innerHTML = rows.map(([k, , l], i) => `<div class="stat ${i === 1 ? 'gold' : ''}" data-s="${k}"><b>0</b><span>${l}</span></div>`).join(''); box._built = true; }
   for (const [k, v, l] of rows) { const el = box.querySelector(`[data-s="${k}"]`), b = el.firstChild; if (b.textContent !== String(v)) { b.textContent = v; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); } el.lastChild.textContent = l; }
 }
-function setAIStatus() {
-  const el = $('aistat');
-  if (AI.mode === 'live') { el.className = 'aistat live'; el.innerHTML = `<i></i><span>Live AI · ${esc(AI.provider || 'Claude')}${AI.tools ? ' with tools' : ''}</span>`; }
-  else if (AI.mode === 'checking') { el.className = 'aistat'; el.innerHTML = '<i></i><span>Checking AI…</span>'; }
-  else { el.className = 'aistat off'; el.innerHTML = '<i></i><span>Live AI not connected</span>'; }
-}
+function setAIStatus() {}
 
 /* ---------- wires: routed through the gaps, drawn for every live operation ---------- */
 function rectIn(el) { const d = $('diagram').getBoundingClientRect(), r = el.getBoundingClientRect(), dg = $('diagram'); return { x: r.left - d.left + dg.scrollLeft, y: r.top - d.top + dg.scrollTop, w: r.width, h: r.height }; }
@@ -222,17 +242,20 @@ async function runRequestInner(text, replay, opts = {}) {
       run.stats.ai++;
       const { text: full } = await AI.sample(orchestratorPrompt(run), { modelTier: 'default', cache: false, signal: UI.ctl.signal, onText: ({ text: t }) => { run.orchText = t; feed(t); updateStream(); } });
       run.orchText = full; feed(full);
-      if (!run.tasks.length && !run.clarify) {
-        run.decisions.push({ type: 'planfix', src: 'code', title: 'Plan unreadable; asking again in strict JSON', detail: 'The first reply had no usable tasks, so orchestration is asked once more for one JSON object.' }); renderAll();
+      if (run.tasks.length < 2 && !run.clarify) {
+        run.decisions.push({ type: 'planfix', src: 'code', title: 'Incomplete plan; asking again in strict JSON', detail: 'The reply had fewer than two usable tasks; orchestration is asked for a complete plan.' }); renderAll();
         run.stats.ai++;
-        const fix = await AI.sample.json(orchestratorPrompt(run) + '\n\nIMPORTANT: your previous reply could not be used. Reply now with ONE JSON object only: {"decisions":[{"type":"...","title":"...","detail":"..."}],"tasks":[{"id":"T1","agent":"...","objective":"...","depends_on":[],"reads":[],"tools":[],"why":"..."}]} including the entity decision.', { modelTier: 'default', cache: false, signal: UI.ctl.signal });
-        normalizeOrch(fix).forEach(onObj); run.orchText += '\n' + JSON.stringify(fix);
+        const fix = await AI.sample.json(orchestratorPrompt(run) + '\n\nIMPORTANT: your previous reply could not be used. Reply now with ONE JSON object only: {"decisions":[{"type":"...","title":"...","detail":"..."}],"tasks":[{"id":"T1","agent":"...","objective":"...","depends_on":[],"reads":[],"tools":[],"why":"..."}]} including the entity decision and all specialist tasks needed to cover the full request.', { modelTier: 'default', cache: false, signal: UI.ctl.signal });
+        const repaired = normalizeOrch(fix);
+        if (repaired.some(o => o.k === 'task')) run.tasks = [];
+        repaired.forEach(onObj); run.orchText += '\n' + JSON.stringify(fix);
       }
     }
   } catch (e) {
     if (e.code === 'not_granted' || e.code === 'sampling_disabled' || e.code === 'not_declared') { AI.mode = 'replay-only'; setAIStatus(); return finishRun(run, 'Claude access isn’t allowed in this view, so live runs are off. Allow access when claude.ai asks, then reload.'); }
     if (e.code === 'cancelled') return finishRun(run, 'Stopped.');
     if (e.code === 'rate_limited' || e.code === 'session_expired' || e.code === 'refused') return finishRun(run, `Orchestration failed: ${errText(e)}`);
+    if (e.code === 'output_truncated') return finishRun(run, 'The AI plan was cut short. Increase MAX_TOKENS_ORCHESTRATOR and try again.');
     if (!run.tasks.length && !run.clarify) run.decisions.push({ type: 'planfix', src: 'code', title: 'AI plan failed; using the rules-based plan', detail: `Orchestration hit a problem (${errText(e)}), so a plan was built from rules instead.` });
     else if (!run.tasks.length) return finishRun(run, `Orchestration failed: ${errText(e)}`);
   }
@@ -249,6 +272,20 @@ async function runRequestInner(text, replay, opts = {}) {
   run.record.orch = run.orchText.split('\n').filter(s => s.trim().startsWith('{')).join('\n');
   if (run.clarify) { run.status = 'clarify'; renderAll(); $('runBtn').disabled = false; $('stopBtn').hidden = true; return; }
   if (!run.tasks.length) return finishRun(run, 'Orchestration produced no tasks.');
+  if (!replay) {
+    run.decisions.push({ type: 'planfix', src: 'code', title: 'Reviewing full outcome coverage', detail: 'Checking the entire registry for missing specialists, deliverables and dependencies.' }); renderAll();
+    try {
+      run.stats.ai++;
+      const audit = await AI.sample.json(orchestratorPrompt(run) + '\n\nCOMPLETENESS REVIEW: Review this draft against EVERY requested outcome and ALL registered specialists: ' + JSON.stringify(run.tasks) + '\nReturn ONE JSON object: {"tasks":[{"id":"T1","agent":"registered id","objective":"specific deliverable","depends_on":[],"reads":[],"tools":[],"why":"needed for this outcome"}],"coverage":[{"outcome":"requested outcome or necessary supporting deliverable","task_ids":["T1"],"done_when":"observable acceptance criterion"}]}. Return the full corrected plan, not just additions. Include research, approved resources, verification, formatting, scheduling, final preparation and follow-up only where necessary for this request. Check every registry role; include every relevant specialist, with no arbitrary task limit and no redundant busywork. Every outcome must have owners and a done_when criterion. Final synthesis depends on all its inputs; compliance follows drafting and precedes distribution; approvals must remain explicit. List tasks in dependency order.', { modelTier: 'default', cache: false, signal: UI.ctl.signal });
+      if (!Array.isArray(audit.tasks) || !audit.tasks.length || !Array.isArray(audit.coverage) || !audit.coverage.length) throw new Error('Completeness review returned no validated plan.');
+      run.tasks = []; normalizeOrch(audit).forEach(onObj);
+      run.coverage = audit.coverage;
+      const ids = new Set(run.tasks.map(t => t.id));
+      if (run.tasks.length !== audit.tasks.length || run.coverage.some(c => !c.outcome || !c.done_when || !Array.isArray(c.task_ids) || !c.task_ids.length || c.task_ids.some(id => !ids.has(id)))) throw new Error('Completeness review has missing task owners.');
+      run.decisions.push({ type: 'success', src: 'ai', title: 'Every outcome has an owner', detail: run.coverage.map(c => c.outcome + ': ' + c.done_when).join(' · ') });
+    } catch (e) { return finishRun(run, 'Completeness review failed: ' + errText(e)); }
+  }
+  try { finalizeTaskPlan(run); } catch (e) { return finishRun(run, e.message); }
   /* registry governance on the plan */
   if (run.advisor) { F.session.advisor = run.advisor; F.session.unit = run.unit || null; }
   F.session.requests.push({ text, adv: run.advisor });
@@ -258,14 +295,51 @@ async function runRequestInner(text, replay, opts = {}) {
   while (run.tasks.some(t => !t.state || t.state === 'queued')) {
     if (UI.ctl.signal.aborted) return finishRun(run, 'Stopped.');
     const ready = run.tasks.filter(t => (!t.state || t.state === 'queued') && t.depends_on.every(d => done.has(d)));
-    if (!ready.length) { run.tasks.filter(t => t.state === 'queued').forEach(t => t.depends_on = []); continue; }
+    if (!ready.length) return finishRun(run, 'The task dependencies cannot be resolved. Please try again.');
     for (let k = 0; k < ready.length; k += 2) {
       await Promise.all(ready.slice(k, k + 2).map(t => runTask(run, t).catch(e => { t.state = 'failed'; t.error = errText(e); renderAll(); })));
       ready.slice(k, k + 2).forEach(t => done.add(t.id));
       if (UI.ctl.signal.aborted) return finishRun(run, 'Stopped.');
     }
   }
+  if (!replay && run.coverage && run.tasks.every(t => t.state === 'done')) {
+    run.decisions.push({ type: 'success', src: 'code', title: 'Checking delivered outcomes', detail: 'Comparing specialist results against every acceptance criterion; approvals remain pending.' }); renderAll();
+    try {
+      run.stats.ai++;
+      const check = await AI.sample.json('Verify completion of this request: ' + run.text + '\nAcceptance criteria: ' + JSON.stringify(run.coverage) + '\nActual specialist results: ' + JSON.stringify(run.tasks.map(t => ({ id: t.id, agent: t.agent, objective: t.objective, result: t.result, verdicts: t.verdicts }))) + '\nReturn JSON only: {"outcomes":[{"outcome":"exact criterion outcome","status":"complete|awaiting_approval|incomplete","evidence":"specific task/result evidence or missing work"}]}. Assess every criterion. A task being done is insufficient: its actual output must deliver the requested result. Never claim a meeting is booked or material sent when only a draft/hold exists. Pending human approvals are awaiting_approval, not incomplete. Unsupported or missing deliverables are incomplete.', { modelTier: 'default', cache: false, signal: UI.ctl.signal });
+      if (!Array.isArray(check.outcomes) || check.outcomes.length !== run.coverage.length || run.coverage.some(c => check.outcomes.filter(o => o.outcome === c.outcome).length !== 1) || check.outcomes.some(o => !['complete', 'awaiting_approval', 'incomplete'].includes(o.status) || !o.evidence)) throw new Error('Final verification did not account for every outcome.');
+      run.completion = check.outcomes;
+      check.outcomes.forEach(o => run.decisions.push({ type: 'success', src: 'ai', title: o.outcome, detail: o.status + ': ' + o.evidence }));
+      const missing = check.outcomes.filter(o => o.status === 'incomplete');
+      if (missing.length) return finishRun(run, 'Unfinished outcomes: ' + missing.map(o => o.outcome + ' — ' + o.evidence).join('; '));
+    } catch (e) { return finishRun(run, 'Final outcome verification failed: ' + errText(e)); }
+  }
   finishRun(run);
+}
+/* Preserve forward references, then display and execute a stable dependency order. */
+function finalizeTaskPlan(run) {
+  const tasks = run.tasks, ids = new Set(tasks.map(t => t.id));
+  for (const t of tasks) {
+    if (t.depends_on.some(id => !ids.has(id))) throw new Error('A task depends on an unknown task. Please try again.');
+    t.depends_on = [...new Set(t.depends_on)];
+  }
+  // The final meeting brief consumes the comparison, approved resources and meeting details.
+  if (/compare|comparison/.test(run.text.toLowerCase()) && /meeting|schedule/.test(run.text.toLowerCase())) {
+    const inputs = tasks.filter(t => ['product.qar', 'marketing.gather', 'sales.schedule'].includes(t.agent));
+    for (const t of tasks.filter(t => t.agent === 'sales.prep')) {
+      t.depends_on = [...new Set([...t.depends_on, ...inputs.map(x => x.id)])];
+    }
+  }
+  const ordered = [], remaining = [...tasks], done = new Set();
+  while (remaining.length) {
+    const i = remaining.findIndex(t => t.depends_on.every(id => done.has(id)));
+    if (i < 0) throw new Error('The AI plan has circular task dependencies. Please try again.');
+    const [t] = remaining.splice(i, 1); ordered.push(t); done.add(t.id);
+  }
+  const labels = new Map(ordered.map((t, i) => [t.id, 'T' + (i + 1)]));
+  for (const t of ordered) { t.depends_on = t.depends_on.map(id => labels.get(id)); t.id = labels.get(t.id); }
+  if (run.coverage) run.coverage.forEach(c => c.task_ids = c.task_ids.map(id => labels.get(id)));
+  run.tasks = ordered;
 }
 function handleOrch(run, o) {
   if (o.k === 'decision') {
@@ -273,7 +347,6 @@ function handleOrch(run, o) {
     if (o.type === 'entity') { if (o.advisor && ADVISORS[o.advisor]) run.advisor = o.advisor; if (o.unit && run.advisor && ADVISORS[run.advisor].units[o.unit]) run.unit = o.unit; if (o.territory && TERRITORIES[o.territory]) run.territory = o.territory; else if (!run.advisor && run.resolution.territories[0]) run.territory = run.resolution.territories[0].id; UI.memAdv = run.advisor || UI.memAdv; flashTile('graph', 'read'); }
     if (o.type === 'known') flashTile('memory', 'read');
   } else if (o.k === 'task') {
-    if (run.tasks.length >= 5) return;
     const arr = x => Array.isArray(x) ? x : x ? [x] : [];
     let id = String(o.id || 'T' + (run.tasks.length + 1)); if (run.tasks.some(x => x.id === id)) id = 'T' + (run.tasks.length + 1);
     const t = { id, agent: resolveAgentId(o.agent) || String(o.agent || ''), objective: String(o.objective || o.task || '').slice(0, 300), depends_on: arr(o.depends_on || o.dependsOn).map(String), reads: arr(o.reads).map(String), tools: arr(o.tools).map(resolveToolName).filter(Boolean), why: String(o.why || '').slice(0, 200) };
@@ -281,7 +354,6 @@ function handleOrch(run, o) {
     if (!AGENTS[t.agent]) { run.decisions.push({ type: 'registry', src: 'code', title: `Unknown agent “${t.agent}” dropped`, detail: 'Orchestration can only route to registered specialists.' }); return; }
     const bad = t.tools.filter(x => !toolAllowed(t.agent, x));
     if (bad.length) { t.tools = t.tools.filter(x => toolAllowed(t.agent, x)); run.decisions.push({ type: 'registry', src: 'code', title: `${AGENTS[t.agent].name}: ${bad.length} tool${bad.length > 1 ? 's' : ''} removed`, detail: `${bad.join(', ')} ${bad.length > 1 ? 'are' : 'is'} not on this agent’s allow-list at the gateway.` }); UI.totals.blocked++; }
-    t.depends_on = t.depends_on.filter(d => run.tasks.some(x => x.id === d));
     t.state = 'queued'; run.tasks.push(t);
   } else if (o.k === 'clarify') {
     if (run.clarified) run.decisions.push({ type: 'missing', src: 'code', title: 'Proceeding on your earlier answer', detail: `Orchestration wanted to ask “${o.question}” again; the app lets it ask only once, so it continues with stated assumptions.` });
@@ -382,6 +454,9 @@ function errText(e) {
   return e && e.code ? `${map[e.code] || e.code}${e.message && !map[e.code] ? ' (' + e.message + ')' : ''}` : String(e && e.message || e);
 }
 function finishRun(run, error) {
+  if (!error && run.tasks.some(t => t.state !== 'done')) error = 'Some specialist tasks did not finish successfully. Review the Agents tab.';
+  if (!error && run.tasks.some(t => (t.verdicts || []).some(v => ['blocked', 'rejected'].includes(v.status)))) error = 'Some contributions did not pass verification. Review the Agents and Outputs tabs.';
+  run.awaitingApproval = (run.completion || []).some(o => o.status === 'awaiting_approval') || run.tasks.some(t => (t.verdicts || []).some(v => v.status === 'approval'));
   run.status = error ? 'failed' : 'done'; run.error = error; run.t1 = Date.now();
   $('runBtn').disabled = false; $('stopBtn').hidden = true;
 
@@ -421,7 +496,7 @@ function taskHTML(r, t) {
   return `<summary><span class="av" style="background:${TC[a.team]};width:28px;height:28px;border-radius:8px;font-size:12px;font-weight:800;color:#0e2135">${t.id}</span><span><b>${esc(a.name)}</b><small>${esc(TEAMS[a.team].name)} · ${esc(t.objective)}</small></span><span class="st ${st}">${st === 'queued' ? 'Waiting' : st === 'running' ? 'Working' : st === 'done' ? 'Done' : 'Failed'}</span></summary><div class="tbody">
     ${p ? `<div class="sec"><b>${icon('memory')} Foundation → ${esc(a.name)} · ${p.items.length} items</b>${byLayer.map(([l, its]) => its.map(i => `<div class="pk"><span class="lid">${esc(i.id)}</span><span>${esc(i.label)}: ${esc(String(i.value).slice(0, 150))}<small>${esc(LAYERS[l].short)} · from ${esc(i.from)} · scope ${esc(i.scope)}</small></span></div>`).join('')).join('')}${p.withheld.map(w => `<div class="wh">Withheld ${esc(w.id)}: ${esc(w.why)}</div>`).join('')}</div>` : ''}
     ${t.calls && t.calls.length ? `<div class="sec"><b>${icon('arrow')} ${esc(a.name)} → enterprise systems</b>${t.calls.map(c => `<div class="pk"><span class="vbadge ${c.via || 'API'}">${c.via || '—'}</span><span><code style="font:11.5px var(--code)">${esc(c.name)}(${esc(JSON.stringify(c.input || {}).slice(0, 90))})</code><small>${c.error ? 'Blocked: ' + esc(c.error) : esc(SYSTEMS[c.sys].name) + ' · ' + esc(JSON.stringify(c.out).slice(0, 140))}</small></span></div>`).join('')}</div>` : ''}
-    ${t.result ? `<div class="sec"><b>${icon('bolt')} ${esc(a.name)} → foundation</b><p class="says">“${esc(t.result.says || '')}”</p>${t.result.output ? `<div class="outbody"><b>${esc(t.result.output.title)}</b>\n${md(t.result.output.body)}</div>` : ''}${(t.result.open_questions || []).length ? `<p class="hint" style="margin:6px 0 0">Open question: ${esc(t.result.open_questions.join(' '))}</p>` : ''}</div>` : ''}
+    ${t.result ? `<div class="sec"><b>${icon('bolt')} ${esc(a.name)} → foundation</b><p class="says">“${esc(t.result.says || '')}”</p>${t.result.output ? `<div class="outbody"><h3>${esc(t.result.output.title)}</h3>${md(t.result.output.body)}</div>` : ''}${(t.result.open_questions || []).length ? `<p class="hint" style="margin:6px 0 0">Open question: ${esc(t.result.open_questions.join(' '))}</p>` : ''}</div>` : ''}
     ${t.verdicts ? `<div class="sec"><b>${icon('shield')} Gatekeeper</b>${t.verdicts.length ? t.verdicts.map(v => `<div class="vd"><span class="vb ${v.status}">${v.status.toUpperCase()}</span><span><b>${esc(v.kind)}: ${esc(v.title)}</b><small>${esc(v.reason)}${v.event ? ` · event ${esc(v.event.type)} → ${esc(v.event.subscribers.map(agentName).join(', ') || 'no subscribers')}` : ''}</small></span></div>`).join('') : '<p class="hint">Nothing proposed for storage. Read only.</p>'}</div>` : ''}
     ${t.retry ? `<p class="hint" style="margin-top:6px">First attempt failed (${esc(t.retry)}); retried once.</p>` : ''}
     ${st === 'failed' ? `<div class="blocked">This agent failed: ${esc(t.error)}. The rest of the plan continued.</div>` : ''}
@@ -464,7 +539,7 @@ function renderOutputs() {
   const pane = $('pane-outputs');
   if (!F.outputs.length) { patchList(pane, [{ key: 'empty', cls: 'empty', html: 'Briefs, drafts, findings and notes appear here as specialists finish. Anything client-facing waits for human approval.' }]); return; }
   patchList(pane, [...F.outputs].reverse().map(o => { const a = AGENTS[o.agent], body = md(o.body);
-    return { key: o.id, cls: 'dcard', html: `<div class="dt"><span class="av sm" style="background:${TC[a.team]};width:18px;height:18px;border-radius:5px"></span>${esc(a.name)} · ${esc(o.kind)} · ${esc(o.run)}</div>${o.kind === 'email' ? `<div class="olk" style="margin-top:6px"><div class="bar"><span>Outlook draft</span><span>${esc(o.status)}</span></div><div class="bd"><b>${esc(o.title)}</b>\n\n${body}</div></div>` : `<b class="tt2">${esc(o.title)}</b><div class="outbody" style="margin-top:5px">${body}</div>`}
+    return { key: o.id, cls: 'dcard', html: `<div class="dt"><span class="av sm" style="background:${TC[a.team]};width:18px;height:18px;border-radius:5px"></span>${esc(a.name)} · ${esc(o.kind)} · ${esc(o.run)}</div>${o.kind === 'email' ? `<div class="olk" style="margin-top:6px"><div class="bar"><span>Outlook draft</span><span>${esc(o.status)}</span></div><div class="bd"><h3>${esc(o.title)}</h3>${body}</div></div>` : `<b class="tt2">${esc(o.title)}</b><div class="outbody" style="margin-top:5px">${body}</div>`}
       <p class="hint" style="margin:6px 0 0">Used: ${esc((o.used || []).join(', ') || '—')}${o.flagged && o.flagged.length ? ` · <b style="color:var(--hl-fg)">Check before use: ${esc(o.flagged.join(', '))}</b>` : ''}</p>${o.status === 'Waiting for approval' ? `<button class="lbtn primary" data-approve="${o.id}" style="margin-top:6px">${icon('check')} Approve</button>` : `<span class="vb published" style="display:inline-block;margin-top:6px">${esc(o.status.toUpperCase())}</span>`}` }; }));
 }
 function renderEvents() {
