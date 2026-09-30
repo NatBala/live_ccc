@@ -1,0 +1,1755 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Connected Client Experience</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>:root{
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --night:#0e2135;--night-2:#15304c;--night-3:#1d3d5e;--line:#2a5278;--nt:#dce8f4;--nm:#8aa3bb;
+  --paper:#eef2f5;--card:#fff;--ink:#15304a;--mute:#66798c;--rule:#d9e1e8;--soft:#f5f7f9;
+  --sales:#82b6ff;--product:#7fd4ab;--marketing:#f0b870;--service:#b9a5f5;--gold:#ffd27a;--alert:#ff7b67;--ok:#2f9e6c;
+  --ui:'Schibsted Grotesk',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;--serif:'Newsreader',Georgia,serif;--code:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+:root{--hl:#fff8e6;--hl-b:#e7b54e;--hl-fg:#8a5a00;--hl-strong:#ffe7a6;--bad-bg:#fff2ef;--bad-fg:#a8321e;--bad-b:#e08a7c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0b1826;--card:#122335;--ink:#e8f0f7;--mute:#a3b6c8;--rule:#2a4360;--soft:#172a3f;--hl:#35291a;--hl-b:#a47d2c;--hl-fg:#ffd27a;--hl-strong:#5c4614;--bad-bg:#3a201d;--bad-fg:#ffb8aa;--bad-b:#a0503f}}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%}
+body{height:100%;margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--ui);overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.ic{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.14em}
+.app{height:100%;display:flex;flex-direction:column}
+
+/* top */
+.top{display:flex;align-items:center;gap:14px;padding:8px 16px;background:var(--night);color:var(--nt);border-bottom:1px solid #0a1828;min-height:56px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:17px;white-space:nowrap}
+.brand svg{width:26px;height:26px}
+.stats{display:flex;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+.stat{padding:0 12px;border-left:1px solid var(--line);min-width:84px}
+.stat:first-child{border:0}
+.stat b{display:block;font-size:19px;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:11px;color:var(--nm);white-space:nowrap}
+.stat.gold b{color:var(--gold)}
+.stat.bump b{animation:bump .6s}
+@keyframes bump{30%{transform:translateY(-2px);color:#fff}}
+.top-actions{display:flex;gap:4px}
+.tbtn{display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid transparent;border-radius:8px;padding:7px 10px;color:var(--nt);font-size:13px;white-space:nowrap}
+.tbtn:hover{background:var(--night-2)}
+.tbtn[aria-pressed="true"]{color:var(--gold);border-color:var(--line)}
+
+.main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 440px}
+.stage{min-width:0;min-height:0;display:flex;flex-direction:column;background:radial-gradient(110% 80% at 50% 55%,#16375a 0%,#0f2439 60%,#0b1b2c 100%);color:var(--nt)}
+.diagram{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;gap:7px;padding:8px 16px 4px;overflow:auto}
+.wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;overflow:visible}
+.row{position:relative;z-index:1}
+.rlabel{font-size:11.5px;color:var(--nm);font-weight:600;letter-spacing:.02em;display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.rlabel b{color:var(--nt);font-weight:700}
+
+/* journey */
+.journey{display:flex;gap:14px;align-items:stretch}
+.acard{display:flex;gap:10px;align-items:center;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:6px 12px;text-align:left;color:var(--nt);min-width:0;flex:0 1 205px}
+.acard:hover{background:rgba(255,255,255,.09)}
+.acard .av{width:40px;height:40px;border-radius:50%;background:#e6edf4;color:#16304a;font-weight:800;display:grid;place-items:center;flex:none}
+.acard>span{min-width:0}
+.acard b{display:block;font-size:14.5px}
+.acard small{display:block;font-size:12px;color:var(--nm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chaps{flex:1;display:flex;gap:4px;align-items:stretch;min-width:0}
+.chap{flex:1;min-width:0;border-radius:10px;border:1px solid var(--line);padding:4px 5px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.03);text-align:left;color:var(--nm);font-size:12px}
+.chap b{display:block;color:var(--nt);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chap.done{border-color:#4d7aa3;background:rgba(127,166,204,.1)}
+.chap.cur{border-color:var(--gold);background:rgba(255,210,122,.12);color:var(--gold)}
+.chap span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* orchestration */
+.orch{border:1px solid #4d6f93;border-radius:14px;padding:6px 12px;background:linear-gradient(90deg,rgba(130,182,255,.1),rgba(185,165,245,.1));cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center}
+.orch.active{border-color:var(--gold);box-shadow:0 0 0 2px rgba(255,210,122,.3)}
+.orch .oname{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.orch .oname .ic{color:var(--gold);font-size:18px}
+.orch .ostages{display:flex;gap:6px;flex-wrap:wrap;font-size:11.5px;color:var(--nm)}
+.orch .ostages span{padding:1px 8px;border-radius:99px;border:1px solid var(--line)}
+.orch .ostages span.on{border-color:var(--gold);color:var(--gold)}
+.tasks{grid-column:1/-1;display:flex;gap:5px;flex-wrap:wrap}
+.task{font-size:11.5px;padding:2px 9px 2px 7px;border-radius:99px;border:1px dashed var(--line);color:var(--nm);display:inline-flex;align-items:center;gap:5px}
+.task i{width:7px;height:7px;border-radius:50%;background:currentColor}
+.task.active{border-style:solid;border-color:var(--gold);color:var(--gold)}
+.task.done{border-style:solid;color:var(--nt);border-color:#4d7aa3}
+.task.done i{background:var(--ok)}
+
+/* lanes */
+.lanes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:12px}
+.lane{border-radius:14px;padding:6px 8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;gap:5px}
+.lane h3{margin:0 0 2px;font-size:13px;display:flex;align-items:center;gap:7px}
+.lane h3 i{width:9px;height:9px;border-radius:50%}
+.agent{display:flex;align-items:center;gap:8px;border-radius:10px;border:1px solid var(--line);background:var(--night-2);padding:4px 8px;text-align:left;color:var(--nt);font-size:13px;transition:transform .25s,border-color .25s,background .25s}
+.agent .dot{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;color:#0e2135;font-size:13px;flex:none;opacity:.55}
+.agent span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.agent em{font-style:normal;font-size:10.5px;color:var(--nm)}
+.agent.done .dot{opacity:1}
+.agent.done em{color:var(--ok)}
+.agent.active{border-color:var(--gold);background:#23476d;transform:scale(1.03);box-shadow:0 0 0 3px rgba(255,210,122,.25)}
+.agent.active .dot{opacity:1}
+.agent.next{border-style:dashed;border-color:var(--gold)}
+.agent.cut{border-color:var(--alert);background:#3a2229}
+.agent.hit{border-color:#ffb27a;border-style:dashed}
+.more{font-size:11px;color:var(--nm);padding:2px 4px}
+
+/* foundation */
+.found{border-radius:18px;padding:10px 12px 8px;margin-bottom:8px;background:linear-gradient(180deg,rgba(255,210,122,.14),rgba(255,210,122,.05));border:1.5px solid rgba(255,210,122,.55);box-shadow:0 0 40px rgba(255,210,122,.08)}
+
+.fhead{display:flex;align-items:center;gap:12px;margin-top:6px}
+.fhead b{display:block;color:var(--gold);font:500 19px/1.1 var(--serif)}
+.fhead span{font-size:12px;color:var(--nt);opacity:.85;margin-left:10px}
+@media (max-width:1500px){.fhead>div:first-child>span{display:none}}
+.fhead>div:first-child{display:flex;align-items:baseline;flex-wrap:wrap}
+.ftot{margin-left:auto;display:flex;gap:14px;white-space:nowrap}
+.ftot span{display:flex;flex-direction:column;align-items:flex-end;font-size:11px;color:var(--nm);opacity:1}
+.ftot b{font:700 16px var(--ui);color:#fff;font-variant-numeric:tabular-nums}
+.ftot span{flex-direction:row!important;align-items:baseline!important;gap:4px}
+.found.busy{box-shadow:0 0 0 1px rgba(255,210,122,.4),0 0 50px rgba(255,210,122,.18)}
+.viz{display:block;min-height:40px;margin:4px 0 2px}
+.vz-cap{display:block;font-size:10.5px;color:#b9cadb;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vz-grid{display:flex;flex-wrap:wrap;gap:3px}
+.vz-grid i{width:10px;height:10px;border-radius:2px;background:#3a5f84}
+.vz-grid i.lr{background:var(--gold)}
+.vz-row{display:flex;flex-wrap:wrap;gap:4px;align-items:flex-end;min-height:26px}
+.vz-row i{background:var(--c)}
+.vz-row.doc i{width:11px;height:14px;border-radius:2px 5px 2px 2px}
+.vz-row.chk i{width:14px;height:14px;border-radius:50% 50% 50% 50%/40% 40% 60% 60%}
+.vz-row.bar i{width:8px;min-height:8px;border-radius:2px}
+.vz-row.bar i{height:calc(var(--h) * .26px)}
+.vz-row.dot i{width:12px;height:12px;border-radius:50%}
+.vz-line{display:flex;gap:6px;align-items:center;min-height:26px;position:relative;padding:0 2px}
+.vz-line::before{content:'';position:absolute;left:0;right:0;top:50%;height:2px;background:#3a5f84}
+.vz-line i{position:relative;width:11px;height:11px;border-radius:50%;background:var(--c);box-shadow:0 0 0 2px #132c47}
+.vz-line em,.vz-row em{font-size:10.5px;color:var(--nm);font-style:normal;position:relative;background:#132c47;padding-right:4px}
+.vz-graph{display:block;width:100%;height:50px}
+.viz i.nw{animation:nw 1s ease-in-out infinite;box-shadow:0 0 0 2px #fff}
+@keyframes nw{50%{transform:scale(1.35)}}
+.th .tn{margin-left:auto}
+.tile .th .tn b{display:inline-block;min-width:22px;text-align:center;background:var(--gold);color:#1a2a3a;border-radius:99px;font-size:11.5px;padding:1px 6px}
+.tt{display:flex;gap:3px;white-space:nowrap;align-items:center;margin-top:auto;padding-top:5px;border-top:1px solid rgba(255,255,255,.08);font-size:10.5px;color:#b9cadb}
+.tt i{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--c);opacity:.45}
+.tt i.on{background:var(--c);opacity:1}
+.tt span{margin-left:3px}
+.agent.entry{flex:0 0 168px;border-color:rgba(255,210,122,.55);background:rgba(255,210,122,.08);border-radius:14px}
+.agent.entry .dot{opacity:1;width:34px;height:34px;border-radius:50%;font-size:17px}
+.agent.entry b{display:block;font-size:14px}
+.agent.entry small{display:block;font-size:11.5px;color:var(--gold)}
+.agent.entry em{display:none}
+.agent.entry.active{background:rgba(255,210,122,.2)}
+.entrycard{border:1px solid var(--hl-b);background:var(--hl);border-radius:14px;padding:10px 12px}
+
+.tiles{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.tile{position:relative;border-radius:12px;border:1px solid #3d6890;background:#132c47;padding:8px 9px;text-align:left;color:var(--nt);min-height:112px;display:flex;flex-direction:column;gap:3px;transition:border-color .3s,background .3s,box-shadow .3s}
+.tile:hover{border-color:#fff}
+.tile .th{display:flex;align-items:center;gap:6px;font-weight:700;font-size:13px}
+.tile .th .ic{color:var(--gold)}
+.tile .tn{font-size:11px;color:#b9cadb}
+.tile .tn b{color:var(--gold);font-size:13px}
+.tile .tl{font-size:12px;color:#e6eef6;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tile .tl.fresh{color:#fff}
+.tile.read{border-color:var(--product);box-shadow:0 0 0 2px rgba(127,212,171,.35)}
+.tile.write{border-color:var(--gold);background:#2a4466;box-shadow:0 0 0 3px rgba(255,210,122,.4)}
+.tile.off{border-color:var(--alert);background:#2a1a1e;border-style:dashed}
+.tile .arch{margin-top:auto;font-size:10.5px;color:var(--nm);align-self:flex-start}
+.tile:hover .arch{color:var(--gold)}
+
+/* integration */
+.integ{border-radius:14px;padding:6px 10px;border:1px solid #3a5876;background:rgba(0,0,0,.18)}
+.systems{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.sys{border-radius:10px;border:1px solid var(--line);background:#102339;padding:5px 9px;text-align:left;color:var(--nt);display:flex;gap:8px;align-items:center;transition:border-color .3s,box-shadow .3s}
+.sys .ic{font-size:18px;color:var(--nm)}
+.sys b{display:block;font-size:12.5px}
+.sys small{display:block;font-size:10.5px;color:var(--nm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sys.hot{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.25)}
+.sys .via{margin-left:auto;font-size:10px;font-weight:700;padding:1px 6px;border-radius:5px;display:none}
+.sys.hot .via{display:inline-block}
+.via.MCP{background:#82b6ff;color:#0e2135}
+.via.API{background:#7fd4ab;color:#0e2135}
+.gw{display:flex;gap:8px;margin-top:6px;font-size:11.5px;color:var(--nm);align-items:center;flex-wrap:wrap}
+.gw span{border:1px solid var(--line);border-radius:6px;padding:1px 8px}
+.gw b{color:var(--nt)}
+.gw .legend{margin-left:auto;display:flex;gap:8px;align-items:center}
+
+/* wires */
+.wire.dispatch{stroke:#c9b8ff;stroke-dasharray:4 5}
+.wire.read{stroke:var(--product)}
+.wire.write{stroke:var(--gold)}
+.wire.call{stroke:#fff;stroke-dasharray:3 5;opacity:.7}
+.pt{filter:drop-shadow(0 0 5px currentColor)}
+
+/* controls */
+.controls{display:flex;align-items:center;gap:8px;padding:2px 16px;flex-wrap:wrap}
+.grow{flex:1}
+.cbtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--nt);display:grid;place-items:center;font-size:16px}
+.cbtn:hover{background:var(--night-2)}
+.cbtn:disabled{opacity:.35}
+.cbtn.play{width:46px;height:46px;background:var(--gold);border-color:var(--gold);color:#1a2a3a;font-size:19px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.seg button{background:none;border:0;padding:6px 10px;font-size:12.5px;color:var(--nm)}
+.seg button[aria-pressed="true"]{background:var(--night-3);color:#fff}
+.toggle{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--nm);background:none;border:0}
+.toggle .sw{width:28px;height:16px;border-radius:99px;background:var(--line);position:relative}
+.toggle .sw::after{content:'';position:absolute;left:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle[aria-pressed="true"] .sw{background:var(--gold)}
+.toggle[aria-pressed="true"] .sw::after{transform:translateX(12px)}
+.pbtn{display:inline-flex;align-items:center;gap:7px;border-radius:99px;padding:8px 15px;font-weight:600;font-size:13.5px;border:1px solid var(--line);background:var(--night-2);color:#fff}
+.pbtn:hover{background:var(--night-3)}
+.pbtn.gold{background:var(--gold);border-color:var(--gold);color:#1a2a3a}
+.pbtn.unplug{background:none;border-color:rgba(255,210,122,.6);color:var(--gold)}
+.scrub{padding:4px 16px 12px;display:flex;gap:3px}
+.tick{flex:1;height:18px;border:0;border-radius:4px;background:var(--c);opacity:.22;position:relative;padding:0}
+.tick.done{opacity:.9}
+.tick.cur{opacity:1;box-shadow:0 0 0 2px #fff}
+.tick .mk{position:absolute;left:50%;top:-14px;transform:translateX(-50%);color:var(--gold);font-size:11px}
+
+/* rail */
+.rail{min-height:0;display:flex;flex-direction:column;border-left:1px solid var(--rule);background:var(--paper)}
+.tabs{display:flex;padding:6px 8px 0;border-bottom:1px solid var(--rule);gap:2px}
+.tab{position:relative;background:none;border:0;border-bottom:2px solid transparent;padding:9px 10px;font-weight:600;font-size:13.5px;color:var(--mute);margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tab .badge{position:absolute;top:6px;right:2px;width:7px;height:7px;border-radius:50%;background:var(--alert);display:none}
+.tab.has .badge{display:block}
+.panes{flex:1;min-height:0;position:relative}
+.pane{position:absolute;inset:0;overflow:auto;padding:14px 16px 40px}
+.pane[hidden]{display:none}
+.h{font-size:12px;font-weight:700;color:var(--mute);margin:16px 0 6px;display:flex;align-items:center;gap:6px}
+.hint{font-size:12.5px;color:var(--mute)}
+
+/* now */
+.nw-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--mute)}
+.nw-actor{display:flex;align-items:center;gap:10px;margin:8px 0 2px}
+.av{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:#0e2135;font-size:17px;flex:none}
+.av.sm{width:22px;height:22px;border-radius:6px;font-size:12px}
+.nw-actor b{display:block;font-size:17px}
+.nw-actor small{display:block;color:var(--mute);font-size:12.5px}
+.nw-title{font-weight:600;margin:6px 0 0}
+.quote{font:400 18px/1.5 var(--serif);margin:8px 0}
+.quote .caret{display:inline-block;width:2px;height:1em;background:var(--ink);vertical-align:-.15em;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.note{font-size:12.5px;color:var(--hl-fg);background:var(--hl);border-radius:8px;padding:5px 9px;display:inline-block}
+.calls{display:flex;flex-direction:column;gap:5px}
+.call{display:grid;grid-template-columns:auto auto 1fr;gap:8px;align-items:center;font-size:12px;border:1px solid var(--rule);background:var(--card);border-radius:9px;padding:6px 8px}
+.call code{font:12px/1.35 var(--code);color:var(--ink);word-break:break-word}
+.call .sysn{font-weight:700;white-space:nowrap}
+.call.pending{opacity:.6}
+.vbadge{font-size:10px;font-weight:800;padding:1px 6px;border-radius:5px}
+.vbadge.MCP{background:#dce9ff;color:#1d4e8f}
+.vbadge.API{background:#d6f3e5;color:#1f6b48}
+.vbadge.Sync,.vbadge.Event,.vbadge.Internal{background:#eee6ff;color:#5b3fa8}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);background:var(--card);border-radius:99px;padding:3px 10px 3px 8px;font-size:12.5px;color:var(--ink);max-width:100%;text-align:left}
+.chip:hover{border-color:var(--mute)}
+.chip small{color:var(--mute)}
+.chip.reused{border-color:var(--hl-b);background:var(--hl)}
+.chip.pending{opacity:.62;border-style:dashed}
+.chip.pub{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.chip.pub small{color:#b8c8d8}
+.diff{border:1px solid var(--rule);background:var(--card);border-radius:10px;padding:7px 10px;margin-bottom:5px;font-size:13px}
+.diff b{display:block;font-size:12px;color:var(--mute);font-weight:600}
+.diff .was{color:var(--mute);text-decoration:line-through;font-size:12px;display:block}
+.diff .now{color:var(--ink)}
+.diff .newtag{font-size:10.5px;font-weight:700;color:#1f7a51;background:#e3f5ec;border-radius:4px;padding:0 5px;margin-left:6px}
+.gdiff{font-size:12.5px;display:flex;flex-direction:column;gap:3px}
+.gdiff span{display:flex;gap:6px;align-items:center}
+.gdiff i{font-style:normal;color:var(--ok);font-weight:800}
+.gate{border:2px solid var(--hl-b);background:var(--hl);border-radius:12px;padding:12px;margin:10px 0}
+.gate b{display:block;font-size:15px}
+.lbtn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);background:var(--card);border-radius:8px;padding:6px 11px;font-size:13px;color:var(--ink)}
+.lbtn.primary{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.lbtn:disabled{opacity:.5}
+.blocked{border:1px solid var(--alert);background:var(--bad-bg);color:var(--bad-fg);border-radius:10px;padding:10px;margin:8px 0}
+
+/* advisor 360 */
+.a360-head{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:12px}
+.a360-head .big{width:54px;height:54px;border-radius:50%;background:#16304a;color:#fff;font-weight:800;font-size:19px;display:grid;place-items:center;flex:none}
+.a360-head b{display:block;font-size:17px}
+.a360-head small{display:block;color:var(--mute);font-size:12.5px}
+.a360-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.a360-meta span{font-size:11.5px;background:var(--soft);border-radius:5px;padding:1px 7px;color:var(--mute)}
+.psec{margin-top:12px;background:var(--card);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+.psec h4{margin:0;padding:8px 12px;font-size:12.5px;background:var(--soft);display:flex;justify-content:space-between;color:var(--mute)}
+.pf{display:grid;grid-template-columns:110px 1fr;gap:8px;padding:7px 12px;border-top:1px solid var(--rule);font-size:13px}
+.pf:first-of-type{border-top:0}
+.pf dt{color:var(--mute);font-size:12px}
+.pf dd{margin:0}
+.pf .src{display:block;font-size:11px;color:var(--mute);margin-top:2px}
+.pf.upd{background:var(--hl)}
+.pf.upd .src{color:var(--hl-fg);font-weight:600}
+.pf.fresh{animation:fresh 2.4s ease}
+@keyframes fresh{0%{background:var(--hl-strong)}100%{background:var(--hl)}}
+.pf .was{display:block;font-size:11.5px;color:var(--mute);text-decoration:line-through}
+
+/* foundation pane */
+.fcomp{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:9px 11px;margin-top:9px}
+.fcomp.hot{border-color:var(--hl-b);box-shadow:0 0 0 3px rgba(231,181,78,.22)}
+.fch{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;padding:0;text-align:left;color:var(--ink)}
+.fch .fi{width:28px;height:28px;border-radius:8px;background:#16304a;color:var(--gold);display:grid;place-items:center;flex:none}
+.fch b{display:block;font-size:14px}
+.fch small{display:block;font-size:11.5px;color:var(--mute)}
+.fch .cnt{margin-left:auto;font-size:11.5px;color:var(--mute);white-space:nowrap;text-align:right}
+.fch .cnt b{color:var(--hl-fg);font-size:14px;display:inline}
+.chg{font-size:12.5px;border-top:1px solid var(--rule);padding:5px 0;display:grid;grid-template-columns:auto 1fr;gap:6px}
+.chg:first-of-type{margin-top:6px}
+.chg .by{font-size:11px;color:var(--mute)}
+.chg.fresh{background:var(--hl)}
+.op{font-size:10px;font-weight:800;border-radius:4px;padding:0 5px;height:17px;line-height:17px}
+.op.add{background:#e3f5ec;color:#1f7a51}
+.op.upd{background:#fff0d9;color:#8a5a00}
+.op.rel{background:#e3eefb;color:#23548a}
+.graphbox{background:#0f2439;border-radius:10px;margin-top:6px;overflow:hidden}
+.graphbox svg{display:block;width:100%;height:auto}
+.gn text{font:600 13px var(--ui);fill:#dce8f4}
+.gn.new circle{stroke:var(--gold);stroke-width:3}
+.gn.new text{fill:#fff}
+.ge{stroke:#44698f;stroke-width:1.4}
+.ge.new{stroke:var(--gold);stroke-width:2.2}
+.gel{font:500 10.5px var(--ui);fill:#8aa3bb}
+.gel.new{fill:var(--gold)}
+
+/* artifacts */
+.agrid{display:flex;flex-direction:column;gap:8px}
+.acard2{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:9px 11px;text-align:left;width:100%}
+.acard2:hover{border-color:var(--mute)}
+.acard2 b{display:block;font-size:14px}
+.acard2 small{display:block;color:var(--mute);font-size:12px}
+.acard2.fresh{border-color:var(--hl-b);background:var(--hl)}
+.preview{border:1px solid var(--rule);border-radius:12px;overflow:hidden;background:var(--card);margin-top:6px}
+
+/* artifact renders (always light, like the real apps) */
+.art{background:#fff;color:#1d2733;font:13px/1.45 'Segoe UI',var(--ui);color-scheme:light}
+.ol-bar{background:#0f6cbd;color:#fff;padding:6px 12px;font-size:12px;display:flex;justify-content:space-between}
+.ol-h{padding:10px 14px;border-bottom:1px solid #e3e6ea}
+.ol-h h5{margin:0 0 6px;font-size:16px;font-weight:600}
+.ol-h div{font-size:12.5px;color:#424b57}
+.ol-b{padding:12px 14px}
+.ol-b p{margin:0 0 8px}
+.ol-b ul{margin:0 0 8px;padding-left:18px}
+.att{display:inline-flex;align-items:center;gap:8px;border:1px solid #d6dbe1;border-radius:6px;padding:6px 10px;font-size:12px;margin-top:4px}
+.att i{width:24px;height:28px;background:#d9382c;border-radius:3px;color:#fff;font:700 8px var(--ui);display:grid;place-items:center;font-style:normal}
+.att.link i{background:#1b8a5a}
+.sig{color:#5a6573;font-size:12px}
+.op1{padding:16px 18px;font-size:12px}
+.op1 .brandrow{display:flex;justify-content:space-between;font-size:10.5px;color:#5a6573;border-bottom:3px solid #16304a;padding-bottom:5px;margin-bottom:8px}
+.op1 h5{font:600 19px/1.15 var(--serif);margin:0 0 3px;color:#16304a}
+.op1 .for{font-size:11px;color:#5a6573;margin-bottom:8px}
+.op1 table{width:100%;border-collapse:collapse;font-size:11.5px;margin:4px 0 8px}
+.op1 th,.op1 td{border-bottom:1px solid #e3e6ea;padding:4px 5px;text-align:left}
+.op1 th{background:#f1f4f7;font-weight:600}
+.op1 td.n{text-align:right;font-variant-numeric:tabular-nums}
+.op1 h6{margin:8px 0 3px;font-size:12px;color:#16304a}
+.op1 ol{margin:0;padding-left:16px}
+.op1 .live{display:inline-block;border:1px dashed #9aa8b6;color:#5a6573;border-radius:4px;padding:0 5px;font-size:10.5px}
+.op1 .disc{font-size:9.5px;color:#6a7580;border-top:1px solid #e3e6ea;margin-top:8px;padding-top:6px}
+.op1 .stamp{float:right;border:2px solid #1f7a51;color:#1f7a51;font-weight:800;font-size:10px;padding:1px 6px;border-radius:4px;transform:rotate(-2deg)}
+.sp-top{background:#1d1d3a;color:#fff;padding:7px 12px;font-size:12px;display:flex;gap:8px;align-items:center}
+.sp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px}
+.sp-card{border:1px solid #dfe3e8;border-radius:8px;padding:8px;font-size:11.5px}
+.sp-card .th{height:52px;border-radius:5px;background:linear-gradient(135deg,#dfe7ef,#c6d3e0);margin-bottom:6px;position:relative}
+.sp-card.pick{border:2px solid #0f6cbd;box-shadow:0 0 0 3px rgba(15,108,189,.15)}
+.sp-card .why{color:#5a6573;margin-top:4px}
+.sp-card .tag{display:inline-block;font-size:10px;border-radius:4px;padding:0 5px;margin-top:4px}
+.tag.ok{background:#e3f5ec;color:#1f7a51}
+.tag.no{background:#fde9e5;color:#b23a26}
+.cal{display:grid;grid-template-columns:70px 1fr;gap:6px;padding:12px 14px}
+.cal .d{background:#0f6cbd;color:#fff;border-radius:8px;text-align:center;padding:8px 4px;font-weight:700}
+.cal .d small{display:block;font-weight:500;font-size:11px}
+.sf-h{background:#032d60;color:#fff;padding:8px 12px;font-size:12px;display:flex;gap:8px;align-items:center}
+.sf-b{padding:10px 12px}
+.sf-row{display:grid;grid-template-columns:120px 1fr;font-size:12px;padding:4px 0;border-bottom:1px solid #eef0f2}
+.sf-row span:first-child{color:#5a6573}
+.sf-task{display:flex;gap:8px;align-items:center;font-size:12px;padding:5px 0;border-bottom:1px solid #eef0f2}
+.sf-task i{width:14px;height:14px;border:1.5px solid #0f6cbd;border-radius:3px;flex:none}
+.doc2{padding:14px 16px}
+.doc2 h5{font:600 17px var(--serif);margin:0 0 6px;color:#16304a}
+.doc2 h6{margin:10px 0 4px;font-size:12px;color:#16304a}
+.doc2 ul,.doc2 ol{margin:0;padding-left:18px}
+.doc2 li{margin:2px 0}
+.planlist{list-style:none;padding:0;margin:0}
+.planlist li{display:grid;grid-template-columns:22px 1fr auto;gap:6px;align-items:center;padding:5px 0;border-bottom:1px solid #eef0f2;font-size:12.5px}
+.planlist .dep{font-size:11px;color:#5a6573}
+.chk{display:flex;gap:6px;align-items:flex-start;font-size:12.5px;padding:3px 0}
+.chk .ok{color:#1f7a51}
+
+/* drawer & modal */
+.scrim{position:fixed;inset:0;background:rgba(6,16,28,.45);z-index:40}
+.scrim[hidden]{display:none}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(620px,100%);background:var(--card);color:var(--ink);z-index:41;display:flex;flex-direction:column;box-shadow:-20px 0 50px rgba(0,0,0,.25);animation:slide .25s ease}
+.drawer[hidden]{display:none}
+@keyframes slide{from{transform:translateX(30px);opacity:0}}
+.dhead{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--rule)}
+.dhead h2{margin:0;font-size:19px;flex:1;display:flex;align-items:center;gap:10px}
+.x{border:0;background:var(--soft);width:34px;height:34px;border-radius:50%;display:grid;place-items:center}
+.dbody{flex:1;overflow:auto;padding:16px 20px 40px}
+.dtabs{display:flex;gap:4px;border-bottom:1px solid var(--rule);margin:0 -20px 12px;padding:0 20px}
+.dtab{background:none;border:0;border-bottom:2px solid transparent;padding:8px 10px;font-weight:600;font-size:13.5px;color:var(--mute);margin-bottom:-1px}
+.dtab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.lead{font:400 19px/1.4 var(--serif);margin:0 0 10px}
+.flow{display:flex;gap:6px;align-items:stretch;overflow-x:auto;padding-bottom:4px}
+.fbox{flex:1;min-width:120px;border:1px solid var(--rule);border-radius:10px;padding:8px;background:var(--soft);font-size:12px}
+.fbox b{display:block;font-size:12.5px;margin-bottom:4px}
+.fbox ul{margin:0;padding-left:14px}
+.fbox li{margin:2px 0}
+.farrow{align-self:center;color:var(--mute);font-size:18px}
+.ifc{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:start;font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--rule)}
+.ifc code{font:12px var(--code)}
+.ifc small{grid-column:2;color:var(--mute)}
+.guard{display:flex;gap:8px;font-size:13px;padding:3px 0}
+.guard .ic{color:var(--ok);margin-top:3px}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:4px 10px;font-size:13px}
+.kv dt{color:var(--mute)}
+.kv dd{margin:0}
+.rcard{border:1px solid var(--rule);border-radius:10px;padding:8px 10px;margin:5px 0;background:var(--soft);font-size:13px;text-align:left;width:100%;display:block;color:var(--ink)}
+.rcard small{display:block;color:var(--mute);font-size:11.5px}
+.tree ul{list-style:none;margin:0;padding-left:16px;border-left:1px dashed var(--rule)}
+.tree>ul{padding-left:0;border:0}
+.tree li{margin:5px 0}
+.modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(6,16,28,.6)}
+.modal[hidden]{display:none}
+.mcard{background:var(--card);color:var(--ink);border-radius:18px;max-width:640px;width:100%;max-height:100%;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.mtop{padding:20px 22px 12px;background:var(--night);color:var(--nt);border-radius:18px 18px 0 0}
+.mtop h2{font:500 28px var(--serif);margin:0 0 4px;color:#fff}
+.mtop p{margin:0;color:var(--nm);font-size:14px}
+.mbody{padding:14px 22px 20px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:#10243a;color:#fff;padding:10px 16px;border-radius:10px;font-size:13.5px;opacity:0;pointer-events:none;transition:.25s;z-index:70;max-width:90%}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* lab */
+.lab h2{font:500 25px/1.15 var(--serif);margin:0 0 6px}
+.labbig b{font:500 44px/1 var(--serif);color:var(--bad-fg)}
+.labbig.ok b{color:var(--hl-fg)}
+.labrow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;width:100%;text-align:left;border:1px solid var(--rule);background:var(--card);border-radius:10px;padding:8px 10px;margin-top:6px;color:var(--ink)}
+.labrow small{display:block;color:var(--mute);font-size:12px}
+.labrow em{display:block;font-style:normal;color:var(--bad-fg);font-size:12.5px;margin-top:3px}
+.labrow .sw{width:30px;height:18px;border-radius:99px;background:var(--gold);position:relative}
+.labrow .sw::after{content:'';position:absolute;right:2px;top:2px;width:14px;height:14px;border-radius:50%;background:#fff}
+.labrow.off{border-color:var(--bad-b);background:var(--bad-bg)}
+.labrow.off .sw{background:#c3ccd5}
+.labrow.off .sw::after{right:14px}
+
+/* intro */
+.intro{position:fixed;inset:0;z-index:60;background:radial-gradient(90% 80% at 30% 30%,#16375a,#0e2135 60%,#0a1828);color:var(--nt);overflow:auto;padding:28px 20px}
+.intro[hidden]{display:none}
+.intro-in{max-width:1120px;margin:0 auto;min-height:100%;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.who{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.bigav{width:52px;height:52px;border-radius:50%;background:#e6edf4;color:#16304a;font-weight:800;display:grid;place-items:center;font-size:18px}
+.who b{display:block;color:#fff;font-size:16px}
+.who span{font-size:13px;color:var(--nm)}
+.bubble{background:#fff;color:#16304a;border-radius:22px 22px 22px 6px;padding:18px 20px;font:400 21px/1.4 var(--serif);box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.bubble-meta{font-size:12.5px;color:var(--nm);margin:10px 0 0}
+.intro h1{font:400 clamp(36px,4.6vw,60px)/1.02 var(--serif);color:#fff;margin:0 0 14px;letter-spacing:-.02em}
+.lede{font-size:16.5px;color:var(--nm);margin:0 0 16px}
+.intro-steps{margin:0 0 22px;padding-left:18px;color:var(--nt);font-size:14.5px}
+.intro-steps li{margin:5px 0}
+.intro-cta{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.pbtn.big{font-size:16.5px;padding:13px 26px}
+.intro-link{background:none;border:0;color:var(--nt);text-decoration:underline;text-underline-offset:3px}
+.mnav{display:none}
+
+@media (max-width:1280px){.main{grid-template-columns:minmax(0,1fr) 380px}.stat{min-width:70px;padding:0 8px}.tlabel{display:none}}
+@media (max-width:1100px){.tiles{grid-template-columns:repeat(4,minmax(0,1fr))}.chap span{display:none}}
+@media (max-width:860px){
+  .top{flex-wrap:wrap}.stats{order:3;width:100%;margin:0}.brand-word{font-size:15px}
+  .main{grid-template-columns:1fr}
+  .app[data-view="live"] .rail{display:none}
+  .app:not([data-view="live"]) .stage{display:none}
+  .tabs{display:none}
+  .diagram{overflow:visible;flex:none}
+  .stage{overflow:auto}
+  .journey{flex-direction:column}.acard{flex:none}.chaps{display:none}
+  .lanes{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .systems{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .gw .legend{display:none}
+  .controls{position:sticky;bottom:0;background:rgba(11,27,44,.95);z-index:5}
+  #holdBtn,.pbtn.unplug{display:none}
+  .mnav{display:flex;background:var(--card);border-top:1px solid var(--rule);padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px))}
+  .mnav button{flex:1;background:none;border:0;padding:10px 0;font-size:12.5px;color:var(--mute)}
+  .mnav button[aria-current="true"]{color:var(--ink);font-weight:700}
+  .intro-in{grid-template-columns:1fr;gap:22px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+.mnow{display:none}
+@media (max-width:860px){.mnow{display:flex;gap:8px;align-items:center;font-size:13px;background:rgba(255,210,122,.1);border:1px solid rgba(255,210,122,.4);border-radius:10px;padding:6px 10px}.mnow:empty{display:none}}
+
+/* routed wires */
+.bus{fill:none;stroke:rgba(255,210,122,.28);stroke-width:2;stroke-dasharray:2 6}
+.bus.b2{stroke:rgba(160,190,220,.25)}
+.wbase{fill:none;stroke-width:6;opacity:.16;stroke-linecap:round;stroke-linejoin:round}
+.wflow{fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1 9;animation:flow .55s linear infinite;opacity:.95}
+.wflow.back{stroke-dasharray:6 6;animation-duration:.9s}
+@keyframes flow{from{stroke-dashoffset:10}to{stroke-dashoffset:0}}
+.wend{filter:drop-shadow(0 0 4px currentColor)}
+.pt{filter:drop-shadow(0 0 6px currentColor)}
+</style>
+</head>
+<body>
+<div class="app" id="app" data-view="live">
+  <header class="top">
+    <div class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="12" width="26" height="8" rx="3" fill="#ffd27a"/><circle cx="8" cy="5" r="3" fill="#82b6ff"/><circle cx="16" cy="5" r="3" fill="#7fd4ab"/><circle cx="24" cy="5" r="3" fill="#f0b870"/><circle cx="16" cy="27" r="3" fill="#b9a5f5"/></svg><span class="brand-word">Connected Client Experience</span></div>
+    <div class="stats" id="stats"></div>
+    <div class="top-actions">
+      <button class="tbtn" id="restartBtn" title="Start the journey over"><svg class="ic" viewBox="0 0 24 24"><path d="M4 12a8 8 0 108-8 8 8 0 00-6 2.7L4 9M4 4v5h5"/></svg><span class="tlabel">Restart</span></button>
+      <button class="tbtn" id="voiceBtn" aria-pressed="false" title="Read each step aloud"><svg class="ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 010 6"/></svg><span class="tlabel">Narrate</span></button>
+      <button class="tbtn" id="helpBtn"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 .5c0 1.5-2.5 2-2.5 3.5M12 17h.01"/></svg><span class="tlabel">How to read this</span></button>
+    </div>
+  </header>
+  <main class="main">
+    <section class="stage" id="stage" aria-label="Architecture in motion">
+      <div class="diagram" id="diagram">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="row journey" id="journey"></div>
+        <div class="row orch" id="orch" data-orch="1" tabindex="0" role="button" aria-label="Intelligence and orchestration layer"></div>
+        <div class="row lanes" id="lanes"></div>
+        <div class="row found" id="found"></div>
+        <div class="row integ" id="integ"></div>
+      </div>
+      <div class="controls">
+        <button class="cbtn" id="prevBtn" aria-label="Previous step"><svg class="ic" viewBox="0 0 24 24"><path d="M6 5v14M19 5l-9 7 9 7z"/></svg></button>
+        <button class="cbtn play" id="playBtn" aria-label="Play"></button>
+        <button class="cbtn" id="nextBtn" aria-label="Next step"><svg class="ic" viewBox="0 0 24 24"><path d="M18 5v14M5 5l9 7-9 7z"/></svg></button>
+        <div class="seg" id="speedSeg" role="group" aria-label="Speed"><button data-speed="0.6">Slow</button><button data-speed="1">Normal</button><button data-speed="2">Fast</button></div>
+        <button class="toggle" id="holdBtn" aria-pressed="false"><span class="sw"></span>Stop after each</button>
+        <span class="grow"></span>
+        <button class="pbtn unplug" data-act="lab"><svg class="ic" viewBox="0 0 24 24"><path d="M9 7V3M15 7V3M7 7h10v4a5 5 0 01-10 0zM12 16v5"/></svg>What if it weren’t shared?</button>
+      </div>
+      <div class="scrub" id="scrub"></div>
+    </section>
+    <aside class="rail" id="rail">
+      <div class="tabs" role="tablist">
+        <button class="tab" data-tab="now" aria-selected="true">Now</button>
+        <button class="tab" data-tab="advisor" aria-selected="false">Advisor 360<i class="badge"></i></button>
+        <button class="tab" data-tab="foundation" aria-selected="false">Foundation<i class="badge"></i></button>
+        <button class="tab" data-tab="artifacts" aria-selected="false">Outputs<i class="badge"></i></button>
+        <button class="tab" data-tab="ledger" aria-selected="false">Ledger</button>
+      </div>
+      <div class="panes">
+        <div class="pane" id="pane-now"></div>
+        <div class="pane" id="pane-advisor" hidden></div>
+        <div class="pane" id="pane-foundation" hidden></div>
+        <div class="pane" id="pane-artifacts" hidden></div>
+        <div class="pane" id="pane-ledger" hidden></div>
+      </div>
+    </aside>
+  </main>
+  <nav class="mnav" id="mnav">
+    <button data-view="live" aria-current="true">Live</button><button data-view="now">Now</button><button data-view="advisor">Advisor</button><button data-view="foundation">Foundation</button><button data-view="artifacts">Outputs</button>
+  </nav>
+</div>
+
+<div class="intro" id="intro">
+  <div class="intro-in">
+    <div class="intro-l">
+      <div class="who"><span class="bigav">AR</span><div><b>Alex Rivera, CFP®</b><span>Senior Vice President, Wealth Advisor · Morgan Stanley, Newport Beach</span></div></div>
+      <div class="bubble">“Before my committee on the 1st, can you send me a fee comparison of Growth Fund of America against the Vanguard growth funds, some ideas for building my growth sleeve, and help me understand why GFA has trailed?”</div>
+      <p class="bubble-meta">Call with Priya Shah, Capital Group wholesaler · Tuesday, September 22, 7:30 a.m. · recorded in Salesforce</p>
+    </div>
+    <div class="intro-r">
+      <h1>One advisor. Four teams. One shared foundation.</h1>
+      <p class="lede">Follow Alex’s request across Sales, Product, Marketing and Service. Every specialist reads from and writes to the same shared AI foundation, which is connected to Salesforce, Microsoft 365, Seismic and the fund data platform.</p>
+      <ul class="intro-steps">
+        <li>It starts when Priya asks her workbench, in one sentence, to take care of it.</li>
+        <li>Watch Alex’s profile, the knowledge base and the relationship graph update as agents work.</li>
+        <li>See every system call, and whether it goes through MCP or an API.</li>
+        <li>Open any component to see how it’s built.</li>
+      </ul>
+      <div class="intro-cta"><button class="pbtn gold big" data-act="start"><svg class="ic" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z" fill="currentColor" stroke="none"/></svg>Start the journey</button><button class="intro-link" id="exploreBtn">Explore the architecture first</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" hidden>
+  <div class="dhead"><h2 id="drawerTitle"></h2><button class="x" id="drawerClose" aria-label="Close"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dbody" id="drawerBody"></div>
+</div>
+<div class="modal" id="modal" role="dialog" aria-modal="true" hidden><div class="mcard" id="modalCard"></div></div>
+<div class="toast" id="toast" role="status"></div>
+<script>/* ===== Connected Client Experience: story data ===== */
+const TEAMS = {
+  sales: { name: 'Sales', color: '#82b6ff', more: ['Lead Me', 'Coach Me', 'Territory Planning'] },
+  product: { name: 'Product', color: '#7fd4ab', more: ['Tone/Style Alignment', 'Contact Summarizer', 'Response Formatter', 'Institutional Pitch Books', 'SRG Product Pitch Books'] },
+  marketing: { name: 'Marketing', color: '#f0b870', more: ['Document Analyzer', 'Audit Support', 'Image Analyzer', 'Audience Builder', 'Voice of Client', 'LinkedIn Post', 'Personalized Email'] },
+  service: { name: 'Service', color: '#b9a5f5', more: ['Inquiry Classifier', 'Identity Verifier', 'Priority Scorer', 'Knowledge Retriever', 'Account Lookup', 'Escalate Me', 'Sentiment Analyzer', 'Cross-sell Detector', 'QA Logger'] }
+};
+const TEAM_ORDER = ['sales', 'product', 'marketing', 'service'];
+
+const AGENTS = {
+  priya: { name: 'Priya Shah', team: 'user', icon: 'mic', skill: 'Wholesaler · Capital Group', role: 'The employee. She asks the workbench for an outcome in plain words, and approves anything that goes to the advisor.' },
+  orch: { name: 'Intelligence & orchestration', team: 'orch', icon: 'network', role: 'Understands the request, resolves who and what it is about, plans the work, routes tasks to specialists, and tracks every task to completion.' },
+  engage: { name: 'Engage Me', team: 'sales', icon: 'chat', skill: 'Meeting notes capture · Real-time Q&A', role: 'Listens in on advisor meetings (with consent), captures what was asked and decided, and answers questions live from verified material.' },
+  prep: { name: 'Prep Me', team: 'sales', icon: 'file', skill: 'Profile creator · Agenda Creation', role: 'Builds the wholesaler’s brief: who the advisor is, what they asked, what to bring, and how to open the conversation.' },
+  schedule: { name: 'Schedule Me', team: 'sales', icon: 'calendar', skill: 'Calendar manager', role: 'Finds time that fits the advisor’s habits and books it through the right person.' },
+  follow: { name: 'Follow Me', team: 'sales', icon: 'check', skill: 'Task creation, assignment, and completion', role: 'Logs outcomes in Salesforce, assigns next steps, and keeps commitments from slipping.' },
+  clarify: { name: 'Query Clarifier', team: 'product', icon: 'search', role: 'Turns a loose question into a precise, answerable one: which funds, which share classes, which time periods.' },
+  planner: { name: 'Research Planner', team: 'product', icon: 'list', role: 'Decides what evidence is needed and where it will come from.' },
+  tools: { name: 'Tool Selection', team: 'product', icon: 'tool', role: 'Picks and runs the right analytics: fee math, peer data, portfolio construction models.' },
+  qar: { name: 'QAR', team: 'product', icon: 'shield', role: 'Question-answer review: produces the verified answer, with every number traced to a system of record.' },
+  gather: { name: 'Resource Gatherer', team: 'marketing', icon: 'book', role: 'Finds approved content and templates in Seismic that fit the audience and the ask.' },
+  copy: { name: 'Copywriter / Editor', team: 'marketing', icon: 'pen', role: 'Writes the piece in the advisor’s preferred format and voice, from verified findings only.' },
+  legal: { name: 'Legal & Compliance', team: 'marketing', icon: 'shield', role: 'Reviews claims, performance presentation and disclosures before anything goes out.' },
+  dist: { name: 'Distribution', team: 'marketing', icon: 'send', role: 'Prepares the send, waits for human approval, and delivers through the approved channel.' },
+  resolve: { name: 'Resolve Me', team: 'service', icon: 'headphones', role: 'Resolves access and delivery problems without making the advisor repeat themselves.' }
+};
+
+const LAYERS = {
+  memory: { name: 'Shared Memory', short: 'Memory', icon: 'memory', q: 'Who is this advisor, and what have they already told us?',
+    biz: 'Alex explains himself once. Every specialist after that knows his role, his approach, his preferences and what he asked for.' },
+  knowledge: { name: 'Knowledge & Retrieval', short: 'Knowledge', icon: 'file', q: 'What approved evidence supports the answer?',
+    biz: 'Product verifies a finding once; Sales, Marketing and Service reuse the same finding and the same source version.' },
+  policy: { name: 'Verification & Compliance', short: 'Verification', icon: 'shield', q: 'Is the claim supported, and is the action allowed?',
+    biz: 'One set of rules for every agent. Nothing reaches an advisor without the same checks and a human approval.' },
+  models: { name: 'Analytics & Models', short: 'Models', icon: 'chart', q: 'What should we prioritize, compare or construct?',
+    biz: 'Existing investments (Sales Alpha, recommenders, portfolio analytics) become shared tools instead of being rebuilt in each agent.' },
+  feedback: { name: 'Feedback Data', short: 'Feedback', icon: 'loop', q: 'What happened, and what should improve?',
+    biz: 'What worked with Alex, and what didn’t, reaches the teams that can fix it.' },
+  events: { name: 'Event-Driven Signals', short: 'Events', icon: 'bolt', q: 'What changed, and who needs to act?',
+    biz: 'A meeting ending, a send, a reply or a failure triggers the right next step without anyone chasing it.' },
+  graph: { name: 'Graph Knowledge Layer', short: 'Graph', icon: 'network', q: 'How are the people, firms, meetings, funds and documents connected?',
+    biz: 'Specialists find the right advisor, team, meeting, fund and document by relationship, not by similar names.' }
+};
+const LAYER_ORDER = ['memory', 'knowledge', 'policy', 'models', 'feedback', 'events', 'graph'];
+
+const SYSTEMS = {
+  sf: { name: 'Salesforce', sub: 'CRM · Service Cloud · call transcripts', icon: 'users', holds: 'Advisors, firms, teams, recorded call transcripts, activities, opportunities, service cases (including Email-to-Case).' },
+  m365: { name: 'Microsoft 365', sub: 'Outlook · Calendar · SharePoint', icon: 'mail', holds: 'Outbound email, calendars, compliance libraries.' },
+  seismic: { name: 'Seismic', sub: 'Approved content', icon: 'book', holds: 'Fact sheets, templates, attribution reports, LiveSend delivery.' },
+  fund: { name: 'Fund data platform', sub: 'Capital Group systems of record', icon: 'chart', holds: 'Expense ratios, holdings, standardized returns. The only source of fund numbers.' },
+  mstar: { name: 'Morningstar', sub: 'Licensed peer data', icon: 'globe', holds: 'Peer categories, competitor fund data, category medians.' }
+};
+const SYS_ORDER = ['sf', 'm365', 'seismic', 'fund', 'mstar'];
+
+/* ---- Advisor profile held in Shared Memory before the story starts ---- */
+const PROFILE_SECTIONS = ['Identity & role', 'Current priorities', 'Preferences', 'Practice & approach', 'Relationship with Capital Group', 'Personal (relationship team only)'];
+const PROFILE_SEED = [
+  ['Identity & role', 'Name', 'Alex Rivera, CFP®', 'Salesforce contact'],
+  ['Identity & role', 'Position', 'Senior Vice President, Wealth Advisor · leads The Rivera Group', 'Salesforce contact'],
+  ['Identity & role', 'Firm & office', 'Morgan Stanley Wealth Management · Newport Beach, CA', 'Salesforce account'],
+  ['Identity & role', 'Team', 'Four people. Jamie Cho (client service associate) runs his calendar.', 'Salesforce team roster'],
+  ['Practice & approach', 'Practice', 'About $1.1B across ~160 households: business owners and tech executives nearing retirement', 'Salesforce account'],
+  ['Practice & approach', 'Investment strategy', 'Discretionary, core-satellite. Low-cost index core; active satellites only “where a manager earns the fee.”', 'Aug 14 meeting summary'],
+  ['Practice & approach', 'Decision process', 'Team investment committee, first Thursday of the month', 'Aug 14 meeting summary'],
+  ['Practice & approach', 'Capital Group holdings', 'The Growth Fund of America in legacy client accounts (~$38M)', 'Salesforce holdings feed'],
+  ['Relationship with Capital Group', 'Coverage', 'Priya Shah (wholesaler) and Sam Lee (internal partner)', 'Salesforce coverage'],
+  ['Relationship with Capital Group', 'History', 'Client since 2019. Last meeting: quarterly review, Aug 14.', 'Salesforce activities'],
+  ['Relationship with Capital Group', 'Engagement', 'Opens quarterly attribution reports; joined a portfolio manager webinar in 2025', 'Seismic engagement data'],
+  ['Preferences', 'Meetings', '30-minute Teams video, before market open (7:30 a.m. PT), Tuesdays or Thursdays', 'Past meeting patterns'],
+  ['Preferences', 'Content', 'Data first, one page, no marketing language', 'Aug 14 meeting summary'],
+  ['Preferences', 'Conversations', 'Wants manager insight and attribution. Tunes out sales pitches.', 'Priya’s notes'],
+  ['Personal (relationship team only)', 'Interests', 'Marathon runner. Coaches his daughter’s soccer team.', 'Priya’s notes'],
+  ['Personal (relationship team only)', 'Recent', 'Training for the California International Marathon in December', 'Aug 14 small talk'],
+  ['Current priorities', 'Focus', 'Launching a new discretionary growth model this quarter', 'Aug 14 meeting summary']
+];
+
+/* ---- Graph before the story starts ---- */
+const GRAPH_SEED = {
+  nodes: [
+    ['alex', 'Alex Rivera', 'person'], ['ms', 'Morgan Stanley', 'firm'], ['team', 'The Rivera Group', 'team'], ['jamie', 'Jamie Cho', 'person'],
+    ['priya', 'Priya Shah', 'cg'], ['sam', 'Sam Lee', 'cg'], ['gfa', 'Growth Fund of America', 'fund'], ['model', 'New growth model', 'opp']
+  ],
+  edges: [
+    ['alex', 'ms', 'works at'], ['alex', 'team', 'leads'], ['jamie', 'team', 'member of'], ['priya', 'alex', 'covers'], ['sam', 'priya', 'supports'],
+    ['alex', 'gfa', 'holds ~$38M'], ['team', 'model', 'building']
+  ]
+};
+
+/* ---- Records already in the foundation (from source systems) ---- */
+const SEED = {
+  'memory.profile': { layer: 'memory', label: 'Alex Rivera · advisor profile', value: '17 facts: role, practice, strategy, preferences, relationship history.', src: 'sf' },
+  'graph.rel': { layer: 'graph', label: 'Alex’s relationship graph', value: 'Alex → Morgan Stanley, The Rivera Group, Jamie Cho, Priya Shah, GFA holdings, new growth model.', src: 'sf' },
+  'models.alpha': { layer: 'models', label: 'Sales Alpha signal', value: 'Alex ranks in the top decile for growth-sleeve opportunity this quarter. A signal, not a reason to sell.', src: 'fund' },
+  'models.peer': { layer: 'models', label: 'Peer-match model', value: 'Matches funds on category, benchmark style and holdings overlap. Returns candidates with a rationale.', src: 'mstar' },
+  'k.gfa': { layer: 'knowledge', label: 'GFA F-2 fund facts', value: 'GFFFX. Expense ratio 0.40% (management 0.25%, other 0.15%, no 12b-1). Benchmark S&P 500. 282 issuers, 12 portfolio managers. Up to 25% outside the U.S.; 10.8% non-U.S. equities. As of 8/31/26; prospectus 11/1/25.', src: 'fund' },
+  'k.vwuax': { layer: 'knowledge', label: 'Vanguard U.S. Growth Admiral facts', value: 'VWUAX. Expense ratio 0.25%. Benchmark Russell 1000 Growth. Multi-manager: Wellington, Baillie Gifford, Jennison. $35.2B (8/31/26).', src: 'mstar' },
+  'k.vigax': { layer: 'knowledge', label: 'Vanguard Growth Index Admiral facts', value: 'VIGAX. Expense ratio 0.05%. Tracks the CRSP US Large Cap Growth Index; about 166 stocks; top three holdings roughly a third of assets.', src: 'mstar' },
+  'k.median': { layer: 'knowledge', label: 'Category cost context', value: 'Morningstar Large Cap No Load median expense ratio: 0.75% (as of 6/30/26).', src: 'mstar' },
+  'k.attr': { layer: 'knowledge', label: 'GFA quarterly attribution report', value: 'Approved attribution commentary, quarter ended 9/26. Financial professional use only.', src: 'seismic' },
+  'k.capsys': { layer: 'knowledge', label: 'The Capital System explainer', value: 'Multiple portfolio managers each run a sleeve; collaborative research; long-term view.', src: 'seismic' },
+  'k.pdfproc': { layer: 'knowledge', label: 'Delivery procedure', value: 'If a recipient firm blocks content links, resend the same approved version as a PDF attachment. Never re-edit.', src: 'm365' },
+  'policy.rules': { layer: 'policy', label: 'Communication rules', value: 'Financial professional use only. Standardized performance from systems of record. Expense ratios as of prospectus. Personal notes never in client-facing content. Human approval before any external send.', src: 'm365' }
+};
+
+/* ---- The journey ---- */
+const CHAPTERS = [
+  { id: 'meet', name: 'Meeting' },
+  { id: 'plan', name: 'Plan' },
+  { id: 'research', name: 'Research' },
+  { id: 'create', name: 'Create' },
+  { id: 'prepare', name: 'Send' },
+  { id: 'service', name: 'Service' },
+  { id: 'follow', name: 'Follow-up' }
+];
+
+const STEPS = [
+  { id: 's0', actor: 'priya', chapter: 'meet', when: 'Tue Sep 22 · 8:04 a.m.', title: 'Priya asks for an outcome',
+    says: 'Alex just asked me for three things on our call. Take care of it: pull what he asked from the call in Salesforce, get the numbers right, and have it ready well before his committee.',
+    note: 'The entry point. Priya’s call with Alex ended at 8:00. She taps the mic in her workbench and says this, instead of opening five different tools.',
+    reads: [], calls: [],
+    writes: [{ key: 'events.request', layer: 'events', label: 'request.received', value: 'Voice request from Priya Shah · about Alex Rivera · source: the Sep 22 call recorded in Salesforce' }],
+    artifact: 'request' },
+
+  { id: 's1', actor: 'engage', chapter: 'meet', when: 'Tue Sep 22 · 8:05 a.m.', title: 'Pull what Alex asked for from the call',
+    says: 'The call transcript is in Salesforce. Alex asked three things: a fee comparison of GFA against the Vanguard growth funds, how he could build his growth sleeve, and why GFA has trailed. He wants one page before his committee on October 1.',
+    reads: ['events.request', 'memory.profile', 'graph.rel'],
+    calls: [['sf', 'MCP', 'crm.get_call_transcript(call="Rivera · Sep 22")', 'read'], ['sf', 'MCP', 'crm.log_meeting(contact="Alex Rivera")', 'write']],
+    writes: [
+      { key: 'memory.request', layer: 'memory', label: 'Alex’s request', value: '1) Fee comparison: GFA vs. Vanguard large-growth funds. 2) Growth-sleeve construction options. 3) Why has GFA trailed? One page, before the Oct 1 committee.' },
+      { key: 'events.meeting1', layer: 'events', label: 'call.captured', value: 'Rivera · Sep 22 · 30 min · transcript in Salesforce' }
+    ],
+    mem: [
+      ['Current priorities', 'Open request', 'Fee comparison vs. Vanguard, growth-sleeve options, and an explanation of GFA’s relative results'],
+      ['Current priorities', 'Deadline', 'Team investment committee, Thursday Oct 1'],
+      ['Current priorities', 'Decision at stake', 'Keep GFA in the new growth model, or replace it with a Vanguard fund'],
+      ['Preferences', 'Fees', 'Wants fees in dollars on his assets, not just percentages']
+    ],
+    graph: { nodes: [['m1', 'Meeting · Sep 22', 'meeting'], ['q1', 'Q: fee comparison', 'question'], ['q2', 'Q: why GFA trailed', 'question']],
+      edges: [['alex', 'm1', 'attended'], ['priya', 'm1', 'hosted'], ['m1', 'q1', 'raised'], ['m1', 'q2', 'raised'], ['q2', 'gfa', 'about']] },
+    artifact: 'notes' },
+
+  { id: 's2', actor: 'orch', chapter: 'plan', when: 'Tue Sep 22 · 8:06 a.m.', title: 'Plan and route the work',
+    says: 'This is Alex Rivera at Morgan Stanley, for The Rivera Group’s growth model. Three questions, four teams. Product answers first because everything else depends on its numbers; Marketing builds the page; Sales prepares and sends; Service stands by.',
+    reads: ['events.request', 'memory.request', 'memory.profile', 'events.meeting1', 'models.alpha'],
+    calls: [],
+    writes: [{ key: 'events.plan', layer: 'events', label: 'plan.created', value: '9 tasks across Product, Marketing, Sales and Service, with dependencies and one human approval.' }],
+    graph: { nodes: [], edges: [['m1', 'model', 'about']] },
+    artifact: 'plan' },
+
+  { id: 's3', actor: 'clarify', chapter: 'research', when: 'Tue Sep 22 · 8:07 a.m.', title: 'Make the question precise',
+    says: 'Alex runs fee-based discretionary accounts, so the right GFA share class is F-2, not A. And “the Vanguard growth funds” means two different things: an active one and an index one. I’ll compare against both.',
+    reads: ['memory.request', 'memory.profile', 'events.plan'],
+    calls: [['sf', 'MCP', 'crm.get_account_programs(team="The Rivera Group")', 'read']],
+    writes: [{ key: 'k.question', layer: 'knowledge', label: 'Clarified question', value: 'Compare GFA F-2 (GFFFX) with Vanguard U.S. Growth Admiral (VWUAX, active) and Vanguard Growth Index Admiral (VIGAX, index) on cost, approach and drivers of relative results.' }],
+    mem: [['Practice & approach', 'Share class', 'Fee-based discretionary accounts → GFA F-2 (GFFFX), no 12b-1 fee']] },
+
+  { id: 's4', actor: 'planner', chapter: 'research', when: 'Tue Sep 22 · 8:07 a.m.', title: 'Plan the evidence',
+    says: 'The peer model confirms both Vanguard funds sit in the same large-growth category. Costs come from fund data; approach from prospectuses; the “why” from attribution and holdings. No numbers from memory, only from systems of record.',
+    reads: ['k.question', 'models.peer', 'k.gfa'],
+    calls: [['mstar', 'API', 'GET /peers?category=LargeGrowth&funds=VWUAX,VIGAX', 'read']],
+    writes: [{ key: 'k.plan', layer: 'knowledge', label: 'Research plan', value: 'Costs: fund data platform + prospectus data. Approach: fund facts. Drivers: holdings concentration, benchmark, mandate. Returns: standardized, inserted at approval.' }],
+    graph: { nodes: [['vwuax', 'Vanguard U.S. Growth', 'fund'], ['vigax', 'Vanguard Growth Index', 'fund']],
+      edges: [['q1', 'gfa', 'compares'], ['q1', 'vwuax', 'compares'], ['q1', 'vigax', 'compares']] } },
+
+  { id: 's5', actor: 'tools', chapter: 'research', when: 'Tue Sep 22 · 8:08 a.m.', title: 'Run the fee math and construction options',
+    says: 'On Alex’s $38M, GFA F-2 costs about $152,000 a year, VWUAX about $95,000 and VIGAX about $19,000. The construction model gives three sleeve options; a 70/30 index-and-GFA mix brings the blended cost down to 0.155%.',
+    reads: ['k.plan', 'k.gfa', 'k.vwuax', 'k.vigax', 'k.median', 'memory.profile'],
+    calls: [['fund', 'API', 'GET /funds/GFFFX/fees', 'read'], ['fund', 'API', 'POST /models/portfolio-construction/run', 'read']],
+    writes: [
+      { key: 'k.fees', layer: 'knowledge', label: 'Fee comparison', value: 'Expense ratios: GFA F-2 0.40%, VWUAX 0.25%, VIGAX 0.05% (category median 0.75%). Annual cost on $38M: $152,000 / $95,000 / $19,000.' },
+      { key: 'models.construct', layer: 'models', label: 'Growth-sleeve options', value: 'A: 70% VIGAX + 30% GFA, blended 0.155%. B: 50/50, blended 0.225%. C: 100% GFA, 0.40%.' }
+    ],
+    artifact: 'fees' },
+
+  { id: 's6', actor: 'qar', chapter: 'research', when: 'Tue Sep 22 · 8:09 a.m.', title: 'Verify why GFA has trailed',
+    says: 'Different jobs, different results. GFA is measured against the S&P 500 and spreads across 282 companies, cyclicals and some non-U.S. stocks. The growth index puts about a third of its money in three mega-caps. When a few giants lead, the index pulls ahead. I didn’t call a single system; everything I needed was already in the foundation.',
+    reads: ['k.question', 'k.fees', 'k.gfa', 'k.vigax', 'k.attr', 'k.capsys'],
+    calls: [],
+    writes: [
+      { key: 'k.finding', layer: 'knowledge', label: 'Verified answer: why GFA trailed', value: 'Mandate (S&P 500 benchmark, flexible growth, up to 25% non-U.S.), concentration (282 issuers vs. an index with ~1/3 in three stocks; NVIDIA 5.8% in GFA vs. 8.1% in the S&P 500), and cost (0.35 points more than VIGAX).' },
+      { key: 'policy.trace', layer: 'policy', label: 'Numbers traced', value: 'Every figure links to the fund data platform or licensed peer data. No model-generated numbers.' }
+    ],
+    graph: { nodes: [['f1', 'Finding · why GFA trailed', 'doc']], edges: [['f1', 'q2', 'answers'], ['f1', 'gfa', 'cites']] },
+    artifact: 'finding' },
+
+  { id: 's7', actor: 'gather', chapter: 'create', when: 'Tue Sep 22 · 8:10 a.m.', title: 'Pick the right approved template',
+    says: 'Alex wants one page and data first, so not the 12-page deck. The fund comparison one-pager is approved for financial professionals and has a slot for standardized returns. That’s the one.',
+    reads: ['memory.profile', 'memory.request', 'k.finding'],
+    calls: [['seismic', 'MCP', 'seismic.search_content(type="fund comparison", audience="financial professional")', 'read']],
+    writes: [{ key: 'k.template', layer: 'knowledge', label: 'Template chosen', value: 'Seismic · Fund comparison one-pager (financial professional use only). Rejected: 12-page GFA deck, retail fact sheet.' }],
+    artifact: 'picker' },
+
+  { id: 's8', actor: 'copy', chapter: 'create', when: 'Tue Sep 22 · 8:12 a.m.', title: 'Write it for Alex',
+    says: 'One page, numbers first, dollars on his $38M, no adjectives. I wrote only from QAR’s verified finding and Tool Selection’s math, so there’s nothing new for compliance to chase.',
+    reads: ['k.template', 'k.finding', 'k.fees', 'models.construct', 'memory.profile'],
+    calls: [],
+    writes: [{ key: 'k.onepager', layer: 'knowledge', label: 'One-pager draft', value: '“Growth sleeve options: GFA vs. Vanguard large growth.” Costs, drivers of relative results, three construction options, standardized returns slot.' }],
+    artifact: 'onepager' },
+
+  { id: 's9', actor: 'legal', chapter: 'create', when: 'Tue Sep 22 · 8:14 a.m.', title: 'Review before anything goes out',
+    says: 'Claims match the verified finding. Expense ratios are as of the prospectus. Standardized returns come from the fund data platform, not from text. Required disclosures added. No personal notes in the content. Approved for financial professional use.',
+    reads: ['k.onepager', 'k.finding', 'policy.rules', 'policy.trace'],
+    calls: [['m365', 'API', 'SharePoint · GET /compliance/disclosures?type=fund-comparison', 'read']],
+    writes: [
+      { key: 'policy.review', layer: 'policy', label: 'Compliance review', value: 'Approved with 4 standard disclosures. Version OP-0922 v1 locked; any edit needs a new review.' },
+      { key: 'events.approved', layer: 'events', label: 'content.approved', value: 'OP-0922 v1 · financial professional use · approved' }
+    ],
+    graph: { nodes: [['op', 'One-pager OP-0922', 'doc']], edges: [['op', 'f1', 'built from'], ['op', 'alex', 'prepared for']] },
+    artifact: 'review' },
+
+  { id: 's10', actor: 'prep', chapter: 'prepare', when: 'Tue Sep 22 · 8:16 a.m.', title: 'Brief Priya',
+    says: 'Priya, open with his marathon training, then get straight to numbers; he tunes out pitches. His real decision is keep or replace GFA in the new model. Lead with Option A and the dollar view. Jamie handles his calendar.',
+    reads: ['memory.profile', 'memory.request', 'k.finding', 'models.construct', 'graph.rel', 'events.approved'],
+    calls: [['sf', 'MCP', 'crm.get_opportunity(name="Rivera growth model")', 'read']],
+    writes: [{ key: 'memory.brief', layer: 'memory', label: 'Wholesaler brief', value: 'Opener, decision at stake, 3 talking points, what not to do, logistics through Jamie.' }],
+    artifact: 'brief' },
+
+  { id: 's11', actor: 'schedule', chapter: 'prepare', when: 'Tue Sep 22 · 8:17 a.m.', title: 'Find the right time',
+    says: 'Alex likes 7:30 a.m. Pacific, Tuesday or Thursday, on Teams, booked through Jamie. Tuesday the 29th works, two days before his committee.',
+    reads: ['memory.profile', 'graph.rel', 'memory.brief'],
+    calls: [['m365', 'MCP', 'calendar.find_times(attendees=[Priya, Alex via Jamie])', 'read'], ['m365', 'MCP', 'calendar.create_event(Teams, 30 min)', 'write']],
+    writes: [{ key: 'events.scheduled', layer: 'events', label: 'meeting.scheduled', value: 'Tue Sep 29 · 7:30 a.m. PT · Teams · booked with Jamie Cho' }],
+    mem: [['Relationship with Capital Group', 'Next meeting', 'Tue Sep 29, 7:30 a.m. PT (Teams), booked through Jamie']],
+    graph: { nodes: [['m2', 'Meeting · Sep 29', 'meeting']], edges: [['m2', 'alex', 'with'], ['jamie', 'm2', 'booked']] },
+    artifact: 'invite' },
+
+  { id: 's12', actor: 'dist', chapter: 'prepare', when: 'Tue Sep 22 · 8:20 a.m.', title: 'Send, with a person’s approval',
+    says: 'The approved one-pager, Priya’s note, to Alex with Jamie copied, through Seismic LiveSend so we know when it’s opened. I won’t send until Priya approves this exact email.',
+    reads: ['k.onepager', 'policy.review', 'memory.profile', 'graph.rel', 'events.scheduled'],
+    calls: [['seismic', 'API', 'POST /livesend/links(asset="OP-0922 v1")', 'write'], ['m365', 'MCP', 'mail.send(to=Alex, cc=Jamie)', 'write'], ['sf', 'MCP', 'crm.log_activity(type="Email")', 'write']],
+    gate: true,
+    writes: [{ key: 'events.sent', layer: 'events', label: 'email.sent', value: 'OP-0922 v1 via LiveSend link · to Alex Rivera, cc Jamie Cho · approved by Priya Shah' }],
+    graph: { nodes: [['em', 'Email · Sep 22', 'doc']], edges: [['em', 'alex', 'sent to'], ['em', 'op', 'links']] },
+    artifact: 'email' },
+
+  { id: 's13', actor: 'resolve', chapter: 'service', when: 'Tue Sep 22 · 10:41 a.m.', title: 'A link that won’t open',
+    says: 'Jamie’s reply landed in Service Cloud as a case: Morgan Stanley’s email security blocks external content links. I already know which email, which document and which version, so I resent the same approved PDF from the case. And I saved the lesson against the firm, not just Alex.',
+    reads: ['events.sent', 'graph.rel', 'k.onepager', 'k.pdfproc'],
+    calls: [['sf', 'MCP', 'service.get_case(origin="Email-to-Case")', 'read'], ['seismic', 'API', 'GET /assets/OP-0922/v1/pdf', 'read'], ['sf', 'MCP', 'service.reply(case, attachment="OP-0922 v1.pdf")', 'write'], ['sf', 'MCP', 'service.close_case(resolution="Resent as PDF")', 'write']],
+    writes: [
+      { key: 'events.resolved', layer: 'events', label: 'service.resolved', value: 'Link blocked at recipient firm → same approved version resent as PDF in 6 minutes.' },
+      { key: 'feedback.delivery', layer: 'feedback', label: 'Delivery lesson', value: 'Morgan Stanley blocks external content links. Default to PDF attachments for all Morgan Stanley advisors.' }
+    ],
+    mem: [['Preferences', 'Delivery', 'Morgan Stanley blocks external content links: send approved PDFs as attachments (applies firm-wide)']],
+    graph: { nodes: [['pol', 'Firm policy: no external links', 'policy']], edges: [['ms', 'pol', 'enforces'], ['em', 'pol', 'blocked by']] },
+    artifact: 'reply' },
+
+  { id: 's14', actor: 'engage', chapter: 'follow', when: 'Tue Sep 29 · 7:30 a.m.', title: 'The follow-up call, live',
+    says: 'Alex asked how he’d explain GFA’s fee to clients. I surfaced Option A from the construction model: 0.155% blended for the whole sleeve. He’s leaning that way, wants the same one-page format every quarter, and his marathon training is on track.',
+    note: 'Time jump: a week later, on the call Schedule Me booked.',
+    reads: ['memory.brief', 'memory.profile', 'k.finding', 'models.construct', 'k.fees'],
+    calls: [['sf', 'MCP', 'crm.get_call_transcript(call="Rivera · Sep 29", live=true)', 'read']],
+    writes: [
+      { key: 'memory.decision', layer: 'memory', label: 'Where Alex landed', value: 'Leaning to Option A (70% index core, 30% GFA). Takes it to committee Oct 1.' },
+      { key: 'events.meeting2', layer: 'events', label: 'call.captured', value: 'Rivera · Sep 29 · 30 min · transcript in Salesforce · decision pending committee' },
+      { key: 'feedback.meeting', layer: 'feedback', label: 'What landed', value: 'The dollar view of fees was the most useful part. Asked for an after-tax comparison, which the template doesn’t cover.' }
+    ],
+    mem: [
+      ['Current priorities', 'Decision at stake', 'Leaning to Option A: 70% index core, 30% GFA. Committee decides Oct 1.'],
+      ['Preferences', 'Content', 'Data first, one page, no marketing language. Wants the same format for quarterly attribution.'],
+      ['Personal (relationship team only)', 'Recent', 'CIM training on track; mentioned a new personal best at 18 miles']
+    ],
+    graph: { nodes: [['optA', 'Option A · 70/30', 'opp']], edges: [['m2', 'optA', 'leaning to'], ['optA', 'gfa', 'includes'], ['optA', 'vigax', 'includes']] } },
+
+  { id: 's15', actor: 'follow', chapter: 'follow', when: 'Tue Sep 29 · 8:05 a.m.', title: 'Close the loop',
+    says: 'Logged the call in Salesforce, moved the growth-model opportunity to “proposal,” and set three tasks: send the quarterly attribution in his format, ask Product about an after-tax view, and check in after his committee.',
+    reads: ['events.meeting2', 'memory.decision', 'memory.profile', 'feedback.meeting'],
+    calls: [['sf', 'MCP', 'crm.log_activity(type="Meeting")', 'write'], ['sf', 'MCP', 'crm.update_opportunity(stage="Proposal")', 'write'], ['sf', 'MCP', 'crm.create_tasks(3)', 'write']],
+    writes: [
+      { key: 'events.crm', layer: 'events', label: 'opportunity.stage_changed', value: 'Rivera growth model → Proposal. 3 tasks assigned.' },
+      { key: 'feedback.backlog', layer: 'feedback', label: 'Content request', value: 'After-tax version of the fund comparison one-pager. Routed to Product and Marketing.' }
+    ],
+    mem: [['Relationship with Capital Group', 'Next touchpoint', 'Check in after Oct 1 committee; quarterly attribution in early January']],
+    graph: { nodes: [], edges: [['model', 'optA', 'proposal']] },
+    artifact: 'crm' },
+
+  { id: 's16', actor: 'orch', chapter: 'follow', when: 'Tue Sep 29 · 8:06 a.m.', title: 'Close the plan and keep what was learned',
+    says: 'All nine tasks are done. What we learned stays: Alex’s preferences, the verified finding for the next advisor who asks, a firm-wide delivery rule for Morgan Stanley, and a content gap for Marketing.',
+    reads: ['events.crm', 'feedback.backlog', 'feedback.delivery', 'feedback.meeting'],
+    calls: [],
+    writes: [{ key: 'events.closed', layer: 'events', label: 'plan.completed', value: '9 of 9 tasks complete. 4 lessons retained in the foundation.' }],
+    artifact: 'summary' }
+];
+
+const GATE_STEP = 's12';
+</script>
+<script>/* ===== Engine: deterministic replay of the journey ===== */
+const clone = o => JSON.parse(JSON.stringify(o));
+const SYSNAME = { sf: 'Salesforce sync', m365: 'Microsoft 365', seismic: 'Seismic ingestion', fund: 'Fund data platform', mstar: 'Morningstar feed' };
+
+function seedState() {
+  const store = {}, archive = {};
+  for (const [k, r] of Object.entries(clone(SEED))) {
+    Object.assign(r, { key: k, version: 1, by: 'sys:' + r.src, producedInRun: false, stepId: null, inputs: [] });
+    store[k] = r; archive[k + '@1'] = r;
+  }
+  const profile = PROFILE_SEED.map(([section, field, value, src]) => ({ section, field, value, src, by: null, step: null, history: [] }));
+  const graph = { nodes: GRAPH_SEED.nodes.map(([id, label, type]) => ({ id, label, type, step: null })), edges: GRAPH_SEED.edges.map(([from, to, label]) => ({ from, to, label, step: null })) };
+  return { store, archive, profile, graph };
+}
+function freshState() {
+  const b = seedState();
+  return Object.assign(b, {
+    steps: clone(STEPS), logs: [], seq: 0, i: 0, phase: 'ready', t: 0, readDone: false, callsDone: false,
+    used: new Set(), completed: new Set(), layers: new Set(), reuse: 0, memUpdates: 0, graphChanges: 0, calls: 0,
+    snaps: {}, blockedMsg: null, drafted: null
+  });
+}
+const cur = S => S.steps[S.i];
+function logEvt(S, type, st, extra) { S.logs.push(Object.assign({ seq: ++S.seq, step: S.steps.indexOf(st) + 1, stepId: st.id, type, agentId: st.actor }, extra)); }
+
+function activate(S) {
+  const st = cur(S); S.phase = 'dispatch'; S.t = 0; S.readDone = false; S.callsDone = false; S.blockedMsg = null;
+  S.used.add(st.actor);
+  const miss = st.reads.find(k => !S.store[k]);
+  if (miss) { S.phase = 'blocked'; S.blockedMsg = `${AGENTS[st.actor].name} can’t start: “${labelFor(miss)}” never reached the foundation.`; }
+}
+function labelFor(k) {
+  if (SEED[k]) return SEED[k].label;
+  for (const s of STEPS) for (const w of s.writes) if (w.key === k) return w.label;
+  return k;
+}
+function applyCalls(S) {
+  if (S.callsDone) return;
+  const st = cur(S);
+  for (const [sys, via, op, dir] of callsBefore(st)) { S.calls++; logEvt(S, 'CALL', st, { sys, via, op, dir, label: op, layer: null }); }
+  S.callsDone = true;
+}
+const callsBefore = st => st.calls.filter(c => !(st.gate && c[3] === 'write'));
+const callsAfter = st => st.calls.filter(c => st.gate && c[3] === 'write');
+function applyReads(S) {
+  if (S.readDone) return;
+  const st = cur(S); S.snaps[st.id] = [];
+  for (const k of st.reads) {
+    const r = S.store[k];
+    const reused = !!(r.producedInRun && r.by !== st.actor);
+    if (reused) S.reuse++;
+    S.layers.add(r.layer);
+    S.snaps[st.id].push(Object.assign(clone(r), { reused }));
+    logEvt(S, 'READ', st, { key: k, version: r.version, label: r.label, value: r.value, layer: r.layer, origin: r.by, reused });
+  }
+  S.readDone = true;
+}
+function putRecord(S, st, w) {
+  const prev = S.store[w.key];
+  const rec = { key: w.key, layer: w.layer, label: w.label, value: w.value, version: (prev ? prev.version : 0) + 1, by: st.actor, producedInRun: true, stepId: st.id,
+    inputs: st.reads.map(k => ({ key: k, version: S.store[k] ? S.store[k].version : null })) };
+  S.store[w.key] = rec; S.archive[w.key + '@' + rec.version] = rec; S.layers.add(w.layer);
+  logEvt(S, 'WRITE', st, { key: w.key, version: rec.version, label: w.label, value: w.value, layer: w.layer });
+  return rec;
+}
+function applyWrites(S) {
+  const st = cur(S);
+  for (const [sys, via, op, dir] of callsAfter(st)) { S.calls++; logEvt(S, 'CALL', st, { sys, via, op, dir, label: op, layer: null }); }
+  for (const w of st.writes) putRecord(S, st, w);
+  if (st.mem && st.mem.length) {
+    const changed = [];
+    for (const [section, field, value] of st.mem) {
+      let f = S.profile.find(p => p.section === section && p.field === field);
+      if (f) { f.history.push({ value: f.value, src: f.src, by: f.by, step: f.step }); f.value = value; }
+      else { f = { section, field, value, history: [] }; S.profile.push(f); }
+      Object.assign(f, { src: AGENTS[st.actor].name, by: st.actor, step: st.id });
+      changed.push(field); S.memUpdates++;
+      logEvt(S, 'MEMORY', st, { field, section, value, label: 'Profile · ' + field, layer: 'memory', prior: f.history.length ? f.history[f.history.length - 1].value : null });
+    }
+    putRecord(S, st, { key: 'memory.profile', layer: 'memory', label: 'Alex Rivera · advisor profile', value: `${S.profile.length} facts. Updated: ${changed.join(', ')}.` });
+  }
+  if (st.graph && (st.graph.nodes.length || st.graph.edges.length)) {
+    for (const [id, label, type] of st.graph.nodes) { S.graph.nodes.push({ id, label, type, step: st.id }); S.graphChanges++; }
+    for (const [from, to, label] of st.graph.edges) { S.graph.edges.push({ from, to, label, step: st.id }); S.graphChanges++; }
+    logEvt(S, 'GRAPH', st, { label: `+${st.graph.nodes.length} nodes, +${st.graph.edges.length} relationships`, layer: 'graph', value: st.graph.edges.map(([a, b, l]) => `${nodeLabel(S, a)} —${l}→ ${nodeLabel(S, b)}`).join('; ') });
+    putRecord(S, st, { key: 'graph.rel', layer: 'graph', label: 'Alex’s relationship graph', value: `${S.graph.nodes.length} entities, ${S.graph.edges.length} relationships.` });
+  }
+  S.completed.add(st.id);
+}
+const nodeLabel = (S, id) => (S.graph.nodes.find(n => n.id === id) || { label: id }).label;
+
+/* ---- Human gate ---- */
+function sendPayload(S) {
+  const g = S.store;
+  return { action: 'SEND', to: 'Alex Rivera (Morgan Stanley)', cc: 'Jamie Cho', from: 'Priya Shah, Capital Group', document: 'OP-0922 v1 · Growth sleeve options: GFA vs. Vanguard large growth',
+    channel: 'Seismic LiveSend link in Outlook', review: g['policy.review'] ? g['policy.review'].value : null, audience: 'Financial professional use only' };
+}
+function fingerprint(p) { const s = JSON.stringify(p); let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return 'FP-' + h.toString(16).toUpperCase().padStart(8, '0'); }
+function gateChecks(S) {
+  const g = S.store;
+  return [
+    { ok: !!g['policy.review'], text: 'Compliance review approved this exact version (OP-0922 v1)' },
+    { ok: !!g['policy.trace'], text: 'Every number traces to a system of record' },
+    { ok: !!g['graph.rel'], text: 'Recipient resolved in the graph: Alex Rivera, Morgan Stanley' },
+    { ok: true, text: 'No personal notes in the content' }
+  ];
+}
+function gateOpen(S, appr) { const st = cur(S); if (!st || !st.gate) return false; const a = appr[st.id]; return !(a && a.decision === 'approved'); }
+function logDecision(S, d) {
+  const st = cur(S), p = sendPayload(S), fp = fingerprint(p);
+  logEvt(S, d === 'approved' ? 'APPROVAL' : 'DRAFT', st, { label: d === 'approved' ? 'Priya Shah approved the send' : 'Kept as draft', value: JSON.stringify(p), layer: 'policy', fingerprint: fp });
+  return fp;
+}
+
+function replayTo(idx, appr) {
+  const S = freshState();
+  for (let j = 0; j < idx && j < S.steps.length; j++) {
+    S.i = j; activate(S);
+    if (S.phase === 'blocked') return S;
+    applyCalls(S); applyReads(S);
+    const st = cur(S);
+    if (st.gate) {
+      const a = appr[st.id];
+      if (a && a.decision === 'draft') { logDecision(S, 'draft'); S.drafted = st.id; continue; }
+      if (gateOpen(S, appr)) { S.phase = 'approval'; return S; }
+      logDecision(S, 'approved');
+    }
+    applyWrites(S);
+  }
+  S.i = Math.min(idx, S.steps.length);
+  if (S.i >= S.steps.length) { S.phase = 'done'; return S; }
+  if (idx > 0) activate(S); else S.phase = 'ready';
+  return S;
+}
+function completedState() { return replayTo(STEPS.length, { [GATE_STEP]: { decision: 'approved' } }); }
+function stats(S) {
+  const c = t => S.logs.filter(x => x.type === t).length;
+  return { agents: [...S.used].filter(a => a !== 'orch' && a !== 'priya').length, handoffs: S.completed.size, reads: c('READ'), writes: c('WRITE'), approvals: c('APPROVAL'),
+    reuse: S.reuse, mem: S.memUpdates, graph: S.graphChanges, calls: S.calls, mcp: S.logs.filter(x => x.type === 'CALL' && x.via === 'MCP').length };
+}
+function futureReaders(S, key) {
+  const out = [];
+  for (let j = S.i + 1; j < S.steps.length; j++) { const st = S.steps[j]; if (st.reads.includes(key) && !out.includes(st.actor)) out.push(st.actor); if (st.writes.some(w => w.key === key)) break; }
+  return out;
+}
+function unplug(S, off) {
+  const direct = new Map(), cascade = new Set(), impacted = new Set(); let lost = 0;
+  for (const st of S.steps) {
+    const snaps = S.snaps[st.id] || [], here = []; let casc = false;
+    for (const r of snaps) {
+      if (r.reused && off.has(r.layer)) { here.push(r); lost++; }
+      else if (r.producedInRun && impacted.has(r.stepId)) casc = true;
+    }
+    if (here.length) { direct.set(st.id, here); impacted.add(st.id); } else if (casc) { cascade.add(st.id); impacted.add(st.id); }
+  }
+  return { direct, cascade, impacted, lost };
+}
+function lineage(S, key, version, depth = 0, seen = new Set()) {
+  const r = S.archive[key + '@' + version]; if (!r) return null;
+  const id = key + '@' + version, repeat = seen.has(id); seen.add(id);
+  const node = { rec: r, repeat, children: [] };
+  if (!repeat && depth < 10) for (const inp of r.inputs || []) { const c = lineage(S, inp.key, inp.version, depth + 1, seen); if (c) node.children.push(c); }
+  return node;
+}
+function lineageAgents(n, set = new Set()) { if (!n) return set; if (AGENTS[n.rec.by]) set.add(n.rec.by); n.children.forEach(c => lineageAgents(c, set)); return set; }
+</script>
+<script>/* ===== Architecture behind each component ===== */
+const ARCH = {
+  memory: {
+    flow: [
+      { t: 'Sources', i: ['Salesforce contact, account, holdings', 'Salesforce call transcripts', 'Service Cloud cases', 'Agent observations'] },
+      { t: 'Memory writer', i: ['Extract candidate facts', 'Validate source and confidence', 'Merge with existing profile', 'Tag scope (shared, team-only, private)'] },
+      { t: 'Stores', i: ['Advisor profile: structured facts with provenance', 'Episodes: meeting and email summaries, embedded', 'Working memory: per task, expires'] },
+      { t: 'Memory reader', i: ['Purpose-scoped retrieval', 'Role-based filtering', 'Personal fields only for the relationship team'] }
+    ],
+    ifc: [['MCP', 'memory.get_profile(advisor_id, purpose)', 'Agents read the profile for a stated purpose'], ['MCP', 'memory.search_episodes(advisor_id, query)', 'Find what was said before'], ['MCP', 'memory.propose_update(field, value, source)', 'Agents propose; the writer commits'], ['Sync', 'Salesforce change data capture', 'Identity, team, holdings stay current']],
+    guards: ['Every fact carries its source, author, time and scope.', 'Agents propose updates; only the memory writer commits them.', 'Volatile facts (holdings, availability, eligibility) are re-read from the system of record when they matter.', 'Personal notes are visible to the relationship team only and never enter client-facing content.'],
+    tech: 'Profile store on Salesforce Data Cloud or a governed database; vector index for episodes; short-lived cache for working memory.'
+  },
+  knowledge: {
+    flow: [
+      { t: 'Sources', i: ['Seismic approved content', 'SharePoint libraries', 'Fund data platform', 'Licensed peer data'] },
+      { t: 'Ingestion', i: ['Parse and chunk documents', 'Embed text', 'Tag version, approval, audience, expiry'] },
+      { t: 'Indexes', i: ['Hybrid search: vector + keyword + metadata', 'Structured facts: numbers by API, never as text', 'Findings: verified answers saved for reuse'] },
+      { t: 'Retriever', i: ['Permission-trimmed results', 'Audience filters', 'Citations with source and version'] }
+    ],
+    ifc: [['MCP', 'knowledge.search(query, audience)', 'Find approved passages with citations'], ['API', 'GET /facts/{fund}/{metric}?as_of=', 'Exact numbers from the system of record'], ['MCP', 'knowledge.save_finding(answer, citations)', 'QAR stores verified answers for reuse'], ['Sync', 'Seismic and SharePoint content events', 'Re-index when a document changes']],
+    guards: ['Expired or unapproved content is never returned.', 'Fund numbers come only from structured facts, never from generated text.', 'Every answer cites a source and a version.'],
+    tech: 'Enterprise search index (for example Azure AI Search or Elasticsearch) plus a fund-facts service in front of the fund data platform.'
+  },
+  policy: {
+    flow: [
+      { t: 'Inputs', i: ['Draft content', 'Proposed action (send, schedule, update)'] },
+      { t: 'Policy engine', i: ['Rules as code: audience, claims, disclosures, recipients', 'Owned by Compliance'] },
+      { t: 'Claim checker', i: ['Each claim matched to a cited finding', 'Each number matched to a system of record'] },
+      { t: 'Human gate', i: ['Approver sees the exact payload', 'Approval binds to its fingerprint', 'Every decision audited'] }
+    ],
+    ifc: [['MCP', 'policy.check(content | action)', 'Returns pass, fixes or block with reasons'], ['MCP', 'policy.request_approval(payload)', 'Routes to the right person'], ['API', 'Audit log export', 'For supervision and exams']],
+    guards: ['One rulebook for every agent: none can allow what another would block.', 'Any edit after approval invalidates it.', 'This supports, and doesn’t replace, accountable reviewers.'],
+    tech: 'A rules engine (for example Open Policy Agent) and the existing compliance review workflow.'
+  },
+  models: {
+    flow: [
+      { t: 'Catalog', i: ['Sales Alpha, Forward-Looking Sales Alpha, NCF Alpha', 'Peer-match and product recommenders', 'Portfolio construction analytics', 'Marketing signals and segments'] },
+      { t: 'Model cards', i: ['Purpose and allowed uses', 'Owner, version, validation date'] },
+      { t: 'Serving', i: ['Versioned endpoints', 'Inputs and outputs logged'] },
+      { t: 'Outputs', i: ['Signal or candidate with rationale', 'Stored in the foundation with model version'] }
+    ],
+    ifc: [['API', 'POST /models/{name}/run', 'Deterministic, typed results'], ['MCP', 'models.find(purpose)', 'Agents discover which model fits a task'], ['Sync', 'Scheduled scoring', 'Sales Alpha refreshed for all advisors']],
+    guards: ['Use a model only for the purpose it was validated for.', 'A signal is not client intent, suitability or permission to sell.', 'Outputs record the model version that produced them.'],
+    tech: 'The existing model platform (for example Databricks or Azure ML) exposed through one catalog.'
+  },
+  feedback: {
+    flow: [
+      { t: 'Signals', i: ['Email opens and replies', 'Meeting notes', 'Service cases', 'Advisor reactions'] },
+      { t: 'Normalize', i: ['Observed fact vs. interpretation', 'Linked to the interaction, document and task'] },
+      { t: 'Route', i: ['Content backlog', 'Model evaluation', 'Sales playbooks'] },
+      { t: 'Outcomes', i: ['What worked, what didn’t, for whom'] }
+    ],
+    ifc: [['MCP', 'feedback.record(type, evidence, link)', 'Any agent can log an outcome'], ['MCP', 'feedback.query(topic)', 'Teams see what advisors keep asking for'], ['API', 'Export to analytics', 'For reporting and model tuning']],
+    guards: ['A click isn’t understanding, and a send isn’t delivery.', 'Private coaching never becomes shared memory.'],
+    tech: 'An outcomes table in the data platform with links into the graph.'
+  },
+  events: {
+    flow: [
+      { t: 'Producers', i: ['Workbench: employee request', 'Salesforce: call captured, case opened, opportunity changed', 'Seismic: document opened', 'Agents: task completed'] },
+      { t: 'Event bus', i: ['Typed schemas', 'Ordered, replayable'] },
+      { t: 'Subscribers', i: ['Orchestration', 'Agents that care about that event'] },
+      { t: 'Task state', i: ['Durable status of every task', 'Retries and timeouts'] }
+    ],
+    ifc: [['Event', 'publish(type, payload)', 'Emit a business event'], ['Event', 'subscribe(type, handler)', 'React to it'], ['Sync', 'Salesforce platform events and change data capture; Microsoft Graph notifications', 'Enterprise systems feed the bus']],
+    guards: ['An event starts work; it never grants permission.', 'Handlers are idempotent, so replays are safe.'],
+    tech: 'A managed event bus (for example Kafka, Azure Event Grid or Service Bus) and a durable workflow engine.'
+  },
+  graph: {
+    flow: [
+      { t: 'Sources', i: ['Salesforce accounts, contacts, teams, calls', 'Calendar events from Microsoft 365', 'Documents from Seismic', 'Agent outputs'] },
+      { t: 'Entity resolution', i: ['Advisor ↔ firm ↔ team ↔ buying unit', 'Deduplicate people and firms'] },
+      { t: 'Graph store', i: ['People, firms, teams, meetings, questions, funds, documents, deliveries'] },
+      { t: 'Queries', i: ['Relationship paths', 'Lineage: which sources built this document', 'Impact: what a change affects'] }
+    ],
+    ifc: [['MCP', 'graph.resolve(name, context)', '“Alex” → Alex Rivera, Morgan Stanley, The Rivera Group'], ['MCP', 'graph.neighbors(id, types)', 'Who else, what else is connected'], ['MCP', 'graph.lineage(document_id)', 'Trace a document to its sources'], ['Sync', 'Salesforce CDC', 'Keeps people and firms current']],
+    guards: ['A relationship never grants access.', 'Source systems stay authoritative.'],
+    tech: 'A graph database (for example Neo4j, Amazon Neptune or Cosmos DB) fed from Salesforce and agent outputs.'
+  },
+  orch: {
+    flow: [
+      { t: 'Understand', i: ['Request by voice, chat or event (“take care of what Alex asked”)', 'Intent and entities', 'graph.resolve: which advisor, which team, which fund'] },
+      { t: 'Plan', i: ['Task graph with dependencies', 'Which steps need a human'] },
+      { t: 'Route', i: ['Agent registry by capability', 'Dispatch with context references, not copies'] },
+      { t: 'Track', i: ['Durable task state', 'Retries, timeouts, escalation', 'Completion and learning'] }
+    ],
+    ifc: [['Internal', 'agent.register(capabilities)', 'Specialists declare what they can do'], ['Internal', 'task.dispatch(agent, task, context_refs)', 'Work is handed out with pointers into the foundation'], ['Event', 'task.completed / task.failed', 'Drives the next step']],
+    guards: ['Conversation state, shared knowledge and task state are kept separate: a dropped call never loses a task.', 'The planner can only route to registered capabilities.'],
+    tech: 'An agent framework on a durable workflow engine, with an agent registry.'
+  },
+  integ: {
+    flow: [
+      { t: 'MCP gateway', i: ['Agent-facing tools for Salesforce, Microsoft 365, Seismic', 'Acts on behalf of the signed-in employee', 'Per-agent tool allow-lists, full logging'] },
+      { t: 'API gateway', i: ['Typed services: fund data, models, licensed data', 'Exact numbers, high volume, deterministic'] },
+      { t: 'Events and sync', i: ['Change data capture from Salesforce', 'Microsoft Graph notifications', 'Seismic content updates'] }
+    ],
+    ifc: [['MCP', 'When an agent needs to look up, search, draft or act in a business app at run time, with the user’s permissions', 'crm.get_call_transcript, service.reply, mail.send, calendar.find_times, seismic.search_content'], ['API', 'When the answer must be exact, typed or high-volume, or it’s system-to-system', 'fund fees, portfolio models, Morningstar peers, PDF export, disclosures'], ['Sync', 'When data should already be in the foundation before anyone asks', 'Salesforce CDC → graph and memory; Seismic → knowledge']],
+    guards: ['MCP servers wrap each vendor’s API; the choice is about who calls and how it’s governed, not the transport.', 'No agent holds its own credentials.', 'Every call is logged against the task that made it.'],
+    tech: 'An MCP gateway in front of MCP servers for each system, beside the existing API gateway and integration platform.'
+  }
+};
+const SYS_ACCESS = {
+  sf: { mcp: ['crm.get_call_transcript', 'crm.get_contact', 'crm.get_account_programs', 'crm.get_opportunity', 'crm.log_meeting', 'crm.log_activity', 'crm.update_opportunity', 'crm.create_tasks', 'service.get_case', 'service.reply', 'service.close_case'], api: [], sync: 'Change data capture and platform events (call captured, case opened) into the graph, memory and events' },
+  m365: { mcp: ['calendar.find_times', 'calendar.create_event', 'mail.send'], api: ['SharePoint disclosures library'], sync: 'Microsoft Graph notifications (calendar responses)' },
+  seismic: { mcp: ['seismic.search_content'], api: ['LiveSend links', 'PDF export'], sync: 'Content and version updates into knowledge' },
+  fund: { mcp: [], api: ['Fund facts and fees', 'Portfolio construction model', 'Standardized returns'], sync: 'Nightly facts refresh into knowledge' },
+  mstar: { mcp: [], api: ['Peer categories and competitor fund data'], sync: 'Licensed feed into knowledge' }
+};
+</script>
+<script>/* ===== UI ===== */
+const byId = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const TC = { sales: '#82b6ff', product: '#7fd4ab', marketing: '#f0b870', service: '#b9a5f5', orch: '#c9b8ff', user: '#e6edf4' };
+const ICONS = {
+  book: '<path d="M4 19V5a2 2 0 012-2h13v16H6a2 2 0 00-2 2 2 2 0 002 2h13"/>',
+  calendar: '<path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/>',
+  chart: '<path d="M5 20V11M11 20V5M17 20v-7M3 20h18"/>',
+  chat: '<path d="M4 5h16v11H9l-5 4z"/>',
+  check: '<path d="M5 12l5 5 9-10"/>',
+  file: '<path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
+  headphones: '<path d="M4 15v-3a8 8 0 0116 0v3M4 15h3v5H4zM17 15h3v5h-3z"/>',
+  list: '<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>',
+  loop: '<path d="M4 12a8 8 0 0114-5l2 2M20 4v5h-5M20 12a8 8 0 01-14 5l-2-2M4 20v-5h5"/>',
+  mail: '<path d="M3 6h18v12H3zM3 7l9 6 9-6"/>',
+  memory: '<path d="M7 7h10v10H7zM10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/>',
+  network: '<circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 7v5M12 12l-5.5 5.5M12 12l5.5 5.5"/>',
+  pen: '<path d="M4 20l4-1 11-11-3-3L5 16zM14 6l3 3"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  send: '<path d="M3 11l18-8-8 18-2-8z"/>',
+  shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+  tool: '<path d="M14 6a4 4 0 00-5 5l-6 6 3 3 6-6a4 4 0 005-5l-3 3-3-3z"/>',
+  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2 20c1-3.5 3.5-5 7-5s6 1.5 7 5M16 4.5a3.5 3.5 0 010 7M18 15c2 .7 3.3 2.3 4 5"/>',
+  mic: '<path d="M12 3a3 3 0 00-3 3v6a3 3 0 006 0V6a3 3 0 00-3-3zM5 11a7 7 0 0014 0M12 18v3"/>',
+  bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  play: '<path d="M7 4l13 8-13 8z" fill="currentColor" stroke="none"/>',
+  pause: '<path d="M7 4h4v16H7zM13 4h4v16h-4z" fill="currentColor" stroke="none"/>',
+  replay: '<path d="M4 12a8 8 0 108-8 8 8 0 00-6 2.7L4 9M4 4v5h5"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  lock: '<path d="M6 11h12v9H6zM8 11V8a4 4 0 018 0v3"/>'
+};
+const icon = (n, c = '') => `<svg class="ic ${c}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ICONS.file}</svg>`;
+const av = (id, c = '') => `<span class="av ${c}" style="background:${TC[AGENTS[id].team]}">${icon(AGENTS[id].icon)}</span>`;
+const teamName = id => AGENTS[id].team === 'orch' ? 'Orchestration' : AGENTS[id].team === 'user' ? 'Wholesaler · Capital Group' : TEAMS[AGENTS[id].team].name;
+const originText = r => r.producedInRun && AGENTS[r.by] ? ((r.key === 'memory.profile' || r.key === 'graph.rel') ? 'last updated by ' : 'from ') + AGENTS[r.by].name : 'from ' + (SYSNAME[(r.by || '').replace('sys:', '')] || 'source system');
+
+const P = { S: null, approvals: {}, playing: false, speed: 1, hold: false, narrate: false, last: 0, raf: 0, tab: 'now', view: 'live', lab: null, labS: null, labA: null, fresh: null, particles: [], lastStats: {} };
+const S = () => (P.lab ? P.labS : P.S);
+
+/* tasks shown in the orchestration band after planning */
+const TASKS = [
+  ['Clarify the question', 'product', ['s3']], ['Evidence & fee math', 'product', ['s4', 's5']], ['Verified answer', 'product', ['s6']],
+  ['One-pager', 'marketing', ['s7', 's8']], ['Compliance review', 'marketing', ['s9']], ['Brief & schedule', 'sales', ['s10', 's11']],
+  ['Send with approval', 'marketing', ['s12']], ['Service on standby', 'service', ['s13']], ['Follow-up & CRM', 'sales', ['s14', 's15']]
+];
+
+/* ---------- Static diagram ---------- */
+function buildDiagram() {
+  byId('journey').innerHTML = `<div class="mnow" id="mnow"></div><button class="agent entry" id="ag-priya" data-agent="priya"><span class="dot" style="background:#e6edf4">${icon('mic')}</span><span><b>Priya Shah</b><small>Start here · voice request</small></span><em></em></button><button class="acard" data-tab="advisor"><span class="av">AR</span><span><b>Alex Rivera, CFP®</b><small>SVP, Wealth Advisor · Morgan Stanley · The Rivera Group</small></span></button>
+    <div class="chaps">${CHAPTERS.map(c => { const st = STEPS.find(s => s.chapter === c.id); return `<button class="chap" data-chap="${c.id}" data-jump="${STEPS.indexOf(st)}" title="${esc(c.name)} · ${esc(st.when)}"><b>${esc(c.name)}</b></button>`; }).join('')}</div>`;
+  byId('orch').innerHTML = `<div class="oname">${icon('network')}Intelligence & orchestration</div><div class="ostages">${['Understand', 'Resolve', 'Plan', 'Route', 'Track'].map(x => `<span data-os="${x}">${x}</span>`).join('')}</div><div class="tasks" id="tasks"></div>`;
+  byId('lanes').innerHTML = TEAM_ORDER.map(t => {
+    const ids = Object.keys(AGENTS).filter(id => AGENTS[id].team === t);
+    return `<div class="lane" data-team="${t}"><h3><i style="background:${TC[t]}"></i>${esc(TEAMS[t].name)}</h3>
+      ${ids.map(id => `<button class="agent" data-agent="${id}" id="ag-${id}"><span class="dot" style="background:${TC[t]}">${icon(AGENTS[id].icon)}</span><span>${esc(AGENTS[id].name)}</span><em></em></button>`).join('')}
+      <div class="more" title="${esc(TEAMS[t].more.join(', '))}">+${TEAMS[t].more.length} more on the same foundation</div></div>`;
+  }).join('');
+  byId('found').innerHTML = `<div class="tiles">${LAYER_ORDER.map(l => `<button class="tile" data-layer="${l}" id="tile-${l}" title="${esc(LAYERS[l].name)}: how it’s built"><span class="th">${icon(LAYERS[l].icon)}${esc(LAYERS[l].short)}<span class="tn"></span></span><span class="viz"></span><span class="tl"></span><span class="tt"></span></button>`).join('')}</div>
+    <div class="fhead"><div><b>Shared AI foundation</b><span>The backbone every specialist reads from and writes to. Click a component to see how it’s built.</span></div><div class="ftot" id="ftot"></div></div>`;
+  byId('integ').innerHTML = `<div class="systems">${SYS_ORDER.map(k => `<button class="sys" data-sys="${k}" id="sys-${k}">${icon(SYSTEMS[k].icon)}<span><b>${esc(SYSTEMS[k].name)}</b><small>${esc(SYSTEMS[k].sub)}</small></span><span class="via"></span></button>`).join('')}</div>
+    <div class="gw"><b>Enterprise integration</b><button class="lbtn" data-act="integ" style="padding:1px 8px;font-size:11.5px;background:none;color:inherit;border-color:#2a5278">MCP gateway · API gateway · events & sync</button><span class="legend"><span class="via MCP" style="display:inline-block">MCP</span>agent tool call <span class="via API" style="display:inline-block">API</span>typed service call</span></div>`;
+}
+
+/* ---------- Dynamic diagram ---------- */
+function renderDiagram() {
+  const s = S(), st = s.steps[s.i], lab = P.labA;
+  const active = st && !['ready', 'done'].includes(s.phase) && !P.lab ? st : null;
+  const chapIdx = active ? CHAPTERS.findIndex(c => c.id === active.chapter) : (s.phase === 'done' ? 99 : -1);
+  document.querySelectorAll('.chap').forEach((el, k) => { el.classList.toggle('cur', k === chapIdx); el.classList.toggle('done', k < chapIdx); });
+  byId('mnow').innerHTML = active ? `${av(active.actor, 'sm')}<span><b>${esc(AGENTS[active.actor].name)}</b> · ${esc(active.title)}</span>` : s.phase === 'done' ? '<span>Journey complete. Open “Now” for the summary.</span>' : '';
+  const orchOn = active && active.actor === 'orch';
+  byId('orch').classList.toggle('active', !!orchOn || (active && s.phase === 'dispatch'));
+  const osOn = orchOn ? (active.id === 's2' ? ['Understand', 'Resolve', 'Plan', 'Route'] : ['Track']) : active && s.phase === 'dispatch' ? ['Route', 'Track'] : [];
+  document.querySelectorAll('[data-os]').forEach(el => el.classList.toggle('on', osOn.includes(el.dataset.os)));
+  const planned = s.completed.has('s2');
+  byId('tasks').innerHTML = planned ? TASKS.map(([n, t, ids]) => {
+    const done = ids.every(x => s.completed.has(x)), act = active && ids.includes(active.id);
+    return `<span class="task ${done ? 'done' : act ? 'active' : ''}" style="${!done && !act ? '' : ''}"><i style="${done ? '' : `color:${TC[t]}`}"></i>${esc(n)}</span>`;
+  }).join('') : `<span class="task">${s.phase === 'ready' ? 'Waiting for the meeting to end' : 'Planning…'}</span>`;
+  const nextSet = new Set();
+  if (active && ['write', 'settle'].includes(s.phase)) active.writes.forEach(w => futureReaders(s, w.key).forEach(a => nextSet.add(a)));
+  document.querySelectorAll('.agent').forEach(el => {
+    const id = el.dataset.agent, mine = s.steps.filter(x => x.actor === id);
+    const done = mine.length && mine.every(x => s.completed.has(x.id)), some = mine.some(x => s.completed.has(x.id));
+    el.classList.toggle('active', !!(active && active.actor === id));
+    el.classList.toggle('done', !!some);
+    el.classList.toggle('next', nextSet.has(id));
+    const cut = !!lab && mine.some(x => lab.direct.has(x.id));
+    el.classList.toggle('cut', cut);
+    el.classList.toggle('hit', !!lab && !cut && mine.some(x => lab.cascade.has(x.id)));
+    const n = mine.filter(x => s.completed.has(x.id)).length;
+    el.querySelector('em').textContent = active && active.actor === id ? 'working' : done ? 'done' : some ? `${n} of ${mine.length}` : '';
+  });
+  const readL = new Set(), writeL = new Set();
+  if (active && ['read', 'think'].includes(s.phase)) active.reads.forEach(k => s.store[k] && readL.add(s.store[k].layer));
+  if (active && ['write', 'settle'].includes(s.phase)) { active.writes.forEach(w => writeL.add(w.layer)); if (active.mem) writeL.add('memory'); if (active.graph && (active.graph.nodes.length || active.graph.edges.length)) writeL.add('graph'); }
+  for (const l of LAYER_ORDER) {
+    const el = byId('tile-' + l), recs = Object.values(s.store).filter(r => r.layer === l).length;
+    const reused = s.logs.filter(e => e.type === 'READ' && e.reused && e.layer === l).length;
+    const last = [...s.logs].reverse().find(e => e.layer === l && ['WRITE', 'MEMORY', 'GRAPH'].includes(e.type) && !(e.type === 'WRITE' && (e.key === 'memory.profile' || e.key === 'graph.rel')));
+    let extra = l === 'memory' ? ` · ${s.profile.length} profile facts` : l === 'graph' ? ` · ${s.graph.nodes.length} nodes` : '';
+    el.querySelector('.tn').innerHTML = reused ? `<b title="${reused} facts reused through this component">${reused}</b>` : '';
+    el.querySelector('.viz').innerHTML = tileViz(l, s);
+    const teams = new Set(s.logs.filter(e => e.layer === l && ['READ', 'WRITE', 'MEMORY', 'GRAPH'].includes(e.type)).map(e => AGENTS[e.agentId].team).filter(t => TEAMS[t]));
+    el.querySelector('.tt').innerHTML = TEAM_ORDER.map(t => `<i class="${teams.has(t) ? 'on' : ''}" style="--c:${TC[t]}" title="${esc(TEAMS[t].name)}"></i>`).join('') + `<span>${teams.size} of 4 teams</span>`;
+    const fresh = last && P.fresh && last.stepId === P.fresh;
+    el.querySelector('.tl').className = 'tl' + (fresh ? ' fresh' : '');
+    el.querySelector('.tl').textContent = last ? (last.type === 'MEMORY' ? `${last.field}: ${last.value}` : last.type === 'GRAPH' ? last.label : `${last.label}: ${last.value}`) : LAYERS[l].q;
+    el.classList.toggle('read', readL.has(l)); el.classList.toggle('write', writeL.has(l));
+    el.classList.toggle('off', !!P.lab && P.lab.off.has(l));
+  }
+  const allTeams = new Set(s.logs.filter(e => e.type === 'READ' && e.reused).flatMap(e => [AGENTS[e.agentId].team, AGENTS[e.origin] ? AGENTS[e.origin].team : null]).filter(t => TEAMS[t]));
+  byId('ftot').innerHTML = `<span><b>${Object.keys(s.store).length}</b>records</span><span><b>${s.reuse}</b>reused</span><span><b>${allTeams.size}</b>teams connected</span>`;
+  byId('found').classList.toggle('busy', readL.size > 0 || writeL.size > 0);
+  const hotSys = {};
+  if (active && ['calls', 'write'].includes(s.phase)) (s.phase === 'calls' ? callsBefore(active) : callsAfter(active)).forEach(([k, via]) => hotSys[k] = hotSys[k] ? hotSys[k] + (hotSys[k].includes(via) ? '' : '+' + via) : via);
+  for (const k of SYS_ORDER) { const el = byId('sys-' + k); el.classList.toggle('hot', !!hotSys[k]); const v = el.querySelector('.via'); v.textContent = hotSys[k] || ''; v.className = 'via ' + (hotSys[k] || '').split('+')[0]; }
+}
+
+function tileViz(l, s) {
+  const recs = Object.values(s.store).filter(r => r.layer === l), fr = r => P.fresh && r.stepId === P.fresh;
+  const col = r => r.producedInRun && AGENTS[r.by] ? TC[AGENTS[r.by].team] : '#46698c';
+  if (l === 'memory') {
+    return `<span class="vz-grid">${s.profile.map(f => `<i class="${f.by ? 'lr' : ''} ${P.fresh && f.step === P.fresh ? 'nw' : ''}" title="${esc(f.field)}"></i>`).join('')}</span><span class="vz-cap">Alex: ${s.profile.length} facts · ${s.profile.filter(f => f.by).length} learned today</span>`;
+  }
+  if (l === 'graph') {
+    const P2 = id => GPOS[id] || [320, 250];
+    return `<svg class="vz-graph" viewBox="-20 0 700 510" preserveAspectRatio="xMidYMid meet">${s.graph.edges.map(e => { const [a, b] = P2(e.from), [c, d] = P2(e.to); return `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="${P.fresh && e.step === P.fresh ? '#ffd27a' : '#4a7298'}" stroke-width="${P.fresh && e.step === P.fresh ? 9 : 5}"/>`; }).join('')}${s.graph.nodes.map(n => { const [x, y] = P2(n.id); return `<circle cx="${x}" cy="${y}" r="${n.id === 'alex' ? 30 : 20}" fill="${P.fresh && n.step === P.fresh ? '#ffd27a' : GCOL[n.type] || '#9fb6cc'}"/>`; }).join('')}</svg><span class="vz-cap">${s.graph.nodes.length} entities · ${s.graph.edges.length} relationships</span>`;
+  }
+  if (l === 'events') {
+    const ev = s.logs.filter(e => e.layer === 'events' && e.type === 'WRITE').slice(-9);
+    return `<span class="vz-line">${ev.map(e => `<i style="--c:${TC[AGENTS[e.agentId].team]}" class="${P.fresh && e.stepId === P.fresh ? 'nw' : ''}" title="${esc(e.label)}"></i>`).join('') || '<em>waiting for the first event</em>'}</span><span class="vz-cap">${ev.length ? esc(ev[ev.length - 1].label) : 'No events yet'}</span>`;
+  }
+  const shape = { knowledge: 'doc', policy: 'chk', models: 'bar', feedback: 'dot' }[l];
+  const seed = recs.filter(r => !r.producedInRun).length, made = recs.length - seed;
+  return `<span class="vz-row ${shape}">${recs.map((r, k) => `<i style="--c:${col(r)};--h:${40 + ((k * 37) % 60)}" class="${fr(r) ? 'nw' : ''}" title="${esc(r.label)}"></i>`).join('') || '<em>empty</em>'}</span><span class="vz-cap">${seed} from systems · ${made} from agents</span>`;
+}
+
+/* ---------- Wires & particles ---------- */
+function rectIn(el) {
+  const d = byId('diagram').getBoundingClientRect(), r = el.getBoundingClientRect(), dg = byId('diagram');
+  return { x: r.left - d.left + dg.scrollLeft, y: r.top - d.top + dg.scrollTop, w: r.width, h: r.height };
+}
+const actorEl = id => id === 'orch' ? byId('orch') : byId('ag-' + id);
+function curve(a, b) { const my = (a.y + b.y) / 2; return `M${a.x.toFixed(1)} ${a.y.toFixed(1)}C${a.x.toFixed(1)} ${my.toFixed(1)} ${b.x.toFixed(1)} ${my.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`; }
+/* Orthogonal routing: wires travel through the gaps between panels, never across cards. */
+function ortho(pts, r = 10) {
+  const p = pts.filter((q, k) => !k || Math.abs(q[0] - pts[k - 1][0]) > .5 || Math.abs(q[1] - pts[k - 1][1]) > .5);
+  let d = `M${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)}`;
+  for (let k = 1; k < p.length - 1; k++) {
+    const [x0, y0] = p[k - 1], [x1, y1] = p[k], [x2, y2] = p[k + 1];
+    const d1 = Math.hypot(x1 - x0, y1 - y0), d2 = Math.hypot(x2 - x1, y2 - y1), rr = Math.min(r, d1 / 2, d2 / 2);
+    d += ` L${(x1 - (x1 - x0) / d1 * rr).toFixed(1)} ${(y1 - (y1 - y0) / d1 * rr).toFixed(1)} Q${x1.toFixed(1)} ${y1.toFixed(1)} ${(x1 + (x2 - x1) / d2 * rr).toFixed(1)} ${(y1 + (y2 - y1) / d2 * rr).toFixed(1)}`;
+  }
+  const L = p[p.length - 1]; return d + ` L${L[0].toFixed(1)} ${L[1].toFixed(1)}`;
+}
+function geo() {
+  const g = { lanes: rectIn(byId('lanes')), found: rectIn(byId('found')), integ: rectIn(byId('integ')), orch: rectIn(byId('orch')), journey: rectIn(byId('journey')) };
+  g.busA = (g.lanes.y + g.lanes.h + g.found.y) / 2;          /* channel between specialists and foundation */
+  g.busB = (g.found.y + g.found.h + g.integ.y) / 2;          /* channel between foundation and systems */
+  g.gapOL = (g.orch.y + g.orch.h + g.lanes.y) / 2;           /* channel between orchestration and specialists */
+  g.gapJO = (g.journey.y + g.journey.h + g.orch.y) / 2;
+  g.xR = g.lanes.x + g.lanes.w + 8; g.xL = g.lanes.x - 8;    /* outer side channels */
+  return g;
+}
+/* the route from an actor down to the foundation channel */
+function trunk(id, g, lane) {
+  if (id === 'orch') { const o = g.orch; return [[o.x + o.w - 36, o.y + o.h], [o.x + o.w - 36, g.gapOL], [g.xR, g.gapOL], [g.xR, g.busA]]; }
+  if (id === 'priya') { const e = rectIn(byId('ag-priya')); return [[e.x + 22, e.y + e.h], [e.x + 22, g.gapJO], [g.xL, g.gapJO], [g.xL, g.busA]]; }
+  const c = rectIn(byId('ag-' + id)), ln = rectIn(byId('ag-' + id).closest('.lane')), gx = ln.x + ln.w + 6;
+  return [[c.x + c.w, c.y + c.h / 2], [gx, c.y + c.h / 2], [gx, g.busA]];
+}
+function wiresFor(s) {
+  const st = s.steps[s.i]; if (!st || P.lab || ['ready', 'done', 'blocked'].includes(s.phase)) return [];
+  const g = geo(), out = [];
+  const tileIn = (l, k, n) => { const t = rectIn(byId('tile-' + l)); const off = (k - (n - 1) / 2) * 5; return [[t.x + t.w / 2, g.busA + off], [t.x + t.w / 2, t.y]]; };
+  const toTile = (l, k, n) => { const tr = trunk(st.actor, g); const last = tr[tr.length - 1]; const off = (k - (n - 1) / 2) * 5; return [...tr.slice(0, -1), [last[0], g.busA + off], ...tileIn(l, k, n)]; };
+  if (s.phase === 'dispatch') {
+    if (st.actor === 'priya') { const e = rectIn(byId('ag-priya')); out.push({ cls: 'dispatch', pts: [[e.x + e.w / 2, e.y + e.h], [e.x + e.w / 2, g.orch.y]], color: '#ffd27a' }); }
+    else if (st.actor !== 'orch') {
+      const c = rectIn(byId('ag-' + st.actor)), ln = rectIn(byId('ag-' + st.actor).closest('.lane')), gx = ln.x + ln.w + 6;
+      out.push({ cls: 'dispatch', pts: [[gx, g.orch.y + g.orch.h], [gx, c.y + c.h / 2], [c.x + c.w, c.y + c.h / 2]], color: '#c9b8ff' });
+    }
+  }
+  if (s.phase === 'calls' || s.phase === 'write') {
+    const cl = s.phase === 'calls' ? callsBefore(st) : callsAfter(st);
+    cl.forEach(([k, via], n) => {
+      const sy = rectIn(byId('sys-' + k)), tr = trunk(st.actor, g), off = n * 4;
+      out.push({ cls: 'call', color: via === 'MCP' ? '#82b6ff' : '#7fd4ab', back: true, label: via,
+        pts: [...tr.slice(0, -1), [tr[tr.length - 1][0], g.busA - 4 + off], [g.xR + 0, g.busA - 4 + off], [g.xR, g.busB + off - 3], [sy.x + sy.w / 2, g.busB + off - 3], [sy.x + sy.w / 2, sy.y]] });
+    });
+  }
+  if (['read', 'think'].includes(s.phase)) {
+    const ls = [...new Set(st.reads.map(k => s.store[k] && s.store[k].layer).filter(Boolean))];
+    ls.forEach((l, k) => out.push({ cls: 'read', pts: toTile(l, k, ls.length).reverse(), color: '#7fd4ab', flow: s.phase === 'read' }));
+  }
+  if (['write', 'settle'].includes(s.phase)) {
+    const set = new Set(st.writes.map(w => w.layer)); if (st.mem) set.add('memory'); if (st.graph && (st.graph.nodes.length || st.graph.edges.length)) set.add('graph');
+    const ls = [...set]; ls.forEach((l, k) => out.push({ cls: 'write', pts: toTile(l, k, ls.length), color: '#ffd27a', flow: s.phase === 'write' }));
+  }
+  return out;
+}
+function renderWires() {
+  const s = S(), svg = byId('wires'), dg = byId('diagram');
+  svg.setAttribute('viewBox', `0 0 ${dg.scrollWidth} ${dg.scrollHeight}`); svg.style.width = dg.scrollWidth + 'px'; svg.style.height = dg.scrollHeight + 'px';
+  const g = geo(), ws = wiresFor(s);
+  /* the two always-on channels: specialists ↔ foundation, foundation ↔ systems */
+  let h = `<path class="bus" d="M${g.xL} ${g.busA} H${g.xR}"/><path class="bus b2" d="M${g.xL} ${g.busB} H${g.xR}"/>`;
+  ws.forEach((w, k) => { const d = ortho(w.pts); h += `<path class="wbase" d="${d}" stroke="${w.color}"/><path class="wflow ${w.back ? 'back' : ''}" id="w${k}" d="${d}" stroke="${w.color}"/>`; });
+  ws.forEach((w, k) => { if (w.flow !== false && !reduceMotion) h += `<circle class="pt" r="5.5" fill="${w.color}" style="color:${w.color}" data-w="${k}" ${w.back ? 'data-back="1"' : ''}/>`; });
+  ws.forEach((w, k) => { const L = w.pts[w.pts.length - 1]; h += `<circle class="wend" cx="${L[0]}" cy="${L[1]}" r="3.5" fill="${w.color}"/>`; });
+  svg.innerHTML = h;
+  P.particles = [...svg.querySelectorAll('circle.pt')].map(c => ({ c, p: byId('w' + c.dataset.w), back: !!c.dataset.back }));
+  P.particles.forEach(x => x.len = x.p.getTotalLength());
+}
+function updateParticles() {
+  const s = S(), d = phaseDur(s.phase); if (!isFinite(d)) return;
+  const f = Math.min(1, s.t / d);
+  for (const x of P.particles) {
+    const e = x.back ? (f < .5 ? f * 2 : 2 - f * 2) : Math.min(1, f * 1.15);
+    const ease = e < .5 ? 2 * e * e : 1 - Math.pow(-2 * e + 2, 2) / 2;
+    const pt = x.p.getPointAtLength(ease * x.len); x.c.setAttribute('cx', pt.x); x.c.setAttribute('cy', pt.y);
+  }
+}
+
+/* ---------- Stats ---------- */
+function renderStats() {
+  const s = S(), st = stats(s);
+  const items = [['agents', `${st.agents}<small style="font-size:12px;color:var(--nm)">/13</small>`, st.agents, 'specialists'], ['handoffs', st.handoffs, st.handoffs, 'handoffs'], ['reuse', st.reuse, st.reuse, 'facts reused'],
+    ['mem', st.mem, st.mem, 'profile updates'], ['graph', st.graph, st.graph, 'graph changes'], ['calls', `${st.calls}`, st.calls, `system calls · ${st.mcp} MCP`]];
+  byId('stats').innerHTML = items.map(([k, v, raw, l]) => `<div class="stat ${k === 'reuse' ? 'gold' : ''} ${P.lastStats[k] !== undefined && P.lastStats[k] !== raw ? 'bump' : ''}"><b>${v}</b><span>${l}</span></div>`).join('');
+  items.forEach(([k, , raw]) => P.lastStats[k] = raw);
+}
+
+/* ---------- Now pane ---------- */
+function typed(s, st) {
+  const full = st.says;
+  if (!P.playing || !['read', 'think', 'calls'].includes(s.phase) || reduceMotion) return esc(full);
+  const dc = phaseDur('calls'), dr = phaseDur('read'), tot = dc + dr + phaseDur('think') * .85;
+  const el = (s.phase === 'calls' ? 0 : s.phase === 'read' ? dc : dc + dr) + s.t;
+  const n = Math.max(1, Math.floor(full.length * Math.min(1, el / tot)));
+  return esc(full.slice(0, n)) + (n < full.length ? '<span class="caret"></span>' : '');
+}
+function renderNow() {
+  const s = S(), pane = byId('pane-now');
+  if (P.lab) { pane.innerHTML = labPanel(s); return; }
+  if (s.phase === 'ready') {
+    pane.innerHTML = `<div class="nw-meta"><span>How it starts · Tue Sep 22, 8:04 a.m.</span><span>${s.steps.length} steps</span></div>
+      <div class="entrycard"><div class="nw-actor">${av('priya')}<div><b>Priya Shah</b><small>Capital Group wholesaler · just off a call with Alex</small></div></div>
+      <p class="quote" style="margin:6px 0 4px">“Alex just asked me for three things on our call. Take care of it.”</p><p class="hint" style="margin:0">One sentence into her workbench. No forms, no tickets, no deciding which agent to ask.</p></div>
+      <p style="font-size:14px;margin:12px 0">The foundation already knows who Alex is: 17 facts in his profile from Salesforce and past conversations, his relationships in the graph, and approved fund facts in knowledge. The call itself is recorded in Salesforce.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="lbtn primary" data-act="play">${icon('play')} Start the journey</button><button class="lbtn" data-tab="advisor">See Alex’s profile first</button></div>
+      <div class="h">What the foundation holds before anyone starts</div>${LAYER_ORDER.map(l => { const n = Object.values(s.store).filter(r => r.layer === l).length; return `<button class="rcard" data-layer="${l}"><b>${esc(LAYERS[l].name)}</b> · ${n} ${n === 1 ? 'record' : 'records'}${l === 'memory' ? `, ${s.profile.length} profile facts` : l === 'graph' ? `, ${s.graph.nodes.length} entities` : ''}<small>${esc(LAYERS[l].q)}</small></button>`; }).join('')}`;
+    return;
+  }
+  if (s.phase === 'done') { pane.innerHTML = donePanel(s); return; }
+  const st = s.steps[s.i], a = AGENTS[st.actor], committed = s.completed.has(st.id);
+  const callsHtml = st.calls.length ? st.calls.map(([k, via, op, dir]) => `<div class="call ${(st.gate && dir === 'write' ? committed : s.callsDone) ? '' : 'pending'}"><span class="vbadge ${via}">${via}</span><span class="sysn">${esc(SYSTEMS[k].name)}</span><code>${esc(op)}</code></div>`).join('') : `<p class="hint">None. Everything it needs is already in the foundation.</p>`;
+  const reads = st.reads.map(k => { const r = s.store[k]; if (!r) return `<span class="chip" style="border-color:var(--alert)">${esc(labelFor(k))} <small>missing</small></span>`; const reused = r.producedInRun && r.by !== st.actor; return `<button class="chip ${s.readDone ? (reused ? 'reused' : '') : 'pending'}" data-rec="${esc(k)}@${r.version}" title="${esc(r.value)}">${icon(LAYERS[r.layer].icon)}${esc(r.label)} <small>${esc(LAYERS[r.layer].short)} · ${esc(originText(r))}</small></button>`; }).join('');
+  const writes = st.writes.map(w => `<button class="chip ${committed ? 'pub' : 'pending'}" ${committed ? `data-rec="${esc(w.key)}@${s.store[w.key].version}"` : ''} title="${esc(w.value)}">${icon(LAYERS[w.layer].icon)}${esc(w.label)} <small>${esc(LAYERS[w.layer].short)}</small></button>`).join('');
+  const mem = st.mem ? st.mem.map(([sec, field, value]) => { const f = s.profile.find(p => p.section === sec && p.field === field); const was = committed && f && f.history.length && f.step === st.id ? f.history[f.history.length - 1].value : null; const isNew = committed && f && !f.history.length; return `<div class="diff" style="${committed ? '' : 'opacity:.5'}"><b>${esc(sec)} · ${esc(field)}${isNew ? '<span class="newtag">new</span>' : ''}</b>${was ? `<span class="was">${esc(was)}</span>` : ''}<span class="now">${esc(value)}</span></div>`; }).join('') : '';
+  const gr = st.graph && (st.graph.nodes.length || st.graph.edges.length) ? `<div class="gdiff" style="${committed ? '' : 'opacity:.5'}">${st.graph.nodes.map(([, l]) => `<span><i>+</i>${esc(l)}</span>`).join('')}${st.graph.edges.map(([x, y, l]) => `<span><i>+</i>${esc(gLabel(s, st, x))} <em style="font-style:normal;color:var(--mute)">${esc(l)}</em> ${esc(gLabel(s, st, y))}</span>`).join('')}</div>` : '';
+  let extra = '';
+  if (s.phase === 'approval') extra = `<div class="gate"><b>Waiting for Priya’s approval</b><p class="hint" style="margin:4px 0 8px">Distribution won’t send until a person approves this exact email.</p><button class="lbtn primary" data-act="gate">Review the email</button></div>`;
+  if (s.phase === 'blocked') extra = `<div class="blocked">${esc(s.blockedMsg)}${s.drafted ? `<br><button class="lbtn" data-act="reopen" style="margin-top:8px">Reopen the review</button>` : ''}</div>`;
+  const next = committed ? [...new Set(st.writes.flatMap(w => futureReaders(s, w.key)))] : [];
+  pane.innerHTML = `<div class="nw-meta"><span>${esc(st.when)}</span><span>Step ${s.i + 1} of ${s.steps.length}</span></div>
+    <div class="nw-actor">${av(st.actor)}<div><b>${esc(a.name)}</b><small>${esc(teamName(st.actor))}${a.skill && a.team !== 'user' ? ' · ' + esc(a.skill) : ''}</small></div></div>
+    <p class="nw-title">${esc(st.title)}</p>
+    <p class="quote" id="nwQuote">“${typed(s, st)}”</p>
+    ${st.note ? `<span class="note">${esc(st.note)}</span>` : ''}${extra}
+    <div class="h">${icon('arrow')} Calls enterprise systems</div><div class="calls">${callsHtml}</div>
+    <div class="h">${icon('memory')} Takes from the shared foundation</div><div class="chips">${reads}</div>
+    <div class="h">${icon('bolt')} Adds to the shared foundation</div><div class="chips">${writes}</div>
+    ${mem ? `<div class="h">${icon('memory')} Updates Alex’s profile in memory</div>${mem}` : ''}
+    ${gr ? `<div class="h">${icon('network')} Updates the graph</div>${gr}` : ''}
+    ${committed && next.length ? `<p class="hint" style="margin-top:10px">Next to reuse this: <b>${next.map(x => esc(AGENTS[x].name)).join(', ')}</b></p>` : ''}
+    ${st.artifact && committed ? `<div class="h">${icon('file')} Output</div><div class="preview">${artifactHTML(st.artifact, s)}</div><button class="lbtn" style="margin-top:6px" data-art="${st.artifact}">Open full size</button>` : ''}`;
+}
+function gLabel(s, st, id) { const n = s.graph.nodes.find(x => x.id === id); if (n) return n.label; const m = st.graph.nodes.find(x => x[0] === id); return m ? m[1] : id; }
+function updateQuote() { const s = S(), q = byId('nwQuote'), st = s.steps[s.i]; if (q && st) q.innerHTML = `“${typed(s, st)}”`; }
+function donePanel(s) {
+  const st = stats(s);
+  return `<div class="nw-meta"><span>Journey complete</span><span>${s.steps.length} of ${s.steps.length}</span></div>
+    <h2 style="font:500 26px/1.15 var(--serif);margin:8px 0 6px">Four teams. One shared foundation. Alex never had to repeat himself.</h2>
+    <p class="hint">Every specialist read from and wrote to the same foundation. Here’s what that added up to.</p>
+    <dl class="kv" style="margin:10px 0"><dt>${st.reuse}</dt><dd>times a specialist reused another specialist’s work</dd><dt>${st.mem}</dt><dd>updates to Alex’s profile, each with its source</dd><dt>${st.graph}</dt><dd>new entities and relationships in the graph</dd><dt>${st.calls}</dt><dd>system calls (${st.mcp} through MCP, ${st.calls - st.mcp} through APIs)</dd><dt>1</dt><dd>human approval, bound to the exact email</dd></dl>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="lbtn primary" data-act="lab">What if it weren’t shared?</button><button class="lbtn" data-tab="advisor">Alex’s profile now</button><button class="lbtn" data-tab="foundation">What changed where</button><button class="lbtn" data-act="restart">Watch again</button></div>
+    <div class="h">${icon('file')} What the foundation kept</div><div class="preview">${artifactHTML('summary', s)}</div>`;
+}
+
+/* ---------- Advisor 360 ---------- */
+function renderAdvisor() {
+  const s = S(), pane = byId('pane-advisor');
+  const sec = PROFILE_SECTIONS.map(name => {
+    const fs = s.profile.filter(f => f.section === name);
+    const personal = /Personal/.test(name);
+    return `<div class="psec"><h4><span>${esc(name.replace(' (relationship team only)', ''))}</span>${personal ? `<span>${icon('lock')} relationship team only</span>` : `<span>${fs.length}</span>`}</h4>${fs.map(f => {
+      const upd = !!f.by, fresh = P.fresh && f.step === P.fresh;
+      const was = f.history.length ? f.history[f.history.length - 1].value : null;
+      return `<div class="pf ${upd ? 'upd' : ''} ${fresh ? 'fresh' : ''}"><dt>${esc(f.field)}</dt><dd>${was && upd ? `<span class="was">${esc(was)}</span>` : ''}${esc(f.value)}<span class="src">${upd ? `Updated by ${esc(AGENTS[f.by].name)} · ${esc(STEPS.find(x => x.id === f.step).when)}` : esc(f.src)}</span></dd></div>`;
+    }).join('')}</div>`;
+  }).join('');
+  const updates = s.profile.filter(f => f.by).length;
+  pane.innerHTML = `<div class="a360-head"><span class="big">AR</span><div><b>Alex Rivera, CFP®</b><small>Senior Vice President, Wealth Advisor · Morgan Stanley Wealth Management</small><div class="a360-meta"><span>The Rivera Group</span><span>Newport Beach, CA</span><span>${s.profile.length} facts</span><span>${updates} learned on this journey</span></div></div></div>
+    <p class="hint" style="margin:10px 2px 0">This is Alex as Shared Memory knows him. Every specialist reads the same profile, for its own purpose. Highlighted facts were learned during this journey, with who learned them.</p>${sec}`;
+}
+
+/* ---------- Foundation pane ---------- */
+const GPOS = { alex: [320, 230], ms: [120, 110], pol: [120, 30], team: [140, 250], jamie: [50, 340], priya: [520, 110], sam: [600, 40], m1: [450, 270], q1: [560, 350], q2: [400, 355], gfa: [300, 450], vwuax: [470, 470], vigax: [600, 455], f1: [600, 270], op: [590, 180], em: [410, 45], m2: [210, 365], optA: [170, 470], model: [55, 450] };
+const GCOL = { person: '#dce8f4', firm: '#9fb6cc', team: '#9fb6cc', cg: '#ffd27a', fund: '#7fd4ab', meeting: '#82b6ff', question: '#f0b870', doc: '#b9a5f5', opp: '#ffd27a', policy: '#ff7b67' };
+function graphSVG(s) {
+  const P2 = id => GPOS[id] || [320, 250];
+  const edges = s.graph.edges.map(e => { const [x1, y1] = P2(e.from), [x2, y2] = P2(e.to), n = P.fresh && e.step === P.fresh; return `<line class="ge ${n ? 'new' : ''}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/><text class="gel ${n ? 'new' : ''}" x="${(x1 + x2) / 2}" y="${(y1 + y2) / 2 - 3}" text-anchor="middle">${esc(e.label)}</text>`; }).join('');
+  const nodes = s.graph.nodes.map(nd => { const [x, y] = P2(nd.id), n = P.fresh && nd.step === P.fresh; return `<g class="gn ${n ? 'new' : ''}"><circle cx="${x}" cy="${y}" r="${nd.id === 'alex' ? 14 : 9}" fill="${GCOL[nd.type] || '#9fb6cc'}"/><text x="${x}" y="${y + (y > 440 ? -15 : 24)}" text-anchor="middle">${esc(nd.label)}</text></g>`; }).join('');
+  return `<div class="graphbox"><svg viewBox="-10 0 680 500">${edges}${nodes}</svg></div>`;
+}
+function renderFoundation() {
+  const s = S(), pane = byId('pane-foundation'), st = s.steps[s.i], keep = pane.scrollTop;
+  const hot = new Set();
+  if (st && !P.lab && ['read', 'think', 'write', 'settle'].includes(s.phase)) { st.reads.forEach(k => s.store[k] && hot.add(s.store[k].layer)); st.writes.forEach(w => hot.add(w.layer)); }
+  pane.innerHTML = `<p class="hint" style="margin:0 2px 4px">What changed in each component during this journey, newest first. Click a component for how it’s built.</p>` + LAYER_ORDER.map(l => {
+    const chg = s.logs.filter(e => (e.layer === l && ['WRITE', 'MEMORY', 'GRAPH'].includes(e.type)) && !(e.type === 'WRITE' && (e.key === 'memory.profile' || e.key === 'graph.rel'))).reverse();
+    const reused = s.logs.filter(e => e.type === 'READ' && e.reused && e.layer === l).length, recs = Object.values(s.store).filter(r => r.layer === l).length;
+    const rows = chg.slice(0, l === 'memory' ? 12 : 8).map(e => {
+      const op = e.type === 'GRAPH' ? 'rel' : e.type === 'MEMORY' ? (e.prior ? 'upd' : 'add') : (e.version > 1 ? 'upd' : 'add');
+      const txt = e.type === 'MEMORY' ? `<b>${esc(e.field)}</b>: ${esc(e.value)}` : e.type === 'GRAPH' ? `${esc(e.label)}<br><span class="by">${esc(e.value)}</span>` : `<b>${esc(e.label)}</b>: ${esc(e.value)}`;
+      return `<div class="chg ${P.fresh && e.stepId === P.fresh ? 'fresh' : ''}"><span class="op ${op}">${op === 'add' ? 'NEW' : op === 'upd' ? 'UPDATED' : 'LINKED'}</span><span>${txt}<br><span class="by">${esc(AGENTS[e.agentId].name)} · step ${e.step}</span></span></div>`;
+    }).join('');
+    return `<section class="fcomp ${hot.has(l) ? 'hot' : ''}"><button class="fch" data-layer="${l}"><span class="fi">${icon(LAYERS[l].icon)}</span><span><b>${esc(LAYERS[l].name)}</b><small>${esc(LAYERS[l].q)}</small></span><span class="cnt"><b>${chg.length}</b> changes<br>${recs} records · ${reused} reused</span></button>
+      ${l === 'graph' ? graphSVG(s) : ''}${rows || '<p class="hint" style="margin:6px 0 0">No changes yet.</p>'}${l === 'memory' ? `<button class="lbtn" data-tab="advisor" style="margin-top:6px">Open Alex’s full profile</button>` : ''}</section>`;
+  }).join('');
+  pane.scrollTop = keep;
+}
+
+/* ---------- Outputs ---------- */
+const ART_NAMES = { request: 'Priya’s request in the workbench', notes: 'Meeting recap · Sep 22', plan: 'Orchestration plan', fees: 'Fee & cost comparison', finding: 'Verified answer: why GFA trailed', picker: 'Seismic template selection', onepager: 'One-pager OP-0922', review: 'Compliance review', brief: 'Wholesaler brief for Priya', invite: 'Calendar invite · Sep 29', email: 'Email to Alex', reply: 'Service: link blocked, PDF resent', crm: 'Salesforce: opportunity & tasks', summary: 'What the foundation kept' };
+function renderArtifacts() {
+  const s = S(), done = s.steps.filter(st => st.artifact && s.completed.has(st.id)).reverse();
+  byId('pane-artifacts').innerHTML = `<p class="hint" style="margin:0 2px 8px">Everything the specialists produced, in the tools people actually use.</p><div class="agrid">${done.length ? done.map(st => `<button class="acard2 ${P.fresh === st.id ? 'fresh' : ''}" data-art="${st.artifact}">${av(st.actor)}<span><b>${esc(ART_NAMES[st.artifact])}</b><small>${esc(AGENTS[st.actor].name)} · ${esc(st.when)}</small></span></button>`).join('') : '<p class="hint">Nothing yet. Outputs appear here as specialists finish.</p>'}</div>`;
+}
+function artifactHTML(t, s) {
+  const has = k => !!s.store[k] && s.store[k].producedInRun;
+  const F = { request: () => `<div class="art"><div class="sp-top" style="background:#16304a">${icon('mic')} Connected workbench · Priya Shah · 8:04 a.m.</div><div class="doc2"><p style="font:400 16px/1.45 var(--serif);margin:0 0 8px">“Alex just asked me for three things on our call. Take care of it: pull what he asked from the call in Salesforce, get the numbers right, and have it ready well before his committee.”</p><h6>Understood</h6><ul><li>Advisor: Alex Rivera · Morgan Stanley · The Rivera Group (resolved in the graph)</li><li>Source: the Sep 22 call transcript in Salesforce</li><li>Deadline: before the Oct 1 investment committee</li><li>Priya approves anything that goes to Alex</li></ul></div></div>`,
+    notes: () => `<div class="art"><div class="sf-h">${icon('users')} Salesforce · Call recap from the recorded transcript · Rivera · Sep 22 · 30 min</div><div class="doc2"><h5>Alex Rivera ↔ Priya Shah</h5><h6>What Alex asked for</h6><ol><li>A fee comparison of The Growth Fund of America against the Vanguard growth funds.</li><li>Ideas for building the growth sleeve of his new discretionary model.</li><li>An explanation of why GFA has trailed the Vanguard growth funds.</li></ol><h6>Context</h6><ul><li>Decision: keep GFA in the new model, or replace it. Team committee Thursday, Oct 1.</li><li>Wants it on one page, data first.</li><li>Asked to see fees in dollars on his ~$38M, not just percentages.</li></ul><h6>Follow-ups</h6><ul><li>Priya to send the comparison before the committee.</li><li>Book a short follow-up through Jamie.</li></ul></div></div>`,
+    plan: () => `<div class="art"><div class="doc2"><h5>Plan · Alex Rivera, The Rivera Group</h5><p class="sig">Resolved: Alex Rivera → Morgan Stanley → The Rivera Group → growth-model opportunity. Deadline Oct 1.</p><ul class="planlist">${TASKS.map(([n, t, ids], k) => `<li><span style="width:10px;height:10px;border-radius:50%;background:${TC[t]}"></span><span>${esc(n)} <span class="dep">· ${esc(TEAMS[t].name)}${k === 0 ? '' : k < 3 ? ' · after “Clarify”' : k < 5 ? ' · after “Verified answer”' : k === 6 ? ' · after review · human approval' : k === 7 ? ' · on a delivery event' : ''}</span></span><span class="dep">${ids.join(', ')}</span></li>`).join('')}</ul></div></div>`,
+    fees: () => `<div class="art"><div class="op1"><h6 style="margin-top:0">Cost comparison · on ~$38M</h6><table><tr><th>Fund</th><th>Approach</th><th class="n">Expense ratio</th><th class="n">Per year</th></tr><tr><td>GFA F-2 (GFFFX)</td><td>Active, 12 managers</td><td class="n">0.40%</td><td class="n">$152,000</td></tr><tr><td>Vanguard U.S. Growth Adm (VWUAX)</td><td>Active, 3 sub-advisers</td><td class="n">0.25%</td><td class="n">$95,000</td></tr><tr><td>Vanguard Growth Index Adm (VIGAX)</td><td>Index</td><td class="n">0.05%</td><td class="n">$19,000</td></tr><tr><td colspan="2">Large-cap no-load median</td><td class="n">0.75%</td><td class="n">—</td></tr></table><h6>Growth-sleeve options (portfolio construction model)</h6><table><tr><th>Option</th><th>Mix</th><th class="n">Blended cost</th></tr><tr><td>A</td><td>70% VIGAX + 30% GFA</td><td class="n">0.155%</td></tr><tr><td>B</td><td>50% VIGAX + 50% GFA</td><td class="n">0.225%</td></tr><tr><td>C</td><td>100% GFA</td><td class="n">0.40%</td></tr></table><p class="sig">Expense ratios from the fund data platform and licensed peer data. GFA as of 8/31/26 (prospectus 11/1/25); category median as of 6/30/26.</p></div></div>`,
+    finding: () => `<div class="art"><div class="doc2"><h5>Why GFA has trailed the Vanguard large-growth funds</h5><p>They are built for different jobs, so they win in different markets.</p><ol><li><b>Mandate and benchmark.</b> GFA is measured against the S&P 500 and invests flexibly: traditional growth, cyclicals, turnarounds, and up to 25% outside the U.S. (10.8% today). The Vanguard funds are pure U.S. large growth.</li><li><b>Concentration.</b> GFA spreads across 282 companies and 12 managers. The growth index holds about a third of its assets in its top three stocks. When a handful of mega-caps lead, the concentrated index pulls ahead. NVIDIA is 5.8% of GFA versus 8.1% of the S&P 500.</li><li><b>Cost.</b> GFA F-2 costs 0.35 percentage points a year more than the index fund.</li></ol><h6>Sources</h6><ul class="sig"><li>GFA F-2 fund facts · fund data platform · 8/31/26</li><li>Vanguard fund data · licensed feed</li><li>GFA quarterly attribution report · Seismic · 9/26</li><li>The Capital System explainer · Seismic</li></ul><p class="sig">Standardized returns are inserted from the fund data platform at approval. No figure here was generated by a model.</p></div></div>`,
+    picker: () => `<div class="art"><div class="sp-top">${icon('search')} Seismic · “fund comparison” · audience: financial professional</div><div class="sp-grid"><div class="sp-card pick"><div class="th"></div><b>Fund comparison one-pager</b><div class="why">1 page · standardized returns slot · approved for financial professionals</div><span class="tag ok">Selected: matches Alex’s “one page, data first”</span></div><div class="sp-card"><div class="th"></div><b>GFA product presentation</b><div class="why">12 pages · narrative</div><span class="tag no">Too long for Alex</span></div><div class="sp-card"><div class="th"></div><b>GFA fact sheet (retail)</b><div class="why">Investor audience</div><span class="tag no">Wrong audience</span></div></div></div>`,
+    onepager: () => { const ok = has('policy.review'); return `<div class="art"><div class="op1">${ok ? '<span class="stamp">APPROVED · OP-0922 v1</span>' : ''}<div class="brandrow"><span>Capital Group | American Funds</span><span>For financial professional use only</span></div><h5>Growth sleeve options: GFA vs. Vanguard large growth</h5><div class="for">Prepared for Alex Rivera, The Rivera Group · by Priya Shah · for the Oct 1 investment committee</div><h6>What it costs on ~$38M</h6><table><tr><th></th><th class="n">GFA F-2</th><th class="n">VWUAX</th><th class="n">VIGAX</th></tr><tr><td>Expense ratio</td><td class="n">0.40%</td><td class="n">0.25%</td><td class="n">0.05%</td></tr><tr><td>Per year</td><td class="n">$152,000</td><td class="n">$95,000</td><td class="n">$19,000</td></tr><tr><td>Approach</td><td class="n">Active, flexible</td><td class="n">Active</td><td class="n">Index</td></tr></table><h6>Why results have differed</h6><ol><li>Different benchmark and mandate: S&P 500, flexible growth, some non-U.S.</li><li>Less concentration: 282 companies vs. an index with ~1/3 in three stocks</li><li>Cost: 0.35 points a year more than the index fund</li></ol><h6>Three ways to build the sleeve</h6><table><tr><td>A · 70% index + 30% GFA</td><td class="n">0.155%</td></tr><tr><td>B · 50% index + 50% GFA</td><td class="n">0.225%</td></tr><tr><td>C · 100% GFA</td><td class="n">0.40%</td></tr></table><h6>Standardized average annual returns (1, 5, 10 years)</h6><span class="live">Inserted from the fund data platform at approval</span>${ok ? `<div class="disc">Figures shown are past results and are not predictive of results in future periods. Expense ratios are as of each fund’s prospectus. Indexes are unmanaged; investors cannot invest directly in an index. Investors should carefully consider investment objectives, risks, charges and expenses, contained in the prospectus.</div>` : ''}</div></div>`; },
+    review: () => `<div class="art"><div class="doc2"><h5>Compliance review · OP-0922 v1</h5>${['Every claim matches QAR’s verified finding', 'Every number traces to the fund data platform or licensed data', 'Expense ratios labeled as of the prospectus', 'Standardized returns inserted from the system of record', 'Four standard disclosures added', 'No personal notes in the content', 'Audience: financial professional use only'].map(x => `<div class="chk"><span class="ok">${icon('check')}</span>${esc(x)}</div>`).join('')}<p class="sig" style="margin-top:8px"><b>Approved.</b> Version locked; any edit requires a new review.</p></div></div>`,
+    brief: () => `<div class="art"><div class="doc2"><h5>Brief · Alex Rivera · for Priya</h5><h6>Open with</h6><p>His California International Marathon training (December). Keep it short, then get to numbers.</p><h6>The decision</h6><p>Keep or replace GFA in the new growth model. His committee decides Oct 1.</p><h6>Lead with</h6><ul><li>The dollar view: about $152K a year for GFA F-2 vs. $19K for the index, on $38M.</li><li>Option A: 70/30 index and GFA, 0.155% blended.</li><li>The “why,” in QAR’s verified words: mandate, concentration, cost.</li></ul><h6>Avoid</h6><ul><li>Pitching or adjectives. He tunes them out.</li><li>The 12-page deck.</li></ul><h6>Logistics</h6><p>Book through Jamie Cho. Teams, 7:30 a.m. PT.</p></div></div>`,
+    invite: () => `<div class="art"><div class="ol-bar"><span>Outlook · Calendar</span><span>Sent to Jamie Cho</span></div><div class="cal"><div class="d">SEP<small>Tue</small>29</div><div><b>Growth sleeve follow-up · Alex Rivera / Priya Shah</b><div class="sig">7:30 – 8:00 a.m. PT · Microsoft Teams meeting</div><div class="sig">Attendees: Alex Rivera, Jamie Cho, Priya Shah</div><p style="margin:6px 0 0">1. Walk through the one-pager · 2. Construction options · 3. Questions for your committee</p></div></div></div>`,
+    email: () => `<div class="art"><div class="ol-bar"><span>Outlook</span><span>${has('events.sent') ? 'Sent' : 'Draft, waiting for approval'}</span></div><div class="ol-h"><h5>GFA vs. Vanguard growth: one page for your Oct 1 committee</h5><div><b>From</b> Priya Shah (Capital Group) · <b>To</b> Alex Rivera · <b>Cc</b> Jamie Cho</div></div><div class="ol-b"><p>Hi Alex,</p><p>As promised, here’s the one-page comparison for your committee:</p><ul><li>Cost on your ~$38M: GFA F-2 about $152K a year, Vanguard U.S. Growth about $95K, Vanguard Growth Index about $19K.</li><li>Why results have differed: benchmark and mandate, concentration in a few mega-caps, and cost. The page walks through each.</li><li>Three ways to build the growth sleeve, including a 70/30 index-and-GFA mix at 0.155% blended.</li></ul><p>Standardized returns and disclosures are on the page. Talk Tuesday at 7:30.</p><p>Priya</p><span class="att link"><i>LINK</i>OP-0922 v1 · Growth sleeve options (1 page) · Seismic LiveSend</span><p class="sig" style="margin-top:8px">For financial professional use only.</p></div></div>`,
+    reply: () => `<div class="art"><div class="sf-h">${icon('headphones')} Salesforce Service Cloud · Case 00481 · Email-to-Case · resolved in 6 min</div><div class="ol-h"><div><b>Jamie Cho</b> · 10:35 a.m.</div></div><div class="ol-b"><p>Hi Priya, Alex couldn’t open the link. Our email security blocks external content links. Could you send the PDF?</p></div><div class="ol-h"><div><b>Priya Shah (Capital Group)</b> · 10:41 a.m.</div></div><div class="ol-b"><p>Of course, Jamie. Attached is the same one-pager as a PDF. Nothing in it has changed.</p><span class="att"><i>PDF</i>OP-0922 v1 · Growth sleeve options.pdf</span><p class="sig" style="margin-top:8px">Sent from the case in Service Cloud. Future Morgan Stanley sends default to attachments.</p></div></div>`,
+    crm: () => `<div class="art"><div class="sf-h">${icon('users')} Salesforce · Opportunity</div><div class="sf-b"><div class="sf-row"><span>Opportunity</span><b>Rivera growth model</b></div><div class="sf-row"><span>Stage</span><span><s style="color:#8a96a3">Discovery</s> → <b>Proposal</b></span></div><div class="sf-row"><span>Next step</span><span>Committee decision Oct 1 · leaning Option A</span></div><div class="sf-row"><span>Activity</span><span>Meeting Sep 29 · summary attached</span></div><h6 style="margin:10px 0 4px;font-size:12px">Tasks</h6><div class="sf-task"><i></i>Check in after the committee · Priya · Oct 2</div><div class="sf-task"><i></i>Ask Product for an after-tax comparison · Sam Lee · Oct 9</div><div class="sf-task"><i></i>Send Q4 attribution in the one-page format · Priya · Jan 8</div></div></div>`,
+    summary: () => `<div class="art"><div class="doc2"><h5>What the foundation kept</h5><ul><li><b>Memory:</b> Alex’s decision stage, his preference for dollar-based fees, his follow-up cadence, and when he’s next on the calendar.</li><li><b>Knowledge:</b> the verified “why GFA trailed” finding, ready for the next advisor who asks.</li><li><b>Graph:</b> Morgan Stanley blocks external links, so every Morgan Stanley advisor now gets attachments.</li><li><b>Feedback:</b> advisors want an after-tax version of the comparison; routed to Product and Marketing.</li><li><b>Events:</b> all nine planned tasks closed; the opportunity moved to Proposal.</li></ul></div></div>` };
+  return F[t] ? F[t]() : '';
+}
+
+/* ---------- Ledger ---------- */
+function renderLedger() {
+  const s = S(), rows = s.logs.slice().reverse();
+  byId('pane-ledger').innerHTML = `<p class="hint" style="margin:0 2px 8px">Every read, write, system call, profile update, graph change and approval, in order.</p>` + (rows.length ? rows.map(e => `<div class="chg" style="grid-template-columns:34px 70px 1fr"><span class="by">${e.seq}</span><span class="op ${e.type === 'READ' ? 'rel' : e.type === 'CALL' ? 'rel' : e.type === 'APPROVAL' ? 'add' : 'upd'}">${e.type}</span><span><b>${esc(AGENTS[e.agentId].name)}</b> · ${e.type === 'CALL' ? `<span class="vbadge ${e.via}">${e.via}</span> ${esc(SYSTEMS[e.sys].name)} <code style="font:11.5px var(--code)">${esc(e.op)}</code>` : esc(e.label)}${e.reused ? ` <span class="by">· reused from ${esc(AGENTS[e.origin].name)}</span>` : ''}</span></div>`).join('') : '<p class="hint">No events yet.</p>');
+}
+
+/* ---------- Drawers ---------- */
+function openDrawer(title, body) { pause(); byId('drawerTitle').innerHTML = title; byId('drawerBody').innerHTML = body; byId('drawer').hidden = false; byId('scrim').hidden = false; byId('drawerBody').scrollTop = 0; byId('drawerClose').focus(); }
+function closeDrawer() { byId('drawer').hidden = true; byId('scrim').hidden = true; }
+function archHTML(a) {
+  return `<div class="h">How it’s built</div><div class="flow">${a.flow.map((b, k) => `${k ? '<span class="farrow">›</span>' : ''}<div class="fbox"><b>${esc(b.t)}</b><ul>${b.i.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div>
+    <div class="h">Interfaces</div>${a.ifc.map(([k, sig, note]) => `<div class="ifc"><span class="vbadge ${k}">${k}</span><code>${esc(sig)}</code><small>${esc(note)}</small></div>`).join('')}
+    <div class="h">Guardrails</div>${a.guards.map(g => `<div class="guard">${icon('check')}<span>${esc(g)}</span></div>`).join('')}
+    <div class="h">Reference technology</div><p class="hint" style="font-size:13px">${esc(a.tech)}</p>`;
+}
+function openLayer(l, tab = 'journey') {
+  const s = S(), c = LAYERS[l];
+  const recs = Object.values(s.store).filter(r => r.layer === l);
+  const users = [...new Set(s.logs.filter(e => e.layer === l && e.type === 'READ').map(e => e.agentId))];
+  const journey = `<p class="lead">${esc(c.q)}</p><p>${esc(c.biz)}</p>
+    ${l === 'memory' ? `<button class="lbtn primary" data-tab="advisor">Open Alex’s profile (${s.profile.length} facts)</button>` : ''}${l === 'graph' ? graphSVG(s) : ''}
+    <div class="h">Used by ${users.length} specialists so far</div><div class="chips">${users.map(a => `<button class="chip" data-agent="${a}"><span class="av sm" style="background:${TC[AGENTS[a].team]}">${icon(AGENTS[a].icon)}</span>${esc(AGENTS[a].name)}</button>`).join('') || '<span class="hint">Nobody yet.</span>'}</div>
+    <div class="h">What it holds now</div>${recs.map(r => `<button class="rcard" data-rec="${esc(r.key)}@${r.version}"><b>${esc(r.label)}</b>${r.version > 1 ? ` · rev ${r.version}` : ''}<br>${esc(r.value)}<small>${esc(originText(r))}</small></button>`).join('')}`;
+  const body = `<div class="dtabs"><button class="dtab" data-ltab="journey" data-l="${l}" aria-selected="${tab === 'journey'}">In this journey</button><button class="dtab" data-ltab="arch" data-l="${l}" aria-selected="${tab === 'arch'}">How it’s built</button></div>${tab === 'arch' ? `<p class="lead">${esc(c.q)}</p>` + archHTML(ARCH[l]) : journey}`;
+  openDrawer(`<span class="av" style="background:#16304a;color:var(--gold)">${icon(c.icon)}</span>${esc(c.name)}`, body);
+}
+function openAgent(id) {
+  if (id === 'orch') { openOrch(); return; }
+  const a = AGENTS[id], s = S(), mine = STEPS.filter(x => x.actor === id);
+  const calls = mine.flatMap(x => x.calls);
+  openDrawer(`${av(id)}${esc(a.name)}`, `<p class="hint">${esc(teamName(id))}${a.skill ? ' · ' + esc(a.skill) : ''}</p><p class="lead">${esc(a.role)}</p>
+    ${mine.map(st => `<div class="rcard"><b>${esc(st.title)}</b> <small style="display:inline">· ${esc(st.when)}</small><br>“${esc(st.says)}”<div style="margin-top:6px"><button class="lbtn" data-jump="${STEPS.indexOf(st)}">Go to this step</button></div></div>`).join('')}
+    <div class="h">Reads from the foundation</div><div class="chips">${[...new Set(mine.flatMap(x => x.reads))].map(k => `<span class="chip">${esc(labelFor(k))}</span>`).join('')}</div>
+    <div class="h">System calls</div>${calls.length ? `<div class="calls">${calls.map(([k, via, op]) => `<div class="call"><span class="vbadge ${via}">${via}</span><span class="sysn">${esc(SYSTEMS[k].name)}</span><code>${esc(op)}</code></div>`).join('')}</div>` : '<p class="hint">None. It works entirely from the foundation.</p>'}`);
+}
+function openOrch(tab = 'journey') {
+  openDrawer(`<span class="av" style="background:#c9b8ff">${icon('network')}</span>Intelligence & orchestration`, `<div class="dtabs"><button class="dtab" data-otab="journey" aria-selected="${tab === 'journey'}">In this journey</button><button class="dtab" data-otab="arch" aria-selected="${tab === 'arch'}">How it’s built</button></div>
+    ${tab === 'arch' ? archHTML(ARCH.orch) : `<p class="lead">${esc(AGENTS.orch.role)}</p><p>It doesn’t do the specialists’ work. It resolves who the request is about, breaks it into tasks, sends each task to the right domain with pointers into the shared foundation, and tracks everything to completion, including the one step that needs a person.</p><div class="preview">${artifactHTML('plan', S())}</div>`}`);
+}
+function openInteg() { openDrawer(`<span class="av" style="background:#dce9ff">${icon('arrow')}</span>Enterprise integration`, `<p class="lead">How agents and the foundation reach Salesforce, Microsoft 365, Seismic and the fund data platform.</p>${archHTML(ARCH.integ)}`); }
+function openSys(k) {
+  const sy = SYSTEMS[k], acc = SYS_ACCESS[k], s = S(), calls = s.logs.filter(e => e.type === 'CALL' && e.sys === k);
+  openDrawer(`<span class="av" style="background:#e6edf4">${icon(sy.icon)}</span>${esc(sy.name)}`, `<p class="hint">${esc(sy.sub)}</p><p class="lead">${esc(sy.holds)}</p>
+    <div class="h">How it’s reached</div>${acc.mcp.length ? `<div class="ifc"><span class="vbadge MCP">MCP</span><code>${acc.mcp.map(esc).join(', ')}</code><small>Agent tools, on behalf of the signed-in employee</small></div>` : ''}${acc.api.length ? `<div class="ifc"><span class="vbadge API">API</span><code>${acc.api.map(esc).join(', ')}</code><small>Typed services where exact results matter</small></div>` : ''}<div class="ifc"><span class="vbadge Sync">Sync</span><code>${esc(acc.sync)}</code><small>Keeps the foundation current before anyone asks</small></div>
+    <div class="h">Calls on this journey (${calls.length})</div>${calls.length ? `<div class="calls">${calls.map(e => `<div class="call"><span class="vbadge ${e.via}">${e.via}</span><span class="sysn">${esc(AGENTS[e.agentId].name)}</span><code>${esc(e.op)}</code></div>`).join('')}</div>` : '<p class="hint">None yet.</p>'}
+    <button class="lbtn" data-act="integ" style="margin-top:12px">When MCP, when API?</button>`);
+}
+function treeHTML(n) { const r = n.rec; return `<li><button class="rcard" data-rec="${esc(r.key)}@${r.version}"><b>${esc(r.label)}</b> <small style="display:inline">· ${esc(AGENTS[r.by] ? AGENTS[r.by].name : originText(r))}</small>${n.repeat ? '<small>shown above</small>' : ''}</button>${n.children.length ? `<ul>${n.children.map(treeHTML).join('')}</ul>` : ''}</li>`; }
+function openRecord(ref) {
+  const s = S(); const [key, v] = ref.split('@'); const r = s.archive[key + '@' + v] || s.store[key]; if (!r) return;
+  const tree = lineage(s, key, r.version), ags = lineageAgents(tree);
+  const readers = [...new Set(s.logs.filter(e => e.type === 'READ' && e.key === key && e.version === r.version).map(e => e.agentId))];
+  openDrawer(`<span class="av" style="background:#16304a;color:var(--gold)">${icon(LAYERS[r.layer].icon)}</span>${esc(r.label)}`, `<p class="lead">${esc(r.value)}</p><dl class="kv"><dt>Component</dt><dd>${esc(LAYERS[r.layer].name)}</dd><dt>Origin</dt><dd>${esc(originText(r))}</dd><dt>Revision</dt><dd>${r.version}</dd></dl>
+    <div class="h">Reused by</div><div class="chips">${readers.map(a => `<button class="chip" data-agent="${a}">${esc(AGENTS[a].name)}</button>`).join('') || '<span class="hint">Nobody yet.</span>'}</div>
+    <div class="h">Where it came from${ags.size ? ` · ${ags.size} specialists` : ''}</div><div class="tree"><ul>${treeHTML(tree)}</ul></div>`);
+}
+function openArtifact(t) { const st = STEPS.find(x => x.artifact === t); openDrawer(`${av(st.actor)}${esc(ART_NAMES[t])}`, `<p class="hint">${esc(AGENTS[st.actor].name)} · ${esc(st.when)}</p><div class="preview">${artifactHTML(t, S())}</div>`); }
+function openHelp() {
+  openDrawer('How to read this', `<p class="lead">Read the screen top to bottom: it’s the architecture, running.</p>
+    <dl class="kv"><dt>Start</dt><dd>Priya, the wholesaler, asks her workbench in one sentence to take care of what Alex asked for on their call.</dd><dt>Journey</dt><dd>Where Alex is: the meeting, the research, the send, a service issue, the follow-up.</dd><dt>Orchestration</dt><dd>Understands the request, resolves Alex, plans and routes tasks, and tracks them.</dd><dt>Specialists</dt><dd>A few agents from each of Sales, Product, Marketing and Service. The others use the same foundation.</dd><dt>Foundation</dt><dd>The backbone. Green lines: a specialist reading. Gold lines: a specialist writing back.</dd><dt>Integration</dt><dd>Salesforce (CRM, call transcripts, Service Cloud), Microsoft 365 (Outlook, calendar), Seismic and fund data, reached through MCP (blue) or APIs (green).</dd></dl>
+    <div class="h">On the right</div><dl class="kv"><dt>Now</dt><dd>What the current specialist is doing, what it read, what it changed, and what it produced.</dd><dt>Advisor 360</dt><dd>Alex’s profile in memory, updating as agents learn.</dd><dt>Foundation</dt><dd>What changed in each component, including the relationship graph.</dd><dt>Outputs</dt><dd>Emails, the one-pager, invites and CRM updates.</dd></dl>
+    <div class="h">Keys</div><p class="hint">Space plays or pauses. Arrows step. Esc closes.</p>`);
+}
+
+/* ---------- Gate ---------- */
+function openGate() {
+  pause(); const s = P.S, p = sendPayload(s), fp = fingerprint(p), ck = gateChecks(s);
+  byId('modalCard').innerHTML = `<div class="mtop"><h2>Priya, your call.</h2><p>Distribution assembled this email entirely from the shared foundation. Nothing goes to Alex until you approve this exact version.</p></div>
+    <div class="mbody"><div class="preview" style="margin:0 0 10px">${artifactHTML('email', s)}</div>${ck.map(c => `<div class="chk"><span class="ok">${icon(c.ok ? 'check' : 'x')}</span>${esc(c.text)}</div>`).join('')}
+    <p class="hint" style="margin:8px 0 12px">Fingerprint ${fp}. Your approval binds to this exact payload.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="lbtn primary" id="approveBtn">${icon('check')} Approve and send</button><button class="lbtn" id="draftBtn">Keep as draft</button><button class="lbtn" id="laterBtn">Decide later</button></div></div>`;
+  byId('modal').hidden = false;
+  byId('approveBtn').onclick = () => decide('approved'); byId('draftBtn').onclick = () => decide('draft'); byId('laterBtn').onclick = () => { byId('modal').hidden = true; };
+  byId('approveBtn').focus();
+}
+function decide(d) {
+  const s = P.S, st = cur(s); byId('modal').hidden = true;
+  if (!st || !st.gate || s.phase !== 'approval') return;
+  logDecision(s, d); P.approvals[st.id] = { decision: d };
+  if (d === 'approved') { s.phase = 'write'; s.t = 0; toast('Approved. Sending through Seismic LiveSend and Outlook.'); renderAll(); play(); }
+  else { s.drafted = st.id; nextStep(); toast('Kept as draft. Nothing was sent.'); }
+}
+function reopenGate() { const idx = STEPS.findIndex(x => x.id === GATE_STEP); delete P.approvals[GATE_STEP]; P.S = replayTo(idx + 1, P.approvals); renderAll(); openGate(); }
+
+/* ---------- Lab ---------- */
+const CONSEQ = { memory: 'Alex’s profile and request stop travelling. Each specialist would have to ask him, or Priya, again.', knowledge: 'The clarified question, fee math, verified answer and one-pager stop travelling. Each team would research on its own.', policy: 'Compliance’s review and the number trace don’t reach Distribution. Sending would stall or go unchecked.', models: 'The construction options never reach Marketing or Sales, so the page and the brief lose Option A.', feedback: 'What Alex said about fees and after-tax views stays with whoever heard it.', events: 'Nobody learns the meeting ended, the plan exists, the email went out or the link failed.', graph: 'Alex, his team, Jamie and his firm’s link policy aren’t connected. Specialists would match by name and guess.' };
+function labPanel(s) {
+  const a = P.labA, off = P.lab.off;
+  const rows = LAYER_ORDER.map(l => { const n = s.logs.filter(e => e.type === 'READ' && e.reused && e.layer === l).length, o = off.has(l); return `<button class="labrow ${o ? 'off' : ''}" data-unplug="${l}">${icon(LAYERS[l].icon)}<span><b>${esc(LAYERS[l].name)}</b><small>${n} facts reused across specialists</small>${o ? `<em>${esc(CONSEQ[l])}</em>` : ''}</span><i class="sw"></i></button>`; }).join('');
+  return `<div class="lab"><h2>What if it weren’t shared?</h2><p class="hint">The whole journey, complete. Switch components off here or on the diagram, and see which specialists lose what they needed.</p>
+    ${off.size ? `<div class="labbig"><b>${a.lost}</b> <span class="hint">of ${s.reuse} reused facts never arrive</span></div><p style="font-size:13.5px"><b>${a.direct.size}</b> steps lose an input directly; <b>${a.cascade.size}</b> more build on incomplete work.</p>` : `<div class="labbig ok"><b>${s.reuse}</b> <span class="hint">times one specialist reused another’s work through the foundation</span></div>`}
+    ${rows}<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="lbtn" data-act="unplug-all">Unplug everything</button><button class="lbtn" data-act="plug-all">Reconnect all</button><button class="lbtn primary" data-act="exit-lab">Back to the journey</button></div>
+    <p class="hint" style="margin-top:10px">Counted from the recorded handoffs: which inputs would stop arriving.</p></div>`;
+}
+function enterLab() { closeDrawer(); pause(); P.labS = P.S.phase === 'done' && !P.S.drafted ? P.S : completedState(); P.lab = { off: new Set() }; setTab('now'); setView('live'); renderAll(); }
+function exitLab() { P.lab = null; P.labS = null; P.labA = null; renderAll(); }
+function toggleUnplug(l) { if (!P.lab) return; P.lab.off.has(l) ? P.lab.off.delete(l) : P.lab.off.add(l); renderAll(); }
+
+/* ---------- Controller ---------- */
+function phaseDur(ph) {
+  const s = S(), st = s.steps[s.i]; if (!st) return Infinity;
+  const d = { dispatch: 800, calls: callsBefore(st).length ? 1700 : 0, read: 1500, think: Math.max(2800, Math.min(7500, st.says.length * 28)), write: 1500, settle: 900 }[ph];
+  return d === undefined ? Infinity : d / P.speed;
+}
+function start() { P.approvals = {}; P.S = freshState(); P.fresh = null; P.lab = null; P.lastStats = {}; byId('intro').hidden = true; renderAll(); }
+function play() {
+  if (P.lab) { exitLab(); return; }
+  const s = P.S;
+  if (s.phase === 'done') { start(); return play(); }
+  if (s.phase === 'blocked') { toast(s.blockedMsg); return; }
+  if (s.phase === 'approval') { openGate(); return; }
+  if (s.phase === 'ready') activate(s);
+  P.playing = true; P.last = performance.now(); cancelAnimationFrame(P.raf); P.raf = requestAnimationFrame(frame);
+  if (s.phase === 'think') narrate(cur(s).says);
+  renderAll();
+}
+function pause() { if (!P.playing) return; P.playing = false; cancelAnimationFrame(P.raf); stopSpeech(); renderControls(); renderNow(); }
+function frame(now) {
+  if (!P.playing) return;
+  const s = P.S; s.t += Math.min(100, now - P.last); P.last = now;
+  updateParticles(); if (['calls', 'read', 'think'].includes(s.phase)) updateQuote();
+  if (s.t >= phaseDur(s.phase)) advance();
+  if (P.playing) P.raf = requestAnimationFrame(frame);
+}
+function advance() {
+  const s = P.S, st = cur(s); s.t = 0;
+  switch (s.phase) {
+    case 'dispatch': s.phase = 'calls'; break;
+    case 'calls': applyCalls(s); s.phase = 'read'; break;
+    case 'read': applyReads(s); s.phase = 'think'; narrate(st.says); break;
+    case 'think': if (st.gate && gateOpen(s, P.approvals)) { s.phase = 'approval'; renderAll(); openGate(); return; } s.phase = 'write'; break;
+    case 'write': applyWrites(s); onCommit(st); s.phase = 'settle'; break;
+    case 'settle': nextStep(); return;
+  }
+  renderAll();
+}
+function onCommit(st) {
+  P.fresh = st.id;
+  if (st.mem && !isVisible('advisor')) badge('advisor', true);
+  if (!isVisible('foundation')) badge('foundation', true);
+  if (st.artifact && !isVisible('artifacts')) badge('artifacts', true);
+}
+function nextStep() {
+  const s = P.S; s.i++;
+  if (s.i >= s.steps.length) { s.phase = 'done'; pause(); renderAll(); return; }
+  activate(s);
+  if (s.phase === 'blocked' || P.hold) pause();
+  renderAll();
+}
+function next() {
+  const s = P.S;
+  if (P.lab) return;
+  if (s.phase === 'done') return;
+  if (s.phase === 'ready') { activate(s); renderAll(); return; }
+  if (s.phase === 'blocked') { toast(s.blockedMsg); return; }
+  if (s.phase === 'approval') { openGate(); return; }
+  const st = cur(s);
+  if (s.phase !== 'settle') {
+    applyCalls(s); applyReads(s);
+    if (st.gate && gateOpen(s, P.approvals)) { s.phase = 'approval'; renderAll(); openGate(); return; }
+    if (!s.completed.has(st.id)) { applyWrites(s); onCommit(st); }
+  }
+  nextStep();
+}
+function prev() { const s = P.S; if (P.lab || s.phase === 'ready') return; jumpTo(s.phase === 'done' ? s.steps.length - 1 : (s.phase === 'dispatch' && s.t < 250) || s.phase === 'blocked' ? s.i - 1 : s.i); }
+function jumpTo(j) {
+  const was = P.playing; pause(); P.lab = null; P.labS = null; P.labA = null;
+  if (j <= P.S.i) STEPS.forEach((st, k) => { if (k >= j) delete P.approvals[st.id]; });
+  if (j < 0) { start(); return; }
+  P.S = replayTo(j, P.approvals);
+  if (j === 0) { P.S.i = 0; activate(P.S); }
+  const lastDone = [...P.S.steps].slice(0, P.S.i).reverse().find(x => P.S.completed.has(x.id)); P.fresh = lastDone ? lastDone.id : null;
+  if (P.S.phase === 'approval' && P.S.i < j) toast('Stopped at Priya’s approval. Nothing skips it.');
+  renderAll();
+  if (was && !['approval', 'blocked', 'done'].includes(P.S.phase)) play();
+}
+
+/* ---------- Narration ---------- */
+function narrate(t) { if (!P.narrate || !P.playing || !('speechSynthesis' in window)) return; try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.rate = .98; speechSynthesis.speak(u); } catch (e) { } }
+function stopSpeech() { try { 'speechSynthesis' in window && speechSynthesis.cancel(); } catch (e) { } }
+
+/* ---------- Render all ---------- */
+function renderControls() {
+  const s = P.S;
+  byId('playBtn').innerHTML = icon(P.playing ? 'pause' : s.phase === 'done' ? 'replay' : 'play');
+  byId('prevBtn').disabled = s.phase === 'ready'; byId('nextBtn').disabled = s.phase === 'done';
+  document.querySelectorAll('#speedSeg button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.speed === P.speed)));
+  byId('holdBtn').setAttribute('aria-pressed', String(P.hold));
+  const s2 = S();
+  byId('scrub').innerHTML = STEPS.map((st, k) => `<button class="tick ${s2.completed.has(st.id) ? 'done' : ''} ${k === s2.i && !['ready', 'done'].includes(s2.phase) && !P.lab ? 'cur' : ''}" style="--c:${TC[AGENTS[st.actor].team]}" data-jump="${k}" title="${k + 1} · ${esc(AGENTS[st.actor].name)}: ${esc(st.title)}">${st.gate ? `<span class="mk">${icon('shield')}</span>` : ''}</button>`).join('');
+}
+function renderAll() {
+  P.labA = P.lab ? unplug(P.labS, P.lab.off) : null;
+  renderDiagram(); renderStats(); renderControls(); renderNow(); renderAdvisor(); renderFoundation(); renderArtifacts(); renderLedger();
+  requestAnimationFrame(renderWires);
+}
+function isVisible(t) { return matchMedia('(max-width:860px)').matches ? P.view === t : P.tab === t; }
+function badge(t, on) { document.querySelector(`.tab[data-tab="${t}"]`).classList.toggle('has', on); }
+function setTab(t) { P.tab = t; document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === t))); document.querySelectorAll('.pane').forEach(p => p.hidden = p.id !== 'pane-' + t); badge(t, false); }
+function setView(v) { P.view = v; byId('app').dataset.view = v; document.querySelectorAll('.mnav button').forEach(b => b.setAttribute('aria-current', String(b.dataset.view === v))); if (v !== 'live') setTab(v); }
+let tt; function toast(m) { const t = byId('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 3200); }
+
+/* ---------- Events ---------- */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act],[data-jump],[data-agent],[data-layer],[data-rec],[data-tab],[data-view],[data-speed],[data-sys],[data-art],[data-unplug],[data-ltab],[data-otab],[data-orch]');
+  if (!el) return; const d = el.dataset;
+  if (d.ltab) { openLayer(d.l, d.ltab); return; }
+  if (d.otab) { openOrch(d.otab); return; }
+  if (d.unplug) { toggleUnplug(d.unplug); return; }
+  if (P.lab && d.layer && el.classList.contains('tile')) { toggleUnplug(d.layer); return; }
+  if (d.act) {
+    const a = d.act;
+    if (a === 'start') { start(); play(); setView('live'); }
+    else if (a === 'play') play();
+    else if (a === 'gate') openGate();
+    else if (a === 'reopen') reopenGate();
+    else if (a === 'restart') { start(); play(); }
+    else if (a === 'lab') enterLab();
+    else if (a === 'exit-lab') exitLab();
+    else if (a === 'unplug-all') { P.lab.off = new Set(LAYER_ORDER); renderAll(); }
+    else if (a === 'plug-all') { P.lab.off = new Set(); renderAll(); }
+    else if (a === 'integ') openInteg();
+    return;
+  }
+  if (d.jump !== undefined) { closeDrawer(); jumpTo(+d.jump); setView('live'); return; }
+  if (d.tab) { closeDrawer(); if (matchMedia('(max-width:860px)').matches) setView(d.tab); else setTab(d.tab); return; }
+  if (d.view) { setView(d.view); return; }
+  if (d.speed) { P.speed = +d.speed; renderControls(); return; }
+  if (d.orch) { openOrch(); return; }
+  if (d.sys) { openSys(d.sys); return; }
+  if (d.art) { openArtifact(d.art); return; }
+  if (d.rec) { openRecord(d.rec); return; }
+  if (d.agent) { openAgent(d.agent); return; }
+  if (d.layer) { openLayer(d.layer); return; }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (!byId('modal').hidden) byId('modal').hidden = true; else closeDrawer(); return; }
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (!byId('intro').hidden || !byId('drawer').hidden || !byId('modal').hidden || ['input', 'textarea'].includes(tag)) return;
+  if (e.key === ' ' && tag !== 'button') { e.preventDefault(); P.playing ? pause() : play(); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+});
+byId('playBtn').onclick = () => P.playing ? pause() : play();
+byId('nextBtn').onclick = next; byId('prevBtn').onclick = prev;
+byId('holdBtn').onclick = () => { P.hold = !P.hold; renderControls(); };
+byId('restartBtn').onclick = () => start();
+byId('helpBtn').onclick = openHelp;
+byId('voiceBtn').onclick = () => { P.narrate = !P.narrate; byId('voiceBtn').setAttribute('aria-pressed', String(P.narrate)); if (!P.narrate) stopSpeech(); };
+byId('drawerClose').onclick = closeDrawer; byId('scrim').onclick = closeDrawer;
+byId('exploreBtn').onclick = () => { byId('intro').hidden = true; };
+addEventListener('resize', () => requestAnimationFrame(renderWires));
+byId('diagram').addEventListener('scroll', () => requestAnimationFrame(renderWires));
+document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+
+buildDiagram(); start(); byId('intro').hidden = false; setTab('now');
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "live_ccc",
+  "version": "1.0.0",
+  "description": "Connected Client Experience: a live multi-agent demo on a shared AI foundation (OpenAI / Azure OpenAI)",
+  "type": "module",
+  "private": true,
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node server.js",
+    "build": "node scripts/build.mjs",
+    "mock": "node scripts/mock-openai.mjs",
+    "dev:mock": "OPENAI_API_KEY=mock OPENAI_BASE_URL=http://localhost:9999/v1 node server.js"
+  }
+}

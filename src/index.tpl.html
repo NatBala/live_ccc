@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Connected Client Experience · Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>/*CSS*/</style>
+</head>
+<body>
+<div class="app" id="app" data-view="live">
+  <header class="top">
+    <div class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="12" width="26" height="8" rx="3" fill="#ffd27a"/><circle cx="8" cy="5" r="3" fill="#82b6ff"/><circle cx="16" cy="5" r="3" fill="#7fd4ab"/><circle cx="24" cy="5" r="3" fill="#f0b870"/><circle cx="16" cy="27" r="3" fill="#b9a5f5"/></svg><span class="brand-word">Connected Client Experience</span><span class="aistat" id="aistat"><i></i><span>Checking AI…</span></span></div>
+    <div class="stats" id="stats"></div>
+    <div class="skinpick" id="skinPick" role="group" aria-label="Theme"></div>
+    <div class="top-actions">
+      <button class="tbtn" id="sessionBtn" title="End this conversation. Lasting memory stays."><svg class="ic" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg><span class="tlabel">New session</span></button>
+      <button class="tbtn" id="resetBtn" title="Reset the foundation to its starting data"><svg class="ic" viewBox="0 0 24 24"><path d="M4 12a8 8 0 108-8 8 8 0 00-6 2.7L4 9M4 4v5h5"/></svg><span class="tlabel">Reset</span></button>
+      <button class="tbtn" id="deepBtn" aria-pressed="false" title="Agents use the deeper model: slower, more thorough"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span class="tlabel">Deeper agents</span></button>
+      <button class="tbtn" id="helpBtn"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 .5c0 1.5-2.5 2-2.5 3.5M12 17h.01"/></svg><span class="tlabel">How it works</span></button>
+    </div>
+  </header>
+  <main class="main">
+    <section class="stage" id="stage">
+      <div class="diagram" id="diagram">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="row cmd" id="cmd">
+          <div class="cmd-top" id="whoRow"></div>
+          <div class="cmd-row"><textarea class="cmd-in" id="cmdIn" rows="1" placeholder="Ask for an outcome, in your own words…" aria-label="Request"></textarea><button class="runbtn" id="runBtn"><svg class="ic" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z" fill="currentColor" stroke="none"/></svg>Run</button><button class="stopbtn" id="stopBtn" hidden>Stop</button></div>
+          <div class="sugs" id="sugs"></div>
+        </div>
+        <div class="row orch" id="orch" role="button" tabindex="0"></div>
+        <div class="row lanes" id="lanes"></div>
+        <div class="row found" id="found"></div>
+        <div class="row integ" id="integ"></div>
+      </div>
+    </section>
+    <aside class="rail" id="rail">
+      <div class="tabs" role="tablist">
+        <button class="tab" data-tab="decisions" aria-selected="true">Decisions<i class="badge"></i></button>
+        <button class="tab" data-tab="packets" aria-selected="false">Agents<i class="badge"></i></button>
+        <button class="tab" data-tab="memory" aria-selected="false">Memory<i class="badge"></i></button>
+        <button class="tab" data-tab="outputs" aria-selected="false">Outputs<i class="badge"></i></button>
+        <button class="tab" data-tab="events" aria-selected="false">Events</button>
+      </div>
+      <div class="panes">
+        <div class="pane" id="pane-decisions"></div>
+        <div class="pane" id="pane-packets" hidden></div>
+        <div class="pane" id="pane-memory" hidden></div>
+        <div class="pane" id="pane-outputs" hidden></div>
+        <div class="pane" id="pane-events" hidden></div>
+      </div>
+    </aside>
+  </main>
+  <nav class="mnav" id="mnav"><button data-view="live" aria-current="true">Live</button><button data-view="decisions">Decisions</button><button data-view="packets">Agents</button><button data-view="memory">Memory</button><button data-view="outputs">Outputs</button></nav>
+</div>
+<div class="scrim" id="scrim" hidden></div>
+<div class="drawer" id="drawer" role="dialog" aria-modal="true" hidden><div class="dhead"><h2 id="drawerTitle"></h2><button class="x" id="drawerClose" aria-label="Close"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="dbody" id="drawerBody"></div></div>
+<div class="toast" id="toast" role="status"></div>
+<div class="kg" id="kg" role="dialog" aria-modal="true" aria-label="Advisor knowledge graph" hidden>
+  <div class="kg-top"><b class="kg-title">Advisor knowledge graph</b><div class="kg-adv" id="kgAdv"></div><span class="grow"></span>
+    <div class="kg-zoom"><button data-kgact="out" aria-label="Zoom out">−</button><button data-kgact="fit">Fit</button><button data-kgact="in" aria-label="Zoom in">+</button></div>
+    <button class="kg-close" data-kgact="close" aria-label="Close">✕</button></div>
+  <div class="kg-filt" id="kgFilt"></div>
+  <div class="kg-main"><div class="kg-canvas"><svg id="kgsvg" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="kg-legend"><span><i class="kgdot new"></i>New</span><span><i class="kgdot updated"></i>Updated</span><span><i class="kgdot session"></i>Earlier today</span><span><i class="kgdot read"></i>Read, unchanged</span><span><i class="kgdot pending"></i>Pending</span><span><i class="kgdot superseded"></i>Superseded</span><span><i class="kgdot locked"></i>Hidden</span><span><i class="kgline"></i>Evidence</span></div></div>
+    <aside class="kg-side" id="kgside"></aside></div>
+  <div class="kg-time" id="kgtime"></div>
+</div>
+<script>/*DATA*/</script>
+<script>/*ENGINE*/</script>
+<script>/*REPLAY*/</script>
+<script>/*GRAPH*/</script>
+<script>/*UI*/</script>
+</body>
+</html>

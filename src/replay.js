@@ -1,0 +1,133 @@
+/* ===== Recorded runs: replayed through the same foundation and gatekeeper ===== */
+const L = o => JSON.stringify(o);
+const RECORDED = [
+  { name: 'Prep me for my call with Alex tomorrow', requester: 'EMP-PRIYA', text: 'Prep me for my call with Alex tomorrow',
+    orch: [
+      L({ k: 'decision', type: 'requester', title: 'Priya Shah, Sales, covers Alex', detail: 'Wholesaler on Alex Rivera’s coverage team, so relationship notes and her own coaching notes are in bounds.' }),
+      L({ k: 'decision', type: 'intent', title: 'Meeting prep, not new research', detail: 'She needs a brief for the call. Alex’s open decision is whether GFA stays in his growth model before the Oct 1 committee.', intent: 'meeting_prep' }),
+      L({ k: 'decision', type: 'entity', title: 'Alex → Alex Rivera, Morgan Stanley', detail: 'One graph match. The growth-model unit is active: it holds the open decision and the last call.', advisor: 'ADV-101', unit: 'BU-101A', confidence: 'high' }),
+      L({ k: 'decision', type: 'scope', title: 'Growth model unit only (BU-101A)', detail: 'The 401(k) committee unit is out of scope; nothing from it should shape this call.' }),
+      L({ k: 'decision', type: 'known', title: 'Reuse K-201 and Alex’s preferences', detail: 'K-201 already explains why GFA trailed. Memory holds his format and fee preferences, so no re-research.', uses: ['K-201', 'MEM-011', 'MEM-017', 'MEM-014', 'CALL-0922', 'TASK-301'] }),
+      L({ k: 'decision', type: 'missing', title: 'Dollar costs aren’t stored yet', detail: 'Alex wants fees in dollars on $38M. Tool Selection computes them on the model platform instead of estimating.' }),
+      L({ k: 'decision', type: 'memory', title: 'Read only: nothing new to remember', detail: 'Priya’s request contains no new statement from Alex, so memory is read, not changed.', class: 'read_only' }),
+      L({ k: 'decision', type: 'controls', title: 'Internal brief, every number traced', detail: 'No send. Personal note allowed for the relationship team; coaching visible to Priya only; numbers only from the platform.' }),
+      L({ k: 'task', id: 'T1', agent: 'product.tools', objective: 'Compute annual costs on $38M for GFFFX, VWUAX and VIGAX, and the blended cost of 70% VIGAX with 30% GFA', depends_on: [], reads: ['knowledge'], tools: ['models.cost_on_assets', 'models.portfolio_construction'], why: 'Only the model platform may produce dollar figures.' }),
+      L({ k: 'task', id: 'T2', agent: 'sales.schedule', objective: 'Confirm the call time against Alex’s meeting pattern', depends_on: [], reads: ['memory'], tools: ['calendar.find_times'], why: 'Alex books through Jamie at 7:30 a.m. PT on Tuesdays or Thursdays.' }),
+      L({ k: 'task', id: 'T3', agent: 'sales.prep', objective: 'Build Priya’s one-page brief from K-201, Alex’s preferences and T1’s numbers', depends_on: ['T1', 'T2'], reads: ['memory', 'knowledge', 'models', 'policy'], tools: ['crm.get_opportunities'], why: 'Prep Me owns briefs and may use relationship notes.' }),
+      L({ k: 'decision', type: 'success', title: 'Priya walks in with one page', detail: 'Dollar costs, the verified why, the open decision and logistics. Alex repeats nothing.' }),
+      L({ k: 'end' })
+    ].join('\n'),
+    agents: {
+      T1: { calls: [['models.cost_on_assets', { tickers: ['GFFFX', 'VWUAX', 'VIGAX'], amount_usd: 38000000 }], ['models.portfolio_construction', { weights: { VIGAX: 70, GFFFX: 30 } }]],
+        json: { says: 'I ran the model platform instead of estimating. On $38M, GFA F-2 costs about $152,000 a year, VWUAX $95,000 and VIGAX $19,000; a 70/30 VIGAX and GFA mix blends to 0.155%.',
+          output: { kind: 'finding', title: 'Costs on Alex’s $38M', body: '- GFA F-2 (GFFFX): 0.40%, about $152,000 a year\n- Vanguard U.S. Growth (VWUAX): 0.25%, about $95,000\n- Vanguard Growth Index (VIGAX): 0.05%, about $19,000\n\n70% VIGAX + 30% GFA blends to 0.155%.' },
+          used: ['GFFFX', 'VWUAX', 'VIGAX'], knowledge: [{ label: 'Annual fund costs on $38M for Alex Rivera', value: 'GFFFX $152,000; VWUAX $95,000; VIGAX $19,000 a year. 70/30 VIGAX/GFA blend: 0.155%.', evidence: ['models.cost_on_assets', 'models.portfolio_construction'] }], memory: [], commitments: [], needs_approval: false, open_questions: [] } },
+      T2: { calls: [['calendar.find_times', { advisor_id: 'ADV-101' }]],
+        json: { says: '“Tomorrow” is Wednesday, but Alex takes calls on Tuesdays and Thursdays and books through Jamie. I proposed Thursday at 7:30 a.m. PT, before his committee, and flagged the mismatch.',
+          output: { kind: 'note', title: 'Call time', body: 'Proposed: Thu Oct 1, 7:30 a.m. PT on Teams, before his committee.\nBackup: Tue Oct 6, 7:30 a.m. PT.\nBook through Jamie Cho.' },
+          used: ['MEM-012'], knowledge: [], memory: [], commitments: [{ title: 'Confirm the Thursday 7:30 a.m. call with Jamie Cho', owner: 'Priya Shah', due: 'Sep 30' }], needs_approval: false, open_questions: ['Is tomorrow’s call already booked, or should Jamie move it to Thursday?'] } },
+      T3: { calls: [['crm.get_opportunities', { advisor_id: 'ADV-101' }]],
+        json: { says: 'I reused QAR’s K-201 and Tool Selection’s dollar figures instead of redoing research, and kept it to one page because that is how Alex works.',
+          output: { kind: 'brief', title: 'Brief: Alex Rivera, growth model decision', body: 'Open with: his marathon training for December.\n\nThe decision: keep or replace GFA in the new growth model. Committee meets Oct 1 (OPP-501, Proposal).\n\nLead with dollars on $38M:\n- GFA F-2 about $152,000 a year; VWUAX about $95,000; VIGAX about $19,000\n- 70/30 VIGAX and GFA blends to 0.155%\n\nWhy GFA trailed (K-201): mandate, concentration, cost.\n\nStill owed: quarterly attribution in his one-page format (TASK-301).' },
+          used: ['K-201', 'MEM-011', 'MEM-017', 'MEM-014', 'MEM-015', 'TASK-301', 'OPP-501'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [] } }
+    } },
+  { name: 'Create an ETF email campaign for Sofia', requester: 'EMP-MARCUS', text: 'Create an ETF email campaign for Sofia',
+    orch: [
+      L({ k: 'decision', type: 'requester', title: 'Marcus Bell, Marketing', detail: 'Marketing may draft advisor emails. Personal and coaching notes are not available to Marketing.' }),
+      L({ k: 'decision', type: 'intent', title: 'One advisor email, not a mass campaign', detail: '“Campaign for Sofia” targets one advisor, so this is a personalized email draft with approval.', intent: 'content' }),
+      L({ k: 'decision', type: 'entity', title: 'Sofia → Sofia Martinez, Morgan Stanley', detail: 'One graph match; her only unit is the core model portfolios.', advisor: 'ADV-104', unit: 'BU-104', confidence: 'high' }),
+      L({ k: 'decision', type: 'scope', title: 'Martinez core model portfolios (BU-104)', detail: 'Her stated priority lives in this unit.' }),
+      L({ k: 'decision', type: 'known', title: 'She said she’s moving core to ETFs', detail: 'MEM-041 is her own statement (CALL-0915). MEM-013 says Morgan Stanley blocks links, so send a PDF.', uses: ['MEM-041', 'MEM-042', 'MEM-013', 'CALL-0915', 'TASK-303'] }),
+      L({ k: 'decision', type: 'missing', title: 'Interest in our ETFs isn’t stated', detail: 'She never asked about Capital Group ETFs. Lead with her question about where active managers fit.' }),
+      L({ k: 'decision', type: 'memory', title: 'Marcus’s ask is not Sofia’s preference', detail: 'Wanting an ETF email tells us about Marketing’s plan, not about Sofia (POL-6). Nothing new to remember.', class: 'read_only' }),
+      L({ k: 'decision', type: 'controls', title: 'Draft only; compliance and approval', detail: 'Legal & Compliance reviews; nothing is sent without Priya’s approval; PDF attachment, not a link.' }),
+      L({ k: 'task', id: 'T1', agent: 'marketing.gather', objective: 'Find approved Seismic content on ETFs and on where active management fits in core-satellite', depends_on: [], reads: ['knowledge', 'policy'], tools: ['seismic.search_content'], why: 'Only approved content can be used.' }),
+      L({ k: 'task', id: 'T2', agent: 'marketing.email', objective: 'Draft a short email to Sofia answering her core-satellite question, attaching the approved pieces', depends_on: ['T1'], reads: ['memory', 'knowledge', 'policy'], tools: ['mail.draft'], why: 'Personalized Email writes advisor emails.' }),
+      L({ k: 'task', id: 'T3', agent: 'marketing.legal', objective: 'Review the draft’s claims and add the required disclosures', depends_on: ['T2'], reads: ['policy', 'knowledge'], tools: ['sharepoint.get_disclosures'], why: 'Nothing client-facing leaves without review.' }),
+      L({ k: 'decision', type: 'success', title: 'An email Sofia would actually want', detail: 'Answers her stated question, uses approved content, PDF not link, waiting for approval.' }),
+      L({ k: 'end' })
+    ].join('\n'),
+    agents: {
+      T1: { calls: [['seismic.search_content', { query: 'etf core satellite active' }]],
+        json: { says: 'Two approved pieces fit: the core-satellite guide answers her question directly, and the ETF lineup overview covers the product side.',
+          output: { kind: 'content_pick', title: 'Approved content for Sofia', body: '- SEIS-117 Core-satellite: where active management fits (lead piece)\n- SEIS-120 Capital Group ETF lineup overview (supporting)\n\nNot used: SEIS-118 is public-audience content.' },
+          used: ['SEIS-117', 'SEIS-120', 'MEM-041'], knowledge: [], memory: [{ attribute: 'Investment style', value: 'Prefers passive investing', scope: 'BU-104', category: 'priority', basis: 'inference', evidence: [] }], commitments: [], needs_approval: false, open_questions: [] } },
+      T2: { calls: [['mail.draft', { to: 'Sofia Martinez', subject: 'Where active managers fit in your core-satellite model' }]],
+        json: { says: 'I answered the question Sofia actually asked, attached the approved pieces as PDFs because Morgan Stanley blocks links, and kept it short for an evening read.',
+          output: { kind: 'email', title: 'Where active managers fit in your core-satellite model', body: 'Hi Sofia,\n\nYou mentioned you’re moving more of your core to ETFs this year and asked what active managers still add. Two short pieces may help:\n\n- Core-satellite: where active management fits (3 pages)\n- Capital Group ETF lineup overview (2 pages)\n\nBoth are attached as PDFs. Happy to walk through them whenever suits you.\n\nPriya' },
+          used: ['MEM-041', 'MEM-042', 'MEM-013', 'SEIS-117', 'SEIS-120', 'CALL-0915'], knowledge: [], memory: [{ attribute: 'Interest in Capital Group ETFs', value: 'Interested in Capital Group ETFs', scope: 'BU-104', category: 'priority', basis: 'employee_request', evidence: [] }], commitments: [], needs_approval: true, open_questions: [] } },
+      T3: { calls: [['sharepoint.get_disclosures', { content_type: 'advisor email' }]],
+        json: { says: 'No performance or fee figures, no personal notes, approved content only. I added the required disclosure. It still needs Priya’s approval to send.',
+          output: { kind: 'note', title: 'Review: email to Sofia', body: '- Claims: none beyond approved content\n- Numbers: none\n- Personal notes: none\n- Disclosure added: For financial professional use only.\n\nResult: approved for sending once Priya approves.' },
+          used: ['POL-1', 'POL-4', 'SEIS-117', 'SEIS-120'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [] } }
+    } }
+];
+
+RECORDED.push(
+  { name: 'Identify the growing trends in LA territory', requester: 'EMP-PRIYA', text: 'Identify the growing trends in LA territory',
+    orch: [
+      L({ k: 'decision', type: 'requester', title: 'Priya Shah, Sales, Southern California', detail: 'Her territory includes LA; she covers two of its three advisors and Sam covers all three.' }),
+      L({ k: 'decision', type: 'intent', title: 'Territory review, not one advisor', detail: 'She wants what is growing across LA so she can decide where to spend time and what to bring.', intent: 'research' }),
+      L({ k: 'decision', type: 'entity', title: 'LA territory: Daniel, Rachel, Luis', detail: 'No single advisor. Territory context comes from the graph; personal notes stay out.', advisor: null, unit: null, territory: 'LA', confidence: 'high' }),
+      L({ k: 'decision', type: 'scope', title: 'Three LA advisors, shared records only', detail: 'Stated priorities, recorded conversations and open opportunities; no private or personal notes.' }),
+      L({ k: 'decision', type: 'known', title: 'Each advisor’s own stated priority', detail: 'Memory already holds what each LA advisor said this quarter; the trends model counts them.', uses: ['MEM-051', 'MEM-061', 'MEM-071', 'CALL-0918', 'CALL-0923', 'EMAIL-0925'] }),
+      L({ k: 'decision', type: 'missing', title: 'No market-wide flow data', detail: 'Trends come from our own recorded conversations and opportunities. They are signals, not market statistics.' }),
+      L({ k: 'decision', type: 'memory', title: 'Read only', detail: 'A territory question adds nothing new about any advisor.', class: 'read_only' }),
+      L({ k: 'decision', type: 'controls', title: 'Signals labeled as signals', detail: 'Model outputs are shown with their evidence; fund numbers only from the data platform.' }),
+      L({ k: 'task', id: 'T1', agent: 'sales.territory', objective: 'Run the territory trends model for LA and explain what is growing, with evidence', depends_on: [], reads: ['memory', 'models'], tools: ['models.territory_trends'], why: 'Territory Planning owns territory reviews.' }),
+      L({ k: 'task', id: 'T2', agent: 'product.qar', objective: 'Pull verified facts for the funds that fit the top trends: BFA and AMBAL', depends_on: ['T1'], reads: ['knowledge'], tools: ['fund.lookup', 'mstar.get_peers'], why: 'Numbers must come from the data platform.' }),
+      L({ k: 'task', id: 'T3', agent: 'marketing.gather', objective: 'Find approved content that matches the top LA trends', depends_on: ['T1'], reads: ['knowledge', 'policy'], tools: ['seismic.search_content'], why: 'Only approved content can be shared.' }),
+      L({ k: 'decision', type: 'success', title: 'Priya knows where to focus in LA', detail: 'What is growing, who is driving it, which funds and approved pieces fit.' }),
+      L({ k: 'end' })
+    ].join('\n'),
+    agents: {
+      T1: { calls: [['models.territory_trends', { territory: 'LA' }]],
+        json: { says: 'I ran the territory model on what LA advisors actually told us this quarter. Fixed income is the clearest shift: two advisors raised it, none did last quarter.',
+          output: { kind: 'finding', title: 'What is growing in LA', body: '- Core bonds and fixed income: 2 advisors, up from none (Rachel Okafor, Luis Herrera)\n- Fee scrutiny: 2 advisors, up from 1 (Daniel Kim, Luis Herrera)\n- Retirement income: 1 advisor, new this quarter (Rachel Okafor)\n- ETF and model-portfolio interest: steady (Daniel Kim)\n\nThese are signals from recorded conversations, not market data.' },
+          used: ['MEM-061', 'MEM-071', 'MEM-051', 'CALL-0923', 'EMAIL-0925', 'CALL-0918'],
+          knowledge: [{ label: 'LA territory trends, this quarter', value: 'Core bonds and fixed income: 2 advisors (0 last quarter). Fee scrutiny: 2 (1). Retirement income: 1 (0). ETF and model portfolios: steady at 1.', evidence: ['models.territory_trends', 'CALL-0923', 'EMAIL-0925', 'CALL-0918'] }],
+          memory: [], commitments: [{ title: 'Send Luis Herrera the core bond story', owner: 'Sam Lee', due: 'Oct 9' }], needs_approval: false, open_questions: [] } },
+      T2: { calls: [['fund.lookup', { name: 'BFA' }], ['fund.lookup', { name: 'AMBAL' }], ['mstar.get_peers', { category: 'Intermediate Core Bond' }], ['mstar.get_peers', { category: 'Moderate Allocation' }]],
+        json: { says: 'Both funds that fit these trends are cheap for their categories. I took every number from the data platform and Morningstar.',
+          output: { kind: 'finding', title: 'Funds that fit LA’s top trends', body: '- The Bond Fund of America F-2 (ABNFX): 0.34%, vs. a 0.46% Intermediate Core Bond median\n- American Balanced Fund F-2 (AMBFX): 0.35%, vs. a 0.9% Moderate Allocation median\n\nBFA fits Luis’s move into fixed income; AMBAL and BFA both fit Rachel’s income review.' },
+          used: ['ABNFX', 'AMBFX', 'MEM-061', 'MEM-071'],
+          knowledge: [{ label: 'BFA and AMBAL F-2 cost vs. category', value: 'ABNFX 0.34% vs. 0.46% Intermediate Core Bond median; AMBFX 0.35% vs. 0.9% Moderate Allocation median.', evidence: ['ABNFX', 'AMBFX', 'mstar.get_peers'] }],
+          memory: [], commitments: [], needs_approval: false, open_questions: [] } },
+      T3: { calls: [['seismic.search_content', { query: 'bond fixed income balanced income retirees' }]],
+        json: { says: 'Three approved pieces line up with the trends, one per conversation Priya or Sam will have.',
+          output: { kind: 'content_pick', title: 'Approved content for LA', body: '- SEIS-121 The Bond Fund of America: core bond story (for Luis)\n- SEIS-123 Balanced vs. bond funds in a retirement income plan (for Rachel)\n- SEIS-122 American Balanced Fund overview (supporting)\n\nAll approved for financial professionals.' },
+          used: ['SEIS-121', 'SEIS-122', 'SEIS-123'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [] } }
+    } },
+  { name: 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month', requester: 'EMP-PRIYA', text: 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month',
+    orch: [
+      L({ k: 'decision', type: 'requester', title: 'Priya Shah covers Rachel', detail: 'Rachel Okafor is on Priya’s coverage list, so shared advisor context is in bounds.' }),
+      L({ k: 'decision', type: 'intent', title: 'Fund comparison plus a meeting', detail: 'Two outcomes: a BFA vs. AMBAL comparison framed for Rachel, and a meeting next month.', intent: 'research' }),
+      L({ k: 'decision', type: 'entity', title: 'Rachel → Rachel Okafor, UBS', detail: 'One graph match; her retirement income unit is the only one.', advisor: 'ADV-106', unit: 'BU-106', confidence: 'high' }),
+      L({ k: 'decision', type: 'scope', title: 'Okafor retirement income portfolios', detail: 'Her stated priority lives here.' }),
+      L({ k: 'decision', type: 'known', title: 'She already told us what she needs', detail: 'MEM-061 and CALL-0923: reliable income for retirees; she is reviewing balanced and bond funds.', uses: ['MEM-061', 'CALL-0923', 'OPP-505', 'SEIS-123'] }),
+      L({ k: 'decision', type: 'missing', title: 'No amount given: show cost per $1M', detail: 'Assumption stated; Tool Selection computes it on the model platform.' }),
+      L({ k: 'decision', type: 'memory', title: 'Read only', detail: 'Her need is already in memory in her own words; nothing new to store.', class: 'read_only' }),
+      L({ k: 'decision', type: 'controls', title: 'Internal comparison; invite needs approval', detail: 'Numbers only from the platform; the meeting is a tentative hold until Priya approves the invite.' }),
+      L({ k: 'task', id: 'T1', agent: 'product.tools', objective: 'Compute BFA and AMBAL F-2 costs per $1M and compare with their category medians', depends_on: [], reads: ['knowledge'], tools: ['models.cost_on_assets', 'mstar.get_peers'], why: 'Dollar figures come only from the model platform.' }),
+      L({ k: 'task', id: 'T2', agent: 'product.qar', objective: 'Explain how BFA and AMBAL each fit Rachel’s retirement income plan, from approved material', depends_on: ['T1'], reads: ['memory', 'knowledge', 'policy'], tools: ['seismic.search_content'], why: 'QAR produces the verified answer.' }),
+      L({ k: 'task', id: 'T3', agent: 'sales.schedule', objective: 'Find a slot next month with Rachel and place a tentative hold', depends_on: [], reads: ['memory'], tools: ['calendar.find_times', 'calendar.create_event'], why: 'Schedule Me books meetings.' }),
+      L({ k: 'decision', type: 'success', title: 'A comparison and a meeting on hold', detail: 'Verified costs, how each fund fits her plan, and a time waiting for Priya’s approval.' }),
+      L({ k: 'end' })
+    ].join('\n'),
+    agents: {
+      T1: { calls: [['models.cost_on_assets', { tickers: ['BFA', 'AMBAL'], amount_usd: 1000000 }], ['mstar.get_peers', { category: 'BFA' }], ['mstar.get_peers', { category: 'AMBAL' }]],
+        json: { says: 'Nearly identical cost, very different jobs. BFA F-2 is 0.34% and AMBAL F-2 is 0.35%, and both sit well under their category medians.',
+          output: { kind: 'finding', title: 'BFA vs. AMBAL F-2: costs', body: '- BFA F-2 (ABNFX): 0.34%, about $3,400 a year per $1M; category median 0.46%\n- AMBAL F-2 (AMBFX): 0.35%, about $3,500 a year per $1M; category median 0.9%\n\nDifferent categories: BFA is a core bond fund; AMBAL holds stocks and bonds.' },
+          used: ['ABNFX', 'AMBFX'], knowledge: [{ label: 'BFA and AMBAL F-2 cost per $1M', value: 'ABNFX 0.34% ($3,400 a year per $1M); AMBFX 0.35% ($3,500 per $1M). Category medians 0.46% and 0.9%.', evidence: ['models.cost_on_assets', 'mstar.get_peers', 'ABNFX', 'AMBFX'] }],
+          memory: [], commitments: [], needs_approval: false, open_questions: [] } },
+      T2: { calls: [['seismic.search_content', { query: 'balanced bond income retirement comparison' }]],
+        json: { says: 'I framed it around what Rachel said she needs, reused Tool Selection’s numbers, and pointed to approved material instead of writing new claims.',
+          output: { kind: 'answer', title: 'How each fits Rachel’s income plan', body: 'Rachel said her retirees want reliable income and she is reviewing balanced and bond funds (CALL-0923).\n\n- BFA: a core bond anchor for stability and income, managed against the Bloomberg U.S. Aggregate.\n- AMBAL: stocks and bonds in one fund, at least 50% stocks (mostly dividend payers) and at least 25% bonds, for growth plus income.\n\nApproved material: SEIS-123 compares the two roles; SEIS-121 and SEIS-122 cover each fund. Performance is inserted from the data platform at approval.' },
+          used: ['MEM-061', 'CALL-0923', 'ABNFX', 'AMBFX', 'SEIS-121', 'SEIS-122', 'SEIS-123'], knowledge: [],
+          memory: [{ attribute: 'Current priority', value: 'Reliable income for retirees; reviewing balanced and bond funds', scope: 'BU-106', category: 'priority', basis: 'advisor_statement', evidence: ['CALL-0923'] }], commitments: [], needs_approval: false, open_questions: [] } },
+      T3: { calls: [['calendar.find_times', { attendees: ['ADV-106', 'Priya Shah'], when: 'next month' }], ['calendar.create_event', { title: 'BFA vs. AMBAL for your income plan', attendees: ['ADV-106', 'Priya Shah'], time: 'Tue Oct 6, 10:00 a.m. PT' }]],
+        json: { says: 'Everyone is free on Tuesday, October 6 at 10:00 a.m. PT. I placed a tentative hold; the invite goes to Rachel once Priya approves it.',
+          output: { kind: 'note', title: 'Meeting with Rachel', body: 'Tentative hold: Tue Oct 6, 10:00 a.m. PT (Rachel Okafor, Priya Shah).\nBackups: Wed Oct 14, 2:00 p.m.; Thu Oct 22, 11:00 a.m.\nThe invite goes to Rachel after Priya approves it.' },
+          used: ['MEM-061'], knowledge: [], memory: [], commitments: [], needs_approval: true, open_questions: [] } }
+    } }
+);
