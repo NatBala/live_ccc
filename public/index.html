@@ -2511,7 +2511,7 @@ async function runTask(run, t) {
   // Start the reading interval only after the completed result has painted.
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   const words = String(t.result?.output?.body || t.result?.says || '').split(/\s+/).filter(Boolean).length;
-  const seconds = Math.min(30, Math.max(8, Math.ceil(words / 3)));
+  const seconds = Math.min(10, Math.max(8, Math.ceil(words / 3)));
   run.presentationPause = { task: t.id, seconds };
   renderAll();
   for (let remaining = seconds; remaining > 0 && !UI.ctl.signal.aborted; remaining--) {
