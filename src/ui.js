@@ -11,49 +11,26 @@ const ICONS = {
   network: '<circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 7v5M12 12l-5.5 5.5M12 12l5.5 5.5"/>',
   users: '<circle cx="9" cy="8" r="3.5"/><path d="M2 20c1-3.5 3.5-5 7-5s6 1.5 7 5M16 4.5a3.5 3.5 0 010 7M18 15c2 .7 3.3 2.3 4 5"/>', mail: '<path d="M3 6h18v12H3zM3 7l9 6 9-6"/>',
   book: '<path d="M4 19V5a2 2 0 012-2h13v16H6a2 2 0 00-2 2 2 2 0 002 2h13"/>', globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
-  check: '<path d="M5 12l5 5 9-10"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>', arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>'
+  check: '<path d="M5 12l5 5 9-10"/>', bell: '<path d="M6 16V11a6 6 0 0112 0v5l2 2H4zM10 20a2 2 0 004 0"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>', arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>'
 };
 const icon = n => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ICONS.file}</svg>`;
-function md(value) {
-  const inline = text => esc(text).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>');
-  const lines = String(value || '').replace(/\r\n?/g, '\n').split('\n');
-  const cells = line => line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(x => x.trim());
-  const separator = line => line.includes('|') && cells(line).every(x => /^:?-{3,}:?$/.test(x));
-  const block = (line, next) => !line.trim() || /^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>|```)/.test(line) || (line.includes('|') && next && separator(next));
-  const html = [];
-  for (let i = 0; i < lines.length;) {
-    const line = lines[i];
-    if (!line.trim()) { i++; continue; }
-    if (/^\s*```/.test(line)) { const code = []; i++; while (i < lines.length && !/^\s*```/.test(lines[i])) code.push(lines[i++]); i++; html.push('<pre><code>' + esc(code.join('\n')) + '</code></pre>'); continue; }
-    if (line.includes('|') && lines[i + 1] && separator(lines[i + 1])) {
-      const headers = cells(line), align = cells(lines[i + 1]).map(x => x.startsWith(':') && x.endsWith(':') ? 'center' : x.endsWith(':') ? 'right' : 'left'); i += 2;
-      const rows = []; while (i < lines.length && lines[i].trim() && lines[i].includes('|')) rows.push(cells(lines[i++]));
-      const cell = (x, j, tag) => '<' + tag + ' style="text-align:' + align[j] + '">' + inline(x || '') + '</' + tag + '>';
-      html.push('<div class="output-table"><table><thead><tr>' + headers.map((x,j) => cell(x,j,'th')).join('') + '</tr></thead><tbody>' + rows.map(row => '<tr>' + headers.map((_,j) => cell(row[j],j,'td')).join('') + '</tr>').join('') + '</tbody></table></div>'); continue;
-    }
-    const heading = line.match(/^\s*(#{1,6})\s+(.+)$/);
-    if (heading) { const level = Math.min(heading[1].length + 2, 6); html.push('<h' + level + '>' + inline(heading[2]) + '</h' + level + '>'); i++; continue; }
-    const list = line.match(/^\s*(?:([-*+])|(\d+)[.)])\s+(.+)$/);
-    if (list) { const tag = list[2] ? 'ol' : 'ul', items = []; while (i < lines.length) { const item = lines[i].match(tag === 'ol' ? /^\s*\d+[.)]\s+(.+)$/ : /^\s*[-*+]\s+(.+)$/); if (!item) break; items.push('<li>' + inline(item[1]) + '</li>'); i++; } html.push('<' + tag + '>' + items.join('') + '</' + tag + '>'); continue; }
-    if (/^\s*>/.test(line)) { const quote = []; while (i < lines.length && /^\s*>/.test(lines[i])) quote.push(lines[i++].replace(/^\s*>\s?/,'')); html.push('<blockquote>' + inline(quote.join(' ')) + '</blockquote>'); continue; }
-    const paragraph = [line]; i++; while (i < lines.length && !block(lines[i], lines[i + 1])) paragraph.push(lines[i++]); html.push('<p>' + inline(paragraph.join(' ')) + '</p>');
-  }
-  return html.join('');
-}
+const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/^#{1,4}\s*(.+)$/gm, '<b>$1</b>');
 const agentName = id => AGENTS[id] ? AGENTS[id].name : id === 'orch' ? 'Orchestration' : EMPLOYEES[id] ? EMPLOYEES[id].name : id;
-const UI = { requester: 'EMP-PRIYA', tab: 'decisions', view: 'live', memAdv: null, ops: [], raf: 0, run: null, ctl: null, recordings: [], totals: { runs: 0, reused: 0, committed: 0, pending: 0, blocked: 0, calls: 0, mcp: 0 } };
+const UI = { requester: 'EMP-PRIYA', tab: 'updates', view: 'live', memAdv: null, ops: [], raf: 0, run: null, ctl: null, recordings: [], totals: { runs: 0, reused: 0, committed: 0, pending: 0, blocked: 0, calls: 0, mcp: 0 } };
 
 /* ---------- static diagram ---------- */
 function buildStatic() {
   $('whoRow').innerHTML = Object.entries(EMPLOYEES).map(([id, e]) => `<button class="who-chip" data-who="${id}" aria-pressed="${id === UI.requester}"><i style="background:${TC[e.team]}">${e.name.split(' ').map(x => x[0]).join('')}</i>${esc(e.name)} <small>${esc(TEAMS[e.team].name)}</small></button>`).join('');
-  $('lanes').innerHTML = TEAM_ORDER.map(t => { const ids = Object.keys(AGENTS).filter(k => AGENTS[k].team === t);
-    return `<div class="lane" data-team="${t}"><h3><i style="background:${TC[t]}"></i>${TEAMS[t].name}<small>${ids.length} specialists</small></h3><div class="pills">${ids.map(id => `<button class="pill" id="pl-${id.replace('.', '-')}" data-agent="${id}" style="--c:${TC[t]}" title="${esc(AGENTS[id].does)}"><i></i><span>${esc(AGENTS[id].name)}</span></button>`).join('')}</div></div>`; }).join('');
+  $('lanes').innerHTML = TEAM_ORDER.map(t => { const roles = Object.entries(ROLES).filter(([, r]) => r.team === t);
+    return `<div class="lane bcol" data-team="${t}" style="--c:${TC[t]}"><h3><i style="background:${TC[t]}"></i>${TEAMS[t].name}<small>workbench</small></h3>${roles.map(([rid, r]) => `<div class="brole" id="role-${rid.replace('.', '-')}"><div class="brh" title="${esc(r.does)}"><b>${esc(r.name)}</b><small>${esc(r.does)}</small></div><div class="bagents" aria-label="Agents in this role">${Object.keys(AGENTS).filter(a => roleOf(a) === rid).map(a => `<span class="bag" id="bag-${a.replace('.', '-')}" title="${esc(AGENTS[a].name)}: ${esc(AGENTS[a].does)}">${esc(AGENTS[a].name)}</span>`).join('')}</div><div class="btasks" id="bt-${rid.replace('.', '-')}"></div></div>`).join('')}</div>`; }).join('');
   $('found').innerHTML = `<div class="tiles">${LAYER_ORDER.map(l => `<button class="tile" id="tile-${l}" data-layer="${l}"><span class="th">${icon(LAYERS[l].icon)}${LAYERS[l].short}</span><span class="cnt"></span><span class="tl"></span></button>`).join('')}</div><div class="fhead"><div><b>Shared AI foundation</b><span>Deterministic rules decide what each agent sees and what gets stored.</span></div><div class="ftot" id="ftot"></div></div>`;
   $('integ').innerHTML = `<div class="systems">${SYS_ORDER.map(k => `<button class="sys" id="sys-${k}" data-sys="${k}">${icon(SYSTEMS[k].icon)}<span><b>${SYSTEMS[k].name}</b><small>${SYSTEMS[k].sub}</small></span><span class="via"></span></button>`).join('')}</div><div class="gw"><b>Enterprise integration</b><span>MCP gateway · API gateway</span><span class="legend"><span class="via MCP" style="display:inline-block">MCP</span>agent tool call <span class="via API" style="display:inline-block">API</span>typed service call</span></div>`;
   $('orch').innerHTML = `<div class="ohead"><div class="oname">${icon('network')}Intelligence & orchestration</div><div class="oreq" id="oreq"></div></div><div class="pipe" id="pipe"></div><div class="othink" id="othink"></div><div class="tchips" id="tchips"></div>`;
   renderSugs(); renderOrch();
 }
-const pillEl = id => $('pl-' + id.replace('.', '-'));
+const pillEl = id => $('pl-' + String(id).replace('.', '-'));
+const taskEl = id => $('tc-' + id);
+const opEl = o => (o.task && taskEl(o.task)) || (o.agent && roleOf(o.agent) && $('role-' + roleOf(o.agent).replace('.', '-')));
 function renderSugs() {
   const t = EMPLOYEES[UI.requester].team;
   $('sugs').innerHTML = SUGGESTIONS[t].map(s => `<button class="sug" data-sug="${esc(s)}">${esc(s)}</button>`).join('');
@@ -85,7 +62,7 @@ function patchList(box, items) {
 }
 
 /* ---------- orchestration: nine precise steps ---------- */
-const OSTEPS = [['understand', 'Understand', ['requester', 'intent']], ['resolve', 'Resolve', ['lookup', 'entity']], ['scope', 'Scope', ['scope']], ['reuse', 'Reuse', ['known']], ['gaps', 'Gaps', ['missing']], ['memory', 'Memory rule', ['memory']], ['controls', 'Controls', ['controls', 'registry']], ['plan', 'Plan', ['planfix', 'success']], ['execute', 'Execute', []]];
+const OSTEPS = [['understand', 'Understand', ['requester', 'intent', 'asks']], ['resolve', 'Resolve', ['lookup', 'entity']], ['scope', 'Scope', ['scope']], ['reuse', 'Reuse', ['known']], ['gaps', 'Gaps', ['missing']], ['memory', 'Memory rule', ['memory']], ['controls', 'Controls', ['controls', 'registry']], ['plan', 'Plan', ['planfix', 'success']], ['execute', 'Execute', []]];
 function stepStates(r) {
   const s = OSTEPS.map(([id, name, types]) => ({ id, name, items: r ? r.decisions.filter(d => types.includes(d.type)) : [], state: 'pending' }));
   if (!r) return s;
@@ -107,23 +84,21 @@ function renderOrch() {
     const act = st.find(x => x.state === 'active');
     const last = [...r.decisions].reverse()[0];
     if (r.status === 'thinking') think = `<span class="spin"></span><b>${act ? act.name : 'Thinking'}</b>${last ? ' · ' + esc(last.title) : ''}`;
-    else if (r.status === 'running') { const run = r.tasks.filter(t => t.state === 'running').map(t => AGENTS[t.agent].name); think = `<span class="spin"></span><b>Execute</b> · ${run.length ? esc(run.join(' and ')) + ' working' : 'routing'} · ${r.tasks.filter(t => t.state === 'done').length} of ${r.tasks.length} done`; }
+    else if (r.status === 'running') { const run = [...new Set(r.tasks.filter(t => t.state === 'running').map(t => ROLES[t.role].name))]; think = `<span class="spin"></span><b>Workbench</b> · ${run.length ? esc(run.join(' and ')) + ' working' : 'assigning'} · ${r.tasks.filter(t => t.state === 'done').length} of ${r.tasks.length} tasks done`; }
     else if (r.status === 'clarify') think = '<b>Gaps</b> · waiting for your answer';
-    else if (r.status === 'done') think = `<b>${r.awaitingApproval ? 'Ready for approval' : 'Complete'}</b> · ${r.tasks.length} specialists in ${Math.round((r.t1 - r.t0) / 1000)} s`;
+    else if (r.status === 'done') think = `<b>Complete</b> · ${r.tasks.length} tasks across ${new Set(r.tasks.map(t => ROLES[t.role].team)).size} teams in ${Math.round((r.t1 - r.t0) / 1000)} s`;
     else if (r.status === 'failed') think = `<b>Stopped</b> · ${esc(r.error || '')}`;
   }
+  if (r && r.presentationPause) { const t = r.tasks.find(t => t.id === r.presentationPause.task); think = `<b>Step ${t?.step || ''} output ready</b> · Next step in ${r.presentationPause.seconds}s · Review the output below`; }
   setHTML($('othink'), think);
-  patchList($('tchips'), r ? r.tasks.map(t => ({ key: t.id, cls: 'tchip ' + (t.state || ''), html: `<i style="--c:${TC[AGENTS[t.agent].team]}"></i>${t.id} ${esc(AGENTS[t.agent].name)}${t.depends_on.length ? ` <span class="arr">after ${t.depends_on.join(', ')}</span>` : ''}` })) : []);
+  patchList($('tchips'), r ? r.tasks.map(t => ({ key: t.id, cls: 'tchip ' + (t.state || ''), html: `<i style="--c:${TC[ROLES[t.role].team]}"></i>${esc(ROLES[t.role].name)}: ${esc(t.title)}` })) : []);
   $('orch').classList.toggle('active', !!r && ['thinking', 'running'].includes(r.status));
 }
 
 /* ---------- lanes, tiles, systems, stats ---------- */
 function renderDiagram() {
   const r = UI.run;
-  document.querySelectorAll('.pill').forEach(el => {
-    const t = r && r.tasks.find(x => x.agent === el.dataset.agent);
-    el.classList.toggle('planned', !!t); el.classList.toggle('running', !!t && t.state === 'running'); el.classList.toggle('done', !!t && t.state === 'done');
-  });
+  renderBoard(r);
   for (const l of LAYER_ORDER) {
     const el = $('tile-' + l);
     const last = [...F.events].reverse().find(e => layerOfEvent(e.type) === l);
@@ -132,6 +107,29 @@ function renderDiagram() {
     if (tlEl.textContent !== tlText) tlEl.textContent = tlText;
   }
   setHTML($('ftot'), `<span><b>${UI.totals.reused}</b>reused</span><span><b>${UI.totals.committed}</b>stored</span><span><b>${UI.totals.blocked}</b>blocked</span>`);
+}
+function taskStatus(t) {
+  if (t.state === 'failed') return ['failed', 'Failed'];
+  if (t.state === 'running') return ['running', 'In progress'];
+  if (t.state === 'done') { const v = t.verdicts || []; if (v.some(x => x.status === 'approval')) return ['approval', 'Waiting for approval']; if (v.some(x => x.kind === 'output' && x.status === 'blocked')) return ['blocked', 'Blocked']; return ['done', 'Done']; }
+  return ['queued', 'Assigned'];
+}
+function outOf(t) { const v = (t.verdicts || []).find(x => x.kind === 'output' && x.id); return v ? F.outputs.find(o => o.id === v.id) : null; }
+function renderBoard(r) {
+  for (const rid of Object.keys(ROLES)) {
+    const box = $('bt-' + rid.replace('.', '-')), tasks = r ? r.tasks.filter(t => t.role === rid) : [];
+    patchList(box, tasks.map(t => { const [cls, label] = taskStatus(t), o = outOf(t);
+      return { key: r.id + t.id, cls: 'bcard ' + cls, html: `<button class="bcard-in" id="tc-${t.id}" data-task="${t.id}"><span class="bst"><i></i>${t.step ? 'Step ' + t.step + ' · ' : ''}${label}</span><b>${esc(t.title)}</b><small class="bwho">${icon('bell')} ${esc(t.person || '')}${cls === 'queued' ? ' notified' : ''}</small>${t.depends_on.length && cls === 'queued' ? `<small>after ${t.depends_on.map(d => { const x = r.tasks.find(y => y.id === d); return x ? esc(x.title) : d; }).join(', ')}</small>` : ''}${o && cls !== 'running' ? `<small class="bout">${esc(o.title)}</small>` : ''}</button>` }; }));
+    $('role-' + rid.replace('.', '-')).classList.toggle('busy', tasks.some(t => t.state === 'running'));
+    $('role-' + rid.replace('.', '-')).classList.toggle('has', tasks.length > 0);
+  }
+  /* which specialist agent is playing each role right now (shown quietly, in gray) */
+  document.querySelectorAll('.bag').forEach(el => {
+    const id = el.id.slice(4).replace('-', '.'), mine = r ? r.tasks.filter(t => t.agent === id) : [];
+    el.classList.toggle('act', mine.some(t => t.state === 'running'));
+    el.classList.toggle('used', mine.length > 0 && mine.every(t => ['done', 'failed'].includes(t.state)));
+    el.classList.toggle('planned', mine.some(t => !t.state || t.state === 'queued'));
+  });
 }
 const layerOfEvent = t => t.startsWith('knowledge') ? 'knowledge' : t.startsWith('memory') ? 'memory' : t.startsWith('approval') ? 'policy' : t.startsWith('commitment') ? 'events' : t.startsWith('content') ? 'knowledge' : 'events';
 function renderStats() {
@@ -148,14 +146,15 @@ const P2 = (x, y) => ({ x, y });
 function cpath(a, b, k = .5) { const dy = Math.max(45, Math.abs(b.y - a.y) * k) * (b.y >= a.y ? 1 : -1); return `M${a.x.toFixed(1)} ${a.y.toFixed(1)} C${a.x.toFixed(1)} ${(a.y + dy).toFixed(1)} ${b.x.toFixed(1)} ${(b.y - dy).toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`; }
 function opPath(o) {
   const off = (o.lane || 0) * 14;
-  const pr = o.agent ? rectIn(pillEl(o.agent)) : null, pb = pr && P2(pr.x + pr.w / 2, pr.y + pr.h), pt = pr && P2(pr.x + pr.w / 2, pr.y);
+  const oe = o.kind === 'request' ? null : opEl(o); if (o.kind !== 'request' && !oe) return null;
+  const pr = oe ? rectIn(oe) : null, pb = pr && P2(pr.x + pr.w / 2, pr.y + pr.h), pt = pr && P2(pr.x + pr.w / 2, pr.y);
   const tileTop = l => { const t = rectIn($('tile-' + l)); return P2(t.x + t.w / 2 + off, t.y); };
   if (o.kind === 'request') { const c = rectIn($('cmd')), r = rectIn($('orch')); return cpath(P2(c.x + c.w * .3, c.y + c.h), P2(c.x + c.w * .3, r.y)); }
   if (o.kind === 'dispatch') { const r = rectIn($('orch')); return cpath(P2(pt.x, r.y + r.h), pt); }
   if (o.kind === 'read') return cpath(tileTop(o.layer), pb);
   if (o.kind === 'write') return cpath(pb, tileTop(o.layer));
   if (o.kind === 'call') { const s = rectIn($('sys-' + o.sys)), e = P2(s.x + s.w / 2 + off / 2, s.y); return `M${pb.x.toFixed(1)} ${pb.y.toFixed(1)} C${pb.x.toFixed(1)} ${(pb.y + 170).toFixed(1)} ${e.x.toFixed(1)} ${(e.y - 170).toFixed(1)} ${e.x.toFixed(1)} ${e.y.toFixed(1)}`; }
-  if (o.kind === 'handoff') { const fr = rectIn(pillEl(o.from)), a = P2(fr.x + fr.w / 2, fr.y + fr.h), t = tileTop(o.layer); return `M${a.x.toFixed(1)} ${a.y.toFixed(1)} C${a.x.toFixed(1)} ${(a.y + 90).toFixed(1)} ${t.x.toFixed(1)} ${(t.y - 80).toFixed(1)} ${t.x.toFixed(1)} ${t.y.toFixed(1)} C${t.x.toFixed(1)} ${(t.y - 80).toFixed(1)} ${pb.x.toFixed(1)} ${(pb.y + 90).toFixed(1)} ${pb.x.toFixed(1)} ${pb.y.toFixed(1)}`; }
+  if (o.kind === 'handoff') { const fe = taskEl(o.fromTask); if (!fe) return null; const fr = rectIn(fe), a = P2(fr.x + fr.w / 2, fr.y + fr.h), t = tileTop(o.layer); return `M${a.x.toFixed(1)} ${a.y.toFixed(1)} C${a.x.toFixed(1)} ${(a.y + 90).toFixed(1)} ${t.x.toFixed(1)} ${(t.y - 80).toFixed(1)} ${t.x.toFixed(1)} ${t.y.toFixed(1)} C${t.x.toFixed(1)} ${(t.y - 80).toFixed(1)} ${pb.x.toFixed(1)} ${(pb.y + 90).toFixed(1)} ${pb.x.toFixed(1)} ${pb.y.toFixed(1)}`; }
   return null;
 }
 const OPCOL = { request: '#ffd27a', dispatch: '#b9cadb', read: '#7fd4ab', write: '#ffd27a', handoff: '#e2b6ff' };
@@ -220,7 +219,7 @@ async function runRequestInner(text, replay, opts = {}) {
   const run = { id: 'RUN-' + (++RUNSEQ), requester, text, clarified: opts.clarified || null, territory: null, t0: Date.now(), decisions: [], tasks: [], status: 'thinking', advisor: null, unit: null, stats: { reused: 0, reads: 0, calls: 0, mcp: 0, committed: 0, pending: 0, blocked: 0, rejected: 0, task: 0, ai: 0 }, orchText: '', record: { name: text.slice(0, 60), requester, text, orch: '', agents: {} }, replay };
   UI.run = run; UI.ctl = new AbortController(); F.runs.push(run); UI.totals.runs++;
   $('runBtn').disabled = true; $('stopBtn').hidden = false; $('cmdIn').value = ''; $('cmdIn').blur();
-  setTab('decisions');
+  setTab('updates');
   logEvent('request.received', `${EMPLOYEES[requester].name}: ${text}`, requester);
   addOp({ kind: 'request', dur: 900 });
   run.resolution = resolveEntities(text);
@@ -242,20 +241,17 @@ async function runRequestInner(text, replay, opts = {}) {
       run.stats.ai++;
       const { text: full } = await AI.sample(orchestratorPrompt(run), { modelTier: 'default', cache: false, signal: UI.ctl.signal, onText: ({ text: t }) => { run.orchText = t; feed(t); updateStream(); } });
       run.orchText = full; feed(full);
-      if (run.tasks.length < 2 && !run.clarify) {
-        run.decisions.push({ type: 'planfix', src: 'code', title: 'Incomplete plan; asking again in strict JSON', detail: 'The reply had fewer than two usable tasks; orchestration is asked for a complete plan.' }); renderAll();
+      if (!run.tasks.length && !run.clarify) {
+        run.decisions.push({ type: 'planfix', src: 'code', title: 'Plan unreadable; asking again in strict JSON', detail: 'The first reply had no usable tasks, so orchestration is asked once more for one JSON object.' }); renderAll();
         run.stats.ai++;
-        const fix = await AI.sample.json(orchestratorPrompt(run) + '\n\nIMPORTANT: your previous reply could not be used. Reply now with ONE JSON object only: {"decisions":[{"type":"...","title":"...","detail":"..."}],"tasks":[{"id":"T1","agent":"...","objective":"...","depends_on":[],"reads":[],"tools":[],"why":"..."}]} including the entity decision and all specialist tasks needed to cover the full request.', { modelTier: 'default', cache: false, signal: UI.ctl.signal });
-        const repaired = normalizeOrch(fix);
-        if (repaired.some(o => o.k === 'task')) run.tasks = [];
-        repaired.forEach(onObj); run.orchText += '\n' + JSON.stringify(fix);
+        const fix = await AI.sample.json(orchestratorPrompt(run) + '\n\nIMPORTANT: your previous reply could not be used. Reply now with ONE JSON object only: {"decisions":[{"type":"...","title":"...","detail":"..."}],"tasks":[{"id":"T1","agent":"...","objective":"...","depends_on":[],"reads":[],"tools":[],"why":"..."}]} including the entity decision.', { modelTier: 'default', cache: false, signal: UI.ctl.signal });
+        normalizeOrch(fix).forEach(onObj); run.orchText += '\n' + JSON.stringify(fix);
       }
     }
   } catch (e) {
     if (e.code === 'not_granted' || e.code === 'sampling_disabled' || e.code === 'not_declared') { AI.mode = 'replay-only'; setAIStatus(); return finishRun(run, 'Claude access isn’t allowed in this view, so live runs are off. Allow access when claude.ai asks, then reload.'); }
     if (e.code === 'cancelled') return finishRun(run, 'Stopped.');
     if (e.code === 'rate_limited' || e.code === 'session_expired' || e.code === 'refused') return finishRun(run, `Orchestration failed: ${errText(e)}`);
-    if (e.code === 'output_truncated') return finishRun(run, 'The AI plan was cut short. Increase MAX_TOKENS_ORCHESTRATOR and try again.');
     if (!run.tasks.length && !run.clarify) run.decisions.push({ type: 'planfix', src: 'code', title: 'AI plan failed; using the rules-based plan', detail: `Orchestration hit a problem (${errText(e)}), so a plan was built from rules instead.` });
     else if (!run.tasks.length) return finishRun(run, `Orchestration failed: ${errText(e)}`);
   }
@@ -269,91 +265,79 @@ async function runRequestInner(text, replay, opts = {}) {
     run.decisions.push({ type: 'planfix', src: 'code', title: 'Rules-based plan', detail: 'No usable AI plan, so specialists were chosen by rules from the request’s wording.' });
     fallbackPlan(run).forEach(o => handleOrch(run, o)); renderAll();
   }
+  if (run.tasks.length) finalizePlan(run);
   run.record.orch = run.orchText.split('\n').filter(s => s.trim().startsWith('{')).join('\n');
   if (run.clarify) { run.status = 'clarify'; renderAll(); $('runBtn').disabled = false; $('stopBtn').hidden = true; return; }
   if (!run.tasks.length) return finishRun(run, 'Orchestration produced no tasks.');
-  if (!replay) {
-    run.decisions.push({ type: 'planfix', src: 'code', title: 'Reviewing full outcome coverage', detail: 'Checking the entire registry for missing specialists, deliverables and dependencies.' }); renderAll();
-    try {
-      run.stats.ai++;
-      const audit = await AI.sample.json(orchestratorPrompt(run) + '\n\nCOMPLETENESS REVIEW: Review this draft against EVERY requested outcome and ALL registered specialists: ' + JSON.stringify(run.tasks) + '\nReturn ONE JSON object: {"tasks":[{"id":"T1","agent":"registered id","objective":"specific deliverable","depends_on":[],"reads":[],"tools":[],"why":"needed for this outcome"}],"coverage":[{"outcome":"requested outcome or necessary supporting deliverable","task_ids":["T1"],"done_when":"observable acceptance criterion"}]}. Return the full corrected plan, not just additions. Include research, approved resources, verification, formatting, scheduling, final preparation and follow-up only where necessary for this request. Check every registry role; include every relevant specialist, with no arbitrary task limit and no redundant busywork. Every outcome must have owners and a done_when criterion. Final synthesis depends on all its inputs; compliance follows drafting and precedes distribution; approvals must remain explicit. List tasks in dependency order.', { modelTier: 'default', cache: false, signal: UI.ctl.signal });
-      if (!Array.isArray(audit.tasks) || !audit.tasks.length || !Array.isArray(audit.coverage) || !audit.coverage.length) throw new Error('Completeness review returned no validated plan.');
-      run.tasks = []; normalizeOrch(audit).forEach(onObj);
-      run.coverage = audit.coverage;
-      const ids = new Set(run.tasks.map(t => t.id));
-      if (run.tasks.length !== audit.tasks.length || run.coverage.some(c => !c.outcome || !c.done_when || !Array.isArray(c.task_ids) || !c.task_ids.length || c.task_ids.some(id => !ids.has(id)))) throw new Error('Completeness review has missing task owners.');
-      run.decisions.push({ type: 'success', src: 'ai', title: 'Every outcome has an owner', detail: run.coverage.map(c => c.outcome + ': ' + c.done_when).join(' · ') });
-    } catch (e) { return finishRun(run, 'Completeness review failed: ' + errText(e)); }
-  }
-  try { finalizeTaskPlan(run); } catch (e) { return finishRun(run, e.message); }
   /* registry governance on the plan */
   if (run.advisor) { F.session.advisor = run.advisor; F.session.unit = run.unit || null; }
   F.session.requests.push({ text, adv: run.advisor });
   run.status = 'running'; renderAll();
-  /* 2. execute in dependency order, two at a time */
+  /* Execute one step at a time, allowing the completed output to be read. */
   const done = new Set();
   while (run.tasks.some(t => !t.state || t.state === 'queued')) {
     if (UI.ctl.signal.aborted) return finishRun(run, 'Stopped.');
     const ready = run.tasks.filter(t => (!t.state || t.state === 'queued') && t.depends_on.every(d => done.has(d)));
-    if (!ready.length) return finishRun(run, 'The task dependencies cannot be resolved. Please try again.');
-    for (let k = 0; k < ready.length; k += 2) {
-      await Promise.all(ready.slice(k, k + 2).map(t => runTask(run, t).catch(e => { t.state = 'failed'; t.error = errText(e); renderAll(); })));
-      ready.slice(k, k + 2).forEach(t => done.add(t.id));
+    if (!ready.length) { run.tasks.filter(t => t.state === 'queued').forEach(t => t.depends_on = []); continue; }
+    for (const t of ready) {
+      await runTask(run, t).catch(e => { t.state = 'failed'; t.error = errText(e); renderAll(); });
+      done.add(t.id);
       if (UI.ctl.signal.aborted) return finishRun(run, 'Stopped.');
     }
   }
-  if (!replay && run.coverage && run.tasks.every(t => t.state === 'done')) {
-    run.decisions.push({ type: 'success', src: 'code', title: 'Checking delivered outcomes', detail: 'Comparing specialist results against every acceptance criterion; approvals remain pending.' }); renderAll();
-    try {
-      run.stats.ai++;
-      const check = await AI.sample.json('Verify completion of this request: ' + run.text + '\nAcceptance criteria: ' + JSON.stringify(run.coverage) + '\nActual specialist results: ' + JSON.stringify(run.tasks.map(t => ({ id: t.id, agent: t.agent, objective: t.objective, result: t.result, verdicts: t.verdicts }))) + '\nReturn JSON only: {"outcomes":[{"outcome":"exact criterion outcome","status":"complete|awaiting_approval|incomplete","evidence":"specific task/result evidence or missing work"}]}. Assess every criterion. A task being done is insufficient: its actual output must deliver the requested result. Never claim a meeting is booked or material sent when only a draft/hold exists. Pending human approvals are awaiting_approval, not incomplete. Unsupported or missing deliverables are incomplete.', { modelTier: 'default', cache: false, signal: UI.ctl.signal });
-      if (!Array.isArray(check.outcomes) || check.outcomes.length !== run.coverage.length || run.coverage.some(c => check.outcomes.filter(o => o.outcome === c.outcome).length !== 1) || check.outcomes.some(o => !['complete', 'awaiting_approval', 'incomplete'].includes(o.status) || !o.evidence)) throw new Error('Final verification did not account for every outcome.');
-      run.completion = check.outcomes;
-      check.outcomes.forEach(o => run.decisions.push({ type: 'success', src: 'ai', title: o.outcome, detail: o.status + ': ' + o.evidence }));
-      const missing = check.outcomes.filter(o => o.status === 'incomplete');
-      if (missing.length) return finishRun(run, 'Unfinished outcomes: ' + missing.map(o => o.outcome + ' — ' + o.evidence).join('; '));
-    } catch (e) { return finishRun(run, 'Final outcome verification failed: ' + errText(e)); }
-  }
   finishRun(run);
 }
-/* Preserve forward references, then display and execute a stable dependency order. */
-function finalizeTaskPlan(run) {
-  const tasks = run.tasks, ids = new Set(tasks.map(t => t.id));
-  for (const t of tasks) {
-    if (t.depends_on.some(id => !ids.has(id))) throw new Error('A task depends on an unknown task. Please try again.');
-    t.depends_on = [...new Set(t.depends_on)];
-  }
-  // The final meeting brief consumes the comparison, approved resources and meeting details.
-  if (/compare|comparison/.test(run.text.toLowerCase()) && /meeting|schedule/.test(run.text.toLowerCase())) {
-    const inputs = tasks.filter(t => ['product.qar', 'marketing.gather', 'sales.schedule'].includes(t.agent));
-    for (const t of tasks.filter(t => t.agent === 'sales.prep')) {
-      t.depends_on = [...new Set([...t.depends_on, ...inputs.map(x => x.id)])];
+/* Tie every task to what was asked, and put the tasks in a clear order. */
+function splitAsks(text) {
+  const parts = text.replace(/\(clarification:.*\)$/i, '').split(/\s*(?:;|,\s*(?:and\s+)?|\s+and\s+(?=(?:also\s+)?(?:schedule|book|send|draft|create|write|prep|prepare|compare|find|identify|update|check|explain|set up|follow)))\s*/i).map(s => s.trim()).filter(s => s.split(' ').length >= 2);
+  return (parts.length ? parts : [text]).slice(0, 4).map(s => s.charAt(0).toUpperCase() + s.slice(1));
+}
+function finalizePlan(run) {
+  if (!run.asks || !run.asks.length) { run.asks = splitAsks(run.text).map(text => ({ text, tasks: [] })); run.decisions.push({ type: 'asks', src: 'code', title: `${run.asks.length} ${run.asks.length === 1 ? 'thing' : 'things'} requested`, detail: run.asks.map((a, k) => `${k + 1}. ${a.text}`).join(' · ') }); }
+  const words = s => new Set(s.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 3 && !['with', 'from', 'that', 'this', 'their', 'month', 'next', 'have', 'about'].includes(w)));
+  for (const t of run.tasks) {
+    if (!(t.ask >= 1 && t.ask <= run.asks.length)) {
+      const tw = words(t.title + ' ' + t.objective); let best = 1, score = -1;
+      run.asks.forEach((a, k) => { const aw = words(a.text); let s = 0; aw.forEach(w => { if ([...tw].some(x => x.startsWith(w.slice(0, 5)) || w.startsWith(x.slice(0, 5)))) s++; }); if (/schedul|meeting|book|calendar/.test(a.text.toLowerCase()) && t.role === 'sales.ssc') s += 3; if (s > score) { score = s; best = k + 1; } });
+      t.ask = best;
     }
+    run.asks[t.ask - 1].tasks.push(t.id);
   }
-  const ordered = [], remaining = [...tasks], done = new Set();
-  while (remaining.length) {
-    const i = remaining.findIndex(t => t.depends_on.every(id => done.has(id)));
-    if (i < 0) throw new Error('The AI plan has circular task dependencies. Please try again.');
-    const [t] = remaining.splice(i, 1); ordered.push(t); done.add(t.id);
-  }
-  const labels = new Map(ordered.map((t, i) => [t.id, 'T' + (i + 1)]));
-  for (const t of ordered) { t.depends_on = t.depends_on.map(id => labels.get(id)); t.id = labels.get(t.id); }
-  if (run.coverage) run.coverage.forEach(c => c.task_ids = c.task_ids.map(id => labels.get(id)));
-  run.tasks = ordered;
+  run.asks.forEach((a, k) => { if (!a.tasks.length) run.decisions.push({ type: 'registry', src: 'code', title: `Not covered: “${a.text}”`, detail: 'No task serves this part of the request. Flagged so nothing is silently dropped.' }); });
+  /* sequential order: dependencies first, then plan order */
+  const order = [], seen = new Set();
+  const visit = t => { if (seen.has(t.id)) return; seen.add(t.id); t.depends_on.forEach(d => { const x = run.tasks.find(y => y.id === d); if (x) visit(x); }); order.push(t); };
+  run.tasks.forEach(visit);
+  order.forEach((t, k) => t.step = k + 1);
+  run.tasks.sort((a, b) => a.step - b.step);
 }
 function handleOrch(run, o) {
   if (o.k === 'decision') {
     run.decisions.push(Object.assign({ src: 'ai' }, o));
     if (o.type === 'entity') { if (o.advisor && ADVISORS[o.advisor]) run.advisor = o.advisor; if (o.unit && run.advisor && ADVISORS[run.advisor].units[o.unit]) run.unit = o.unit; if (o.territory && TERRITORIES[o.territory]) run.territory = o.territory; else if (!run.advisor && run.resolution.territories[0]) run.territory = run.resolution.territories[0].id; UI.memAdv = run.advisor || UI.memAdv; flashTile('graph', 'read'); }
     if (o.type === 'known') flashTile('memory', 'read');
+    if (o.type === 'asks' && Array.isArray(o.asks)) run.asks = o.asks.map(String).filter(Boolean).slice(0, 5).map(text => ({ text, tasks: [] }));
   } else if (o.k === 'task') {
+    if (run.tasks.length >= 5) return;
     const arr = x => Array.isArray(x) ? x : x ? [x] : [];
     let id = String(o.id || 'T' + (run.tasks.length + 1)); if (run.tasks.some(x => x.id === id)) id = 'T' + (run.tasks.length + 1);
     const t = { id, agent: resolveAgentId(o.agent) || String(o.agent || ''), objective: String(o.objective || o.task || '').slice(0, 300), depends_on: arr(o.depends_on || o.dependsOn).map(String), reads: arr(o.reads).map(String), tools: arr(o.tools).map(resolveToolName).filter(Boolean), why: String(o.why || '').slice(0, 200) };
+    const rr = ROLES[o.role] ? o.role : null;
+    if (!AGENTS[t.agent] && rr) t.agent = ROLE_DEFAULT_AGENT[rr];
     if (!t.objective) t.objective = AGENTS[t.agent] ? AGENTS[t.agent].does : 'Contribute to the request';
+    t.role = rr && roleOf(t.agent) && ROLES[rr].team === AGENTS[t.agent]?.team ? rr : roleOf(t.agent);
+    t.title = String(o.title || '').trim().slice(0, 60) || t.objective.split(/[,.;]/)[0].split(' ').slice(0, 6).join(' ');
+    t.ask = Number(o.ask) || null;
+    /* business assignment rules for Sales work */
+    if (AGENTS[t.agent] && AGENTS[t.agent].team === 'sales') {
+      const txt = t.title + ' ' + t.objective, rule = ROLE_RULES.find(x => x.test.test(txt));
+      if (rule && t.role !== rule.role) { const from = ROLES[t.role] ? ROLES[t.role].name : '—'; t.role = rule.role; t.agent = rule.agent(txt); run.decisions.push({ type: 'registry', src: 'code', title: `“${t.title}” → ${ROLES[rule.role].name}`, detail: `${rule.why}. Moved from ${from}.` }); }
+    }
+    t.person = ROLES[t.role] ? (t.role === 'sales.wholesalers' && run.advisor && EMPLOYEES[run.requester].team === 'sales' && ADVISORS[run.advisor].coverage.includes(run.requester) && run.requester !== 'EMP-SAM' ? EMPLOYEES[run.requester].name : ROLES[t.role].person) : '';
     if (!AGENTS[t.agent]) { run.decisions.push({ type: 'registry', src: 'code', title: `Unknown agent “${t.agent}” dropped`, detail: 'Orchestration can only route to registered specialists.' }); return; }
     const bad = t.tools.filter(x => !toolAllowed(t.agent, x));
     if (bad.length) { t.tools = t.tools.filter(x => toolAllowed(t.agent, x)); run.decisions.push({ type: 'registry', src: 'code', title: `${AGENTS[t.agent].name}: ${bad.length} tool${bad.length > 1 ? 's' : ''} removed`, detail: `${bad.join(', ')} ${bad.length > 1 ? 'are' : 'is'} not on this agent’s allow-list at the gateway.` }); UI.totals.blocked++; }
+    t.depends_on = t.depends_on.filter(d => run.tasks.some(x => x.id === d));
     t.state = 'queued'; run.tasks.push(t);
   } else if (o.k === 'clarify') {
     if (run.clarified) run.decisions.push({ type: 'missing', src: 'code', title: 'Proceeding on your earlier answer', detail: `Orchestration wanted to ask “${o.question}” again; the app lets it ask only once, so it continues with stated assumptions.` });
@@ -363,25 +347,25 @@ function handleOrch(run, o) {
 async function runTask(run, t) {
   const a = AGENTS[t.agent], sig = UI.ctl.signal;
   t.state = 'running'; t.t0 = Date.now(); UI.openTask = t.id; renderAll();
-  addOp({ kind: 'dispatch', agent: t.agent, dur: 800 }); await sleep(800);
+  addOp({ kind: 'dispatch', agent: t.agent, task: t.id, dur: 800 }); await sleep(800);
   /* foundation assembles the context packet */
   t.packet = buildPacket(t, run);
   const layers = [...new Set(t.packet.items.map(i => i.layer))];
-  layers.forEach((l, k) => { addOp({ kind: 'read', agent: t.agent, layer: l, lane: k - (layers.length - 1) / 2, dur: 1400 }); flashTile(l, 'read'); });
+  layers.forEach((l, k) => { addOp({ kind: 'read', agent: t.agent, task: t.id, layer: l, lane: k - (layers.length - 1) / 2, dur: 1400 }); flashTile(l, 'read'); });
   const reusedItems = t.packet.items.filter(i => { const rec = F.memory.find(m => m.id === i.id) || F.findings.find(k => k.id === i.id); return rec && (rec.origin || rec.by) && (rec.origin || rec.by) !== t.agent; });
   run.stats.reads += t.packet.items.length;
   renderAll(); await sleep(1200);
   /* upstream work */
   const upstream = t.depends_on.map(d => run.tasks.find(x => x.id === d)).filter(x => x && x.result).map(x => ({ task: x.id, agent: x.agent, title: x.result.output?.title || '', body: x.result.output?.body || '', ids: (x.verdicts || []).filter(v => v.id).map(v => v.id) }));
   t.upstreamReuse = upstream.length;
-  upstream.forEach((up, k) => { const pub = run.tasks.find(x => x.id === up.task); const l = pub && pub.verdicts && pub.verdicts.some(v => v.kind === 'memory' && v.status === 'committed') ? 'memory' : 'knowledge'; addOp({ kind: 'handoff', from: up.agent, agent: t.agent, layer: l, lane: k, dur: 2000 }); });
+  upstream.forEach((up, k) => { const pub = run.tasks.find(x => x.id === up.task); const l = pub && pub.verdicts && pub.verdicts.some(v => v.kind === 'memory' && v.status === 'committed') ? 'memory' : 'knowledge'; addOp({ kind: 'handoff', from: up.agent, fromTask: up.task, agent: t.agent, task: t.id, layer: l, lane: k, dur: 2000 }); });
   if (upstream.length) await sleep(900);
   t.calls = []; t.toolResults = [];
   const onCall = async (name, input) => {
     if (sig.aborted) throw new Error('stopped');
     const T = TOOLS[name];
     if (!T || !toolAllowed(t.agent, name)) { t.calls.push({ name, input, error: 'Not permitted for this agent' }); UI.totals.blocked++; renderAll(); throw new Error(`${name} is not permitted for ${a.name}`); }
-    addOp({ kind: 'call', agent: t.agent, sys: T.sys, via: T.via, dur: 1500 });
+    addOp({ kind: 'call', agent: t.agent, task: t.id, sys: T.sys, via: T.via, dur: 1500 });
     let out; try { out = capResult(T.run(input && typeof input === 'object' ? input : {})); } catch (e) { t.calls.push({ name, input, error: e.message }); renderAll(); throw e; }
     t.calls.push({ name, input, sys: T.sys, via: T.via, rw: T.rw, out }); t.toolResults.push({ name, out });
     run.stats.calls++; UI.totals.calls++; if (T.via === 'MCP') { run.stats.mcp++; UI.totals.mcp++; }
@@ -434,15 +418,27 @@ async function runTask(run, t) {
   const wl = new Set(t.verdicts.filter(v => !['blocked', 'rejected', 'read'].includes(v.status)).map(v => ({ knowledge: 'knowledge', memory: 'memory', commitment: 'events', output: 'knowledge' }[v.kind])));
   if (t.verdicts.some(v => v.event)) wl.add('events');
   if (t.verdicts.some(v => ['published', 'committed'].includes(v.status))) wl.add('graph');
-  [...wl].forEach((l, k) => { addOp({ kind: 'write', agent: t.agent, layer: l, lane: k - (wl.size - 1) / 2, dur: 1400 }); flashTile(l, 'write'); });
+  [...wl].forEach((l, k) => { addOp({ kind: 'write', agent: t.agent, task: t.id, layer: l, lane: k - (wl.size - 1) / 2, dur: 1400 }); flashTile(l, 'write'); });
   if (t.verdicts.some(v => v.status === 'blocked' || v.status === 'rejected')) flashTile('policy', 'write');
   /* event fan-out: subscribers get notified */
   const subs = new Set(t.verdicts.flatMap(v => v.event ? v.event.subscribers : []));
-  subs.forEach(sid => { const el = pillEl(sid); if (el) { el.classList.remove('notified'); void el.offsetWidth; el.classList.add('notified'); } });
+  new Set([...subs].map(roleOf).filter(Boolean)).forEach(rid => { const el = $('role-' + rid.replace('.', '-')); if (el) { el.classList.remove('notified'); void el.offsetWidth; el.classList.add('notified'); } });
   t.state = 'done'; t.t1 = Date.now();
   if (t.verdicts.some(v => v.kind === 'memory')) badge('memory', true);
-  if (t.verdicts.some(v => v.kind === 'output')) badge('outputs', true);
-  renderAll(); await sleep(1100);
+  if (t.verdicts.some(v => v.kind === 'output')) badge('updates', true);
+  setTab('updates');
+  renderAll();
+  // Start the reading interval only after the completed result has painted.
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  const words = String(t.result?.output?.body || t.result?.says || '').split(/\s+/).filter(Boolean).length;
+  const seconds = Math.min(30, Math.max(8, Math.ceil(words / 3)));
+  run.presentationPause = { task: t.id, seconds };
+  renderAll();
+  for (let remaining = seconds; remaining > 0 && !UI.ctl.signal.aborted; remaining--) {
+    run.presentationPause.seconds = remaining; renderAll();
+    for (let k = 0; k < 10 && !UI.ctl.signal.aborted; k++) await sleep(100);
+  }
+  run.presentationPause = null; renderAll();
 }
 function defaultArgs(n, run, t) {
   const tick = mentionsFunds(run.text + ' ' + t.objective), people = (run.resolution.people || []).map(p => p.name);
@@ -454,9 +450,6 @@ function errText(e) {
   return e && e.code ? `${map[e.code] || e.code}${e.message && !map[e.code] ? ' (' + e.message + ')' : ''}` : String(e && e.message || e);
 }
 function finishRun(run, error) {
-  if (!error && run.tasks.some(t => t.state !== 'done')) error = 'Some specialist tasks did not finish successfully. Review the Agents tab.';
-  if (!error && run.tasks.some(t => (t.verdicts || []).some(v => ['blocked', 'rejected'].includes(v.status)))) error = 'Some contributions did not pass verification. Review the Agents and Outputs tabs.';
-  run.awaitingApproval = (run.completion || []).some(o => o.status === 'awaiting_approval') || run.tasks.some(t => (t.verdicts || []).some(v => v.status === 'approval'));
   run.status = error ? 'failed' : 'done'; run.error = error; run.t1 = Date.now();
   $('runBtn').disabled = false; $('stopBtn').hidden = true;
 
@@ -470,12 +463,12 @@ const SI = { done: '✓', active: '', pending: '', skipped: '–', failed: '!' }
 function stepBody(r, s) {
   if (s.id === 'plan') {
     const succ = s.items.filter(d => d.type === 'success'), fixes = s.items.filter(d => d.type === 'planfix');
-    return `${fixes.map(d => `<div class="dl"><span class="tag2 code">RULE</span><span><b>${esc(d.title)}</b> ${esc(d.detail || '')}</span></div>`).join('')}${r.tasks.map(t => `<div class="dl"><span class="tid" style="background:${TC[AGENTS[t.agent].team]}">${t.id}</span><span><b>${esc(AGENTS[t.agent].name)}</b> · ${esc(t.objective)}${t.depends_on.length ? ` <small>after ${t.depends_on.join(', ')}</small>` : ''}</span></div>`).join('')}${succ.map(d => `<div class="dl"><span class="tag2 ai">DONE WHEN</span><span>${esc(d.title)}</span></div>`).join('')}`;
+    return `${fixes.map(d => `<div class="dl"><span class="tag2 code">RULE</span><span><b>${esc(d.title)}</b> ${esc(d.detail || '')}</span></div>`).join('')}${r.tasks.map(t => `<div class="dl"><span class="tid" style="background:${TC[ROLES[t.role].team]}">${t.id}</span><span><b>${esc(t.title)}</b> → ${esc(TEAMS[ROLES[t.role].team].name)} · ${esc(ROLES[t.role].name)}<small>${esc(t.objective)}${t.depends_on.length ? ' · after ' + t.depends_on.join(', ') : ''}</small></span></div>`).join('')}${succ.map(d => `<div class="dl"><span class="tag2 ai">DONE WHEN</span><span>${esc(d.title)}</span></div>`).join('')}`;
   }
   if (s.id === 'execute') {
     return r.tasks.map(t => { const up = t.depends_on.map(d => r.tasks.find(x => x.id === d)).filter(Boolean);
       const icon2 = t.state === 'done' ? '✓' : t.state === 'running' ? '<span class="spin"></span>' : t.state === 'failed' ? '!' : '·';
-      return `<div class="dl"><span class="tid ${t.state || ''}" style="background:${TC[AGENTS[t.agent].team]}">${icon2}</span><span><b>${esc(AGENTS[t.agent].name)}</b>${t.state === 'done' && t.result ? ` · ${esc(t.result.says)}` : t.state === 'failed' ? ` · failed: ${esc(t.error)}` : t.state === 'running' ? ' · working' : ' · waiting'}${up.length ? `<small>Builds on ${up.map(x => esc(x.id + ' ' + AGENTS[x.agent].name)).join(', ')} through the foundation</small>` : ''}${t.verdicts ? `<small>${t.verdicts.map(v => `${v.kind} ${v.status}`).join(' · ')}</small>` : ''}</span></div>`; }).join('');
+      return `<div class="dl"><span class="tid ${t.state || ''}" style="background:${TC[ROLES[t.role].team]}">${icon2}</span><span><b>${esc(ROLES[t.role].name)}: ${esc(t.title)}</b>${t.state === 'done' && t.result ? ` · ${esc(t.result.says)}` : t.state === 'failed' ? ` · failed: ${esc(t.error)}` : t.state === 'running' ? ' · working' : ' · waiting'}${up.length ? `<small>Builds on ${up.map(x => esc(ROLES[x.role].name + '’s “' + x.title + '”')).join(', ')} through the foundation</small>` : ''}${t.verdicts ? `<small>${t.verdicts.map(v => `${v.kind} ${v.status}`).join(' · ')}</small>` : ''}</span></div>`; }).join('');
   }
   return s.items.map(d => `<div class="dl"><span class="tag2 ${d.src === 'code' ? 'code' : 'ai'}">${d.src === 'code' ? 'RULE' : 'AI'}</span><span><b>${esc(d.title)}</b>${d.detail ? ' ' + esc(d.detail) : ''}${d.uses && d.uses.length ? `<small>${esc(d.uses.join(' · '))}</small>` : ''}</span></div>`).join('');
 }
@@ -485,7 +478,7 @@ function renderDecisions() {
   const items = [];
   if (r.status === 'done') items.push({ key: 'sum', cls: 'summary', html: `<h3>${r.tasks.length} specialists · ${Math.round((r.t1 - r.t0) / 1000)} s</h3><div class="sgrid"><div><b>${r.stats.reused}</b>facts reused</div><div><b>${r.stats.reads}</b>records delivered</div><div><b>${r.stats.calls}</b>system calls</div><div><b>${r.stats.committed}</b>stored</div><div><b>${r.stats.pending + r.stats.task}</b>kept scoped / pending</div><div><b>${r.stats.blocked}</b>blocked or rejected</div></div>` });
   if (r.status === 'failed') items.push({ key: 'fail', cls: 'blocked', html: `<b>${esc(r.error)}</b>${r.tasks.length ? '' : '<br>No specialist ran.'}<div style="margin-top:8px"><button class="lbtn" data-act="retry">Try again</button></div>${r.orchText ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px">What orchestration returned</summary><div class="stream">${esc(r.orchText.slice(-3000))}</div></details>` : ''}` });
-  if (r.status === 'clarify') items.push({ key: 'clar-' + r.id, cls: 'clar', html: `<b>One question before planning</b><p style="margin:4px 0 0">${esc(r.clarify)}</p><input id="clarIn" placeholder="Your answer"><div style="display:flex;gap:6px;margin-top:6px"><button class="lbtn primary" data-act="answer">Continue</button><button class="lbtn" data-act="assume">Let it assume</button></div>` });
+  if (r.status === 'clarify') items.push({ key: 'clar-note', cls: 'clar', html: `<b>Waiting for your answer</b><p style="margin:4px 0 0">${esc(r.clarify)}</p><button class="lbtn primary" data-tab="updates" style="margin-top:6px">Answer in Updates</button>` });
   items.push({ key: 'req-' + r.id, cls: 'dcard', html: `<div class="dt">REQUEST · ${esc(EMPLOYEES[r.requester].name)}, ${esc(TEAMS[EMPLOYEES[r.requester].team].name)}</div><b class="tt2">“${esc(r.text)}”</b>` });
   stepStates(r).forEach((s, k) => items.push({ key: 'st-' + s.id, cls: 'scard ' + s.state, html: `<div class="sh"><span class="sn">${s.state === 'done' ? '✓' : s.state === 'active' ? '<span class="spin"></span>' : k + 1}</span><b>${s.name}</b>${s.state === 'skipped' ? '<small>not stated</small>' : ''}</div>${['pending', 'skipped'].includes(s.state) && !(s.id === 'execute' && r.tasks.length) ? '' : `<div class="sb">${stepBody(r, s)}</div>`}` }));
   patchList(pane, items);
@@ -496,7 +489,7 @@ function taskHTML(r, t) {
   return `<summary><span class="av" style="background:${TC[a.team]};width:28px;height:28px;border-radius:8px;font-size:12px;font-weight:800;color:#0e2135">${t.id}</span><span><b>${esc(a.name)}</b><small>${esc(TEAMS[a.team].name)} · ${esc(t.objective)}</small></span><span class="st ${st}">${st === 'queued' ? 'Waiting' : st === 'running' ? 'Working' : st === 'done' ? 'Done' : 'Failed'}</span></summary><div class="tbody">
     ${p ? `<div class="sec"><b>${icon('memory')} Foundation → ${esc(a.name)} · ${p.items.length} items</b>${byLayer.map(([l, its]) => its.map(i => `<div class="pk"><span class="lid">${esc(i.id)}</span><span>${esc(i.label)}: ${esc(String(i.value).slice(0, 150))}<small>${esc(LAYERS[l].short)} · from ${esc(i.from)} · scope ${esc(i.scope)}</small></span></div>`).join('')).join('')}${p.withheld.map(w => `<div class="wh">Withheld ${esc(w.id)}: ${esc(w.why)}</div>`).join('')}</div>` : ''}
     ${t.calls && t.calls.length ? `<div class="sec"><b>${icon('arrow')} ${esc(a.name)} → enterprise systems</b>${t.calls.map(c => `<div class="pk"><span class="vbadge ${c.via || 'API'}">${c.via || '—'}</span><span><code style="font:11.5px var(--code)">${esc(c.name)}(${esc(JSON.stringify(c.input || {}).slice(0, 90))})</code><small>${c.error ? 'Blocked: ' + esc(c.error) : esc(SYSTEMS[c.sys].name) + ' · ' + esc(JSON.stringify(c.out).slice(0, 140))}</small></span></div>`).join('')}</div>` : ''}
-    ${t.result ? `<div class="sec"><b>${icon('bolt')} ${esc(a.name)} → foundation</b><p class="says">“${esc(t.result.says || '')}”</p>${t.result.output ? `<div class="outbody"><h3>${esc(t.result.output.title)}</h3>${md(t.result.output.body)}</div>` : ''}${(t.result.open_questions || []).length ? `<p class="hint" style="margin:6px 0 0">Open question: ${esc(t.result.open_questions.join(' '))}</p>` : ''}</div>` : ''}
+    ${t.result ? `<div class="sec"><b>${icon('bolt')} ${esc(a.name)} → foundation</b><p class="says">“${esc(t.result.says || '')}”</p>${t.result.output ? `<div class="outbody"><b>${esc(t.result.output.title)}</b>\n${md(t.result.output.body)}</div>` : ''}${(t.result.open_questions || []).length ? `<p class="hint" style="margin:6px 0 0">Open question: ${esc(t.result.open_questions.join(' '))}</p>` : ''}</div>` : ''}
     ${t.verdicts ? `<div class="sec"><b>${icon('shield')} Gatekeeper</b>${t.verdicts.length ? t.verdicts.map(v => `<div class="vd"><span class="vb ${v.status}">${v.status.toUpperCase()}</span><span><b>${esc(v.kind)}: ${esc(v.title)}</b><small>${esc(v.reason)}${v.event ? ` · event ${esc(v.event.type)} → ${esc(v.event.subscribers.map(agentName).join(', ') || 'no subscribers')}` : ''}</small></span></div>`).join('') : '<p class="hint">Nothing proposed for storage. Read only.</p>'}</div>` : ''}
     ${t.retry ? `<p class="hint" style="margin-top:6px">First attempt failed (${esc(t.retry)}); retried once.</p>` : ''}
     ${st === 'failed' ? `<div class="blocked">This agent failed: ${esc(t.error)}. The rest of the plan continued.</div>` : ''}
@@ -539,7 +532,7 @@ function renderOutputs() {
   const pane = $('pane-outputs');
   if (!F.outputs.length) { patchList(pane, [{ key: 'empty', cls: 'empty', html: 'Briefs, drafts, findings and notes appear here as specialists finish. Anything client-facing waits for human approval.' }]); return; }
   patchList(pane, [...F.outputs].reverse().map(o => { const a = AGENTS[o.agent], body = md(o.body);
-    return { key: o.id, cls: 'dcard', html: `<div class="dt"><span class="av sm" style="background:${TC[a.team]};width:18px;height:18px;border-radius:5px"></span>${esc(a.name)} · ${esc(o.kind)} · ${esc(o.run)}</div>${o.kind === 'email' ? `<div class="olk" style="margin-top:6px"><div class="bar"><span>Outlook draft</span><span>${esc(o.status)}</span></div><div class="bd"><h3>${esc(o.title)}</h3>${body}</div></div>` : `<b class="tt2">${esc(o.title)}</b><div class="outbody" style="margin-top:5px">${body}</div>`}
+    return { key: o.id, cls: 'dcard', html: `<div class="dt"><span class="av sm" style="background:${TC[a.team]};width:18px;height:18px;border-radius:5px"></span>${esc(a.name)} · ${esc(o.kind)} · ${esc(o.run)}</div>${o.kind === 'email' ? `<div class="olk" style="margin-top:6px"><div class="bar"><span>Outlook draft</span><span>${esc(o.status)}</span></div><div class="bd"><b>${esc(o.title)}</b>\n\n${body}</div></div>` : `<b class="tt2">${esc(o.title)}</b><div class="outbody" style="margin-top:5px">${body}</div>`}
       <p class="hint" style="margin:6px 0 0">Used: ${esc((o.used || []).join(', ') || '—')}${o.flagged && o.flagged.length ? ` · <b style="color:var(--hl-fg)">Check before use: ${esc(o.flagged.join(', '))}</b>` : ''}</p>${o.status === 'Waiting for approval' ? `<button class="lbtn primary" data-approve="${o.id}" style="margin-top:6px">${icon('check')} Approve</button>` : `<span class="vb published" style="display:inline-block;margin-top:6px">${esc(o.status.toUpperCase())}</span>`}` }; }));
 }
 function renderEvents() {
@@ -547,16 +540,73 @@ function renderEvents() {
   if (!F.events.length) { patchList(pane, [{ key: 'empty', cls: 'empty', html: 'Every change in the foundation publishes an event, and subscribing specialists are notified.' }]); return; }
   patchList(pane, [...F.events].reverse().slice(0, 80).map(e => ({ key: e.id, cls: 'vd', html: `<span class="vb read">${esc(e.id)}</span><span><b>${esc(e.type)}</b> · ${esc(e.detail)}<small>${esc(agentName(e.by))} · ${esc(e.at)}${e.subscribers.length ? ' · notified ' + esc(e.subscribers.map(agentName).join(', ')) : ''}</small></span>` })));
 }
-const PANES = { decisions: renderDecisions, packets: renderPackets, memory: renderMemory, outputs: renderOutputs, events: renderEvents };
+function verdictLines(t) {
+  return (t.verdicts || []).filter(v => v.kind !== 'output' || v.status === 'blocked').map(v => {
+    const txt = v.kind === 'knowledge' ? (v.status === 'published' ? `Shared with all teams: ${v.title}` : `Not shared: ${v.title} (${v.reason})`)
+      : v.kind === 'memory' ? ({ committed: `Remembered: ${v.title}`, pending: `Needs the advisor’s confirmation: ${v.title}`, task: `Kept with this task only: ${v.title}`, rejected: `Not remembered: ${v.title} (a guess, not stated)`, read: `Already known: ${v.title}`, blocked: `Not allowed: ${v.title}` }[v.status] || v.title)
+      : v.kind === 'commitment' ? `New follow-up task: ${v.title}` : `Blocked: ${v.reason}`;
+    return `<div class="uv ${v.status}">${esc(txt)}</div>`;
+  }).join('');
+}
+function outputHTML(o) {
+  if (!o) return '';
+  const body = md(o.body);
+  return o.kind === 'email' ? `<div class="olk" style="margin-top:6px"><div class="bar"><span>Outlook draft</span><span>${esc(o.status)}</span></div><div class="bd"><b>${esc(o.title)}</b>\n\n${body}</div></div>` : `<div class="outbody" style="margin-top:6px"><b>${esc(o.title)}</b>\n${body}</div>`;
+}
+function renderUpdates() {
+  const r = UI.run, pane = $('pane-updates');
+  if (!r) { patchList(pane, [{ key: 'empty', cls: 'empty', html: `<p style="font:400 19px/1.4 var(--serif);color:var(--ink);margin:0 0 8px">Ask for an outcome and press Enter.</p>Orchestration decides the plan, then assigns each task to the right team: Wholesalers, SSC, Product specialists, Content & campaigns and so on. The tasks appear on the workbench, and each team’s output shows up here the moment it’s done.` }]); return; }
+  const items = [{ key: 'req-' + r.id, cls: 'dcard', html: `<div class="dt">REQUEST · ${esc(EMPLOYEES[r.requester].name)}, ${esc(TEAMS[EMPLOYEES[r.requester].team].name)}</div><b class="tt2">“${esc(r.text)}”</b>` }];
+  if (r.status === 'thinking') { const act = stepStates(r).find(x => x.state === 'active'); items.push({ key: 'plan-wait', cls: 'dcard ustat', html: `<span class="spin"></span> Orchestration is planning${act ? ' · ' + esc(act.name) : ''}` }); }
+  if (r.status === 'clarify') items.push({ key: 'clar-' + r.id, cls: 'clar', html: `<b>One question before planning</b><p style="margin:4px 0 0">${esc(r.clarify)}</p><input id="clarIn" placeholder="Your answer"><div style="display:flex;gap:6px;margin-top:6px"><button class="lbtn primary" data-act="answer">Continue</button><button class="lbtn" data-act="assume">Let it assume</button></div>` });
+  if (r.tasks.length) {
+    const asks = r.asks && r.asks.length ? r.asks : [{ text: r.text, tasks: r.tasks.map(t => t.id) }];
+    items.push({ key: 'plan-' + r.id, cls: 'dcard plancard', html: `<div class="dt">YOUR REQUEST, BROKEN INTO ${r.tasks.length} ${r.tasks.length === 1 ? 'STEP' : 'STEPS'}</div>${asks.map((a, k) => `<div class="ask"><div class="askh"><span class="askn">${k + 1}</span><b>${esc(a.text)}</b>${a.tasks.length ? '' : '<em class="bst blocked">Not covered</em>'}</div>${a.tasks.map(id => r.tasks.find(t => t.id === id)).filter(Boolean).sort((x, y) => x.step - y.step).map(t => { const [cls, label] = taskStatus(t), R = ROLES[t.role], A = AGENTS[t.agent];
+      const tools = [...new Set((t.calls || []).map(c => c.name))];
+      return `<button class="steprow" data-task="${t.id}"><span class="stepn" style="background:${TC[R.team]}">${t.step}</span><span class="stepb"><b>${esc(t.title)}</b><small>${esc(TEAMS[R.team].name)} · ${esc(R.name)}${t.person ? ' · ' + esc(t.person) : ''}${t.depends_on.length ? ' · after step ' + t.depends_on.map(d => (r.tasks.find(x => x.id === d) || {}).step).filter(Boolean).join(', ') : ''}</small><small class="agentline">Agent: ${esc(A.name)}${tools.length ? ' · tools: ' + esc(tools.join(', ')) : t.tools.length ? ' · can use: ' + esc(t.tools.join(', ')) : ''}</small></span><em class="bst ${cls}">${label}</em></button>`; }).join('')}</div>`).join('')}<p class="hint" style="margin:6px 0 0">Click any step to see exactly what it produced.</p>` });
+  }
+  const done = r.tasks.filter(t => ['done', 'failed'].includes(t.state)).sort((a, b) => (a.t1 || 0) - (b.t1 || 0));
+  for (const t of done) {
+    const R = ROLES[t.role], o = outOf(t), [cls, label] = taskStatus(t);
+    items.push({ key: 'out-' + r.id + t.id, cls: 'dcard uout ' + cls, html: `<div class="uh"><i style="background:${TC[R.team]}"></i><span><b>Step ${t.step || '?'} · ${esc(R.name)}</b> · ${esc(TEAMS[R.team].name)}${t.person ? ' · ' + esc(t.person) : ''}<small>${esc(t.title)}</small></span><em class="bst ${cls}">${label}</em></div>
+      ${t.state === 'failed' ? `<div class="blocked">This task didn’t finish: ${esc(t.error)}</div>` : ''}${t.result && t.result.says ? `<p class="says">${esc(t.result.says)}</p>` : ''}${outputHTML(o)}${verdictLines(t)}
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">${o && o.status === 'Waiting for approval' ? `<button class="lbtn primary" data-approve="${o.id}">${icon('check')} Approve</button>` : ''}<button class="lbtn" data-task="${t.id}">Open full output</button></div>` });
+  }
+  if (r.status === 'done') items.push({ key: 'final-' + r.id, cls: 'dcard finalcard', html: `<div class="dt">WHAT WAS PRODUCED FOR YOUR REQUEST</div>${r.tasks.map(t => { const o = outOf(t), R = ROLES[t.role]; return `<button class="steprow" data-task="${t.id}"><span class="stepn" style="background:${TC[R.team]}">${t.step}</span><span class="stepb"><b>${esc(o ? o.title : t.title)}</b><small>${esc(R.name)} · ${esc(o ? o.status : t.state === 'failed' ? 'Did not finish' : 'No document; see details')}</small></span><em class="openlink">Open</em></button>`; }).join('')}` });
+  if (r.status === 'done') items.push({ key: 'sum-' + r.id, cls: 'summary', html: `<h3>All ${r.tasks.length} tasks done · ${Math.round((r.t1 - r.t0) / 1000)} s</h3><div class="sgrid"><div><b>${r.stats.reused}</b>facts reused</div><div><b>${r.stats.committed}</b>stored</div><div><b>${r.stats.calls}</b>system calls</div></div>` });
+  if (r.status === 'failed') items.push({ key: 'fail-' + r.id, cls: 'blocked', html: `<b>${esc(r.error)}</b><div style="margin-top:8px"><button class="lbtn" data-act="retry">Try again</button></div>` });
+  patchList(pane, items);
+}
+function openTask(id) {
+  const r = UI.run, t = r && r.tasks.find(x => x.id === id); if (!t) return;
+  const R = ROLES[t.role], A = AGENTS[t.agent], o = outOf(t), [cls, label] = taskStatus(t);
+  const ask = r.asks && t.ask ? r.asks[t.ask - 1] : null;
+  const prev = r.tasks.find(x => x.step === t.step - 1), next = r.tasks.find(x => x.step === t.step + 1);
+  const ups = t.depends_on.map(d => r.tasks.find(x => x.id === d)).filter(Boolean);
+  const body = o ? outputHTML(o).replace('style="margin-top:6px"', 'style="margin-top:0"') : t.result && t.result.output ? `<div class="outbody"><b>${esc(t.result.output.title)}</b>\n${md(t.result.output.body)}</div><p class="hint">Not stored: ${esc(((t.verdicts || []).find(v => v.kind === 'output') || {}).reason || 'see the checks below')}</p>` : `<p class="hint">${t.state === 'done' ? 'This step produced no document; its result is shown under “How it was produced”.' : t.state === 'failed' ? 'This step did not finish: ' + esc(t.error) : 'Not finished yet.'}</p>`;
+  openDrawer(`<span class="stepn big" style="background:${TC[R.team]}">${t.step || ''}</span>${esc(t.title)}`, `
+    <div class="ohd"><span>${esc(TEAMS[R.team].name)} · ${esc(R.name)}${t.person ? ' · ' + esc(t.person) : ''}</span><em class="bst ${cls}">${label}</em></div>
+    ${ask ? `<div class="fulfills"><small>Fulfills part ${t.ask} of the request</small><b>“${esc(ask.text)}”</b></div>` : ''}
+    <div class="h">Output</div>${body}
+    ${o && o.status === 'Waiting for approval' ? `<button class="lbtn primary" data-approve="${o.id}" style="margin-top:8px">${icon('check')} Approve</button>` : ''}
+    ${verdictLines(t) ? `<div class="h">What this step added to the foundation</div>${verdictLines(t)}` : ''}
+    <div class="h">How it was produced</div>
+    <dl class="kv"><dt>Agent</dt><dd>${esc(A.name)}: ${esc(A.does)}</dd><dt>Task</dt><dd>${esc(t.objective)}</dd>${ups.length ? `<dt>Built on</dt><dd>${ups.map(x => `Step ${x.step}: ${esc(x.title)}`).join('; ')}</dd>` : ''}${t.result && t.result.says ? `<dt>Agent’s note</dt><dd>${esc(t.result.says)}</dd>` : ''}</dl>
+    <details class="tcard" style="margin-top:8px"><summary style="padding:8px 10px"><span><b>Full trace</b><small>What the foundation sent, every system call and result, and each gatekeeper decision</small></span></summary>${taskHTML(r, t).replace(/^<summary>[\s\S]*?<\/summary>/, '')}</details>
+    <div style="display:flex;justify-content:space-between;margin-top:14px">${prev ? `<button class="lbtn" data-task="${prev.id}">← Step ${prev.step}</button>` : '<span></span>'}${next ? `<button class="lbtn" data-task="${next.id}">Step ${next.step} →</button>` : ''}</div>`);
+}
+const PANES = { updates: renderUpdates, decisions: renderDecisions, memory: renderMemory, events: renderEvents };
 let RQ = 0;
-function renderAll() { if (RQ) return; RQ = requestAnimationFrame(() => { RQ = 0; renderOrch(); renderDiagram(); renderStats(); PANES[UI.tab](); autoScroll(); if (KG.open) renderKG(); }); }
+function renderAll() { if (RQ) return; RQ = requestAnimationFrame(() => { RQ = 0; renderOrch(); renderDiagram(); renderStats(); (PANES[UI.tab] || renderUpdates)(); autoScroll(); if (KG.open) renderKG(); }); }
 /* Follow the work while agents run; pause for 5 s whenever the person scrolls. */
 function autoScroll() {
-  const r = UI.run; if (!r || !['thinking', 'running'].includes(r.status)) return;
+  const r = UI.run; if (!r || !['thinking', 'running', 'done'].includes(r.status)) return;
+  if (r.status === 'done' && (r._scrolledDone || UI.tab !== 'updates')) return; if (r.status === 'done') r._scrolledDone = true;
   if (performance.now() - (UI.userScrollAt || -1e9) < 5000) return;
   const pane = $('pane-' + UI.tab); if (!pane || pane.hidden) return;
   let target = null;
-  if (UI.tab === 'decisions') { const lines = [...pane.querySelectorAll('.scard.active .dl')]; target = lines.filter(l => l.querySelector('.tid.running')).pop() || lines.pop() || pane.querySelector('.scard.active'); }
+  if (UI.tab === 'updates') target = pane.lastElementChild;
+  else if (UI.tab === 'decisions') { const lines = [...pane.querySelectorAll('.scard.active .dl')]; target = lines.filter(l => l.querySelector('.tid.running')).pop() || lines.pop() || pane.querySelector('.scard.active'); }
   else if (UI.tab === 'packets') target = [...pane.querySelectorAll('details.tcard.running')].pop();
   else return;
   if (!target) return;
@@ -572,27 +622,24 @@ document.addEventListener('pointerdown', e => { if (e.target.classList && e.targ
 /* ---------- chrome ---------- */
 function buildStaticWho() { document.querySelectorAll('[data-who]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.who === UI.requester))); renderSugs(); }
 function badge(t, on) { const b = document.querySelector(`.tab[data-tab="${t}"]`); if (b && UI.tab !== t) b.classList.toggle('has', on); }
-function setTab(t) { UI.tab = t; document.querySelectorAll('.tab').forEach(b => { b.setAttribute('aria-selected', String(b.dataset.tab === t)); if (b.dataset.tab === t) b.classList.remove('has'); }); document.querySelectorAll('.pane').forEach(p => p.hidden = p.id !== 'pane-' + t); if (PANES[t]) PANES[t](); }
+function setTab(t) { if (!PANES[t]) t = 'updates'; UI.tab = t; document.querySelectorAll('.tab').forEach(b => { b.setAttribute('aria-selected', String(b.dataset.tab === t)); if (b.dataset.tab === t) b.classList.remove('has'); }); document.querySelectorAll('.pane').forEach(p => p.hidden = p.id !== 'pane-' + t); if (PANES[t]) PANES[t](); }
 function setView(v) { UI.view = v; $('app').dataset.view = v; document.querySelectorAll('.mnav button').forEach(b => b.setAttribute('aria-current', String(b.dataset.view === v))); if (v !== 'live') setTab(v); }
 let tt; function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 3400); }
 function openDrawer(title, body) { $('drawerTitle').innerHTML = title; $('drawerBody').innerHTML = body; $('drawer').hidden = false; $('scrim').hidden = false; }
 function closeDrawer() { $('drawer').hidden = true; $('scrim').hidden = true; }
 function openHelp() {
-  openDrawer('How it works', `<p class="lead">Type a request as anyone in Sales, Product, Marketing or Service. The app runs it live.</p>
-  <dl class="kv"><dt>Orchestration</dt><dd>Claude reads the request and a snapshot of the foundation, then decides: who it’s about, the scope, what to reuse, what’s missing, how to classify anything new about the advisor, and which of the 37 specialists should work, in what order. Decisions stream in as they’re made.</dd>
-  <dt>Specialists</dt><dd>Each planned agent is a separate Claude call. It receives only the context packet the foundation allows, can call its permitted Salesforce, Microsoft 365, Seismic, data-platform and Morningstar tools, and returns a structured contribution.</dd>
-  <dt>Foundation</dt><dd>Plain rules, not AI. It builds each packet (withholding out-of-scope, personal or private records), then checks every contribution: evidence for findings, traceable numbers, the advisor’s own words for lasting preferences, scope, and human approval for anything client-facing.</dd>
-  <dt>Events</dt><dd>Every stored change publishes an event; subscribing specialists light up.</dd>
-  <dt>Memory</dt><dd>Current conversation, lasting preferences, pending validation, interaction history and open commitments, per advisor. “New session” ends the conversation; lasting memory stays.</dd>
-  <dt>Replay</dt><dd>Every live run is recorded. Replays run through the same foundation and rules, so they’re safe for presentations.</dd>
-  <dt>If AI misbehaves</dt><dd>An unreadable plan is requested again in strict JSON, then replaced by a rules-based plan. A clarifying question is asked at most once. Each specialist retries once. Internal outputs with untraceable numbers are flagged for checking; client-facing ones are blocked.</dd></dl>
-  <div class="h">Try these in order</div><ol style="font-size:13.5px;padding-left:18px;margin:0"><li>Sales: “Identify the growing trends in LA territory”</li><li>Sales: “Compare BFA and AMBAL for Rachel and schedule a meeting with her next month”</li><li>Sales: “Prep me for my call with Alex tomorrow”</li><li>Marketing: “Draft the follow-up email to Alex using Product’s verified comparison”</li><li>Sales: “Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.” (watch it land as pending, not memory)</li><li>New session, then Sales: “What does Maya care about for her retirement committee?”</li></ol>
-  <div class="h">Reference data</div><p class="hint">Advisors and teams are fictional. Fund expense ratios for GFA, VWUAX and VIGAX are from public fund pages as of the dates shown; other funds’ numbers are left out on purpose.</p>`);
+  openDrawer('How it works', `<p class="lead">Type a request as anyone in Sales, Product, Marketing or Service and press Enter.</p>
+  <dl class="kv"><dt>Orchestration</dt><dd>The AI decides who the request is about, what can be reused, what’s missing and how to treat anything new about the advisor, then plans the work. Nine steps, each shown as AI or RULE.</dd>
+  <dt>Workbench</dt><dd>Each task is assigned to a team and role: Wholesalers (meeting prep), SSC (scheduling and follow-up), Internal wholesalers, Product specialists, Investment analytics, Content & campaigns, Compliance review, Distribution, Advisor service. Cards move from Assigned to In progress to Done.</dd>
+  <dt>Updates</dt><dd>Each team’s output appears on the right the moment its task finishes, with what was shared, remembered or held for approval. Click Details on any task to see the context the foundation gave it and the systems it called.</dd>
+  <dt>Foundation</dt><dd>Plain rules, not AI: what each task may see, evidence and number checks, memory rules, approvals, events and the knowledge graph.</dd></dl>
+  <div class="h">Try</div><ol style="font-size:13.5px;padding-left:18px;margin:0"><li>Identify the growing trends in LA territory</li><li>Compare BFA and AMBAL for Rachel and schedule a meeting with her next month</li><li>Prep me for my call with Alex tomorrow</li><li>Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.</li></ol>
+  <div class="h">Reference data</div><p class="hint">Advisors and teams are fictional. Expense ratios for GFA, BFA, AMBAL, VWUAX and VIGAX are from public sources as of the dates shown.</p>`);
 }
 
 /* ---------- events ---------- */
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-who],[data-sug],[data-replay],[data-tab],[data-view],[data-act],[data-approve],[data-madv],[data-agent],[data-layer],[data-sys]'); if (!el) return;
+  const el = e.target.closest('[data-task],[data-who],[data-sug],[data-replay],[data-tab],[data-view],[data-act],[data-approve],[data-madv],[data-agent],[data-layer],[data-sys]'); if (!el) return;
   const d = el.dataset;
   if (d.who) { UI.requester = d.who; buildStaticWho(); return; }
   if (d.sug) { $('cmdIn').value = d.sug; $('cmdIn').focus(); return; }
@@ -604,6 +651,7 @@ document.addEventListener('click', e => {
   if (d.act === 'kg') { openKG(d.adv); return; }
   if (d.act === 'answer' || d.act === 'assume') { const v = d.act === 'assume' ? 'Make your best assumption and continue' : $('clarIn').value.trim(); if (v) { const q = UI.run.clarify, t = UI.run.text.replace(/ \(clarification:.*\)$/, ''); UI.run = null; runRequest(`${t} (clarification: ${v})`, null, { clarified: { question: q, answer: v } }); } return; }
   if (d.act === 'retry') { const t = UI.run.text; UI.run = null; runRequest(t); return; }
+  if (d.task) { openTask(d.task); return; }
   if (d.agent) { const a = AGENTS[d.agent]; openDrawer(esc(a.name), `<p class="hint">${esc(TEAMS[a.team].name)}</p><p class="lead">${esc(a.does)}</p><div class="h">Tools it may call</div>${a.tools.length ? a.tools.map(t => `<div class="pk"><span class="vbadge ${TOOLS[t].via}">${TOOLS[t].via}</span><span><code style="font:12px var(--code)">${esc(t)}</code><small>${esc(SYSTEMS[TOOLS[t].sys].name)} · ${esc(TOOLS[t].desc)}</small></span></div>`).join('') : '<p class="hint">None. It works only from the foundation.</p>'}<div class="h">Subscribed to</div><p class="hint">${Object.entries(SUBSCRIPTIONS).filter(([, v]) => v.includes(d.agent)).map(([k]) => k).join(', ') || 'No events'}</p>`); return; }
   if (d.layer === 'graph') { openKG(UI.memAdv || F.session.advisor); return; }
   if (d.act === 'kg') { openKG(d.adv); return; }
@@ -617,6 +665,7 @@ $('sessionBtn').onclick = () => { F.session = { advisor: null, unit: null, reque
 $('resetBtn').onclick = () => { if (UI.run && ['thinking', 'running'].includes(UI.run.status)) return; F = freshFoundation(); UI.run = null; UI.totals = { runs: 0, reused: 0, committed: 0, pending: 0, blocked: 0, calls: 0, mcp: 0 }; toast('Foundation reset to its starting data.'); renderAll(); };
 $('deepBtn').onclick = () => { AI.deep = !AI.deep; $('deepBtn').setAttribute('aria-pressed', String(AI.deep)); toast(AI.deep ? 'Agents will think longer (slower).' : 'Agents use the fast model.'); };
 $('helpBtn').onclick = openHelp;
+$('railBtn').onclick = () => { const on = !$('app').classList.contains('norail'); $('app').classList.toggle('norail', on); $('railBtn').setAttribute('aria-pressed', String(on)); $('railBtn').querySelector('.tlabel').textContent = on ? 'Show panel' : 'Hide panel'; requestAnimationFrame(drawOps); };
 const SKINS = [['navy', 'Midnight navy', '#16375a'], ['graphite', 'Graphite', '#2a2e34'], ['evergreen', 'Evergreen', '#164039'], ['porcelain', 'Porcelain (light)', '#eef1f4']];
 function setSkin(s) { document.documentElement.dataset.skin = s; try { localStorage.setItem('cce-skin', s); } catch (e) { } document.querySelectorAll('[data-skin-btn]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.skinBtn === s))); requestAnimationFrame(drawOps); if (KG.open) renderKG(true); }
 $('skinPick').innerHTML = SKINS.map(([k, n, c]) => `<button data-skin-btn="${k}" title="${n}" aria-label="Theme: ${n}" style="background:${c};box-shadow:inset 0 0 0 1px rgba(128,128,128,.5)"></button>`).join('');

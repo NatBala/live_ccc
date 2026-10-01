@@ -1,6 +1,6 @@
 :root{
   box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
-  --night:#0f2439;--night-2:#132c47;--night-3:#16375a;--line:#355674;--nt:#edf4fc;--nm:#b5c8db;
+  --night:var(--night);--night-2:var(--night-2);--night-3:var(--night-3);--line:var(--line);--nt:var(--nt);--nm:var(--nm);
   --paper:#eef2f5;--card:#fff;--ink:#15304a;--mute:#66798c;--rule:#d9e1e8;--soft:#f5f7f9;
   --sales:#82b6ff;--product:#7fd4ab;--marketing:#f0b870;--service:#b9a5f5;--gold:#ffd27a;--alert:#ff7b67;--ok:#2f9e6c;
   --ui:'Schibsted Grotesk',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;--serif:'Newsreader',Georgia,serif;--code:ui-monospace,'SF Mono',Menlo,Consolas,monospace;

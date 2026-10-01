@@ -327,7 +327,7 @@ function fallbackPlan(run) {
   if (/link|access|won.?t open|issue|problem|unclear/.test(t)) add('service.resolve', 'Resolve the advisor’s issue', ['service.get_cases']);
   if (/said|profile|from now on|prefers/.test(t)) add('marketing.voc', 'Capture the advisor statement and propose memory under the rules', ['crm.get_call_notes']);
   if (!tasks.length) add(run.advisor ? 'sales.prep' : 'product.qar', run.advisor ? 'Summarize what the foundation knows for this request' : 'Answer the request from verified knowledge', []);
-  return tasks;
+  return tasks.slice(0, 5);
 }
 
 /* ---------- AI runtime ---------- */
@@ -360,17 +360,16 @@ function openAISampler() {
     const stream = typeof o.onText === 'function';
     const r = await post({ tier: tierOf(o), messages: [{ role: 'user', content: prompt }], stream }, o.signal);
     if (!stream) { const d = await r.json(); const text = d.choices?.[0]?.message?.content || ''; if (!text) throw err('empty_completion'); return { text }; }
-    const reader = r.body.getReader(), dec = new TextDecoder(); let buf = '', text = '', finishReason = null;
+    const reader = r.body.getReader(), dec = new TextDecoder(); let buf = '', text = '';
     try {
       for (;;) {
         const { value, done } = await reader.read(); if (done) break;
         buf += dec.decode(value, { stream: true });
         const lines = buf.split('\n'); buf = lines.pop();
         for (const ln of lines) { const s = ln.trim(); if (!s.startsWith('data:')) continue; const p = s.slice(5).trim(); if (p === '[DONE]') continue;
-          try { const choice = JSON.parse(p).choices?.[0]; if (choice?.finish_reason) finishReason = choice.finish_reason; const delta = choice?.delta?.content || ''; if (delta) { text += delta; o.onText({ text, delta }); } } catch (e) { } }
+          try { const delta = JSON.parse(p).choices?.[0]?.delta?.content || ''; if (delta) { text += delta; o.onText({ text, delta }); } } catch (e) { } }
       }
     } catch (e) { if (e.name === 'AbortError' || (o.signal && o.signal.aborted)) throw err('cancelled'); throw err('upstream_error', 'Stream interrupted', text); }
-    if (finishReason === 'length') throw err('output_truncated', 'The AI plan exceeded its output budget', text);
     if (!text) throw err('empty_completion');
     return { text };
   }
@@ -382,7 +381,6 @@ function openAISampler() {
       const r = await post({ tier: tierOf(o), messages, tools: defs.length ? defs : undefined, json: true }, o.signal);
       const d = await r.json(), msg = d.choices?.[0]?.message;
       if (!msg) throw err('empty_completion');
-      if (d.choices[0].finish_reason === 'length') throw err('output_truncated', 'The AI reply exceeded its output budget');
       if (msg.tool_calls && msg.tool_calls.length) {
         messages.push({ role: 'assistant', content: msg.content || null, tool_calls: msg.tool_calls });
         for (const tc of msg.tool_calls) {
@@ -434,6 +432,10 @@ Capital Group colleagues (NOT advisors; a meeting with them is internal): ${Obje
 Territories: ${Object.entries(TERRITORIES).map(([k, t]) => `${k} ${t.name}: ${t.advisors.map(a => ADVISORS[a].short).join(', ')}`).join('; ')}
 Fund nicknames: GFA = Growth Fund of America (GFFFX F-2), BFA = The Bond Fund of America (ABNFX F-2), AMBAL = American Balanced Fund (AMBFX F-2), WMIF = Washington Mutual (AWSHX), IFA = Income Fund of America (AMECX)
 
+WORKBENCH TEAMS (every task is assigned to one of these roles and appears on that team's workbench)
+${Object.entries(ROLES).map(([k, r]) => `${k} | ${TEAMS[r.team].name} · ${r.name} | ${r.does} | specialists: ${Object.keys(AGENTS).filter(a => roleOf(a) === k).join(', ')}`).join('\n')}
+Routing rules: meeting preparation goes to sales.wholesalers; scheduling and anything that is follow-up goes to sales.ssc; territory insight goes to sales.internal.
+
 AGENT REGISTRY (choose only these ids)
 ${registryText()}
 
@@ -443,28 +445,30 @@ ${POLICIES.map(p => p.id + ' ' + p.text).join('\n')}
 Output ONLY newline-delimited JSON, one object per line, no prose and no code fences, in this order:
 {"k":"decision","type":"requester","title":"...","detail":"..."}
 {"k":"decision","type":"intent","title":"...","detail":"...","intent":"meeting_prep|research|content|campaign|service|profile_update|question"}
+{"k":"decision","type":"asks","title":"N things requested","detail":"...","asks":["each distinct thing the person asked for, in their words, 2 to 8 words each"]}
 {"k":"decision","type":"entity","title":"...","detail":"...","advisor":"ADV-...|null","unit":"BU-...|null","territory":"LA|OC|SD|null","confidence":"high|medium|low"}
 {"k":"decision","type":"scope","title":"...","detail":"..."}
 {"k":"decision","type":"known","title":"...","detail":"...","uses":["ids you will reuse"]}
 {"k":"decision","type":"missing","title":"...","detail":"..."}
 {"k":"decision","type":"memory","title":"...","detail":"...","class":"read_only|task_requirement|lasting_preference_candidate|none"}
 {"k":"decision","type":"controls","title":"...","detail":"..."}
-then as many task lines as needed {"k":"task","id":"T1","agent":"registry id","objective":"one sentence","depends_on":[],"reads":["memory","knowledge","policy","models","events","feedback"],"tools":["tool names from that agent's list"],"why":"why this specialist"}
+then 2 to 5 lines {"k":"task","id":"T1","ask":1,"title":"3 to 6 words, as it appears on the team's workbench","role":"workbench role id","agent":"registry id from that role","objective":"one sentence","depends_on":[],"reads":["memory","knowledge","policy","models","events","feedback"],"tools":["tool names from that agent's list"],"why":"why this specialist"}
 {"k":"decision","type":"success","title":"...","detail":"..."}
 {"k":"end"}
 Requests can be about one advisor, a territory, a product, or internal work with colleagues. Not every request needs an advisor: for a territory set advisor null and territory; for product-only or internal work set both null.
 Ask for clarification only if acting would be unsafe or impossible: emit {"k":"clarify","question":"..."} after the entity decision, then {"k":"end"}. Otherwise make a sensible assumption and state it in the "missing" decision.
 ${run.clarified ? `You already asked: "${run.clarified.question}". The user answered: "${run.clarified.answer}". Do NOT ask again. Proceed, interpreting the answer as best you can, and state your assumption.` : ''}
 Be precise: titles of 3 to 6 words, details of at most 16 words, no filler. Reuse foundation records instead of redoing work.
-Tell the story a real team would: choose the specialists who genuinely own each part (across teams when the work crosses teams; no fixed task count), and chain them with depends_on so later specialists build on what earlier ones publish to the foundation. Tasks that don't depend on each other run in parallel. List tasks in dependency order. For a fund comparison and meeting request, obtain the comparison and approved resources, schedule the meeting, then produce the final meeting brief. The final brief must depend on every comparison, resource-gathering and scheduling task whose result it uses. Do not prepare the final brief before its supporting material exists.
+Tell the story a real team would: choose the specialists who genuinely own each part (usually 3 to 5, across teams when the work crosses teams), and chain them with depends_on so later specialists build on what earlier ones publish to the foundation. Tasks that don't depend on each other run in parallel.
+Every ask must be covered by at least one task, and every task must serve one ask ("ask" is its 1-based number). Do not add work the person did not ask for.
 Classify new information about the advisor strictly: an employee's request is not an advisor preference.`;
 }
 function agentPrompt(task, run, packet, upstream, withTools) {
   const a = AGENTS[task.agent], E = EMPLOYEES[run.requester];
   const lines = packet.items.map(i => `[${i.id}] (${i.layer}, from ${i.from}, scope ${i.scope}) ${i.label}: ${i.value}`).join('\n');
-  const up = upstream.length ? upstream.map(u => `${u.task} by ${AGENTS[u.agent].name}: ${u.title}\n${u.body}\nPublished: ${u.ids.join(', ') || 'nothing'}`).join('\n\n') : 'None.';
+  const up = upstream.length ? upstream.map(u => { const R = ROLES[roleOf(u.agent)]; return `${u.task} by ${R ? R.name + ' (' + TEAMS[R.team].name + ')' : AGENTS[u.agent].name}: ${u.title}\n${u.body}\nPublished: ${u.ids.join(', ') || 'nothing'}`; }).join('\n\n') : 'None.';
   const tl = withTools ? `\nYou can call your enterprise tools (Salesforce and Microsoft 365 through the MCP gateway; the data and model platform, Seismic exports and Morningstar through APIs). Call a tool only when the packet lacks what you need.` : `\nTool results fetched for you:\n${JSON.stringify(task.prefetched || {})}`;
-  return `You are ${a.name}, a ${TEAMS[a.team].name} specialist agent in Capital Group's Connected Client Experience. Your job: ${a.does}. Today is ${TODAY}.
+  return `You are ${a.name}, a ${TEAMS[a.team].name} specialist agent working for the ${ROLES[task.role] ? ROLES[task.role].name : TEAMS[a.team].name} team in Capital Group's Connected Client Experience. Your job: ${a.does}. Today is ${TODAY}.
 Task from orchestration (${task.id}): ${task.objective}
 Original request from ${E.name} (${TEAMS[E.team].name}): "${run.text}"
 Active scope: advisor ${run.advisor || 'none'} · unit ${run.unit || 'none'}
@@ -483,9 +487,10 @@ RULES
 - Personal notes never go in client-facing content. Public content never names advisors.
 - Memory: propose a lasting preference with "basis":"advisor_statement" only when the advisor's own words in a cited episode (CALL-/EMAIL- id) support it. An employee's ask is "employee_request"; a one-time need is "task_requirement"; a guess is "inference". Propose memory only for genuinely new information.
 - Knowledge: publish only reusable, evidence-backed findings with evidence ids.
+- When you mention other contributors, name their team role (for example Investment analytics, Product specialists, SSC, Wholesalers), not internal agent names.
 
 Reply with only a JSON object:
-{"says":"one first-person sentence, at most 22 words: what you did and whose work you built on","output":{"kind":"brief|email|finding|answer|plan|content_pick|post|case_update|note","title":"...","body":"Readable Markdown: use a pipe table for fund comparisons and other tabular data, headings for briefs, numbered steps for plans, bullets for findings, and short paragraphs for emails. Separate blocks with blank lines; keep it concise."},"used":["ids"],"knowledge":[{"label":"...","value":"...","evidence":["ids"]}],"memory":[{"attribute":"...","value":"...","scope":"BU-...|advisor","category":"content_pref|communication_pref|priority|relationship","basis":"advisor_statement|employee_request|task_requirement|inference","evidence":["ids"]}],"commitments":[{"title":"...","owner":"...","due":"..."}],"needs_approval":false,"open_questions":[]}
+{"says":"one first-person sentence, at most 22 words: what you did and which team's work you built on (name teams, not agents)","output":{"kind":"brief|email|finding|answer|plan|content_pick|post|case_update|note","title":"...","body":"under 150 words; '- ' bullets; blank line between paragraphs"},"used":["ids"],"knowledge":[{"label":"...","value":"...","evidence":["ids"]}],"memory":[{"attribute":"...","value":"...","scope":"BU-...|advisor","category":"content_pref|communication_pref|priority|relationship","basis":"advisor_statement|employee_request|task_requirement|inference","evidence":["ids"]}],"commitments":[{"title":"...","owner":"...","due":"..."}],"needs_approval":false,"open_questions":[]}
 Use empty arrays when nothing applies.`;
 }
 function toolDefs(task, onCall) {

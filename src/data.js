@@ -68,6 +68,35 @@ const AGENTS = {
   'service.qa': { name: 'QA Logger', team: 'service', does: 'Logs service quality outcomes', tools: [] }
 };
 
+/* ---- Workbench: the teams and roles tasks are assigned to ---- */
+const ROLES = {
+  'sales.wholesalers': { team: 'sales', name: 'Wholesalers', person: 'Priya Shah', does: 'Advisor meetings: preparation, briefs, live conversations' },
+  'sales.ssc': { team: 'sales', name: 'SSC', person: 'Nina Alvarez', does: 'Scheduling and follow-up' },
+  'sales.internal': { team: 'sales', name: 'Internal wholesalers', person: 'Sam Lee', does: 'Territory insight and prioritization' },
+  'product.specialists': { team: 'product', name: 'Product specialists', person: 'Dana Ortiz', does: 'Fund questions, comparisons, verified answers' },
+  'product.analytics': { team: 'product', name: 'Investment analytics', person: 'Wei Zhang', does: 'Fee math, peer data, portfolio construction' },
+  'marketing.content': { team: 'marketing', name: 'Content & campaigns', person: 'Marcus Bell', does: 'Approved content, drafts, personalized emails' },
+  'marketing.compliance': { team: 'marketing', name: 'Compliance review', person: 'Grace Liu', does: 'Claims, disclosures, sign-off' },
+  'marketing.distribution': { team: 'marketing', name: 'Distribution', person: 'Omar Haddad', does: 'Audiences and approved sends' },
+  'service.advisor': { team: 'service', name: 'Advisor service', person: 'Kim Nguyen', does: 'Access, delivery and service cases' }
+};
+const AGENT_ROLE = {
+  'sales.prep': 'sales.wholesalers', 'sales.engage': 'sales.wholesalers', 'sales.coach': 'sales.wholesalers',
+  'sales.schedule': 'sales.ssc', 'sales.follow': 'sales.ssc',
+  'sales.lead': 'sales.internal', 'sales.territory': 'sales.internal',
+  'product.tools': 'product.analytics',
+  'marketing.legal': 'marketing.compliance', 'marketing.audit': 'marketing.compliance',
+  'marketing.dist': 'marketing.distribution', 'marketing.audience': 'marketing.distribution',
+  'service.classify': 'service.advisor', 'service.identity': 'service.advisor', 'service.priority': 'service.advisor', 'service.knowledge': 'service.advisor', 'service.account': 'service.advisor', 'service.resolve': 'service.advisor', 'service.escalate': 'service.advisor', 'service.sentiment': 'service.advisor', 'service.crosssell': 'service.advisor', 'service.qa': 'service.advisor'
+};
+const roleOf = agent => AGENT_ROLE[agent] || (AGENTS[agent] ? { sales: 'sales.wholesalers', product: 'product.specialists', marketing: 'marketing.content', service: 'service.advisor' }[AGENTS[agent].team] : null);
+/* Deterministic assignment rules the business asked for: they override the AI when they apply. */
+const ROLE_RULES = [
+  { test: /schedul|follow.?up|book(ing)?\b|calendar|invite|reschedul|reminder|set up (a )?(call|meeting)/i, role: 'sales.ssc', agent: t => /schedul|book|calendar|invite|reschedul|set up/i.test(t) ? 'sales.schedule' : 'sales.follow', why: 'Scheduling and follow-up go to SSC' },
+  { test: /\bprep|brief|agenda|talking points|meeting preparation|prepare (me|for)/i, role: 'sales.wholesalers', agent: () => 'sales.prep', why: 'Meeting preparation goes to the wholesaler' }
+];
+const ROLE_DEFAULT_AGENT = { 'sales.wholesalers': 'sales.prep', 'sales.ssc': 'sales.schedule', 'sales.internal': 'sales.territory', 'product.specialists': 'product.qar', 'product.analytics': 'product.tools', 'marketing.content': 'marketing.email', 'marketing.compliance': 'marketing.legal', 'marketing.distribution': 'marketing.dist', 'service.advisor': 'service.resolve' };
+
 const LAYERS = {
   memory: { name: 'Shared Memory', short: 'Memory', icon: 'memory' },
   knowledge: { name: 'Knowledge & Retrieval', short: 'Knowledge', icon: 'file' },

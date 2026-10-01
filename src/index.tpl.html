@@ -16,6 +16,7 @@
     <div class="stats" id="stats"></div>
     <div class="skinpick" id="skinPick" role="group" aria-label="Theme"></div>
     <div class="top-actions">
+      <button class="tbtn" id="railBtn" aria-pressed="false" title="Hide the outputs panel to give the diagram the full width"><svg class="ic" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM9 5v14"/></svg><span class="tlabel">Hide panel</span></button>
       <button class="tbtn" id="sessionBtn" title="End this conversation. Lasting memory stays."><svg class="ic" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg><span class="tlabel">New session</span></button>
       <button class="tbtn" id="resetBtn" title="Reset the foundation to its starting data"><svg class="ic" viewBox="0 0 24 24"><path d="M4 12a8 8 0 108-8 8 8 0 00-6 2.7L4 9M4 4v5h5"/></svg><span class="tlabel">Reset</span></button>
       <button class="tbtn" id="deepBtn" aria-pressed="false" title="Agents use the deeper model: slower, more thorough"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span class="tlabel">Deeper agents</span></button>
@@ -39,22 +40,20 @@
     </section>
     <aside class="rail" id="rail">
       <div class="tabs" role="tablist">
-        <button class="tab" data-tab="decisions" aria-selected="true">Decisions<i class="badge"></i></button>
-        <button class="tab" data-tab="packets" aria-selected="false">Agents<i class="badge"></i></button>
+        <button class="tab" data-tab="updates" aria-selected="true">Updates<i class="badge"></i></button>
+        <button class="tab" data-tab="decisions" aria-selected="false">Decisions<i class="badge"></i></button>
         <button class="tab" data-tab="memory" aria-selected="false">Memory<i class="badge"></i></button>
-        <button class="tab" data-tab="outputs" aria-selected="false">Outputs<i class="badge"></i></button>
         <button class="tab" data-tab="events" aria-selected="false">Events</button>
       </div>
       <div class="panes">
-        <div class="pane" id="pane-decisions"></div>
-        <div class="pane" id="pane-packets" hidden></div>
+        <div class="pane" id="pane-updates"></div>
+        <div class="pane" id="pane-decisions" hidden></div>
         <div class="pane" id="pane-memory" hidden></div>
-        <div class="pane" id="pane-outputs" hidden></div>
         <div class="pane" id="pane-events" hidden></div>
       </div>
     </aside>
   </main>
-  <nav class="mnav" id="mnav"><button data-view="live" aria-current="true">Live</button><button data-view="decisions">Decisions</button><button data-view="packets">Agents</button><button data-view="memory">Memory</button><button data-view="outputs">Outputs</button></nav>
+  <nav class="mnav" id="mnav"><button data-view="live" aria-current="true">Live</button><button data-view="updates">Updates</button><button data-view="decisions">Decisions</button><button data-view="memory">Memory</button><button data-view="events">Events</button></nav>
 </div>
 <div class="scrim" id="scrim" hidden></div>
 <div class="drawer" id="drawer" role="dialog" aria-modal="true" hidden><div class="dhead"><h2 id="drawerTitle"></h2><button class="x" id="drawerClose" aria-label="Close"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="dbody" id="drawerBody"></div></div>
@@ -65,7 +64,7 @@
     <button class="kg-close" data-kgact="close" aria-label="Close">✕</button></div>
   <div class="kg-filt" id="kgFilt"></div>
   <div class="kg-main"><div class="kg-canvas"><svg id="kgsvg" preserveAspectRatio="xMidYMid meet"></svg>
-    <div class="kg-legend"><span><i class="kgdot new"></i>New</span><span><i class="kgdot updated"></i>Updated</span><span><i class="kgdot session"></i>Earlier in session</span><span><i class="kgdot read"></i>Read, unchanged</span><span><i class="kgdot pending"></i>Pending validation</span><span><i class="kgdot superseded"></i>Superseded</span><span><i class="kgdot locked"></i>Access restricted</span><span><i class="kgline"></i>Evidence link</span></div></div>
+    <div class="kg-legend"><span><i class="kgdot new"></i>New</span><span><i class="kgdot updated"></i>Updated</span><span><i class="kgdot session"></i>Earlier today</span><span><i class="kgdot read"></i>Read, unchanged</span><span><i class="kgdot pending"></i>Pending</span><span><i class="kgdot superseded"></i>Superseded</span><span><i class="kgdot locked"></i>Hidden</span><span><i class="kgline"></i>Evidence</span></div></div>
     <aside class="kg-side" id="kgside"></aside></div>
   <div class="kg-time" id="kgtime"></div>
 </div>

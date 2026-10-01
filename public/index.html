@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>:root{
   box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
-  --night:#0f2439;--night-2:#132c47;--night-3:#16375a;--line:#355674;--nt:#edf4fc;--nm:#b5c8db;
+  --night:var(--night);--night-2:var(--night-2);--night-3:var(--night-3);--line:var(--line);--nt:var(--nt);--nm:var(--nm);
   --paper:#eef2f5;--card:#fff;--ink:#15304a;--mute:#66798c;--rule:#d9e1e8;--soft:#f5f7f9;
   --sales:#82b6ff;--product:#7fd4ab;--marketing:#f0b870;--service:#b9a5f5;--gold:#ffd27a;--alert:#ff7b67;--ok:#2f9e6c;
   --ui:'Schibsted Grotesk',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;--serif:'Newsreader',Georgia,serif;--code:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
@@ -811,64 +811,93 @@ button{font:inherit;color:inherit;cursor:pointer}
 [data-skin="porcelain"] .kgsum div,[data-skin="porcelain"] .kglink{background:#f3f6f9;border-color:#e0e6ec;color:#1d3044}
 [data-skin="porcelain"] .kgd h3{color:#15304a}
 
-/* Legible graph labels and a status key that does not rely on color alone. */
-.kgl{font-size:15px;fill:var(--nt,#edf4fc)}
-.kgs{font-size:12px;fill:var(--st2,#b5c8db)}
-.kgl,.kgs,.kghl,.kgcn,.kgcs{paint-order:stroke;stroke:var(--s0);stroke-width:5px;stroke-linejoin:round}
-.kghl{font-size:15px}
-.kgmarker{font:800 13px var(--ui);fill:#10273a;stroke:none}
-.kgtag{color:#10273a;font-size:12px;padding:4px 9px}
-.kg-canvas{display:grid;grid-template-rows:minmax(0,1fr) auto}
-.kg-legend{position:static;margin:0 12px 12px;display:flex;gap:8px;color:var(--nt);background:var(--s1);border:1px solid var(--sl2);padding:10px 12px;font-size:13px;line-height:1.4}
-.kg-legend>span{gap:8px;padding:5px 9px;background:var(--s2);border:1px solid var(--sl2);border-radius:6px}
-.kg-legend .kgdot{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;box-shadow:none;font-style:normal;font-size:14px;font-weight:800}
-.kgdot.new{background:#7fe8c5;color:#10273a}
-.kgdot.new::after{content:'+'}
-.kgdot.updated{background:#ffbb70;color:#10273a}
-.kgdot.updated::after{content:'↻'}
-.kgdot.session{border:3px solid #ffd27a}
-.kgdot.read{border:3px solid #7fd4ab}
-.kgdot.pending{border:3px dashed #ffb347}
-.kgdot.superseded{background:#64788d;color:#fff}
-.kgdot.superseded::after{content:'−'}
-.kgdot.locked{background:#64788d;color:#fff;border-radius:3px}
-.kgdot.locked::after{content:'×'}
-.kgline{width:28px;border-top-width:3px}
-.kgf{font-size:13px;padding:6px 12px}
-.kgf i{width:12px;height:12px}
-.kgx{opacity:.22}
-.kgx.hi{opacity:1}
+/* ===== Workbench board ===== */
+.bcol{gap:6px}
+.bcol h3 small{margin-left:auto;font-weight:500;color:var(--nm);font-size:11px}
+.brole{border:1px solid var(--line);border-radius:10px;padding:6px 7px;background:rgba(255,255,255,.02);transition:border-color .3s,box-shadow .3s}
+.brole.has{border-color:color-mix(in srgb,var(--c) 55%,transparent)}
+.brole.busy{box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 45%,transparent)}
+.brole.notified{animation:notif 1.6s ease}
+.brh b{display:block;font-size:12.5px;color:var(--nt)}
+.brh small{display:block;font-size:10.5px;color:var(--nm);line-height:1.3}
+.btasks{display:flex;flex-direction:column;gap:5px;margin-top:5px}
+.btasks:empty{display:none}
+.bcard-in{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--s2);color:var(--nt);border-radius:8px;padding:6px 8px;font-size:12px;cursor:pointer;transition:border-color .3s,background .3s}
+.bcard-in:hover{border-color:var(--sl2)}
+.bcard-in b{display:block;font-size:12.5px;line-height:1.3;margin-top:2px;color:var(--sw)}
+.bcard-in small{display:block;font-size:10.5px;color:var(--nm);margin-top:2px}
+.bcard-in small.bout{color:var(--st2);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bst{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--nm);font-style:normal}
+.bst i{width:7px;height:7px;border-radius:50%;background:currentColor}
+.bcard.running .bcard-in{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 10%,var(--s2))}
+.bcard.running .bst{color:var(--acc-t)}
+.bcard.running .bst i{animation:blinkdot 1s ease-in-out infinite}
+@keyframes blinkdot{50%{opacity:.25}}
+.bcard.done .bst{color:#5fd3a0}
+.bcard.approval .bst{color:var(--acc-t)}
+.bcard.failed .bst,.bcard.blocked .bst{color:var(--alert)}
+.bcard.done .bcard-in{border-color:color-mix(in srgb,#5fd3a0 45%,var(--line))}
+/* Updates feed */
+.ustat{display:flex;gap:8px;align-items:center;font-size:13px}
+.ua{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--rule);font-size:13px}
+.ua:first-of-type{border-top:0}
+.ua i,.uh i{width:9px;height:9px;border-radius:50%}
+.ua small,.uh small{display:block;color:var(--mute);font-size:11.5px}
+.ua .bst,.uh .bst{white-space:nowrap}
+.ua .bst.done,.uh .bst.done{color:#1f7a51}
+.ua .bst.running,.ua .bst.approval,.uh .bst.approval{color:var(--hl-fg)}
+.ua .bst.failed,.ua .bst.blocked,.uh .bst.failed,.uh .bst.blocked{color:var(--bad-fg)}
+.uh{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:13.5px}
+.uout .says{margin:8px 0 2px;font-size:14.5px}
+.uv{font-size:12.5px;padding:4px 8px;border-radius:6px;margin-top:5px;background:var(--soft)}
+.uv.published,.uv.committed{background:#e3f5ec;color:#1f6b48}
+.uv.pending,.uv.task{background:var(--hl);color:var(--hl-fg)}
+.uv.rejected,.uv.blocked{background:var(--bad-bg);color:var(--bad-fg)}
+@media (prefers-color-scheme:dark){:root:not([data-skin="porcelain"]) .uv.published,:root:not([data-skin="porcelain"]) .uv.committed{background:#143a2a;color:#9fe3c2}}
 
-.outbody,.olk .bd{white-space:normal;font-size:14px;line-height:1.65;padding:14px 16px;overflow-wrap:anywhere}
-.outbody p,.olk .bd p{margin:0 0 12px}
-.outbody h3,.outbody h4,.outbody h5,.outbody h6,.olk .bd h3,.olk .bd h4{line-height:1.3;margin:18px 0 9px;color:var(--ink)}
-.outbody>:first-child,.olk .bd>:first-child{margin-top:0}
-.outbody>:last-child,.olk .bd>:last-child{margin-bottom:0}
-.outbody ul,.outbody ol,.olk .bd ul,.olk .bd ol{padding-left:22px;margin:8px 0 14px}
-.outbody li,.olk .bd li{margin:5px 0}
-.output-table{overflow-x:auto;margin:12px 0;border:1px solid var(--rule);border-radius:8px}
-.output-table table{border-collapse:collapse;width:100%;min-width:320px;font-size:13px;line-height:1.5}
-.output-table th,.output-table td{padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
-.output-table th{background:var(--card);font-weight:700;color:var(--ink)}
-.output-table tr:nth-child(even) td{background:var(--card)}
-.output-table tr:last-child td{border-bottom:0}
-.outbody code,.olk .bd code{font-family:var(--code);font-size:.9em;background:var(--card);padding:2px 5px;border-radius:4px}
-.outbody pre,.olk .bd pre{white-space:pre-wrap;background:var(--card);padding:12px;border:1px solid var(--rule);border-radius:6px}
-.outbody blockquote,.olk .bd blockquote{margin:12px 0;border-left:3px solid var(--sales);padding-left:12px;color:var(--mute)}
+.brh small{display:none}
+.brole{padding:5px 7px}
+.brh b{font-size:12px}
+.bcol{gap:5px}
 
-#kgsvg .kgl{font-size:17px}
-#kgsvg .kgs{font-size:13px}
-@media(max-width:900px){
-  .kg-main{display:block;overflow:auto}
-  .kg-canvas{min-height:760px;overflow:auto;grid-template-rows:660px auto}
-  #kgsvg{min-width:1100px}
-  .kg-legend{position:sticky;left:0;max-width:calc(100vw - 24px)}
-  .kg-side{max-height:none;overflow:visible}
+.bwho{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--nm);margin-top:2px}
+.bwho .ic{width:11px;height:11px}
+
+.plancard .ask{margin-top:8px}
+.askh{display:flex;align-items:center;gap:8px;font-size:13.5px}
+.askn{width:20px;height:20px;border-radius:6px;background:var(--soft);border:1px solid var(--rule);display:grid;place-items:center;font-size:11px;font-weight:800;flex:none}
+.steprow{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;width:100%;text-align:left;border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:10px;padding:7px 9px;margin:5px 0 0 28px;width:calc(100% - 28px)}
+.finalcard .steprow{margin-left:0;width:100%}
+.steprow:hover{border-color:var(--mute)}
+.stepn{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:12px;font-weight:800;color:#0e2135;flex:none}
+.stepn.big{width:30px;height:30px;font-size:14px;display:inline-grid;margin-right:4px}
+.stepb b{display:block;font-size:13px}
+.stepb small{display:block;font-size:11.5px;color:var(--mute)}
+.stepb .agentline{color:var(--mute);font-style:italic}
+.openlink{font-style:normal;font-size:12px;font-weight:700;color:var(--hl-fg)}
+.ohd{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--mute)}
+.fulfills{margin-top:10px;border-left:3px solid var(--hl-b);background:var(--hl);border-radius:0 8px 8px 0;padding:7px 10px}
+.fulfills small{display:block;font-size:11px;color:var(--hl-fg);font-weight:700}
+.fulfills b{font:400 15px/1.4 var(--serif)}
+
+/* agents inside each role: quiet, grayscale */
+.bagents{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
+.bag{font-size:10px;line-height:1.5;padding:0 6px;border-radius:5px;border:1px solid var(--line);color:var(--nm);opacity:.55;filter:grayscale(1);white-space:nowrap;transition:opacity .3s,border-color .3s}
+.bag.planned{opacity:.8;border-style:dashed;border-color:var(--sl2)}
+.bag.act{opacity:1;border-color:var(--st2);color:var(--nt)}
+.bag.act::before{content:'';display:inline-block;width:7px;height:7px;margin-right:4px;border-radius:50%;border:1.5px solid var(--st2);border-right-color:transparent;animation:rot 1s linear infinite;vertical-align:-1px}
+.bag.used{opacity:.9;color:var(--st2)}
+.bag.used::before{content:'✓ ';font-weight:700}
+
+/* Layout: outputs on the left, the live diagram on the right with the remaining width */
+@media (min-width:861px){
+  .main{grid-template-columns:400px minmax(0,1fr)}
+  .rail{order:-1;border-left:0;border-right:1px solid var(--rule)}
+  .app.norail .main{grid-template-columns:minmax(0,1fr)}
+  .app.norail .rail{display:none}
 }
-
-.kgdot.session::after{content:'•';color:#ffd27a}
-.kgdot.read::after{content:'✓';color:#7fd4ab;font-size:11px}
-.kgdot.locked::after{content:'🔒';font-size:11px}
+@media (min-width:861px) and (max-width:1280px){.app:not(.norail) .main{grid-template-columns:360px minmax(0,1fr)}}
+.tbtn[aria-pressed="true"] .ic{transform:scaleX(-1)}
 </style>
 </head>
 <body>
@@ -878,6 +907,7 @@ button{font:inherit;color:inherit;cursor:pointer}
     <div class="stats" id="stats"></div>
     <div class="skinpick" id="skinPick" role="group" aria-label="Theme"></div>
     <div class="top-actions">
+      <button class="tbtn" id="railBtn" aria-pressed="false" title="Hide the outputs panel to give the diagram the full width"><svg class="ic" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM9 5v14"/></svg><span class="tlabel">Hide panel</span></button>
       <button class="tbtn" id="sessionBtn" title="End this conversation. Lasting memory stays."><svg class="ic" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg><span class="tlabel">New session</span></button>
       <button class="tbtn" id="resetBtn" title="Reset the foundation to its starting data"><svg class="ic" viewBox="0 0 24 24"><path d="M4 12a8 8 0 108-8 8 8 0 00-6 2.7L4 9M4 4v5h5"/></svg><span class="tlabel">Reset</span></button>
       <button class="tbtn" id="deepBtn" aria-pressed="false" title="Agents use the deeper model: slower, more thorough"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span class="tlabel">Deeper agents</span></button>
@@ -901,22 +931,20 @@ button{font:inherit;color:inherit;cursor:pointer}
     </section>
     <aside class="rail" id="rail">
       <div class="tabs" role="tablist">
-        <button class="tab" data-tab="decisions" aria-selected="true">Decisions<i class="badge"></i></button>
-        <button class="tab" data-tab="packets" aria-selected="false">Agents<i class="badge"></i></button>
+        <button class="tab" data-tab="updates" aria-selected="true">Updates<i class="badge"></i></button>
+        <button class="tab" data-tab="decisions" aria-selected="false">Decisions<i class="badge"></i></button>
         <button class="tab" data-tab="memory" aria-selected="false">Memory<i class="badge"></i></button>
-        <button class="tab" data-tab="outputs" aria-selected="false">Outputs<i class="badge"></i></button>
         <button class="tab" data-tab="events" aria-selected="false">Events</button>
       </div>
       <div class="panes">
-        <div class="pane" id="pane-decisions"></div>
-        <div class="pane" id="pane-packets" hidden></div>
+        <div class="pane" id="pane-updates"></div>
+        <div class="pane" id="pane-decisions" hidden></div>
         <div class="pane" id="pane-memory" hidden></div>
-        <div class="pane" id="pane-outputs" hidden></div>
         <div class="pane" id="pane-events" hidden></div>
       </div>
     </aside>
   </main>
-  <nav class="mnav" id="mnav"><button data-view="live" aria-current="true">Live</button><button data-view="decisions">Decisions</button><button data-view="packets">Agents</button><button data-view="memory">Memory</button><button data-view="outputs">Outputs</button></nav>
+  <nav class="mnav" id="mnav"><button data-view="live" aria-current="true">Live</button><button data-view="updates">Updates</button><button data-view="decisions">Decisions</button><button data-view="memory">Memory</button><button data-view="events">Events</button></nav>
 </div>
 <div class="scrim" id="scrim" hidden></div>
 <div class="drawer" id="drawer" role="dialog" aria-modal="true" hidden><div class="dhead"><h2 id="drawerTitle"></h2><button class="x" id="drawerClose" aria-label="Close"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="dbody" id="drawerBody"></div></div>
@@ -927,7 +955,7 @@ button{font:inherit;color:inherit;cursor:pointer}
     <button class="kg-close" data-kgact="close" aria-label="Close">✕</button></div>
   <div class="kg-filt" id="kgFilt"></div>
   <div class="kg-main"><div class="kg-canvas"><svg id="kgsvg" preserveAspectRatio="xMidYMid meet"></svg>
-    <div class="kg-legend"><span><i class="kgdot new"></i>New</span><span><i class="kgdot updated"></i>Updated</span><span><i class="kgdot session"></i>Earlier in session</span><span><i class="kgdot read"></i>Read, unchanged</span><span><i class="kgdot pending"></i>Pending validation</span><span><i class="kgdot superseded"></i>Superseded</span><span><i class="kgdot locked"></i>Access restricted</span><span><i class="kgline"></i>Evidence link</span></div></div>
+    <div class="kg-legend"><span><i class="kgdot new"></i>New</span><span><i class="kgdot updated"></i>Updated</span><span><i class="kgdot session"></i>Earlier today</span><span><i class="kgdot read"></i>Read, unchanged</span><span><i class="kgdot pending"></i>Pending</span><span><i class="kgdot superseded"></i>Superseded</span><span><i class="kgdot locked"></i>Hidden</span><span><i class="kgline"></i>Evidence</span></div></div>
     <aside class="kg-side" id="kgside"></aside></div>
   <div class="kg-time" id="kgtime"></div>
 </div>
@@ -1000,6 +1028,35 @@ const AGENTS = {
   'service.crosssell': { name: 'Cross-sell Detector', team: 'service', does: 'Flags explicit needs for Sales, never infers', tools: [] },
   'service.qa': { name: 'QA Logger', team: 'service', does: 'Logs service quality outcomes', tools: [] }
 };
+
+/* ---- Workbench: the teams and roles tasks are assigned to ---- */
+const ROLES = {
+  'sales.wholesalers': { team: 'sales', name: 'Wholesalers', person: 'Priya Shah', does: 'Advisor meetings: preparation, briefs, live conversations' },
+  'sales.ssc': { team: 'sales', name: 'SSC', person: 'Nina Alvarez', does: 'Scheduling and follow-up' },
+  'sales.internal': { team: 'sales', name: 'Internal wholesalers', person: 'Sam Lee', does: 'Territory insight and prioritization' },
+  'product.specialists': { team: 'product', name: 'Product specialists', person: 'Dana Ortiz', does: 'Fund questions, comparisons, verified answers' },
+  'product.analytics': { team: 'product', name: 'Investment analytics', person: 'Wei Zhang', does: 'Fee math, peer data, portfolio construction' },
+  'marketing.content': { team: 'marketing', name: 'Content & campaigns', person: 'Marcus Bell', does: 'Approved content, drafts, personalized emails' },
+  'marketing.compliance': { team: 'marketing', name: 'Compliance review', person: 'Grace Liu', does: 'Claims, disclosures, sign-off' },
+  'marketing.distribution': { team: 'marketing', name: 'Distribution', person: 'Omar Haddad', does: 'Audiences and approved sends' },
+  'service.advisor': { team: 'service', name: 'Advisor service', person: 'Kim Nguyen', does: 'Access, delivery and service cases' }
+};
+const AGENT_ROLE = {
+  'sales.prep': 'sales.wholesalers', 'sales.engage': 'sales.wholesalers', 'sales.coach': 'sales.wholesalers',
+  'sales.schedule': 'sales.ssc', 'sales.follow': 'sales.ssc',
+  'sales.lead': 'sales.internal', 'sales.territory': 'sales.internal',
+  'product.tools': 'product.analytics',
+  'marketing.legal': 'marketing.compliance', 'marketing.audit': 'marketing.compliance',
+  'marketing.dist': 'marketing.distribution', 'marketing.audience': 'marketing.distribution',
+  'service.classify': 'service.advisor', 'service.identity': 'service.advisor', 'service.priority': 'service.advisor', 'service.knowledge': 'service.advisor', 'service.account': 'service.advisor', 'service.resolve': 'service.advisor', 'service.escalate': 'service.advisor', 'service.sentiment': 'service.advisor', 'service.crosssell': 'service.advisor', 'service.qa': 'service.advisor'
+};
+const roleOf = agent => AGENT_ROLE[agent] || (AGENTS[agent] ? { sales: 'sales.wholesalers', product: 'product.specialists', marketing: 'marketing.content', service: 'service.advisor' }[AGENTS[agent].team] : null);
+/* Deterministic assignment rules the business asked for: they override the AI when they apply. */
+const ROLE_RULES = [
+  { test: /schedul|follow.?up|book(ing)?\b|calendar|invite|reschedul|reminder|set up (a )?(call|meeting)/i, role: 'sales.ssc', agent: t => /schedul|book|calendar|invite|reschedul|set up/i.test(t) ? 'sales.schedule' : 'sales.follow', why: 'Scheduling and follow-up go to SSC' },
+  { test: /\bprep|brief|agenda|talking points|meeting preparation|prepare (me|for)/i, role: 'sales.wholesalers', agent: () => 'sales.prep', why: 'Meeting preparation goes to the wholesaler' }
+];
+const ROLE_DEFAULT_AGENT = { 'sales.wholesalers': 'sales.prep', 'sales.ssc': 'sales.schedule', 'sales.internal': 'sales.territory', 'product.specialists': 'product.qar', 'product.analytics': 'product.tools', 'marketing.content': 'marketing.email', 'marketing.compliance': 'marketing.legal', 'marketing.distribution': 'marketing.dist', 'service.advisor': 'service.resolve' };
 
 const LAYERS = {
   memory: { name: 'Shared Memory', short: 'Memory', icon: 'memory' },
@@ -1544,7 +1601,7 @@ function fallbackPlan(run) {
   if (/link|access|won.?t open|issue|problem|unclear/.test(t)) add('service.resolve', 'Resolve the advisor’s issue', ['service.get_cases']);
   if (/said|profile|from now on|prefers/.test(t)) add('marketing.voc', 'Capture the advisor statement and propose memory under the rules', ['crm.get_call_notes']);
   if (!tasks.length) add(run.advisor ? 'sales.prep' : 'product.qar', run.advisor ? 'Summarize what the foundation knows for this request' : 'Answer the request from verified knowledge', []);
-  return tasks;
+  return tasks.slice(0, 5);
 }
 
 /* ---------- AI runtime ---------- */
@@ -1577,17 +1634,16 @@ function openAISampler() {
     const stream = typeof o.onText === 'function';
     const r = await post({ tier: tierOf(o), messages: [{ role: 'user', content: prompt }], stream }, o.signal);
     if (!stream) { const d = await r.json(); const text = d.choices?.[0]?.message?.content || ''; if (!text) throw err('empty_completion'); return { text }; }
-    const reader = r.body.getReader(), dec = new TextDecoder(); let buf = '', text = '', finishReason = null;
+    const reader = r.body.getReader(), dec = new TextDecoder(); let buf = '', text = '';
     try {
       for (;;) {
         const { value, done } = await reader.read(); if (done) break;
         buf += dec.decode(value, { stream: true });
         const lines = buf.split('\n'); buf = lines.pop();
         for (const ln of lines) { const s = ln.trim(); if (!s.startsWith('data:')) continue; const p = s.slice(5).trim(); if (p === '[DONE]') continue;
-          try { const choice = JSON.parse(p).choices?.[0]; if (choice?.finish_reason) finishReason = choice.finish_reason; const delta = choice?.delta?.content || ''; if (delta) { text += delta; o.onText({ text, delta }); } } catch (e) { } }
+          try { const delta = JSON.parse(p).choices?.[0]?.delta?.content || ''; if (delta) { text += delta; o.onText({ text, delta }); } } catch (e) { } }
       }
     } catch (e) { if (e.name === 'AbortError' || (o.signal && o.signal.aborted)) throw err('cancelled'); throw err('upstream_error', 'Stream interrupted', text); }
-    if (finishReason === 'length') throw err('output_truncated', 'The AI plan exceeded its output budget', text);
     if (!text) throw err('empty_completion');
     return { text };
   }
@@ -1599,7 +1655,6 @@ function openAISampler() {
       const r = await post({ tier: tierOf(o), messages, tools: defs.length ? defs : undefined, json: true }, o.signal);
       const d = await r.json(), msg = d.choices?.[0]?.message;
       if (!msg) throw err('empty_completion');
-      if (d.choices[0].finish_reason === 'length') throw err('output_truncated', 'The AI reply exceeded its output budget');
       if (msg.tool_calls && msg.tool_calls.length) {
         messages.push({ role: 'assistant', content: msg.content || null, tool_calls: msg.tool_calls });
         for (const tc of msg.tool_calls) {
@@ -1651,6 +1706,10 @@ Capital Group colleagues (NOT advisors; a meeting with them is internal): ${Obje
 Territories: ${Object.entries(TERRITORIES).map(([k, t]) => `${k} ${t.name}: ${t.advisors.map(a => ADVISORS[a].short).join(', ')}`).join('; ')}
 Fund nicknames: GFA = Growth Fund of America (GFFFX F-2), BFA = The Bond Fund of America (ABNFX F-2), AMBAL = American Balanced Fund (AMBFX F-2), WMIF = Washington Mutual (AWSHX), IFA = Income Fund of America (AMECX)
 
+WORKBENCH TEAMS (every task is assigned to one of these roles and appears on that team's workbench)
+${Object.entries(ROLES).map(([k, r]) => `${k} | ${TEAMS[r.team].name} · ${r.name} | ${r.does} | specialists: ${Object.keys(AGENTS).filter(a => roleOf(a) === k).join(', ')}`).join('\n')}
+Routing rules: meeting preparation goes to sales.wholesalers; scheduling and anything that is follow-up goes to sales.ssc; territory insight goes to sales.internal.
+
 AGENT REGISTRY (choose only these ids)
 ${registryText()}
 
@@ -1660,28 +1719,30 @@ ${POLICIES.map(p => p.id + ' ' + p.text).join('\n')}
 Output ONLY newline-delimited JSON, one object per line, no prose and no code fences, in this order:
 {"k":"decision","type":"requester","title":"...","detail":"..."}
 {"k":"decision","type":"intent","title":"...","detail":"...","intent":"meeting_prep|research|content|campaign|service|profile_update|question"}
+{"k":"decision","type":"asks","title":"N things requested","detail":"...","asks":["each distinct thing the person asked for, in their words, 2 to 8 words each"]}
 {"k":"decision","type":"entity","title":"...","detail":"...","advisor":"ADV-...|null","unit":"BU-...|null","territory":"LA|OC|SD|null","confidence":"high|medium|low"}
 {"k":"decision","type":"scope","title":"...","detail":"..."}
 {"k":"decision","type":"known","title":"...","detail":"...","uses":["ids you will reuse"]}
 {"k":"decision","type":"missing","title":"...","detail":"..."}
 {"k":"decision","type":"memory","title":"...","detail":"...","class":"read_only|task_requirement|lasting_preference_candidate|none"}
 {"k":"decision","type":"controls","title":"...","detail":"..."}
-then as many task lines as needed {"k":"task","id":"T1","agent":"registry id","objective":"one sentence","depends_on":[],"reads":["memory","knowledge","policy","models","events","feedback"],"tools":["tool names from that agent's list"],"why":"why this specialist"}
+then 2 to 5 lines {"k":"task","id":"T1","ask":1,"title":"3 to 6 words, as it appears on the team's workbench","role":"workbench role id","agent":"registry id from that role","objective":"one sentence","depends_on":[],"reads":["memory","knowledge","policy","models","events","feedback"],"tools":["tool names from that agent's list"],"why":"why this specialist"}
 {"k":"decision","type":"success","title":"...","detail":"..."}
 {"k":"end"}
 Requests can be about one advisor, a territory, a product, or internal work with colleagues. Not every request needs an advisor: for a territory set advisor null and territory; for product-only or internal work set both null.
 Ask for clarification only if acting would be unsafe or impossible: emit {"k":"clarify","question":"..."} after the entity decision, then {"k":"end"}. Otherwise make a sensible assumption and state it in the "missing" decision.
 ${run.clarified ? `You already asked: "${run.clarified.question}". The user answered: "${run.clarified.answer}". Do NOT ask again. Proceed, interpreting the answer as best you can, and state your assumption.` : ''}
 Be precise: titles of 3 to 6 words, details of at most 16 words, no filler. Reuse foundation records instead of redoing work.
-Tell the story a real team would: choose the specialists who genuinely own each part (across teams when the work crosses teams; no fixed task count), and chain them with depends_on so later specialists build on what earlier ones publish to the foundation. Tasks that don't depend on each other run in parallel. List tasks in dependency order. For a fund comparison and meeting request, obtain the comparison and approved resources, schedule the meeting, then produce the final meeting brief. The final brief must depend on every comparison, resource-gathering and scheduling task whose result it uses. Do not prepare the final brief before its supporting material exists.
+Tell the story a real team would: choose the specialists who genuinely own each part (usually 3 to 5, across teams when the work crosses teams), and chain them with depends_on so later specialists build on what earlier ones publish to the foundation. Tasks that don't depend on each other run in parallel.
+Every ask must be covered by at least one task, and every task must serve one ask ("ask" is its 1-based number). Do not add work the person did not ask for.
 Classify new information about the advisor strictly: an employee's request is not an advisor preference.`;
 }
 function agentPrompt(task, run, packet, upstream, withTools) {
   const a = AGENTS[task.agent], E = EMPLOYEES[run.requester];
   const lines = packet.items.map(i => `[${i.id}] (${i.layer}, from ${i.from}, scope ${i.scope}) ${i.label}: ${i.value}`).join('\n');
-  const up = upstream.length ? upstream.map(u => `${u.task} by ${AGENTS[u.agent].name}: ${u.title}\n${u.body}\nPublished: ${u.ids.join(', ') || 'nothing'}`).join('\n\n') : 'None.';
+  const up = upstream.length ? upstream.map(u => { const R = ROLES[roleOf(u.agent)]; return `${u.task} by ${R ? R.name + ' (' + TEAMS[R.team].name + ')' : AGENTS[u.agent].name}: ${u.title}\n${u.body}\nPublished: ${u.ids.join(', ') || 'nothing'}`; }).join('\n\n') : 'None.';
   const tl = withTools ? `\nYou can call your enterprise tools (Salesforce and Microsoft 365 through the MCP gateway; the data and model platform, Seismic exports and Morningstar through APIs). Call a tool only when the packet lacks what you need.` : `\nTool results fetched for you:\n${JSON.stringify(task.prefetched || {})}`;
-  return `You are ${a.name}, a ${TEAMS[a.team].name} specialist agent in Capital Group's Connected Client Experience. Your job: ${a.does}. Today is ${TODAY}.
+  return `You are ${a.name}, a ${TEAMS[a.team].name} specialist agent working for the ${ROLES[task.role] ? ROLES[task.role].name : TEAMS[a.team].name} team in Capital Group's Connected Client Experience. Your job: ${a.does}. Today is ${TODAY}.
 Task from orchestration (${task.id}): ${task.objective}
 Original request from ${E.name} (${TEAMS[E.team].name}): "${run.text}"
 Active scope: advisor ${run.advisor || 'none'} · unit ${run.unit || 'none'}
@@ -1700,9 +1761,10 @@ RULES
 - Personal notes never go in client-facing content. Public content never names advisors.
 - Memory: propose a lasting preference with "basis":"advisor_statement" only when the advisor's own words in a cited episode (CALL-/EMAIL- id) support it. An employee's ask is "employee_request"; a one-time need is "task_requirement"; a guess is "inference". Propose memory only for genuinely new information.
 - Knowledge: publish only reusable, evidence-backed findings with evidence ids.
+- When you mention other contributors, name their team role (for example Investment analytics, Product specialists, SSC, Wholesalers), not internal agent names.
 
 Reply with only a JSON object:
-{"says":"one first-person sentence, at most 22 words: what you did and whose work you built on","output":{"kind":"brief|email|finding|answer|plan|content_pick|post|case_update|note","title":"...","body":"Readable Markdown: use a pipe table for fund comparisons and other tabular data, headings for briefs, numbered steps for plans, bullets for findings, and short paragraphs for emails. Separate blocks with blank lines; keep it concise."},"used":["ids"],"knowledge":[{"label":"...","value":"...","evidence":["ids"]}],"memory":[{"attribute":"...","value":"...","scope":"BU-...|advisor","category":"content_pref|communication_pref|priority|relationship","basis":"advisor_statement|employee_request|task_requirement|inference","evidence":["ids"]}],"commitments":[{"title":"...","owner":"...","due":"..."}],"needs_approval":false,"open_questions":[]}
+{"says":"one first-person sentence, at most 22 words: what you did and which team's work you built on (name teams, not agents)","output":{"kind":"brief|email|finding|answer|plan|content_pick|post|case_update|note","title":"...","body":"under 150 words; '- ' bullets; blank line between paragraphs"},"used":["ids"],"knowledge":[{"label":"...","value":"...","evidence":["ids"]}],"memory":[{"attribute":"...","value":"...","scope":"BU-...|advisor","category":"content_pref|communication_pref|priority|relationship","basis":"advisor_statement|employee_request|task_requirement|inference","evidence":["ids"]}],"commitments":[{"title":"...","owner":"...","due":"..."}],"needs_approval":false,"open_questions":[]}
 Use empty arrays when nothing applies.`;
 }
 function toolDefs(task, onCall) {
@@ -1726,9 +1788,9 @@ const RECORDED = [
       L({ k: 'decision', type: 'missing', title: 'Dollar costs aren’t stored yet', detail: 'Alex wants fees in dollars on $38M. Tool Selection computes them on the model platform instead of estimating.' }),
       L({ k: 'decision', type: 'memory', title: 'Read only: nothing new to remember', detail: 'Priya’s request contains no new statement from Alex, so memory is read, not changed.', class: 'read_only' }),
       L({ k: 'decision', type: 'controls', title: 'Internal brief, every number traced', detail: 'No send. Personal note allowed for the relationship team; coaching visible to Priya only; numbers only from the platform.' }),
-      L({ k: 'task', id: 'T1', agent: 'product.tools', objective: 'Compute annual costs on $38M for GFFFX, VWUAX and VIGAX, and the blended cost of 70% VIGAX with 30% GFA', depends_on: [], reads: ['knowledge'], tools: ['models.cost_on_assets', 'models.portfolio_construction'], why: 'Only the model platform may produce dollar figures.' }),
-      L({ k: 'task', id: 'T2', agent: 'sales.schedule', objective: 'Confirm the call time against Alex’s meeting pattern', depends_on: [], reads: ['memory'], tools: ['calendar.find_times'], why: 'Alex books through Jamie at 7:30 a.m. PT on Tuesdays or Thursdays.' }),
-      L({ k: 'task', id: 'T3', agent: 'sales.prep', objective: 'Build Priya’s one-page brief from K-201, Alex’s preferences and T1’s numbers', depends_on: ['T1', 'T2'], reads: ['memory', 'knowledge', 'models', 'policy'], tools: ['crm.get_opportunities'], why: 'Prep Me owns briefs and may use relationship notes.' }),
+      L({ k: 'task', id: 'T1', agent: 'product.tools', title: 'Cost Alex’s $38M across three funds', objective: 'Compute annual costs on $38M for GFFFX, VWUAX and VIGAX, and the blended cost of 70% VIGAX with 30% GFA', depends_on: [], reads: ['knowledge'], tools: ['models.cost_on_assets', 'models.portfolio_construction'], why: 'Only the model platform may produce dollar figures.' }),
+      L({ k: 'task', id: 'T2', agent: 'sales.schedule', title: 'Confirm Alex’s call time', objective: 'Confirm the call time against Alex’s meeting pattern', depends_on: [], reads: ['memory'], tools: ['calendar.find_times'], why: 'Alex books through Jamie at 7:30 a.m. PT on Tuesdays or Thursdays.' }),
+      L({ k: 'task', id: 'T3', agent: 'sales.prep', title: 'Prepare Alex meeting brief', objective: 'Build Priya’s one-page brief from K-201, Alex’s preferences and T1’s numbers', depends_on: ['T1', 'T2'], reads: ['memory', 'knowledge', 'models', 'policy'], tools: ['crm.get_opportunities'], why: 'Prep Me owns briefs and may use relationship notes.' }),
       L({ k: 'decision', type: 'success', title: 'Priya walks in with one page', detail: 'Dollar costs, the verified why, the open decision and logistics. Alex repeats nothing.' }),
       L({ k: 'end' })
     ].join('\n'),
@@ -1756,9 +1818,9 @@ const RECORDED = [
       L({ k: 'decision', type: 'missing', title: 'Interest in our ETFs isn’t stated', detail: 'She never asked about Capital Group ETFs. Lead with her question about where active managers fit.' }),
       L({ k: 'decision', type: 'memory', title: 'Marcus’s ask is not Sofia’s preference', detail: 'Wanting an ETF email tells us about Marketing’s plan, not about Sofia (POL-6). Nothing new to remember.', class: 'read_only' }),
       L({ k: 'decision', type: 'controls', title: 'Draft only; compliance and approval', detail: 'Legal & Compliance reviews; nothing is sent without Priya’s approval; PDF attachment, not a link.' }),
-      L({ k: 'task', id: 'T1', agent: 'marketing.gather', objective: 'Find approved Seismic content on ETFs and on where active management fits in core-satellite', depends_on: [], reads: ['knowledge', 'policy'], tools: ['seismic.search_content'], why: 'Only approved content can be used.' }),
-      L({ k: 'task', id: 'T2', agent: 'marketing.email', objective: 'Draft a short email to Sofia answering her core-satellite question, attaching the approved pieces', depends_on: ['T1'], reads: ['memory', 'knowledge', 'policy'], tools: ['mail.draft'], why: 'Personalized Email writes advisor emails.' }),
-      L({ k: 'task', id: 'T3', agent: 'marketing.legal', objective: 'Review the draft’s claims and add the required disclosures', depends_on: ['T2'], reads: ['policy', 'knowledge'], tools: ['sharepoint.get_disclosures'], why: 'Nothing client-facing leaves without review.' }),
+      L({ k: 'task', id: 'T1', agent: 'marketing.gather', title: 'Pick approved ETF content', objective: 'Find approved Seismic content on ETFs and on where active management fits in core-satellite', depends_on: [], reads: ['knowledge', 'policy'], tools: ['seismic.search_content'], why: 'Only approved content can be used.' }),
+      L({ k: 'task', id: 'T2', agent: 'marketing.email', title: 'Draft Sofia’s email', objective: 'Draft a short email to Sofia answering her core-satellite question, attaching the approved pieces', depends_on: ['T1'], reads: ['memory', 'knowledge', 'policy'], tools: ['mail.draft'], why: 'Personalized Email writes advisor emails.' }),
+      L({ k: 'task', id: 'T3', agent: 'marketing.legal', title: 'Review Sofia’s email', objective: 'Review the draft’s claims and add the required disclosures', depends_on: ['T2'], reads: ['policy', 'knowledge'], tools: ['sharepoint.get_disclosures'], why: 'Nothing client-facing leaves without review.' }),
       L({ k: 'decision', type: 'success', title: 'An email Sofia would actually want', detail: 'Answers her stated question, uses approved content, PDF not link, waiting for approval.' }),
       L({ k: 'end' })
     ].join('\n'),
@@ -1789,9 +1851,9 @@ RECORDED.push(
       L({ k: 'decision', type: 'missing', title: 'No market-wide flow data', detail: 'Trends come from our own recorded conversations and opportunities. They are signals, not market statistics.' }),
       L({ k: 'decision', type: 'memory', title: 'Read only', detail: 'A territory question adds nothing new about any advisor.', class: 'read_only' }),
       L({ k: 'decision', type: 'controls', title: 'Signals labeled as signals', detail: 'Model outputs are shown with their evidence; fund numbers only from the data platform.' }),
-      L({ k: 'task', id: 'T1', agent: 'sales.territory', objective: 'Run the territory trends model for LA and explain what is growing, with evidence', depends_on: [], reads: ['memory', 'models'], tools: ['models.territory_trends'], why: 'Territory Planning owns territory reviews.' }),
-      L({ k: 'task', id: 'T2', agent: 'product.qar', objective: 'Pull verified facts for the funds that fit the top trends: BFA and AMBAL', depends_on: ['T1'], reads: ['knowledge'], tools: ['fund.lookup', 'mstar.get_peers'], why: 'Numbers must come from the data platform.' }),
-      L({ k: 'task', id: 'T3', agent: 'marketing.gather', objective: 'Find approved content that matches the top LA trends', depends_on: ['T1'], reads: ['knowledge', 'policy'], tools: ['seismic.search_content'], why: 'Only approved content can be shared.' }),
+      L({ k: 'task', id: 'T1', agent: 'sales.territory', title: 'Summarize LA territory trends', objective: 'Run the territory trends model for LA and explain what is growing, with evidence', depends_on: [], reads: ['memory', 'models'], tools: ['models.territory_trends'], why: 'Territory Planning owns territory reviews.' }),
+      L({ k: 'task', id: 'T2', agent: 'product.qar', title: 'Verify BFA and AMBAL facts', objective: 'Pull verified facts for the funds that fit the top trends: BFA and AMBAL', depends_on: ['T1'], reads: ['knowledge'], tools: ['fund.lookup', 'mstar.get_peers'], why: 'Numbers must come from the data platform.' }),
+      L({ k: 'task', id: 'T3', agent: 'marketing.gather', title: 'Pick content for LA trends', objective: 'Find approved content that matches the top LA trends', depends_on: ['T1'], reads: ['knowledge', 'policy'], tools: ['seismic.search_content'], why: 'Only approved content can be shared.' }),
       L({ k: 'decision', type: 'success', title: 'Priya knows where to focus in LA', detail: 'What is growing, who is driving it, which funds and approved pieces fit.' }),
       L({ k: 'end' })
     ].join('\n'),
@@ -1823,9 +1885,9 @@ RECORDED.push(
       L({ k: 'decision', type: 'missing', title: 'No amount given: show cost per $1M', detail: 'Assumption stated; Tool Selection computes it on the model platform.' }),
       L({ k: 'decision', type: 'memory', title: 'Read only', detail: 'Her need is already in memory in her own words; nothing new to store.', class: 'read_only' }),
       L({ k: 'decision', type: 'controls', title: 'Internal comparison; invite needs approval', detail: 'Numbers only from the platform; the meeting is a tentative hold until Priya approves the invite.' }),
-      L({ k: 'task', id: 'T1', agent: 'product.tools', objective: 'Compute BFA and AMBAL F-2 costs per $1M and compare with their category medians', depends_on: [], reads: ['knowledge'], tools: ['models.cost_on_assets', 'mstar.get_peers'], why: 'Dollar figures come only from the model platform.' }),
-      L({ k: 'task', id: 'T2', agent: 'product.qar', objective: 'Explain how BFA and AMBAL each fit Rachel’s retirement income plan, from approved material', depends_on: ['T1'], reads: ['memory', 'knowledge', 'policy'], tools: ['seismic.search_content'], why: 'QAR produces the verified answer.' }),
-      L({ k: 'task', id: 'T3', agent: 'sales.schedule', objective: 'Find a slot next month with Rachel and place a tentative hold', depends_on: [], reads: ['memory'], tools: ['calendar.find_times', 'calendar.create_event'], why: 'Schedule Me books meetings.' }),
+      L({ k: 'task', id: 'T1', agent: 'product.tools', title: 'Cost BFA vs. AMBAL', objective: 'Compute BFA and AMBAL F-2 costs per $1M and compare with their category medians', depends_on: [], reads: ['knowledge'], tools: ['models.cost_on_assets', 'mstar.get_peers'], why: 'Dollar figures come only from the model platform.' }),
+      L({ k: 'task', id: 'T2', agent: 'product.qar', title: 'Explain fit for Rachel’s plan', objective: 'Explain how BFA and AMBAL each fit Rachel’s retirement income plan, from approved material', depends_on: ['T1'], reads: ['memory', 'knowledge', 'policy'], tools: ['seismic.search_content'], why: 'QAR produces the verified answer.' }),
+      L({ k: 'task', id: 'T3', agent: 'sales.schedule', title: 'Schedule meeting with Rachel', objective: 'Find a slot next month with Rachel and place a tentative hold', depends_on: [], reads: ['memory'], tools: ['calendar.find_times', 'calendar.create_event'], why: 'Schedule Me books meetings.' }),
       L({ k: 'decision', type: 'success', title: 'A comparison and a meeting on hold', detail: 'Verified costs, how each fund fits her plan, and a time waiting for Priya’s approval.' }),
       L({ k: 'end' })
     ].join('\n'),
@@ -1921,16 +1983,6 @@ function kgLayout(g, W, H, hide, changesOnly) {
     x.items.forEach((it, k) => { const t = n === 1 ? mid : ang + span * (.1 + .8 * k / (n - 1)); const r = R2 + (k % tiers) * 62; pos[it.id] = { x: cx + Math.cos(t) * r * SX, y: cy + Math.sin(t) * r * SY, a: t, hub }; });
     ang += span; return hub;
   });
-  // Reserve two label columns and separate neighboring rows vertically.
-  for (const right of [false, true]) {
-    const rows = Object.values(pos).filter(p => (Math.cos(p.a) >= -0.05) === right).sort((a, b) => a.y - b.y);
-    const gap = 44;
-    rows.forEach((p, i) => { p.x = right ? W - 355 : 355; p.y = Math.max(60, p.y, i ? rows[i - 1].y + gap : 60); });
-    if (rows.length && rows[rows.length - 1].y > H - 60) {
-      const offset = rows[rows.length - 1].y - (H - 60);
-      rows.forEach(p => p.y -= offset);
-    }
-  }
   return { cx, cy, hubs, pos, groups };
 }
 
@@ -1951,15 +2003,13 @@ function kgSVG(g, opt) {
       <text x="${f(hub.x + Math.cos(hub.a) * 34)}" y="${f(hub.y + Math.sin(hub.a) * 30 + (Math.sin(hub.a) > .3 ? 12 : Math.sin(hub.a) < -.3 ? -4 : 4))}" text-anchor="${Math.cos(hub.a) > .35 ? 'start' : Math.cos(hub.a) < -.35 ? 'end' : 'middle'}" class="kghl" fill="${C.color}">${esc(C.label)} · ${cnt}</text></g>`; }
   for (const gr of L.groups) for (const n of gr.items) {
     const p = L.pos[n.id], col = KG_CLUSTERS[n.cluster].color, right = Math.cos(p.a) >= -0.05, r = full ? 9 : 8;
-    const ring = { new: '#7fe8c5', updated: '#ffbb70', session: '#e8c877', read: '#7fd4ab', pending: '#ffb347', superseded: '#6a7f94', locked: '#6a7f94', unknown: '#8aa3bb', none: 'none' }[n.state];
+    const ring = { new: '#ffd27a', updated: '#ffd27a', session: '#e8c877', read: '#7fd4ab', pending: '#ffb347', superseded: '#6a7f94', locked: '#6a7f94', unknown: '#8aa3bb', none: 'none' }[n.state];
     const showLabel = full || ['new', 'updated', 'pending'].includes(n.state);
     h += `<g class="kgn ${n.state} ${KG.sel === n.id ? 'sel' : ''}" data-node="${esc(n.id)}" tabindex="0">
       ${['new', 'updated'].includes(n.state) ? `<circle cx="${f(p.x)}" cy="${f(p.y)}" r="${r + 9}" fill="#ffd27a" opacity=".22" class="kgpulse" filter="url(#kgglow)"/>` : ''}
-      <circle cx="${f(p.x)}" cy="${f(p.y)}" r="${r}" fill="${col}" style="${['pending', 'unknown'].includes(n.state) ? 'fill:var(--s1)' : n.state === 'locked' || n.state === 'superseded' ? 'fill:var(--kg-dim)' : ''}" stroke="${ring}" stroke-width="${ring === 'none' ? 0 : 3}" ${['pending', 'unknown', 'superseded'].includes(n.state) ? 'stroke-dasharray="3 3"' : ''}/>
-      ${n.state === 'read' ? `<text x="${f(p.x)}" y="${f(p.y + 4)}" text-anchor="middle" class="kgmarker">✓</text>` : n.state === 'session' ? `<circle cx="${f(p.x)}" cy="${f(p.y)}" r="3" fill="#10273a"/>` : ''}
-      ${n.state === 'updated' ? `<text x="${f(p.x)}" y="${f(p.y + 4)}" text-anchor="middle" class="kgmarker">↻</text>` : n.state === 'new' ? `<text x="${f(p.x)}" y="${f(p.y + 4)}" text-anchor="middle" class="kgmarker">+</text>` : n.state === 'superseded' ? `<path d="M${f(p.x - 6)} ${f(p.y)}h12" stroke="#fff" stroke-width="2"/>` : ''}
+      <circle cx="${f(p.x)}" cy="${f(p.y)}" r="${r}" fill="${col}" style="${['pending', 'unknown'].includes(n.state) ? 'fill:var(--s1)' : n.state === 'locked' || n.state === 'superseded' ? 'fill:var(--kg-dim)' : ''}" stroke="${ring}" stroke-width="${ring === 'none' ? 0 : 2.5}" ${['pending', 'unknown', 'superseded'].includes(n.state) ? 'stroke-dasharray="3 3"' : ''}/>
       ${n.state === 'locked' ? `<svg x="${f(p.x - 6)}" y="${f(p.y - 6)}" width="12" height="12" viewBox="0 0 24 24" fill="none" style="stroke:var(--nt)" stroke-width="2.4"><path d="M6 11h12v9H6zM8 11V8a4 4 0 018 0v3"/></svg>` : ''}
-      ${showLabel ? `<text x="${f(p.x + (right ? 15 : -15))}" y="${f(p.y - 1)}" text-anchor="${right ? 'start' : 'end'}" class="kgl">${esc(n.label.length > 38 ? n.label.slice(0, 36) + '…' : n.label)}</text><text x="${f(p.x + (right ? 15 : -15))}" y="${f(p.y + 13)}" text-anchor="${right ? 'start' : 'end'}" class="kgs">${esc(n.sub.length > 45 ? n.sub.slice(0, 43) + '…' : n.sub)}</text>` : ''}
+      ${showLabel ? `<text x="${f(p.x + (right ? 15 : -15))}" y="${f(p.y - 1)}" text-anchor="${right ? 'start' : 'end'}" class="kgl">${esc(n.label)}</text><text x="${f(p.x + (right ? 15 : -15))}" y="${f(p.y + 13)}" text-anchor="${right ? 'start' : 'end'}" class="kgs">${esc(n.sub)}</text>` : ''}
       ${['new', 'updated'].includes(n.state) && full ? `<text x="${f(p.x)}" y="${f(p.y - 16)}" text-anchor="middle" class="kgbadge">${n.state === 'new' ? 'NEW' : 'UPDATED'}</text>` : ''}
       <title>${esc(n.label)} · ${esc(STATE_TXT[n.state] || n.state)}</title></g>`;
   }
@@ -1978,7 +2028,7 @@ function kgCompact(advId) {
 
 /* ---------- full-screen explorer ---------- */
 function openKG(advId) {
-  KG.open = true; KG.adv = advId || UI.memAdv || F.session.advisor || 'ADV-101'; KG.sel = null; KG.vb = { x: 0, y: 0, w: 1400, h: 900 };
+  KG.open = true; KG.adv = advId || UI.memAdv || F.session.advisor || 'ADV-101'; KG.sel = null; KG.vb = { x: -90, y: -20, w: 1580, h: 940 };
   $('kg').hidden = false; renderKG(true);
 }
 function closeKG() { KG.open = false; $('kg').hidden = true; }
@@ -2017,14 +2067,14 @@ function kgInit() {
   $('kg').addEventListener('click', e => {
     const el = e.target.closest('[data-node],[data-kgadv],[data-kgcl],[data-kgact]'); if (!el) return; const d = el.dataset;
     if (d.node) { if (d.node) { KG.sel = d.node; renderKG(); } return; }
-    if (d.kgadv) { KG.adv = d.kgadv; KG.sel = null; KG.vb = { x: 0, y: 0, w: 1400, h: 900 }; renderKG(); return; }
+    if (d.kgadv) { KG.adv = d.kgadv; KG.sel = null; KG.vb = { x: -90, y: -20, w: 1580, h: 940 }; renderKG(); return; }
     if (d.kgcl) { KG.hide.has(d.kgcl) ? KG.hide.delete(d.kgcl) : KG.hide.add(d.kgcl); renderKG(); return; }
     const a = d.kgact;
     if (a === 'changes') { KG.changesOnly = !KG.changesOnly; renderKG(); }
     else if (a === 'back') { KG.sel = null; renderKG(); }
     else if (a === 'close') closeKG();
     else if (a === 'in') kgZoom(1 / 1.25); else if (a === 'out') kgZoom(1.25);
-    else if (a === 'fit') { KG.vb = { x: 0, y: 0, w: 1400, h: 900 }; kgApplyVB(); }
+    else if (a === 'fit') { KG.vb = { x: -90, y: -20, w: 1580, h: 940 }; kgApplyVB(); }
   });
 }
 </script>
@@ -2041,49 +2091,26 @@ const ICONS = {
   network: '<circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 7v5M12 12l-5.5 5.5M12 12l5.5 5.5"/>',
   users: '<circle cx="9" cy="8" r="3.5"/><path d="M2 20c1-3.5 3.5-5 7-5s6 1.5 7 5M16 4.5a3.5 3.5 0 010 7M18 15c2 .7 3.3 2.3 4 5"/>', mail: '<path d="M3 6h18v12H3zM3 7l9 6 9-6"/>',
   book: '<path d="M4 19V5a2 2 0 012-2h13v16H6a2 2 0 00-2 2 2 2 0 002 2h13"/>', globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
-  check: '<path d="M5 12l5 5 9-10"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>', arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>'
+  check: '<path d="M5 12l5 5 9-10"/>', bell: '<path d="M6 16V11a6 6 0 0112 0v5l2 2H4zM10 20a2 2 0 004 0"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>', arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>'
 };
 const icon = n => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ICONS.file}</svg>`;
-function md(value) {
-  const inline = text => esc(text).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>');
-  const lines = String(value || '').replace(/\r\n?/g, '\n').split('\n');
-  const cells = line => line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(x => x.trim());
-  const separator = line => line.includes('|') && cells(line).every(x => /^:?-{3,}:?$/.test(x));
-  const block = (line, next) => !line.trim() || /^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>|```)/.test(line) || (line.includes('|') && next && separator(next));
-  const html = [];
-  for (let i = 0; i < lines.length;) {
-    const line = lines[i];
-    if (!line.trim()) { i++; continue; }
-    if (/^\s*```/.test(line)) { const code = []; i++; while (i < lines.length && !/^\s*```/.test(lines[i])) code.push(lines[i++]); i++; html.push('<pre><code>' + esc(code.join('\n')) + '</code></pre>'); continue; }
-    if (line.includes('|') && lines[i + 1] && separator(lines[i + 1])) {
-      const headers = cells(line), align = cells(lines[i + 1]).map(x => x.startsWith(':') && x.endsWith(':') ? 'center' : x.endsWith(':') ? 'right' : 'left'); i += 2;
-      const rows = []; while (i < lines.length && lines[i].trim() && lines[i].includes('|')) rows.push(cells(lines[i++]));
-      const cell = (x, j, tag) => '<' + tag + ' style="text-align:' + align[j] + '">' + inline(x || '') + '</' + tag + '>';
-      html.push('<div class="output-table"><table><thead><tr>' + headers.map((x,j) => cell(x,j,'th')).join('') + '</tr></thead><tbody>' + rows.map(row => '<tr>' + headers.map((_,j) => cell(row[j],j,'td')).join('') + '</tr>').join('') + '</tbody></table></div>'); continue;
-    }
-    const heading = line.match(/^\s*(#{1,6})\s+(.+)$/);
-    if (heading) { const level = Math.min(heading[1].length + 2, 6); html.push('<h' + level + '>' + inline(heading[2]) + '</h' + level + '>'); i++; continue; }
-    const list = line.match(/^\s*(?:([-*+])|(\d+)[.)])\s+(.+)$/);
-    if (list) { const tag = list[2] ? 'ol' : 'ul', items = []; while (i < lines.length) { const item = lines[i].match(tag === 'ol' ? /^\s*\d+[.)]\s+(.+)$/ : /^\s*[-*+]\s+(.+)$/); if (!item) break; items.push('<li>' + inline(item[1]) + '</li>'); i++; } html.push('<' + tag + '>' + items.join('') + '</' + tag + '>'); continue; }
-    if (/^\s*>/.test(line)) { const quote = []; while (i < lines.length && /^\s*>/.test(lines[i])) quote.push(lines[i++].replace(/^\s*>\s?/,'')); html.push('<blockquote>' + inline(quote.join(' ')) + '</blockquote>'); continue; }
-    const paragraph = [line]; i++; while (i < lines.length && !block(lines[i], lines[i + 1])) paragraph.push(lines[i++]); html.push('<p>' + inline(paragraph.join(' ')) + '</p>');
-  }
-  return html.join('');
-}
+const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/^#{1,4}\s*(.+)$/gm, '<b>$1</b>');
 const agentName = id => AGENTS[id] ? AGENTS[id].name : id === 'orch' ? 'Orchestration' : EMPLOYEES[id] ? EMPLOYEES[id].name : id;
-const UI = { requester: 'EMP-PRIYA', tab: 'decisions', view: 'live', memAdv: null, ops: [], raf: 0, run: null, ctl: null, recordings: [], totals: { runs: 0, reused: 0, committed: 0, pending: 0, blocked: 0, calls: 0, mcp: 0 } };
+const UI = { requester: 'EMP-PRIYA', tab: 'updates', view: 'live', memAdv: null, ops: [], raf: 0, run: null, ctl: null, recordings: [], totals: { runs: 0, reused: 0, committed: 0, pending: 0, blocked: 0, calls: 0, mcp: 0 } };
 
 /* ---------- static diagram ---------- */
 function buildStatic() {
   $('whoRow').innerHTML = Object.entries(EMPLOYEES).map(([id, e]) => `<button class="who-chip" data-who="${id}" aria-pressed="${id === UI.requester}"><i style="background:${TC[e.team]}">${e.name.split(' ').map(x => x[0]).join('')}</i>${esc(e.name)} <small>${esc(TEAMS[e.team].name)}</small></button>`).join('');
-  $('lanes').innerHTML = TEAM_ORDER.map(t => { const ids = Object.keys(AGENTS).filter(k => AGENTS[k].team === t);
-    return `<div class="lane" data-team="${t}"><h3><i style="background:${TC[t]}"></i>${TEAMS[t].name}<small>${ids.length} specialists</small></h3><div class="pills">${ids.map(id => `<button class="pill" id="pl-${id.replace('.', '-')}" data-agent="${id}" style="--c:${TC[t]}" title="${esc(AGENTS[id].does)}"><i></i><span>${esc(AGENTS[id].name)}</span></button>`).join('')}</div></div>`; }).join('');
+  $('lanes').innerHTML = TEAM_ORDER.map(t => { const roles = Object.entries(ROLES).filter(([, r]) => r.team === t);
+    return `<div class="lane bcol" data-team="${t}" style="--c:${TC[t]}"><h3><i style="background:${TC[t]}"></i>${TEAMS[t].name}<small>workbench</small></h3>${roles.map(([rid, r]) => `<div class="brole" id="role-${rid.replace('.', '-')}"><div class="brh" title="${esc(r.does)}"><b>${esc(r.name)}</b><small>${esc(r.does)}</small></div><div class="bagents" aria-label="Agents in this role">${Object.keys(AGENTS).filter(a => roleOf(a) === rid).map(a => `<span class="bag" id="bag-${a.replace('.', '-')}" title="${esc(AGENTS[a].name)}: ${esc(AGENTS[a].does)}">${esc(AGENTS[a].name)}</span>`).join('')}</div><div class="btasks" id="bt-${rid.replace('.', '-')}"></div></div>`).join('')}</div>`; }).join('');
   $('found').innerHTML = `<div class="tiles">${LAYER_ORDER.map(l => `<button class="tile" id="tile-${l}" data-layer="${l}"><span class="th">${icon(LAYERS[l].icon)}${LAYERS[l].short}</span><span class="cnt"></span><span class="tl"></span></button>`).join('')}</div><div class="fhead"><div><b>Shared AI foundation</b><span>Deterministic rules decide what each agent sees and what gets stored.</span></div><div class="ftot" id="ftot"></div></div>`;
   $('integ').innerHTML = `<div class="systems">${SYS_ORDER.map(k => `<button class="sys" id="sys-${k}" data-sys="${k}">${icon(SYSTEMS[k].icon)}<span><b>${SYSTEMS[k].name}</b><small>${SYSTEMS[k].sub}</small></span><span class="via"></span></button>`).join('')}</div><div class="gw"><b>Enterprise integration</b><span>MCP gateway · API gateway</span><span class="legend"><span class="via MCP" style="display:inline-block">MCP</span>agent tool call <span class="via API" style="display:inline-block">API</span>typed service call</span></div>`;
   $('orch').innerHTML = `<div class="ohead"><div class="oname">${icon('network')}Intelligence & orchestration</div><div class="oreq" id="oreq"></div></div><div class="pipe" id="pipe"></div><div class="othink" id="othink"></div><div class="tchips" id="tchips"></div>`;
   renderSugs(); renderOrch();
 }
-const pillEl = id => $('pl-' + id.replace('.', '-'));
+const pillEl = id => $('pl-' + String(id).replace('.', '-'));
+const taskEl = id => $('tc-' + id);
+const opEl = o => (o.task && taskEl(o.task)) || (o.agent && roleOf(o.agent) && $('role-' + roleOf(o.agent).replace('.', '-')));
 function renderSugs() {
   const t = EMPLOYEES[UI.requester].team;
   $('sugs').innerHTML = SUGGESTIONS[t].map(s => `<button class="sug" data-sug="${esc(s)}">${esc(s)}</button>`).join('');
@@ -2115,7 +2142,7 @@ function patchList(box, items) {
 }
 
 /* ---------- orchestration: nine precise steps ---------- */
-const OSTEPS = [['understand', 'Understand', ['requester', 'intent']], ['resolve', 'Resolve', ['lookup', 'entity']], ['scope', 'Scope', ['scope']], ['reuse', 'Reuse', ['known']], ['gaps', 'Gaps', ['missing']], ['memory', 'Memory rule', ['memory']], ['controls', 'Controls', ['controls', 'registry']], ['plan', 'Plan', ['planfix', 'success']], ['execute', 'Execute', []]];
+const OSTEPS = [['understand', 'Understand', ['requester', 'intent', 'asks']], ['resolve', 'Resolve', ['lookup', 'entity']], ['scope', 'Scope', ['scope']], ['reuse', 'Reuse', ['known']], ['gaps', 'Gaps', ['missing']], ['memory', 'Memory rule', ['memory']], ['controls', 'Controls', ['controls', 'registry']], ['plan', 'Plan', ['planfix', 'success']], ['execute', 'Execute', []]];
 function stepStates(r) {
   const s = OSTEPS.map(([id, name, types]) => ({ id, name, items: r ? r.decisions.filter(d => types.includes(d.type)) : [], state: 'pending' }));
   if (!r) return s;
@@ -2137,23 +2164,21 @@ function renderOrch() {
     const act = st.find(x => x.state === 'active');
     const last = [...r.decisions].reverse()[0];
     if (r.status === 'thinking') think = `<span class="spin"></span><b>${act ? act.name : 'Thinking'}</b>${last ? ' · ' + esc(last.title) : ''}`;
-    else if (r.status === 'running') { const run = r.tasks.filter(t => t.state === 'running').map(t => AGENTS[t.agent].name); think = `<span class="spin"></span><b>Execute</b> · ${run.length ? esc(run.join(' and ')) + ' working' : 'routing'} · ${r.tasks.filter(t => t.state === 'done').length} of ${r.tasks.length} done`; }
+    else if (r.status === 'running') { const run = [...new Set(r.tasks.filter(t => t.state === 'running').map(t => ROLES[t.role].name))]; think = `<span class="spin"></span><b>Workbench</b> · ${run.length ? esc(run.join(' and ')) + ' working' : 'assigning'} · ${r.tasks.filter(t => t.state === 'done').length} of ${r.tasks.length} tasks done`; }
     else if (r.status === 'clarify') think = '<b>Gaps</b> · waiting for your answer';
-    else if (r.status === 'done') think = `<b>${r.awaitingApproval ? 'Ready for approval' : 'Complete'}</b> · ${r.tasks.length} specialists in ${Math.round((r.t1 - r.t0) / 1000)} s`;
+    else if (r.status === 'done') think = `<b>Complete</b> · ${r.tasks.length} tasks across ${new Set(r.tasks.map(t => ROLES[t.role].team)).size} teams in ${Math.round((r.t1 - r.t0) / 1000)} s`;
     else if (r.status === 'failed') think = `<b>Stopped</b> · ${esc(r.error || '')}`;
   }
+  if (r && r.presentationPause) { const t = r.tasks.find(t => t.id === r.presentationPause.task); think = `<b>Step ${t?.step || ''} output ready</b> · Next step in ${r.presentationPause.seconds}s · Review the output below`; }
   setHTML($('othink'), think);
-  patchList($('tchips'), r ? r.tasks.map(t => ({ key: t.id, cls: 'tchip ' + (t.state || ''), html: `<i style="--c:${TC[AGENTS[t.agent].team]}"></i>${t.id} ${esc(AGENTS[t.agent].name)}${t.depends_on.length ? ` <span class="arr">after ${t.depends_on.join(', ')}</span>` : ''}` })) : []);
+  patchList($('tchips'), r ? r.tasks.map(t => ({ key: t.id, cls: 'tchip ' + (t.state || ''), html: `<i style="--c:${TC[ROLES[t.role].team]}"></i>${esc(ROLES[t.role].name)}: ${esc(t.title)}` })) : []);
   $('orch').classList.toggle('active', !!r && ['thinking', 'running'].includes(r.status));
 }
 
 /* ---------- lanes, tiles, systems, stats ---------- */
 function renderDiagram() {
   const r = UI.run;
-  document.querySelectorAll('.pill').forEach(el => {
-    const t = r && r.tasks.find(x => x.agent === el.dataset.agent);
-    el.classList.toggle('planned', !!t); el.classList.toggle('running', !!t && t.state === 'running'); el.classList.toggle('done', !!t && t.state === 'done');
-  });
+  renderBoard(r);
   for (const l of LAYER_ORDER) {
     const el = $('tile-' + l);
     const last = [...F.events].reverse().find(e => layerOfEvent(e.type) === l);
@@ -2162,6 +2187,29 @@ function renderDiagram() {
     if (tlEl.textContent !== tlText) tlEl.textContent = tlText;
   }
   setHTML($('ftot'), `<span><b>${UI.totals.reused}</b>reused</span><span><b>${UI.totals.committed}</b>stored</span><span><b>${UI.totals.blocked}</b>blocked</span>`);
+}
+function taskStatus(t) {
+  if (t.state === 'failed') return ['failed', 'Failed'];
+  if (t.state === 'running') return ['running', 'In progress'];
+  if (t.state === 'done') { const v = t.verdicts || []; if (v.some(x => x.status === 'approval')) return ['approval', 'Waiting for approval']; if (v.some(x => x.kind === 'output' && x.status === 'blocked')) return ['blocked', 'Blocked']; return ['done', 'Done']; }
+  return ['queued', 'Assigned'];
+}
+function outOf(t) { const v = (t.verdicts || []).find(x => x.kind === 'output' && x.id); return v ? F.outputs.find(o => o.id === v.id) : null; }
+function renderBoard(r) {
+  for (const rid of Object.keys(ROLES)) {
+    const box = $('bt-' + rid.replace('.', '-')), tasks = r ? r.tasks.filter(t => t.role === rid) : [];
+    patchList(box, tasks.map(t => { const [cls, label] = taskStatus(t), o = outOf(t);
+      return { key: r.id + t.id, cls: 'bcard ' + cls, html: `<button class="bcard-in" id="tc-${t.id}" data-task="${t.id}"><span class="bst"><i></i>${t.step ? 'Step ' + t.step + ' · ' : ''}${label}</span><b>${esc(t.title)}</b><small class="bwho">${icon('bell')} ${esc(t.person || '')}${cls === 'queued' ? ' notified' : ''}</small>${t.depends_on.length && cls === 'queued' ? `<small>after ${t.depends_on.map(d => { const x = r.tasks.find(y => y.id === d); return x ? esc(x.title) : d; }).join(', ')}</small>` : ''}${o && cls !== 'running' ? `<small class="bout">${esc(o.title)}</small>` : ''}</button>` }; }));
+    $('role-' + rid.replace('.', '-')).classList.toggle('busy', tasks.some(t => t.state === 'running'));
+    $('role-' + rid.replace('.', '-')).classList.toggle('has', tasks.length > 0);
+  }
+  /* which specialist agent is playing each role right now (shown quietly, in gray) */
+  document.querySelectorAll('.bag').forEach(el => {
+    const id = el.id.slice(4).replace('-', '.'), mine = r ? r.tasks.filter(t => t.agent === id) : [];
+    el.classList.toggle('act', mine.some(t => t.state === 'running'));
+    el.classList.toggle('used', mine.length > 0 && mine.every(t => ['done', 'failed'].includes(t.state)));
+    el.classList.toggle('planned', mine.some(t => !t.state || t.state === 'queued'));
+  });
 }
 const layerOfEvent = t => t.startsWith('knowledge') ? 'knowledge' : t.startsWith('memory') ? 'memory' : t.startsWith('approval') ? 'policy' : t.startsWith('commitment') ? 'events' : t.startsWith('content') ? 'knowledge' : 'events';
 function renderStats() {
@@ -2178,14 +2226,15 @@ const P2 = (x, y) => ({ x, y });
 function cpath(a, b, k = .5) { const dy = Math.max(45, Math.abs(b.y - a.y) * k) * (b.y >= a.y ? 1 : -1); return `M${a.x.toFixed(1)} ${a.y.toFixed(1)} C${a.x.toFixed(1)} ${(a.y + dy).toFixed(1)} ${b.x.toFixed(1)} ${(b.y - dy).toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`; }
 function opPath(o) {
   const off = (o.lane || 0) * 14;
-  const pr = o.agent ? rectIn(pillEl(o.agent)) : null, pb = pr && P2(pr.x + pr.w / 2, pr.y + pr.h), pt = pr && P2(pr.x + pr.w / 2, pr.y);
+  const oe = o.kind === 'request' ? null : opEl(o); if (o.kind !== 'request' && !oe) return null;
+  const pr = oe ? rectIn(oe) : null, pb = pr && P2(pr.x + pr.w / 2, pr.y + pr.h), pt = pr && P2(pr.x + pr.w / 2, pr.y);
   const tileTop = l => { const t = rectIn($('tile-' + l)); return P2(t.x + t.w / 2 + off, t.y); };
   if (o.kind === 'request') { const c = rectIn($('cmd')), r = rectIn($('orch')); return cpath(P2(c.x + c.w * .3, c.y + c.h), P2(c.x + c.w * .3, r.y)); }
   if (o.kind === 'dispatch') { const r = rectIn($('orch')); return cpath(P2(pt.x, r.y + r.h), pt); }
   if (o.kind === 'read') return cpath(tileTop(o.layer), pb);
   if (o.kind === 'write') return cpath(pb, tileTop(o.layer));
   if (o.kind === 'call') { const s = rectIn($('sys-' + o.sys)), e = P2(s.x + s.w / 2 + off / 2, s.y); return `M${pb.x.toFixed(1)} ${pb.y.toFixed(1)} C${pb.x.toFixed(1)} ${(pb.y + 170).toFixed(1)} ${e.x.toFixed(1)} ${(e.y - 170).toFixed(1)} ${e.x.toFixed(1)} ${e.y.toFixed(1)}`; }
-  if (o.kind === 'handoff') { const fr = rectIn(pillEl(o.from)), a = P2(fr.x + fr.w / 2, fr.y + fr.h), t = tileTop(o.layer); return `M${a.x.toFixed(1)} ${a.y.toFixed(1)} C${a.x.toFixed(1)} ${(a.y + 90).toFixed(1)} ${t.x.toFixed(1)} ${(t.y - 80).toFixed(1)} ${t.x.toFixed(1)} ${t.y.toFixed(1)} C${t.x.toFixed(1)} ${(t.y - 80).toFixed(1)} ${pb.x.toFixed(1)} ${(pb.y + 90).toFixed(1)} ${pb.x.toFixed(1)} ${pb.y.toFixed(1)}`; }
+  if (o.kind === 'handoff') { const fe = taskEl(o.fromTask); if (!fe) return null; const fr = rectIn(fe), a = P2(fr.x + fr.w / 2, fr.y + fr.h), t = tileTop(o.layer); return `M${a.x.toFixed(1)} ${a.y.toFixed(1)} C${a.x.toFixed(1)} ${(a.y + 90).toFixed(1)} ${t.x.toFixed(1)} ${(t.y - 80).toFixed(1)} ${t.x.toFixed(1)} ${t.y.toFixed(1)} C${t.x.toFixed(1)} ${(t.y - 80).toFixed(1)} ${pb.x.toFixed(1)} ${(pb.y + 90).toFixed(1)} ${pb.x.toFixed(1)} ${pb.y.toFixed(1)}`; }
   return null;
 }
 const OPCOL = { request: '#ffd27a', dispatch: '#b9cadb', read: '#7fd4ab', write: '#ffd27a', handoff: '#e2b6ff' };
@@ -2250,7 +2299,7 @@ async function runRequestInner(text, replay, opts = {}) {
   const run = { id: 'RUN-' + (++RUNSEQ), requester, text, clarified: opts.clarified || null, territory: null, t0: Date.now(), decisions: [], tasks: [], status: 'thinking', advisor: null, unit: null, stats: { reused: 0, reads: 0, calls: 0, mcp: 0, committed: 0, pending: 0, blocked: 0, rejected: 0, task: 0, ai: 0 }, orchText: '', record: { name: text.slice(0, 60), requester, text, orch: '', agents: {} }, replay };
   UI.run = run; UI.ctl = new AbortController(); F.runs.push(run); UI.totals.runs++;
   $('runBtn').disabled = true; $('stopBtn').hidden = false; $('cmdIn').value = ''; $('cmdIn').blur();
-  setTab('decisions');
+  setTab('updates');
   logEvent('request.received', `${EMPLOYEES[requester].name}: ${text}`, requester);
   addOp({ kind: 'request', dur: 900 });
   run.resolution = resolveEntities(text);
@@ -2272,20 +2321,17 @@ async function runRequestInner(text, replay, opts = {}) {
       run.stats.ai++;
       const { text: full } = await AI.sample(orchestratorPrompt(run), { modelTier: 'default', cache: false, signal: UI.ctl.signal, onText: ({ text: t }) => { run.orchText = t; feed(t); updateStream(); } });
       run.orchText = full; feed(full);
-      if (run.tasks.length < 2 && !run.clarify) {
-        run.decisions.push({ type: 'planfix', src: 'code', title: 'Incomplete plan; asking again in strict JSON', detail: 'The reply had fewer than two usable tasks; orchestration is asked for a complete plan.' }); renderAll();
+      if (!run.tasks.length && !run.clarify) {
+        run.decisions.push({ type: 'planfix', src: 'code', title: 'Plan unreadable; asking again in strict JSON', detail: 'The first reply had no usable tasks, so orchestration is asked once more for one JSON object.' }); renderAll();
         run.stats.ai++;
-        const fix = await AI.sample.json(orchestratorPrompt(run) + '\n\nIMPORTANT: your previous reply could not be used. Reply now with ONE JSON object only: {"decisions":[{"type":"...","title":"...","detail":"..."}],"tasks":[{"id":"T1","agent":"...","objective":"...","depends_on":[],"reads":[],"tools":[],"why":"..."}]} including the entity decision and all specialist tasks needed to cover the full request.', { modelTier: 'default', cache: false, signal: UI.ctl.signal });
-        const repaired = normalizeOrch(fix);
-        if (repaired.some(o => o.k === 'task')) run.tasks = [];
-        repaired.forEach(onObj); run.orchText += '\n' + JSON.stringify(fix);
+        const fix = await AI.sample.json(orchestratorPrompt(run) + '\n\nIMPORTANT: your previous reply could not be used. Reply now with ONE JSON object only: {"decisions":[{"type":"...","title":"...","detail":"..."}],"tasks":[{"id":"T1","agent":"...","objective":"...","depends_on":[],"reads":[],"tools":[],"why":"..."}]} including the entity decision.', { modelTier: 'default', cache: false, signal: UI.ctl.signal });
+        normalizeOrch(fix).forEach(onObj); run.orchText += '\n' + JSON.stringify(fix);
       }
     }
   } catch (e) {
     if (e.code === 'not_granted' || e.code === 'sampling_disabled' || e.code === 'not_declared') { AI.mode = 'replay-only'; setAIStatus(); return finishRun(run, 'Claude access isn’t allowed in this view, so live runs are off. Allow access when claude.ai asks, then reload.'); }
     if (e.code === 'cancelled') return finishRun(run, 'Stopped.');
     if (e.code === 'rate_limited' || e.code === 'session_expired' || e.code === 'refused') return finishRun(run, `Orchestration failed: ${errText(e)}`);
-    if (e.code === 'output_truncated') return finishRun(run, 'The AI plan was cut short. Increase MAX_TOKENS_ORCHESTRATOR and try again.');
     if (!run.tasks.length && !run.clarify) run.decisions.push({ type: 'planfix', src: 'code', title: 'AI plan failed; using the rules-based plan', detail: `Orchestration hit a problem (${errText(e)}), so a plan was built from rules instead.` });
     else if (!run.tasks.length) return finishRun(run, `Orchestration failed: ${errText(e)}`);
   }
@@ -2299,91 +2345,79 @@ async function runRequestInner(text, replay, opts = {}) {
     run.decisions.push({ type: 'planfix', src: 'code', title: 'Rules-based plan', detail: 'No usable AI plan, so specialists were chosen by rules from the request’s wording.' });
     fallbackPlan(run).forEach(o => handleOrch(run, o)); renderAll();
   }
+  if (run.tasks.length) finalizePlan(run);
   run.record.orch = run.orchText.split('\n').filter(s => s.trim().startsWith('{')).join('\n');
   if (run.clarify) { run.status = 'clarify'; renderAll(); $('runBtn').disabled = false; $('stopBtn').hidden = true; return; }
   if (!run.tasks.length) return finishRun(run, 'Orchestration produced no tasks.');
-  if (!replay) {
-    run.decisions.push({ type: 'planfix', src: 'code', title: 'Reviewing full outcome coverage', detail: 'Checking the entire registry for missing specialists, deliverables and dependencies.' }); renderAll();
-    try {
-      run.stats.ai++;
-      const audit = await AI.sample.json(orchestratorPrompt(run) + '\n\nCOMPLETENESS REVIEW: Review this draft against EVERY requested outcome and ALL registered specialists: ' + JSON.stringify(run.tasks) + '\nReturn ONE JSON object: {"tasks":[{"id":"T1","agent":"registered id","objective":"specific deliverable","depends_on":[],"reads":[],"tools":[],"why":"needed for this outcome"}],"coverage":[{"outcome":"requested outcome or necessary supporting deliverable","task_ids":["T1"],"done_when":"observable acceptance criterion"}]}. Return the full corrected plan, not just additions. Include research, approved resources, verification, formatting, scheduling, final preparation and follow-up only where necessary for this request. Check every registry role; include every relevant specialist, with no arbitrary task limit and no redundant busywork. Every outcome must have owners and a done_when criterion. Final synthesis depends on all its inputs; compliance follows drafting and precedes distribution; approvals must remain explicit. List tasks in dependency order.', { modelTier: 'default', cache: false, signal: UI.ctl.signal });
-      if (!Array.isArray(audit.tasks) || !audit.tasks.length || !Array.isArray(audit.coverage) || !audit.coverage.length) throw new Error('Completeness review returned no validated plan.');
-      run.tasks = []; normalizeOrch(audit).forEach(onObj);
-      run.coverage = audit.coverage;
-      const ids = new Set(run.tasks.map(t => t.id));
-      if (run.tasks.length !== audit.tasks.length || run.coverage.some(c => !c.outcome || !c.done_when || !Array.isArray(c.task_ids) || !c.task_ids.length || c.task_ids.some(id => !ids.has(id)))) throw new Error('Completeness review has missing task owners.');
-      run.decisions.push({ type: 'success', src: 'ai', title: 'Every outcome has an owner', detail: run.coverage.map(c => c.outcome + ': ' + c.done_when).join(' · ') });
-    } catch (e) { return finishRun(run, 'Completeness review failed: ' + errText(e)); }
-  }
-  try { finalizeTaskPlan(run); } catch (e) { return finishRun(run, e.message); }
   /* registry governance on the plan */
   if (run.advisor) { F.session.advisor = run.advisor; F.session.unit = run.unit || null; }
   F.session.requests.push({ text, adv: run.advisor });
   run.status = 'running'; renderAll();
-  /* 2. execute in dependency order, two at a time */
+  /* Execute one step at a time, allowing the completed output to be read. */
   const done = new Set();
   while (run.tasks.some(t => !t.state || t.state === 'queued')) {
     if (UI.ctl.signal.aborted) return finishRun(run, 'Stopped.');
     const ready = run.tasks.filter(t => (!t.state || t.state === 'queued') && t.depends_on.every(d => done.has(d)));
-    if (!ready.length) return finishRun(run, 'The task dependencies cannot be resolved. Please try again.');
-    for (let k = 0; k < ready.length; k += 2) {
-      await Promise.all(ready.slice(k, k + 2).map(t => runTask(run, t).catch(e => { t.state = 'failed'; t.error = errText(e); renderAll(); })));
-      ready.slice(k, k + 2).forEach(t => done.add(t.id));
+    if (!ready.length) { run.tasks.filter(t => t.state === 'queued').forEach(t => t.depends_on = []); continue; }
+    for (const t of ready) {
+      await runTask(run, t).catch(e => { t.state = 'failed'; t.error = errText(e); renderAll(); });
+      done.add(t.id);
       if (UI.ctl.signal.aborted) return finishRun(run, 'Stopped.');
     }
   }
-  if (!replay && run.coverage && run.tasks.every(t => t.state === 'done')) {
-    run.decisions.push({ type: 'success', src: 'code', title: 'Checking delivered outcomes', detail: 'Comparing specialist results against every acceptance criterion; approvals remain pending.' }); renderAll();
-    try {
-      run.stats.ai++;
-      const check = await AI.sample.json('Verify completion of this request: ' + run.text + '\nAcceptance criteria: ' + JSON.stringify(run.coverage) + '\nActual specialist results: ' + JSON.stringify(run.tasks.map(t => ({ id: t.id, agent: t.agent, objective: t.objective, result: t.result, verdicts: t.verdicts }))) + '\nReturn JSON only: {"outcomes":[{"outcome":"exact criterion outcome","status":"complete|awaiting_approval|incomplete","evidence":"specific task/result evidence or missing work"}]}. Assess every criterion. A task being done is insufficient: its actual output must deliver the requested result. Never claim a meeting is booked or material sent when only a draft/hold exists. Pending human approvals are awaiting_approval, not incomplete. Unsupported or missing deliverables are incomplete.', { modelTier: 'default', cache: false, signal: UI.ctl.signal });
-      if (!Array.isArray(check.outcomes) || check.outcomes.length !== run.coverage.length || run.coverage.some(c => check.outcomes.filter(o => o.outcome === c.outcome).length !== 1) || check.outcomes.some(o => !['complete', 'awaiting_approval', 'incomplete'].includes(o.status) || !o.evidence)) throw new Error('Final verification did not account for every outcome.');
-      run.completion = check.outcomes;
-      check.outcomes.forEach(o => run.decisions.push({ type: 'success', src: 'ai', title: o.outcome, detail: o.status + ': ' + o.evidence }));
-      const missing = check.outcomes.filter(o => o.status === 'incomplete');
-      if (missing.length) return finishRun(run, 'Unfinished outcomes: ' + missing.map(o => o.outcome + ' — ' + o.evidence).join('; '));
-    } catch (e) { return finishRun(run, 'Final outcome verification failed: ' + errText(e)); }
-  }
   finishRun(run);
 }
-/* Preserve forward references, then display and execute a stable dependency order. */
-function finalizeTaskPlan(run) {
-  const tasks = run.tasks, ids = new Set(tasks.map(t => t.id));
-  for (const t of tasks) {
-    if (t.depends_on.some(id => !ids.has(id))) throw new Error('A task depends on an unknown task. Please try again.');
-    t.depends_on = [...new Set(t.depends_on)];
-  }
-  // The final meeting brief consumes the comparison, approved resources and meeting details.
-  if (/compare|comparison/.test(run.text.toLowerCase()) && /meeting|schedule/.test(run.text.toLowerCase())) {
-    const inputs = tasks.filter(t => ['product.qar', 'marketing.gather', 'sales.schedule'].includes(t.agent));
-    for (const t of tasks.filter(t => t.agent === 'sales.prep')) {
-      t.depends_on = [...new Set([...t.depends_on, ...inputs.map(x => x.id)])];
+/* Tie every task to what was asked, and put the tasks in a clear order. */
+function splitAsks(text) {
+  const parts = text.replace(/\(clarification:.*\)$/i, '').split(/\s*(?:;|,\s*(?:and\s+)?|\s+and\s+(?=(?:also\s+)?(?:schedule|book|send|draft|create|write|prep|prepare|compare|find|identify|update|check|explain|set up|follow)))\s*/i).map(s => s.trim()).filter(s => s.split(' ').length >= 2);
+  return (parts.length ? parts : [text]).slice(0, 4).map(s => s.charAt(0).toUpperCase() + s.slice(1));
+}
+function finalizePlan(run) {
+  if (!run.asks || !run.asks.length) { run.asks = splitAsks(run.text).map(text => ({ text, tasks: [] })); run.decisions.push({ type: 'asks', src: 'code', title: `${run.asks.length} ${run.asks.length === 1 ? 'thing' : 'things'} requested`, detail: run.asks.map((a, k) => `${k + 1}. ${a.text}`).join(' · ') }); }
+  const words = s => new Set(s.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 3 && !['with', 'from', 'that', 'this', 'their', 'month', 'next', 'have', 'about'].includes(w)));
+  for (const t of run.tasks) {
+    if (!(t.ask >= 1 && t.ask <= run.asks.length)) {
+      const tw = words(t.title + ' ' + t.objective); let best = 1, score = -1;
+      run.asks.forEach((a, k) => { const aw = words(a.text); let s = 0; aw.forEach(w => { if ([...tw].some(x => x.startsWith(w.slice(0, 5)) || w.startsWith(x.slice(0, 5)))) s++; }); if (/schedul|meeting|book|calendar/.test(a.text.toLowerCase()) && t.role === 'sales.ssc') s += 3; if (s > score) { score = s; best = k + 1; } });
+      t.ask = best;
     }
+    run.asks[t.ask - 1].tasks.push(t.id);
   }
-  const ordered = [], remaining = [...tasks], done = new Set();
-  while (remaining.length) {
-    const i = remaining.findIndex(t => t.depends_on.every(id => done.has(id)));
-    if (i < 0) throw new Error('The AI plan has circular task dependencies. Please try again.');
-    const [t] = remaining.splice(i, 1); ordered.push(t); done.add(t.id);
-  }
-  const labels = new Map(ordered.map((t, i) => [t.id, 'T' + (i + 1)]));
-  for (const t of ordered) { t.depends_on = t.depends_on.map(id => labels.get(id)); t.id = labels.get(t.id); }
-  if (run.coverage) run.coverage.forEach(c => c.task_ids = c.task_ids.map(id => labels.get(id)));
-  run.tasks = ordered;
+  run.asks.forEach((a, k) => { if (!a.tasks.length) run.decisions.push({ type: 'registry', src: 'code', title: `Not covered: “${a.text}”`, detail: 'No task serves this part of the request. Flagged so nothing is silently dropped.' }); });
+  /* sequential order: dependencies first, then plan order */
+  const order = [], seen = new Set();
+  const visit = t => { if (seen.has(t.id)) return; seen.add(t.id); t.depends_on.forEach(d => { const x = run.tasks.find(y => y.id === d); if (x) visit(x); }); order.push(t); };
+  run.tasks.forEach(visit);
+  order.forEach((t, k) => t.step = k + 1);
+  run.tasks.sort((a, b) => a.step - b.step);
 }
 function handleOrch(run, o) {
   if (o.k === 'decision') {
     run.decisions.push(Object.assign({ src: 'ai' }, o));
     if (o.type === 'entity') { if (o.advisor && ADVISORS[o.advisor]) run.advisor = o.advisor; if (o.unit && run.advisor && ADVISORS[run.advisor].units[o.unit]) run.unit = o.unit; if (o.territory && TERRITORIES[o.territory]) run.territory = o.territory; else if (!run.advisor && run.resolution.territories[0]) run.territory = run.resolution.territories[0].id; UI.memAdv = run.advisor || UI.memAdv; flashTile('graph', 'read'); }
     if (o.type === 'known') flashTile('memory', 'read');
+    if (o.type === 'asks' && Array.isArray(o.asks)) run.asks = o.asks.map(String).filter(Boolean).slice(0, 5).map(text => ({ text, tasks: [] }));
   } else if (o.k === 'task') {
+    if (run.tasks.length >= 5) return;
     const arr = x => Array.isArray(x) ? x : x ? [x] : [];
     let id = String(o.id || 'T' + (run.tasks.length + 1)); if (run.tasks.some(x => x.id === id)) id = 'T' + (run.tasks.length + 1);
     const t = { id, agent: resolveAgentId(o.agent) || String(o.agent || ''), objective: String(o.objective || o.task || '').slice(0, 300), depends_on: arr(o.depends_on || o.dependsOn).map(String), reads: arr(o.reads).map(String), tools: arr(o.tools).map(resolveToolName).filter(Boolean), why: String(o.why || '').slice(0, 200) };
+    const rr = ROLES[o.role] ? o.role : null;
+    if (!AGENTS[t.agent] && rr) t.agent = ROLE_DEFAULT_AGENT[rr];
     if (!t.objective) t.objective = AGENTS[t.agent] ? AGENTS[t.agent].does : 'Contribute to the request';
+    t.role = rr && roleOf(t.agent) && ROLES[rr].team === AGENTS[t.agent]?.team ? rr : roleOf(t.agent);
+    t.title = String(o.title || '').trim().slice(0, 60) || t.objective.split(/[,.;]/)[0].split(' ').slice(0, 6).join(' ');
+    t.ask = Number(o.ask) || null;
+    /* business assignment rules for Sales work */
+    if (AGENTS[t.agent] && AGENTS[t.agent].team === 'sales') {
+      const txt = t.title + ' ' + t.objective, rule = ROLE_RULES.find(x => x.test.test(txt));
+      if (rule && t.role !== rule.role) { const from = ROLES[t.role] ? ROLES[t.role].name : '—'; t.role = rule.role; t.agent = rule.agent(txt); run.decisions.push({ type: 'registry', src: 'code', title: `“${t.title}” → ${ROLES[rule.role].name}`, detail: `${rule.why}. Moved from ${from}.` }); }
+    }
+    t.person = ROLES[t.role] ? (t.role === 'sales.wholesalers' && run.advisor && EMPLOYEES[run.requester].team === 'sales' && ADVISORS[run.advisor].coverage.includes(run.requester) && run.requester !== 'EMP-SAM' ? EMPLOYEES[run.requester].name : ROLES[t.role].person) : '';
     if (!AGENTS[t.agent]) { run.decisions.push({ type: 'registry', src: 'code', title: `Unknown agent “${t.agent}” dropped`, detail: 'Orchestration can only route to registered specialists.' }); return; }
     const bad = t.tools.filter(x => !toolAllowed(t.agent, x));
     if (bad.length) { t.tools = t.tools.filter(x => toolAllowed(t.agent, x)); run.decisions.push({ type: 'registry', src: 'code', title: `${AGENTS[t.agent].name}: ${bad.length} tool${bad.length > 1 ? 's' : ''} removed`, detail: `${bad.join(', ')} ${bad.length > 1 ? 'are' : 'is'} not on this agent’s allow-list at the gateway.` }); UI.totals.blocked++; }
+    t.depends_on = t.depends_on.filter(d => run.tasks.some(x => x.id === d));
     t.state = 'queued'; run.tasks.push(t);
   } else if (o.k === 'clarify') {
     if (run.clarified) run.decisions.push({ type: 'missing', src: 'code', title: 'Proceeding on your earlier answer', detail: `Orchestration wanted to ask “${o.question}” again; the app lets it ask only once, so it continues with stated assumptions.` });
@@ -2393,25 +2427,25 @@ function handleOrch(run, o) {
 async function runTask(run, t) {
   const a = AGENTS[t.agent], sig = UI.ctl.signal;
   t.state = 'running'; t.t0 = Date.now(); UI.openTask = t.id; renderAll();
-  addOp({ kind: 'dispatch', agent: t.agent, dur: 800 }); await sleep(800);
+  addOp({ kind: 'dispatch', agent: t.agent, task: t.id, dur: 800 }); await sleep(800);
   /* foundation assembles the context packet */
   t.packet = buildPacket(t, run);
   const layers = [...new Set(t.packet.items.map(i => i.layer))];
-  layers.forEach((l, k) => { addOp({ kind: 'read', agent: t.agent, layer: l, lane: k - (layers.length - 1) / 2, dur: 1400 }); flashTile(l, 'read'); });
+  layers.forEach((l, k) => { addOp({ kind: 'read', agent: t.agent, task: t.id, layer: l, lane: k - (layers.length - 1) / 2, dur: 1400 }); flashTile(l, 'read'); });
   const reusedItems = t.packet.items.filter(i => { const rec = F.memory.find(m => m.id === i.id) || F.findings.find(k => k.id === i.id); return rec && (rec.origin || rec.by) && (rec.origin || rec.by) !== t.agent; });
   run.stats.reads += t.packet.items.length;
   renderAll(); await sleep(1200);
   /* upstream work */
   const upstream = t.depends_on.map(d => run.tasks.find(x => x.id === d)).filter(x => x && x.result).map(x => ({ task: x.id, agent: x.agent, title: x.result.output?.title || '', body: x.result.output?.body || '', ids: (x.verdicts || []).filter(v => v.id).map(v => v.id) }));
   t.upstreamReuse = upstream.length;
-  upstream.forEach((up, k) => { const pub = run.tasks.find(x => x.id === up.task); const l = pub && pub.verdicts && pub.verdicts.some(v => v.kind === 'memory' && v.status === 'committed') ? 'memory' : 'knowledge'; addOp({ kind: 'handoff', from: up.agent, agent: t.agent, layer: l, lane: k, dur: 2000 }); });
+  upstream.forEach((up, k) => { const pub = run.tasks.find(x => x.id === up.task); const l = pub && pub.verdicts && pub.verdicts.some(v => v.kind === 'memory' && v.status === 'committed') ? 'memory' : 'knowledge'; addOp({ kind: 'handoff', from: up.agent, fromTask: up.task, agent: t.agent, task: t.id, layer: l, lane: k, dur: 2000 }); });
   if (upstream.length) await sleep(900);
   t.calls = []; t.toolResults = [];
   const onCall = async (name, input) => {
     if (sig.aborted) throw new Error('stopped');
     const T = TOOLS[name];
     if (!T || !toolAllowed(t.agent, name)) { t.calls.push({ name, input, error: 'Not permitted for this agent' }); UI.totals.blocked++; renderAll(); throw new Error(`${name} is not permitted for ${a.name}`); }
-    addOp({ kind: 'call', agent: t.agent, sys: T.sys, via: T.via, dur: 1500 });
+    addOp({ kind: 'call', agent: t.agent, task: t.id, sys: T.sys, via: T.via, dur: 1500 });
     let out; try { out = capResult(T.run(input && typeof input === 'object' ? input : {})); } catch (e) { t.calls.push({ name, input, error: e.message }); renderAll(); throw e; }
     t.calls.push({ name, input, sys: T.sys, via: T.via, rw: T.rw, out }); t.toolResults.push({ name, out });
     run.stats.calls++; UI.totals.calls++; if (T.via === 'MCP') { run.stats.mcp++; UI.totals.mcp++; }
@@ -2464,15 +2498,27 @@ async function runTask(run, t) {
   const wl = new Set(t.verdicts.filter(v => !['blocked', 'rejected', 'read'].includes(v.status)).map(v => ({ knowledge: 'knowledge', memory: 'memory', commitment: 'events', output: 'knowledge' }[v.kind])));
   if (t.verdicts.some(v => v.event)) wl.add('events');
   if (t.verdicts.some(v => ['published', 'committed'].includes(v.status))) wl.add('graph');
-  [...wl].forEach((l, k) => { addOp({ kind: 'write', agent: t.agent, layer: l, lane: k - (wl.size - 1) / 2, dur: 1400 }); flashTile(l, 'write'); });
+  [...wl].forEach((l, k) => { addOp({ kind: 'write', agent: t.agent, task: t.id, layer: l, lane: k - (wl.size - 1) / 2, dur: 1400 }); flashTile(l, 'write'); });
   if (t.verdicts.some(v => v.status === 'blocked' || v.status === 'rejected')) flashTile('policy', 'write');
   /* event fan-out: subscribers get notified */
   const subs = new Set(t.verdicts.flatMap(v => v.event ? v.event.subscribers : []));
-  subs.forEach(sid => { const el = pillEl(sid); if (el) { el.classList.remove('notified'); void el.offsetWidth; el.classList.add('notified'); } });
+  new Set([...subs].map(roleOf).filter(Boolean)).forEach(rid => { const el = $('role-' + rid.replace('.', '-')); if (el) { el.classList.remove('notified'); void el.offsetWidth; el.classList.add('notified'); } });
   t.state = 'done'; t.t1 = Date.now();
   if (t.verdicts.some(v => v.kind === 'memory')) badge('memory', true);
-  if (t.verdicts.some(v => v.kind === 'output')) badge('outputs', true);
-  renderAll(); await sleep(1100);
+  if (t.verdicts.some(v => v.kind === 'output')) badge('updates', true);
+  setTab('updates');
+  renderAll();
+  // Start the reading interval only after the completed result has painted.
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  const words = String(t.result?.output?.body || t.result?.says || '').split(/\s+/).filter(Boolean).length;
+  const seconds = Math.min(30, Math.max(8, Math.ceil(words / 3)));
+  run.presentationPause = { task: t.id, seconds };
+  renderAll();
+  for (let remaining = seconds; remaining > 0 && !UI.ctl.signal.aborted; remaining--) {
+    run.presentationPause.seconds = remaining; renderAll();
+    for (let k = 0; k < 10 && !UI.ctl.signal.aborted; k++) await sleep(100);
+  }
+  run.presentationPause = null; renderAll();
 }
 function defaultArgs(n, run, t) {
   const tick = mentionsFunds(run.text + ' ' + t.objective), people = (run.resolution.people || []).map(p => p.name);
@@ -2484,9 +2530,6 @@ function errText(e) {
   return e && e.code ? `${map[e.code] || e.code}${e.message && !map[e.code] ? ' (' + e.message + ')' : ''}` : String(e && e.message || e);
 }
 function finishRun(run, error) {
-  if (!error && run.tasks.some(t => t.state !== 'done')) error = 'Some specialist tasks did not finish successfully. Review the Agents tab.';
-  if (!error && run.tasks.some(t => (t.verdicts || []).some(v => ['blocked', 'rejected'].includes(v.status)))) error = 'Some contributions did not pass verification. Review the Agents and Outputs tabs.';
-  run.awaitingApproval = (run.completion || []).some(o => o.status === 'awaiting_approval') || run.tasks.some(t => (t.verdicts || []).some(v => v.status === 'approval'));
   run.status = error ? 'failed' : 'done'; run.error = error; run.t1 = Date.now();
   $('runBtn').disabled = false; $('stopBtn').hidden = true;
 
@@ -2500,12 +2543,12 @@ const SI = { done: '✓', active: '', pending: '', skipped: '–', failed: '!' }
 function stepBody(r, s) {
   if (s.id === 'plan') {
     const succ = s.items.filter(d => d.type === 'success'), fixes = s.items.filter(d => d.type === 'planfix');
-    return `${fixes.map(d => `<div class="dl"><span class="tag2 code">RULE</span><span><b>${esc(d.title)}</b> ${esc(d.detail || '')}</span></div>`).join('')}${r.tasks.map(t => `<div class="dl"><span class="tid" style="background:${TC[AGENTS[t.agent].team]}">${t.id}</span><span><b>${esc(AGENTS[t.agent].name)}</b> · ${esc(t.objective)}${t.depends_on.length ? ` <small>after ${t.depends_on.join(', ')}</small>` : ''}</span></div>`).join('')}${succ.map(d => `<div class="dl"><span class="tag2 ai">DONE WHEN</span><span>${esc(d.title)}</span></div>`).join('')}`;
+    return `${fixes.map(d => `<div class="dl"><span class="tag2 code">RULE</span><span><b>${esc(d.title)}</b> ${esc(d.detail || '')}</span></div>`).join('')}${r.tasks.map(t => `<div class="dl"><span class="tid" style="background:${TC[ROLES[t.role].team]}">${t.id}</span><span><b>${esc(t.title)}</b> → ${esc(TEAMS[ROLES[t.role].team].name)} · ${esc(ROLES[t.role].name)}<small>${esc(t.objective)}${t.depends_on.length ? ' · after ' + t.depends_on.join(', ') : ''}</small></span></div>`).join('')}${succ.map(d => `<div class="dl"><span class="tag2 ai">DONE WHEN</span><span>${esc(d.title)}</span></div>`).join('')}`;
   }
   if (s.id === 'execute') {
     return r.tasks.map(t => { const up = t.depends_on.map(d => r.tasks.find(x => x.id === d)).filter(Boolean);
       const icon2 = t.state === 'done' ? '✓' : t.state === 'running' ? '<span class="spin"></span>' : t.state === 'failed' ? '!' : '·';
-      return `<div class="dl"><span class="tid ${t.state || ''}" style="background:${TC[AGENTS[t.agent].team]}">${icon2}</span><span><b>${esc(AGENTS[t.agent].name)}</b>${t.state === 'done' && t.result ? ` · ${esc(t.result.says)}` : t.state === 'failed' ? ` · failed: ${esc(t.error)}` : t.state === 'running' ? ' · working' : ' · waiting'}${up.length ? `<small>Builds on ${up.map(x => esc(x.id + ' ' + AGENTS[x.agent].name)).join(', ')} through the foundation</small>` : ''}${t.verdicts ? `<small>${t.verdicts.map(v => `${v.kind} ${v.status}`).join(' · ')}</small>` : ''}</span></div>`; }).join('');
+      return `<div class="dl"><span class="tid ${t.state || ''}" style="background:${TC[ROLES[t.role].team]}">${icon2}</span><span><b>${esc(ROLES[t.role].name)}: ${esc(t.title)}</b>${t.state === 'done' && t.result ? ` · ${esc(t.result.says)}` : t.state === 'failed' ? ` · failed: ${esc(t.error)}` : t.state === 'running' ? ' · working' : ' · waiting'}${up.length ? `<small>Builds on ${up.map(x => esc(ROLES[x.role].name + '’s “' + x.title + '”')).join(', ')} through the foundation</small>` : ''}${t.verdicts ? `<small>${t.verdicts.map(v => `${v.kind} ${v.status}`).join(' · ')}</small>` : ''}</span></div>`; }).join('');
   }
   return s.items.map(d => `<div class="dl"><span class="tag2 ${d.src === 'code' ? 'code' : 'ai'}">${d.src === 'code' ? 'RULE' : 'AI'}</span><span><b>${esc(d.title)}</b>${d.detail ? ' ' + esc(d.detail) : ''}${d.uses && d.uses.length ? `<small>${esc(d.uses.join(' · '))}</small>` : ''}</span></div>`).join('');
 }
@@ -2515,7 +2558,7 @@ function renderDecisions() {
   const items = [];
   if (r.status === 'done') items.push({ key: 'sum', cls: 'summary', html: `<h3>${r.tasks.length} specialists · ${Math.round((r.t1 - r.t0) / 1000)} s</h3><div class="sgrid"><div><b>${r.stats.reused}</b>facts reused</div><div><b>${r.stats.reads}</b>records delivered</div><div><b>${r.stats.calls}</b>system calls</div><div><b>${r.stats.committed}</b>stored</div><div><b>${r.stats.pending + r.stats.task}</b>kept scoped / pending</div><div><b>${r.stats.blocked}</b>blocked or rejected</div></div>` });
   if (r.status === 'failed') items.push({ key: 'fail', cls: 'blocked', html: `<b>${esc(r.error)}</b>${r.tasks.length ? '' : '<br>No specialist ran.'}<div style="margin-top:8px"><button class="lbtn" data-act="retry">Try again</button></div>${r.orchText ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px">What orchestration returned</summary><div class="stream">${esc(r.orchText.slice(-3000))}</div></details>` : ''}` });
-  if (r.status === 'clarify') items.push({ key: 'clar-' + r.id, cls: 'clar', html: `<b>One question before planning</b><p style="margin:4px 0 0">${esc(r.clarify)}</p><input id="clarIn" placeholder="Your answer"><div style="display:flex;gap:6px;margin-top:6px"><button class="lbtn primary" data-act="answer">Continue</button><button class="lbtn" data-act="assume">Let it assume</button></div>` });
+  if (r.status === 'clarify') items.push({ key: 'clar-note', cls: 'clar', html: `<b>Waiting for your answer</b><p style="margin:4px 0 0">${esc(r.clarify)}</p><button class="lbtn primary" data-tab="updates" style="margin-top:6px">Answer in Updates</button>` });
   items.push({ key: 'req-' + r.id, cls: 'dcard', html: `<div class="dt">REQUEST · ${esc(EMPLOYEES[r.requester].name)}, ${esc(TEAMS[EMPLOYEES[r.requester].team].name)}</div><b class="tt2">“${esc(r.text)}”</b>` });
   stepStates(r).forEach((s, k) => items.push({ key: 'st-' + s.id, cls: 'scard ' + s.state, html: `<div class="sh"><span class="sn">${s.state === 'done' ? '✓' : s.state === 'active' ? '<span class="spin"></span>' : k + 1}</span><b>${s.name}</b>${s.state === 'skipped' ? '<small>not stated</small>' : ''}</div>${['pending', 'skipped'].includes(s.state) && !(s.id === 'execute' && r.tasks.length) ? '' : `<div class="sb">${stepBody(r, s)}</div>`}` }));
   patchList(pane, items);
@@ -2526,7 +2569,7 @@ function taskHTML(r, t) {
   return `<summary><span class="av" style="background:${TC[a.team]};width:28px;height:28px;border-radius:8px;font-size:12px;font-weight:800;color:#0e2135">${t.id}</span><span><b>${esc(a.name)}</b><small>${esc(TEAMS[a.team].name)} · ${esc(t.objective)}</small></span><span class="st ${st}">${st === 'queued' ? 'Waiting' : st === 'running' ? 'Working' : st === 'done' ? 'Done' : 'Failed'}</span></summary><div class="tbody">
     ${p ? `<div class="sec"><b>${icon('memory')} Foundation → ${esc(a.name)} · ${p.items.length} items</b>${byLayer.map(([l, its]) => its.map(i => `<div class="pk"><span class="lid">${esc(i.id)}</span><span>${esc(i.label)}: ${esc(String(i.value).slice(0, 150))}<small>${esc(LAYERS[l].short)} · from ${esc(i.from)} · scope ${esc(i.scope)}</small></span></div>`).join('')).join('')}${p.withheld.map(w => `<div class="wh">Withheld ${esc(w.id)}: ${esc(w.why)}</div>`).join('')}</div>` : ''}
     ${t.calls && t.calls.length ? `<div class="sec"><b>${icon('arrow')} ${esc(a.name)} → enterprise systems</b>${t.calls.map(c => `<div class="pk"><span class="vbadge ${c.via || 'API'}">${c.via || '—'}</span><span><code style="font:11.5px var(--code)">${esc(c.name)}(${esc(JSON.stringify(c.input || {}).slice(0, 90))})</code><small>${c.error ? 'Blocked: ' + esc(c.error) : esc(SYSTEMS[c.sys].name) + ' · ' + esc(JSON.stringify(c.out).slice(0, 140))}</small></span></div>`).join('')}</div>` : ''}
-    ${t.result ? `<div class="sec"><b>${icon('bolt')} ${esc(a.name)} → foundation</b><p class="says">“${esc(t.result.says || '')}”</p>${t.result.output ? `<div class="outbody"><h3>${esc(t.result.output.title)}</h3>${md(t.result.output.body)}</div>` : ''}${(t.result.open_questions || []).length ? `<p class="hint" style="margin:6px 0 0">Open question: ${esc(t.result.open_questions.join(' '))}</p>` : ''}</div>` : ''}
+    ${t.result ? `<div class="sec"><b>${icon('bolt')} ${esc(a.name)} → foundation</b><p class="says">“${esc(t.result.says || '')}”</p>${t.result.output ? `<div class="outbody"><b>${esc(t.result.output.title)}</b>\n${md(t.result.output.body)}</div>` : ''}${(t.result.open_questions || []).length ? `<p class="hint" style="margin:6px 0 0">Open question: ${esc(t.result.open_questions.join(' '))}</p>` : ''}</div>` : ''}
     ${t.verdicts ? `<div class="sec"><b>${icon('shield')} Gatekeeper</b>${t.verdicts.length ? t.verdicts.map(v => `<div class="vd"><span class="vb ${v.status}">${v.status.toUpperCase()}</span><span><b>${esc(v.kind)}: ${esc(v.title)}</b><small>${esc(v.reason)}${v.event ? ` · event ${esc(v.event.type)} → ${esc(v.event.subscribers.map(agentName).join(', ') || 'no subscribers')}` : ''}</small></span></div>`).join('') : '<p class="hint">Nothing proposed for storage. Read only.</p>'}</div>` : ''}
     ${t.retry ? `<p class="hint" style="margin-top:6px">First attempt failed (${esc(t.retry)}); retried once.</p>` : ''}
     ${st === 'failed' ? `<div class="blocked">This agent failed: ${esc(t.error)}. The rest of the plan continued.</div>` : ''}
@@ -2569,7 +2612,7 @@ function renderOutputs() {
   const pane = $('pane-outputs');
   if (!F.outputs.length) { patchList(pane, [{ key: 'empty', cls: 'empty', html: 'Briefs, drafts, findings and notes appear here as specialists finish. Anything client-facing waits for human approval.' }]); return; }
   patchList(pane, [...F.outputs].reverse().map(o => { const a = AGENTS[o.agent], body = md(o.body);
-    return { key: o.id, cls: 'dcard', html: `<div class="dt"><span class="av sm" style="background:${TC[a.team]};width:18px;height:18px;border-radius:5px"></span>${esc(a.name)} · ${esc(o.kind)} · ${esc(o.run)}</div>${o.kind === 'email' ? `<div class="olk" style="margin-top:6px"><div class="bar"><span>Outlook draft</span><span>${esc(o.status)}</span></div><div class="bd"><h3>${esc(o.title)}</h3>${body}</div></div>` : `<b class="tt2">${esc(o.title)}</b><div class="outbody" style="margin-top:5px">${body}</div>`}
+    return { key: o.id, cls: 'dcard', html: `<div class="dt"><span class="av sm" style="background:${TC[a.team]};width:18px;height:18px;border-radius:5px"></span>${esc(a.name)} · ${esc(o.kind)} · ${esc(o.run)}</div>${o.kind === 'email' ? `<div class="olk" style="margin-top:6px"><div class="bar"><span>Outlook draft</span><span>${esc(o.status)}</span></div><div class="bd"><b>${esc(o.title)}</b>\n\n${body}</div></div>` : `<b class="tt2">${esc(o.title)}</b><div class="outbody" style="margin-top:5px">${body}</div>`}
       <p class="hint" style="margin:6px 0 0">Used: ${esc((o.used || []).join(', ') || '—')}${o.flagged && o.flagged.length ? ` · <b style="color:var(--hl-fg)">Check before use: ${esc(o.flagged.join(', '))}</b>` : ''}</p>${o.status === 'Waiting for approval' ? `<button class="lbtn primary" data-approve="${o.id}" style="margin-top:6px">${icon('check')} Approve</button>` : `<span class="vb published" style="display:inline-block;margin-top:6px">${esc(o.status.toUpperCase())}</span>`}` }; }));
 }
 function renderEvents() {
@@ -2577,16 +2620,73 @@ function renderEvents() {
   if (!F.events.length) { patchList(pane, [{ key: 'empty', cls: 'empty', html: 'Every change in the foundation publishes an event, and subscribing specialists are notified.' }]); return; }
   patchList(pane, [...F.events].reverse().slice(0, 80).map(e => ({ key: e.id, cls: 'vd', html: `<span class="vb read">${esc(e.id)}</span><span><b>${esc(e.type)}</b> · ${esc(e.detail)}<small>${esc(agentName(e.by))} · ${esc(e.at)}${e.subscribers.length ? ' · notified ' + esc(e.subscribers.map(agentName).join(', ')) : ''}</small></span>` })));
 }
-const PANES = { decisions: renderDecisions, packets: renderPackets, memory: renderMemory, outputs: renderOutputs, events: renderEvents };
+function verdictLines(t) {
+  return (t.verdicts || []).filter(v => v.kind !== 'output' || v.status === 'blocked').map(v => {
+    const txt = v.kind === 'knowledge' ? (v.status === 'published' ? `Shared with all teams: ${v.title}` : `Not shared: ${v.title} (${v.reason})`)
+      : v.kind === 'memory' ? ({ committed: `Remembered: ${v.title}`, pending: `Needs the advisor’s confirmation: ${v.title}`, task: `Kept with this task only: ${v.title}`, rejected: `Not remembered: ${v.title} (a guess, not stated)`, read: `Already known: ${v.title}`, blocked: `Not allowed: ${v.title}` }[v.status] || v.title)
+      : v.kind === 'commitment' ? `New follow-up task: ${v.title}` : `Blocked: ${v.reason}`;
+    return `<div class="uv ${v.status}">${esc(txt)}</div>`;
+  }).join('');
+}
+function outputHTML(o) {
+  if (!o) return '';
+  const body = md(o.body);
+  return o.kind === 'email' ? `<div class="olk" style="margin-top:6px"><div class="bar"><span>Outlook draft</span><span>${esc(o.status)}</span></div><div class="bd"><b>${esc(o.title)}</b>\n\n${body}</div></div>` : `<div class="outbody" style="margin-top:6px"><b>${esc(o.title)}</b>\n${body}</div>`;
+}
+function renderUpdates() {
+  const r = UI.run, pane = $('pane-updates');
+  if (!r) { patchList(pane, [{ key: 'empty', cls: 'empty', html: `<p style="font:400 19px/1.4 var(--serif);color:var(--ink);margin:0 0 8px">Ask for an outcome and press Enter.</p>Orchestration decides the plan, then assigns each task to the right team: Wholesalers, SSC, Product specialists, Content & campaigns and so on. The tasks appear on the workbench, and each team’s output shows up here the moment it’s done.` }]); return; }
+  const items = [{ key: 'req-' + r.id, cls: 'dcard', html: `<div class="dt">REQUEST · ${esc(EMPLOYEES[r.requester].name)}, ${esc(TEAMS[EMPLOYEES[r.requester].team].name)}</div><b class="tt2">“${esc(r.text)}”</b>` }];
+  if (r.status === 'thinking') { const act = stepStates(r).find(x => x.state === 'active'); items.push({ key: 'plan-wait', cls: 'dcard ustat', html: `<span class="spin"></span> Orchestration is planning${act ? ' · ' + esc(act.name) : ''}` }); }
+  if (r.status === 'clarify') items.push({ key: 'clar-' + r.id, cls: 'clar', html: `<b>One question before planning</b><p style="margin:4px 0 0">${esc(r.clarify)}</p><input id="clarIn" placeholder="Your answer"><div style="display:flex;gap:6px;margin-top:6px"><button class="lbtn primary" data-act="answer">Continue</button><button class="lbtn" data-act="assume">Let it assume</button></div>` });
+  if (r.tasks.length) {
+    const asks = r.asks && r.asks.length ? r.asks : [{ text: r.text, tasks: r.tasks.map(t => t.id) }];
+    items.push({ key: 'plan-' + r.id, cls: 'dcard plancard', html: `<div class="dt">YOUR REQUEST, BROKEN INTO ${r.tasks.length} ${r.tasks.length === 1 ? 'STEP' : 'STEPS'}</div>${asks.map((a, k) => `<div class="ask"><div class="askh"><span class="askn">${k + 1}</span><b>${esc(a.text)}</b>${a.tasks.length ? '' : '<em class="bst blocked">Not covered</em>'}</div>${a.tasks.map(id => r.tasks.find(t => t.id === id)).filter(Boolean).sort((x, y) => x.step - y.step).map(t => { const [cls, label] = taskStatus(t), R = ROLES[t.role], A = AGENTS[t.agent];
+      const tools = [...new Set((t.calls || []).map(c => c.name))];
+      return `<button class="steprow" data-task="${t.id}"><span class="stepn" style="background:${TC[R.team]}">${t.step}</span><span class="stepb"><b>${esc(t.title)}</b><small>${esc(TEAMS[R.team].name)} · ${esc(R.name)}${t.person ? ' · ' + esc(t.person) : ''}${t.depends_on.length ? ' · after step ' + t.depends_on.map(d => (r.tasks.find(x => x.id === d) || {}).step).filter(Boolean).join(', ') : ''}</small><small class="agentline">Agent: ${esc(A.name)}${tools.length ? ' · tools: ' + esc(tools.join(', ')) : t.tools.length ? ' · can use: ' + esc(t.tools.join(', ')) : ''}</small></span><em class="bst ${cls}">${label}</em></button>`; }).join('')}</div>`).join('')}<p class="hint" style="margin:6px 0 0">Click any step to see exactly what it produced.</p>` });
+  }
+  const done = r.tasks.filter(t => ['done', 'failed'].includes(t.state)).sort((a, b) => (a.t1 || 0) - (b.t1 || 0));
+  for (const t of done) {
+    const R = ROLES[t.role], o = outOf(t), [cls, label] = taskStatus(t);
+    items.push({ key: 'out-' + r.id + t.id, cls: 'dcard uout ' + cls, html: `<div class="uh"><i style="background:${TC[R.team]}"></i><span><b>Step ${t.step || '?'} · ${esc(R.name)}</b> · ${esc(TEAMS[R.team].name)}${t.person ? ' · ' + esc(t.person) : ''}<small>${esc(t.title)}</small></span><em class="bst ${cls}">${label}</em></div>
+      ${t.state === 'failed' ? `<div class="blocked">This task didn’t finish: ${esc(t.error)}</div>` : ''}${t.result && t.result.says ? `<p class="says">${esc(t.result.says)}</p>` : ''}${outputHTML(o)}${verdictLines(t)}
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">${o && o.status === 'Waiting for approval' ? `<button class="lbtn primary" data-approve="${o.id}">${icon('check')} Approve</button>` : ''}<button class="lbtn" data-task="${t.id}">Open full output</button></div>` });
+  }
+  if (r.status === 'done') items.push({ key: 'final-' + r.id, cls: 'dcard finalcard', html: `<div class="dt">WHAT WAS PRODUCED FOR YOUR REQUEST</div>${r.tasks.map(t => { const o = outOf(t), R = ROLES[t.role]; return `<button class="steprow" data-task="${t.id}"><span class="stepn" style="background:${TC[R.team]}">${t.step}</span><span class="stepb"><b>${esc(o ? o.title : t.title)}</b><small>${esc(R.name)} · ${esc(o ? o.status : t.state === 'failed' ? 'Did not finish' : 'No document; see details')}</small></span><em class="openlink">Open</em></button>`; }).join('')}` });
+  if (r.status === 'done') items.push({ key: 'sum-' + r.id, cls: 'summary', html: `<h3>All ${r.tasks.length} tasks done · ${Math.round((r.t1 - r.t0) / 1000)} s</h3><div class="sgrid"><div><b>${r.stats.reused}</b>facts reused</div><div><b>${r.stats.committed}</b>stored</div><div><b>${r.stats.calls}</b>system calls</div></div>` });
+  if (r.status === 'failed') items.push({ key: 'fail-' + r.id, cls: 'blocked', html: `<b>${esc(r.error)}</b><div style="margin-top:8px"><button class="lbtn" data-act="retry">Try again</button></div>` });
+  patchList(pane, items);
+}
+function openTask(id) {
+  const r = UI.run, t = r && r.tasks.find(x => x.id === id); if (!t) return;
+  const R = ROLES[t.role], A = AGENTS[t.agent], o = outOf(t), [cls, label] = taskStatus(t);
+  const ask = r.asks && t.ask ? r.asks[t.ask - 1] : null;
+  const prev = r.tasks.find(x => x.step === t.step - 1), next = r.tasks.find(x => x.step === t.step + 1);
+  const ups = t.depends_on.map(d => r.tasks.find(x => x.id === d)).filter(Boolean);
+  const body = o ? outputHTML(o).replace('style="margin-top:6px"', 'style="margin-top:0"') : t.result && t.result.output ? `<div class="outbody"><b>${esc(t.result.output.title)}</b>\n${md(t.result.output.body)}</div><p class="hint">Not stored: ${esc(((t.verdicts || []).find(v => v.kind === 'output') || {}).reason || 'see the checks below')}</p>` : `<p class="hint">${t.state === 'done' ? 'This step produced no document; its result is shown under “How it was produced”.' : t.state === 'failed' ? 'This step did not finish: ' + esc(t.error) : 'Not finished yet.'}</p>`;
+  openDrawer(`<span class="stepn big" style="background:${TC[R.team]}">${t.step || ''}</span>${esc(t.title)}`, `
+    <div class="ohd"><span>${esc(TEAMS[R.team].name)} · ${esc(R.name)}${t.person ? ' · ' + esc(t.person) : ''}</span><em class="bst ${cls}">${label}</em></div>
+    ${ask ? `<div class="fulfills"><small>Fulfills part ${t.ask} of the request</small><b>“${esc(ask.text)}”</b></div>` : ''}
+    <div class="h">Output</div>${body}
+    ${o && o.status === 'Waiting for approval' ? `<button class="lbtn primary" data-approve="${o.id}" style="margin-top:8px">${icon('check')} Approve</button>` : ''}
+    ${verdictLines(t) ? `<div class="h">What this step added to the foundation</div>${verdictLines(t)}` : ''}
+    <div class="h">How it was produced</div>
+    <dl class="kv"><dt>Agent</dt><dd>${esc(A.name)}: ${esc(A.does)}</dd><dt>Task</dt><dd>${esc(t.objective)}</dd>${ups.length ? `<dt>Built on</dt><dd>${ups.map(x => `Step ${x.step}: ${esc(x.title)}`).join('; ')}</dd>` : ''}${t.result && t.result.says ? `<dt>Agent’s note</dt><dd>${esc(t.result.says)}</dd>` : ''}</dl>
+    <details class="tcard" style="margin-top:8px"><summary style="padding:8px 10px"><span><b>Full trace</b><small>What the foundation sent, every system call and result, and each gatekeeper decision</small></span></summary>${taskHTML(r, t).replace(/^<summary>[\s\S]*?<\/summary>/, '')}</details>
+    <div style="display:flex;justify-content:space-between;margin-top:14px">${prev ? `<button class="lbtn" data-task="${prev.id}">← Step ${prev.step}</button>` : '<span></span>'}${next ? `<button class="lbtn" data-task="${next.id}">Step ${next.step} →</button>` : ''}</div>`);
+}
+const PANES = { updates: renderUpdates, decisions: renderDecisions, memory: renderMemory, events: renderEvents };
 let RQ = 0;
-function renderAll() { if (RQ) return; RQ = requestAnimationFrame(() => { RQ = 0; renderOrch(); renderDiagram(); renderStats(); PANES[UI.tab](); autoScroll(); if (KG.open) renderKG(); }); }
+function renderAll() { if (RQ) return; RQ = requestAnimationFrame(() => { RQ = 0; renderOrch(); renderDiagram(); renderStats(); (PANES[UI.tab] || renderUpdates)(); autoScroll(); if (KG.open) renderKG(); }); }
 /* Follow the work while agents run; pause for 5 s whenever the person scrolls. */
 function autoScroll() {
-  const r = UI.run; if (!r || !['thinking', 'running'].includes(r.status)) return;
+  const r = UI.run; if (!r || !['thinking', 'running', 'done'].includes(r.status)) return;
+  if (r.status === 'done' && (r._scrolledDone || UI.tab !== 'updates')) return; if (r.status === 'done') r._scrolledDone = true;
   if (performance.now() - (UI.userScrollAt || -1e9) < 5000) return;
   const pane = $('pane-' + UI.tab); if (!pane || pane.hidden) return;
   let target = null;
-  if (UI.tab === 'decisions') { const lines = [...pane.querySelectorAll('.scard.active .dl')]; target = lines.filter(l => l.querySelector('.tid.running')).pop() || lines.pop() || pane.querySelector('.scard.active'); }
+  if (UI.tab === 'updates') target = pane.lastElementChild;
+  else if (UI.tab === 'decisions') { const lines = [...pane.querySelectorAll('.scard.active .dl')]; target = lines.filter(l => l.querySelector('.tid.running')).pop() || lines.pop() || pane.querySelector('.scard.active'); }
   else if (UI.tab === 'packets') target = [...pane.querySelectorAll('details.tcard.running')].pop();
   else return;
   if (!target) return;
@@ -2602,27 +2702,24 @@ document.addEventListener('pointerdown', e => { if (e.target.classList && e.targ
 /* ---------- chrome ---------- */
 function buildStaticWho() { document.querySelectorAll('[data-who]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.who === UI.requester))); renderSugs(); }
 function badge(t, on) { const b = document.querySelector(`.tab[data-tab="${t}"]`); if (b && UI.tab !== t) b.classList.toggle('has', on); }
-function setTab(t) { UI.tab = t; document.querySelectorAll('.tab').forEach(b => { b.setAttribute('aria-selected', String(b.dataset.tab === t)); if (b.dataset.tab === t) b.classList.remove('has'); }); document.querySelectorAll('.pane').forEach(p => p.hidden = p.id !== 'pane-' + t); if (PANES[t]) PANES[t](); }
+function setTab(t) { if (!PANES[t]) t = 'updates'; UI.tab = t; document.querySelectorAll('.tab').forEach(b => { b.setAttribute('aria-selected', String(b.dataset.tab === t)); if (b.dataset.tab === t) b.classList.remove('has'); }); document.querySelectorAll('.pane').forEach(p => p.hidden = p.id !== 'pane-' + t); if (PANES[t]) PANES[t](); }
 function setView(v) { UI.view = v; $('app').dataset.view = v; document.querySelectorAll('.mnav button').forEach(b => b.setAttribute('aria-current', String(b.dataset.view === v))); if (v !== 'live') setTab(v); }
 let tt; function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 3400); }
 function openDrawer(title, body) { $('drawerTitle').innerHTML = title; $('drawerBody').innerHTML = body; $('drawer').hidden = false; $('scrim').hidden = false; }
 function closeDrawer() { $('drawer').hidden = true; $('scrim').hidden = true; }
 function openHelp() {
-  openDrawer('How it works', `<p class="lead">Type a request as anyone in Sales, Product, Marketing or Service. The app runs it live.</p>
-  <dl class="kv"><dt>Orchestration</dt><dd>Claude reads the request and a snapshot of the foundation, then decides: who it’s about, the scope, what to reuse, what’s missing, how to classify anything new about the advisor, and which of the 37 specialists should work, in what order. Decisions stream in as they’re made.</dd>
-  <dt>Specialists</dt><dd>Each planned agent is a separate Claude call. It receives only the context packet the foundation allows, can call its permitted Salesforce, Microsoft 365, Seismic, data-platform and Morningstar tools, and returns a structured contribution.</dd>
-  <dt>Foundation</dt><dd>Plain rules, not AI. It builds each packet (withholding out-of-scope, personal or private records), then checks every contribution: evidence for findings, traceable numbers, the advisor’s own words for lasting preferences, scope, and human approval for anything client-facing.</dd>
-  <dt>Events</dt><dd>Every stored change publishes an event; subscribing specialists light up.</dd>
-  <dt>Memory</dt><dd>Current conversation, lasting preferences, pending validation, interaction history and open commitments, per advisor. “New session” ends the conversation; lasting memory stays.</dd>
-  <dt>Replay</dt><dd>Every live run is recorded. Replays run through the same foundation and rules, so they’re safe for presentations.</dd>
-  <dt>If AI misbehaves</dt><dd>An unreadable plan is requested again in strict JSON, then replaced by a rules-based plan. A clarifying question is asked at most once. Each specialist retries once. Internal outputs with untraceable numbers are flagged for checking; client-facing ones are blocked.</dd></dl>
-  <div class="h">Try these in order</div><ol style="font-size:13.5px;padding-left:18px;margin:0"><li>Sales: “Identify the growing trends in LA territory”</li><li>Sales: “Compare BFA and AMBAL for Rachel and schedule a meeting with her next month”</li><li>Sales: “Prep me for my call with Alex tomorrow”</li><li>Marketing: “Draft the follow-up email to Alex using Product’s verified comparison”</li><li>Sales: “Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.” (watch it land as pending, not memory)</li><li>New session, then Sales: “What does Maya care about for her retirement committee?”</li></ol>
-  <div class="h">Reference data</div><p class="hint">Advisors and teams are fictional. Fund expense ratios for GFA, VWUAX and VIGAX are from public fund pages as of the dates shown; other funds’ numbers are left out on purpose.</p>`);
+  openDrawer('How it works', `<p class="lead">Type a request as anyone in Sales, Product, Marketing or Service and press Enter.</p>
+  <dl class="kv"><dt>Orchestration</dt><dd>The AI decides who the request is about, what can be reused, what’s missing and how to treat anything new about the advisor, then plans the work. Nine steps, each shown as AI or RULE.</dd>
+  <dt>Workbench</dt><dd>Each task is assigned to a team and role: Wholesalers (meeting prep), SSC (scheduling and follow-up), Internal wholesalers, Product specialists, Investment analytics, Content & campaigns, Compliance review, Distribution, Advisor service. Cards move from Assigned to In progress to Done.</dd>
+  <dt>Updates</dt><dd>Each team’s output appears on the right the moment its task finishes, with what was shared, remembered or held for approval. Click Details on any task to see the context the foundation gave it and the systems it called.</dd>
+  <dt>Foundation</dt><dd>Plain rules, not AI: what each task may see, evidence and number checks, memory rules, approvals, events and the knowledge graph.</dd></dl>
+  <div class="h">Try</div><ol style="font-size:13.5px;padding-left:18px;margin:0"><li>Identify the growing trends in LA territory</li><li>Compare BFA and AMBAL for Rachel and schedule a meeting with her next month</li><li>Prep me for my call with Alex tomorrow</li><li>Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.</li></ol>
+  <div class="h">Reference data</div><p class="hint">Advisors and teams are fictional. Expense ratios for GFA, BFA, AMBAL, VWUAX and VIGAX are from public sources as of the dates shown.</p>`);
 }
 
 /* ---------- events ---------- */
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-who],[data-sug],[data-replay],[data-tab],[data-view],[data-act],[data-approve],[data-madv],[data-agent],[data-layer],[data-sys]'); if (!el) return;
+  const el = e.target.closest('[data-task],[data-who],[data-sug],[data-replay],[data-tab],[data-view],[data-act],[data-approve],[data-madv],[data-agent],[data-layer],[data-sys]'); if (!el) return;
   const d = el.dataset;
   if (d.who) { UI.requester = d.who; buildStaticWho(); return; }
   if (d.sug) { $('cmdIn').value = d.sug; $('cmdIn').focus(); return; }
@@ -2634,6 +2731,7 @@ document.addEventListener('click', e => {
   if (d.act === 'kg') { openKG(d.adv); return; }
   if (d.act === 'answer' || d.act === 'assume') { const v = d.act === 'assume' ? 'Make your best assumption and continue' : $('clarIn').value.trim(); if (v) { const q = UI.run.clarify, t = UI.run.text.replace(/ \(clarification:.*\)$/, ''); UI.run = null; runRequest(`${t} (clarification: ${v})`, null, { clarified: { question: q, answer: v } }); } return; }
   if (d.act === 'retry') { const t = UI.run.text; UI.run = null; runRequest(t); return; }
+  if (d.task) { openTask(d.task); return; }
   if (d.agent) { const a = AGENTS[d.agent]; openDrawer(esc(a.name), `<p class="hint">${esc(TEAMS[a.team].name)}</p><p class="lead">${esc(a.does)}</p><div class="h">Tools it may call</div>${a.tools.length ? a.tools.map(t => `<div class="pk"><span class="vbadge ${TOOLS[t].via}">${TOOLS[t].via}</span><span><code style="font:12px var(--code)">${esc(t)}</code><small>${esc(SYSTEMS[TOOLS[t].sys].name)} · ${esc(TOOLS[t].desc)}</small></span></div>`).join('') : '<p class="hint">None. It works only from the foundation.</p>'}<div class="h">Subscribed to</div><p class="hint">${Object.entries(SUBSCRIPTIONS).filter(([, v]) => v.includes(d.agent)).map(([k]) => k).join(', ') || 'No events'}</p>`); return; }
   if (d.layer === 'graph') { openKG(UI.memAdv || F.session.advisor); return; }
   if (d.act === 'kg') { openKG(d.adv); return; }
@@ -2647,6 +2745,7 @@ $('sessionBtn').onclick = () => { F.session = { advisor: null, unit: null, reque
 $('resetBtn').onclick = () => { if (UI.run && ['thinking', 'running'].includes(UI.run.status)) return; F = freshFoundation(); UI.run = null; UI.totals = { runs: 0, reused: 0, committed: 0, pending: 0, blocked: 0, calls: 0, mcp: 0 }; toast('Foundation reset to its starting data.'); renderAll(); };
 $('deepBtn').onclick = () => { AI.deep = !AI.deep; $('deepBtn').setAttribute('aria-pressed', String(AI.deep)); toast(AI.deep ? 'Agents will think longer (slower).' : 'Agents use the fast model.'); };
 $('helpBtn').onclick = openHelp;
+$('railBtn').onclick = () => { const on = !$('app').classList.contains('norail'); $('app').classList.toggle('norail', on); $('railBtn').setAttribute('aria-pressed', String(on)); $('railBtn').querySelector('.tlabel').textContent = on ? 'Show panel' : 'Hide panel'; requestAnimationFrame(drawOps); };
 const SKINS = [['navy', 'Midnight navy', '#16375a'], ['graphite', 'Graphite', '#2a2e34'], ['evergreen', 'Evergreen', '#164039'], ['porcelain', 'Porcelain (light)', '#eef1f4']];
 function setSkin(s) { document.documentElement.dataset.skin = s; try { localStorage.setItem('cce-skin', s); } catch (e) { } document.querySelectorAll('[data-skin-btn]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.skinBtn === s))); requestAnimationFrame(drawOps); if (KG.open) renderKG(true); }
 $('skinPick').innerHTML = SKINS.map(([k, n, c]) => `<button data-skin-btn="${k}" title="${n}" aria-label="Theme: ${n}" style="background:${c};box-shadow:inset 0 0 0 1px rgba(128,128,128,.5)"></button>`).join('');
