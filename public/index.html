@@ -2779,6 +2779,8 @@ function handleOrch(run, o) {
     else run.clarify = String(o.question || 'Which advisor do you mean?');
   }
 }
+/* How long each step's finished output stays on screen before the next step starts */
+const READ_PAUSE_S = 5;
 async function runTask(run, t) {
   const a = AGENTS[t.agent], sig = UI.ctl.signal;
   t.state = 'running'; t.t0 = Date.now(); UI.openTask = t.id; renderAll();
@@ -2866,8 +2868,7 @@ async function runTask(run, t) {
   renderAll();
   // Start the reading interval only after the completed result has painted.
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-  const words = String(t.result?.output?.body || t.result?.says || '').split(/\s+/).filter(Boolean).length;
-  const seconds = Math.min(10, Math.max(8, Math.ceil(words / 3)));
+  const seconds = READ_PAUSE_S;
   run.presentationPause = { task: t.id, seconds };
   renderAll();
   for (let remaining = seconds; remaining > 0 && !UI.ctl.signal.aborted; remaining--) {
