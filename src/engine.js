@@ -85,8 +85,14 @@ const TOOLS = {
     run: a => ({ task_id: 'SF-TASK-' + (700 + F.seq), title: S(a.title), owner: S(a.owner), due: S(a.due) }) },
   'service.get_cases': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Service Cloud: service cases for an advisor.', props: { advisor_id: 'string' },
     run: a => F.cases.filter(c => c.adv === advId(a.advisor_id)) },
-  'service.update_case': { sys: 'sf', via: 'MCP', rw: 'write', desc: 'Service Cloud: add a resolution note or status to a case (or open a new one).', props: { case_id: 'string', note: 'string' },
-    run: a => ({ case_id: S(a.case_id) || 'CASE-00' + (600 + F.seq), note: S(a.note).slice(0, 140), status: 'Updated' }) },
+  'service.update_case': { sys: 'sf', via: 'MCP', rw: 'write', desc: 'Service Cloud: add a resolution note and status (Open, Pending advisor, Resolved) to a case, or open a new one.', props: { case_id: 'string', note: 'string', status: 'string' },
+    run: a => { const id = S(a.case_id) || 'CASE-00' + (600 + F.seq), c = F.cases.find(x => x.id === id), status = S(a.status) || 'Updated';
+      if (c && S(a.status)) c.status = status;
+      return { case_id: id, status, note: S(a.note).slice(0, 600), history: c ? `Added to ${id} history in Service Cloud; owner ${c.owner || 'Advisor service'}` : 'New case opened in Service Cloud' }; } },
+  'contact.get_interactions': { sys: 'gen', via: 'MCP', rw: 'read', desc: 'Genesys Cloud: recent calls and chats from an advisor or their team, with what they said and who handled it.', props: { advisor_id: 'string' },
+    run: a => INTERACTIONS.filter(x => x.adv === advId(a.advisor_id)) },
+  'service.get_insights': { sys: 'gen', via: 'API', rw: 'read', desc: 'Genesys Cloud and Service Cloud, aggregated: what advisors ask Service about a topic (fees, access) this quarter. No advisor identifiers.', props: { topic: 'string' },
+    run: a => { const t = S(a.topic).toLowerCase(), k = /fee|cost|expense|transparen/.test(t) ? 'fees' : /link|access|deliver/.test(t) ? 'access' : null; return k ? Object.assign({ topic: k }, SERVICE_INSIGHTS[k]) : { topic: t, note: 'No aggregated insights for this topic. Known topics: fees, access.' }; } },
   'calendar.find_times': { sys: 'm365', via: 'MCP', rw: 'read', desc: 'Outlook calendar: open slots. attendees = advisor ids or colleague names; when = e.g. "tomorrow", "next week", "next month".', props: { attendees: 'array', when: 'string' },
     run: a => { const at = (Array.isArray(a.attendees) ? a.attendees : [a.attendees || a.advisor_id]).map(S).filter(Boolean), w = S(a.when).toLowerCase();
       const isAlex = at.some(x => advId(x) === 'ADV-101');
@@ -98,10 +104,19 @@ const TOOLS = {
       return { event_id: 'EVT-CAL-' + (200 + F.seq), title: S(a.title), time: S(a.time), attendees: at.map(x => ADVISORS[advId(x)] ? ADVISORS[advId(x)].name : x), status: ext ? 'Tentative hold; advisor invite goes out after approval' : 'Invite sent to colleagues' }; } },
   'mail.draft': { sys: 'm365', via: 'MCP', rw: 'write', desc: 'Outlook: save an email draft (never sends). Returns the draft id.', props: { to: 'string', subject: 'string' },
     run: a => ({ draft_id: 'DRAFT-' + (400 + F.seq), to: S(a.to), subject: S(a.subject), status: 'Draft saved; sending needs human approval' }) },
-  'sharepoint.get_disclosures': { sys: 'm365', via: 'API', rw: 'read', desc: 'SharePoint compliance library: required disclosures for a content type.', props: { content_type: 'string' },
-    run: () => ['Past results are not predictive of results in future periods.', 'Expense ratios are as of each fund’s prospectus.', 'Indexes are unmanaged; investors cannot invest directly in an index.', 'For financial professional use only.'] },
+  'sharepoint.get_disclosures': { sys: 'm365', via: 'API', rw: 'read', desc: 'SharePoint compliance library: required disclosures and channel rules for a content type (advisor email, LinkedIn post, committee pack).', props: { content_type: 'string' },
+    run: a => { const t = S(a.content_type).toLowerCase(), k = /linkedin|social|post|public/.test(t) ? 'social' : /committee|plan|retirement/.test(t) ? 'committee' : 'email';
+      return { channel: k, required_disclosures: DISCLOSURES[k].required, channel_rules: DISCLOSURES[k].rules }; } },
   'seismic.search_content': { sys: 'seismic', via: 'MCP', rw: 'read', desc: 'Seismic: search approved content by keywords and audience. Returns ids, titles, audience, format.', props: { query: 'string' },
     run: a => { const q = S(a.query).toLowerCase().split(/\W+/).filter(w => w.length > 2); return CONTENT.map(c => ({ c, s: q.filter(w => (c.tags + ' ' + c.title.toLowerCase()).includes(w)).length })).filter(x => x.s).sort((x, y) => y.s - x.s).slice(0, 4).map(x => ({ id: x.c.id, title: x.c.title, audience: x.c.audience, format: x.c.format, status: x.c.status })); } },
+  'seismic.get_approved_language': { sys: 'seismic', via: 'MCP', rw: 'read', desc: 'Seismic messaging library: approved language on a topic (fees, active vs index, performance), with ids to cite.', props: { topic: 'string' },
+    run: a => { const q = S(a.topic).toLowerCase().split(/\W+/).filter(w => w.length > 2); const hits = APPROVED_LANGUAGE.filter(m => q.some(w => (m.topic + ' ' + m.text.toLowerCase()).includes(w))); return (hits.length ? hits : APPROVED_LANGUAGE).slice(0, 4); } },
+  'seismic.get_delivery_log': { sys: 'seismic', via: 'API', rw: 'read', desc: 'Seismic LiveSend: delivery and link activity for content sent to an advisor (opens, link clicks, expiry, recipient access).', props: { advisor_id: 'string' },
+    run: a => DELIVERIES.filter(x => x.adv === advId(a.advisor_id)) },
+  'mcloud.get_engagement': { sys: 'mcloud', via: 'API', rw: 'read', desc: 'Marketing Cloud: how past content on a topic performed (opens, clicks, engagement) and what resonated.', props: { topic: 'string' },
+    run: a => /fee|cost|expense|transparen/.test(S(a.topic).toLowerCase()) ? { topic: 'fees', results: ENGAGEMENT.fees } : { topic: S(a.topic), results: [], note: 'No campaign history for this topic. Known topics: fees.' } },
+  'aem.get_page': { sys: 'aem', via: 'API', rw: 'read', desc: 'Adobe Experience Manager: published, approved web pages a post or email may link to.', props: { query: 'string' },
+    run: a => { const q = S(a.query).toLowerCase().split(/\W+/).filter(w => w.length > 2); return AEM_PAGES.filter(p => q.some(w => (p.tags + ' ' + p.title.toLowerCase()).includes(w))).map(({ tags, ...p }) => p); } },
   'seismic.export_pdf': { sys: 'seismic', via: 'API', rw: 'read', desc: 'Seismic: export an approved asset as a PDF attachment (same version).', props: { asset_id: 'string' },
     run: a => ({ asset: S(a.asset_id), file: S(a.asset_id) + '.pdf', version: 'unchanged' }) },
   'fund.get_facts': { sys: 'fund', via: 'API', rw: 'read', desc: 'Fund data platform: verified facts for a ticker (GFFFX, AGTHX, VWUAX, VIGAX, AWSHX, ABALX, AMECX). Expense ratios in percent.', props: { ticker: 'string' },
@@ -113,6 +128,17 @@ const TOOLS = {
   'models.cost_on_assets': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model platform: annual cost in dollars of each fund’s expense ratio on an amount. Use for any dollar fee figure.', props: { tickers: 'array', amount_usd: 'number' },
     run: a => { const amt = Number(a.amount_usd) || 0, tk = (Array.isArray(a.tickers) ? a.tickers : S(a.tickers).split(/[ ,]+/)).map(x => S(x).toUpperCase()).filter(Boolean);
       return { amount_usd: amt, costs: tk.map(x => tickerOf(x) || x).map(t => FUNDS[t] && FUNDS[t].er != null ? { ticker: t, expense_ratio_pct: FUNDS[t].er, annual_cost_usd: Math.round(amt * FUNDS[t].er / 100) } : { ticker: t, annual_cost_usd: null, note: 'Expense ratio not available' }) }; } },
+  'crm.get_plan': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce: retirement plan records an advisor’s committee oversees: plan, assets, participants, committee, meeting dates and lineup.', props: { advisor_id: 'string' },
+    run: a => Object.entries(PLANS).filter(([, p]) => p.adv === advId(a.advisor_id)).map(([id, p]) => ({ plan_id: id, name: p.name, assets_usd: p.assets_usd, participants: p.participants, committee: p.committee, next_meeting: p.next_meeting, materials_due: p.materials_due, lineup: p.lineup.map(o => ({ option: o.option, fund: o.fund, fund_name: FUNDS[o.fund].name, assets_usd: o.assets_usd })), other: p.other })) },
+  'models.plan_fee_comparison': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model platform: fee comparison for a retirement plan lineup: each option’s expense ratio against its Morningstar category median, in basis points and annual dollars on the option’s assets.', props: { plan_id: 'string' },
+    run: a => { const id = PLANS[S(a.plan_id)] ? S(a.plan_id) : Object.keys(PLANS).find(k => PLANS[k].adv === advId(a.plan_id)); if (!id) throw new Error('Unknown plan. Known: ' + Object.keys(PLANS).join(', '));
+      const P = PLANS[id], r2 = x => Math.round(x * 1000) / 1000;
+      const options = P.lineup.map(o => { const f = FUNDS[o.fund], c = PEERS[o.category];
+        return { option: o.option, fund: o.fund, share_class: f.name.split(', ')[1] || '', assets_usd: o.assets_usd, expense_ratio_pct: f.er, er_as_of: f.asOf, category: o.category, category_median_pct: c.medianEr,
+          difference_bps: Math.round((f.er - c.medianEr) * 100), annual_cost_usd: Math.round(o.assets_usd * f.er / 100), annual_cost_at_median_usd: Math.round(o.assets_usd * c.medianEr / 100) }; });
+      const covered = options.reduce((t, o) => t + o.assets_usd, 0), cost = options.reduce((t, o) => t + o.annual_cost_usd, 0);
+      const same = [...new Set(P.lineup.map(o => o.category))].map(cat => options.filter(o => o.category === cat)).filter(g => g.length > 1).map(g => { const base = Math.max(...g.map(o => o.assets_usd)); return { category: g[0].category, on_assets_usd: base, costs: g.map(o => ({ fund: o.fund, option: o.option, annual_cost_usd: Math.round(base * o.expense_ratio_pct / 100) })) }; });
+      return { plan_id: id, plan: P.name, options, covered_assets_usd: covered, covered_annual_cost_usd: cost, covered_weighted_expense_ratio_pct: r2(cost / covered * 100), same_category_on_equal_assets: same, not_covered: P.other, sources: 'Expense ratios: fund data platform (as of dates shown). Category medians: Morningstar (' + [...new Set(P.lineup.map(o => PEERS[o.category].note))].join('; ') + ').' }; } },
   'models.portfolio_construction': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model platform: blended expense ratio for a mix, e.g. {"VIGAX":70,"GFFFX":30}.', props: { weights: 'object' },
     run: a => { const w = a.weights && typeof a.weights === 'object' ? a.weights : {}; let tot = 0, er = 0; const miss = [];
       for (const [k, v] of Object.entries(w)) { const f = FUNDS[tickerOf(k)]; if (!f || f.er == null) { miss.push(k); continue; } er += f.er * Number(v); tot += Number(v); }
@@ -154,6 +180,8 @@ function buildPacket(task, run) {
   if (advId) {
     const A = ADVISORS[advId];
     push('graph', advId, 'Resolved advisor', `${A.name} · ${A.title} · ${FIRMS[A.firm].name} · ${Object.entries(A.units).map(([k, v]) => k + ' ' + v).join('; ')}`, 'Graph', 'advisor');
+    HANDOVERS.filter(h => h.adv === advId).forEach(h => push('graph', h.id, 'Coverage handover', `${EMPLOYEES[h.from].name} → ${EMPLOYEES[h.to].name}, effective ${h.effective}. ${h.note}`, h.src, 'advisor'));
+    Object.entries(PLANS).filter(([, p]) => p.adv === advId && (!unit || p.unit === unit)).forEach(([id, p]) => push('graph', id, 'Retirement plan', `${p.name}: $${p.assets_usd / 1e6}M, ${p.participants} participants. ${p.committee}. Next meeting ${p.next_meeting}; materials due ${p.materials_due}. Options: ${p.lineup.map(o => `${o.option} ${o.fund} ($${o.assets_usd / 1e6}M)`).join('; ')}; ${p.other.label} ($${p.other.assets_usd / 1e6}M).`, 'Salesforce plan record', p.unit));
     if (reads.has('memory')) {
       for (const m of F.memory.filter(m => m.adv === advId && m.status !== 'superseded')) {
         const inScope = m.scope === 'advisor' || m.scope === A.firm || !unit || m.scope === unit;
@@ -206,17 +234,21 @@ function traceable(value, corpus) {
 }
 /* Everything a task was given: the only place its numbers may come from */
 const corpusOf = ctx => (JSON.stringify(ctx.packet.items) + JSON.stringify(ctx.toolResults) + JSON.stringify(ctx.upstream)).replace(/,/g, '');
+/* Names that identify an advisor or their firm; public content may not contain them (POL-8) */
+const IDENTIFIERS = [...Object.values(ADVISORS).map(a => a.name.split(',')[0]), ...Object.values(FIRMS).map(f => f.name.replace(/\s*\(.*\)/, '').replace(/ (Wealth Management|Wealth|Advisors|Advisory)$/, ''))];
 /* The output checks, shared by the gatekeeper and by human edits before approval */
 function outputProblems(advisor, kind, body, corpus) {
   const clientFacing = /email|post|content/.test(kind || '');
   const personal = clientFacing && F.memory.filter(m => m.access !== 'shared' && m.adv === advisor).some(m => m.value.split(/\W+/).filter(w => w.length > 6).some(w => body.includes(w)));
-  return { clientFacing, personal, miss: traceable(body, corpus) };
+  const identifiers = /post/.test(kind || '') ? IDENTIFIERS.filter(n => new RegExp('\\b' + n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(body)) : [];
+  return { clientFacing, personal, identifiers, miss: traceable(body, corpus) };
 }
 /* A person edited a draft that is waiting for approval: the same rules run again before it is saved */
 function recheckOutput(o, body, by) {
   const p = outputProblems(o.adv, o.kind, body, o.corpus || '');
   const issues = [];
   if (p.personal) issues.push('Contains a personal note; personal notes never go in client-facing content (POL-4).');
+  if (p.identifiers.length) issues.push(`Public content names an advisor or firm: ${p.identifiers.join(', ')} (POL-8).`);
   if (p.miss.length && p.clientFacing) issues.push(`Numbers not traceable to a system of record: ${p.miss.slice(0, 3).join(', ')} (POL-2).`);
   if (issues.length) return issues;
   o.body = body; o.flagged = p.miss; o.rev = (o.rev || 1) + 1; o.editedBy = EMPLOYEES[by] ? EMPLOYEES[by].name : by;
@@ -282,8 +314,9 @@ function gatekeep(task, res, ctx) {
   }
   /* output */
   if (res.output && res.output.body) {
-    const { clientFacing, personal, miss } = outputProblems(run.advisor, res.output.kind, res.output.body, corpus);
+    const { clientFacing, personal, identifiers, miss } = outputProblems(run.advisor, res.output.kind, res.output.body, corpus);
     if (personal) V('output', 'blocked', res.output.title, 'Client-facing draft contains a personal note (POL-4)');
+    else if (identifiers.length) V('output', 'blocked', res.output.title, `Public content names an advisor or firm: ${identifiers.join(', ')} (POL-8)`);
     else if (miss.length && clientFacing) V('output', 'blocked', res.output.title, `Client-facing draft has numbers not traceable to a system of record: ${miss.slice(0, 3).join(', ')}`);
     else {
       const id = 'OUT-' + (++F.seq), needs = !!res.needs_approval || /email|post/.test(res.output.kind || '');
@@ -422,7 +455,9 @@ function foundationHeadlines() {
     const mem = F.memory.filter(m => m.adv === id && m.status !== 'superseded' && m.access === 'shared').map(m => `${m.attr}: ${m.value} [${m.scope}; ${m.id}]`).join(' | ');
     const com = F.commitments.filter(c => c.adv === id && c.status === 'Open').map(c => `${c.id} ${c.title}`).join('; ');
     const ep = F.episodes.filter(e => e.adv === id).map(e => `${e.id} (${e.date})`).join(', ');
-    return `${id} ${a.name}, ${a.title}, ${FIRMS[a.firm].name}. Units: ${Object.entries(a.units).map(([k, v]) => k + ' ' + v).join('; ')}. Coverage: ${a.coverage.map(c => EMPLOYEES[c].name).join(', ')}.\n  Memory: ${mem || 'none'}\n  Unknown: ${(UNKNOWNS[id] || []).join('; ') || 'nothing flagged'}\n  Open commitments: ${com || 'none'}\n  Episodes: ${ep}`;
+    const plans = Object.entries(PLANS).filter(([, p]) => p.adv === id).map(([k, p]) => `${k} ${p.name} (${p.unit}; options ${p.lineup.map(o => o.fund).join(', ')}; meets ${p.next_meeting})`).join('; ');
+    const ho = HANDOVERS.filter(h => h.adv === id).map(h => `${h.id} ${EMPLOYEES[h.from].name} → ${EMPLOYEES[h.to].name} as primary, effective ${h.effective}`).join('; ');
+    return `${id} ${a.name}, ${a.title}, ${FIRMS[a.firm].name}. Units: ${Object.entries(a.units).map(([k, v]) => k + ' ' + v).join('; ')}. Coverage: ${a.coverage.map(c => EMPLOYEES[c].name).join(', ')}.${ho ? ' Coverage handover: ' + ho + '.' : ''}${plans ? ' Plans: ' + plans + '.' : ''}\n  Memory: ${mem || 'none'}\n  Unknown: ${(UNKNOWNS[id] || []).join('; ') || 'nothing flagged'}\n  Open commitments: ${com || 'none'}\n  Episodes: ${ep}`;
   }).join('\n');
 }
 function orchestratorPrompt(run) {
@@ -476,7 +511,7 @@ Requests can be about one advisor, a territory, a product, or internal work with
 Ask for clarification only if acting would be unsafe or impossible: emit {"k":"clarify","question":"..."} after the entity decision, then {"k":"end"}. Otherwise make a sensible assumption and state it in the "missing" decision.
 ${run.clarified ? `You already asked: "${run.clarified.question}". The user answered: "${run.clarified.answer}". Do NOT ask again. Proceed, interpreting the answer as best you can, and state your assumption.` : ''}
 Be precise: titles of 3 to 6 words, details of at most 16 words, no filler. Reuse foundation records instead of redoing work.
-Tell the story a real team would: choose the specialists who genuinely own each part (usually 3 to 5, across teams when the work crosses teams), and chain them with depends_on so later specialists build on what earlier ones publish to the foundation. Tasks that don't depend on each other run in parallel.
+Tell the story a real team would. ${E.name} is the primary actor: the plan ends with a result delivered to them, and other teams appear as contributors whose work they build on. Choose only the specialists the request needs (often 2 to 4); bring in another team only when it owns part of the work or holds evidence ${E.name.split(' ')[0]} lacks, and say so in "why", including which system it will query and for what. Every task must produce a different kind of output (for example a computation, a verified answer, a draft, a compliance review, a case update, a calendar hold); never add a task that only reformats, summarizes or packages an earlier task's output. Chain tasks with depends_on so later specialists build on what earlier ones publish to the foundation. Tasks that don't depend on each other run in parallel.
 Every ask must be covered by at least one task, and every task must serve one ask ("ask" is its 1-based number). Do not add work the person did not ask for.
 Classify new information about the advisor strictly: an employee's request is not an advisor preference.`;
 }
@@ -505,10 +540,13 @@ RULES
 - Memory: propose a lasting preference with "basis":"advisor_statement" only when the advisor's own words in a cited episode (CALL-/EMAIL- id) support it. An employee's ask is "employee_request"; a one-time need is "task_requirement"; a guess is "inference". Propose memory only for genuinely new information.
 - Knowledge: publish only reusable, evidence-backed findings with evidence ids.
 - When you mention other contributors, name their team role (for example Investment analytics, Product specialists, SSC, Wholesalers), not internal agent names.
+- You work for ${E.name}. When you reuse a colleague's earlier notes or work (for example call notes another wholesaler recorded), credit them by name and team and say why it helps ${E.name.split(' ')[0]}.
+- When approved messaging (MSG- ids) is available, use it verbatim or lightly edited and cite the ids in "used"; make no new claims beyond it.${a.team === 'service' ? `
+- Diagnose from evidence: for each likely cause, say what you checked and which record (case, interaction, delivery log id) confirms or rules it out. Write case notes the way an experienced service rep would: plain sentences a colleague can follow, not system shorthand.` : ''}
 - "next_step": the one concrete action ${E.name} should take because of your work (who, what, by when if known), addressed to ${E.name.split(' ')[0]}. Use the same number rules. Leave it empty if there is nothing for them to do.
 
 Reply with only a JSON object:
-{"says":"one first-person sentence, at most 22 words: what you did and which team's work you built on (name teams, not agents)","output":{"kind":"brief|email|finding|answer|plan|content_pick|post|case_update|note","title":"...","body":"under 150 words; '- ' bullets; blank line between paragraphs"},"used":["ids"],"knowledge":[{"label":"...","value":"...","evidence":["ids"]}],"memory":[{"attribute":"...","value":"...","scope":"BU-...|advisor","category":"content_pref|communication_pref|priority|relationship","basis":"advisor_statement|employee_request|task_requirement|inference","evidence":["ids"]}],"commitments":[{"title":"...","owner":"...","due":"..."}],"needs_approval":false,"open_questions":[],"next_step":"..."}
+{"says":"one first-person sentence, at most 22 words: what you did and which team's work you built on (name teams, not agents)","output":{"kind":"brief|email|finding|answer|plan|content_pick|post|case_update|note","title":"...","body":"${a.team === 'service' ? 'under 180 words; short plain paragraphs: what happened, what you checked and found (with record ids), what you did and what happens next' : "under 150 words; '- ' bullets; blank line between paragraphs"}"},"used":["ids"],"knowledge":[{"label":"...","value":"...","evidence":["ids"]}],"memory":[{"attribute":"...","value":"...","scope":"BU-...|advisor","category":"content_pref|communication_pref|priority|relationship","basis":"advisor_statement|employee_request|task_requirement|inference","evidence":["ids"]}],"commitments":[{"title":"...","owner":"...","due":"..."}],"needs_approval":false,"open_questions":[],"next_step":"..."}
 Use empty arrays when nothing applies.`;
 }
 function toolDefs(task, onCall) {

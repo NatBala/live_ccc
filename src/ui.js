@@ -31,9 +31,14 @@ function buildStatic() {
 const pillEl = id => $('pl-' + String(id).replace('.', '-'));
 const taskEl = id => $('tc-' + id);
 const opEl = o => (o.task && taskEl(o.task)) || (o.agent && roleOf(o.agent) && $('role-' + roleOf(o.agent).replace('.', '-')));
+function savedRun(text) { /* a run saved in this session wins over the built-in one */
+  const u = UI.recordings.findIndex(r => r.text === text && r.requester === UI.requester); if (u >= 0) return 'u' + u;
+  const b = RECORDED.findIndex(r => r.text === text && r.requester === UI.requester); return b >= 0 ? 'b' + b : null;
+}
 function renderSugs() {
   const t = EMPLOYEES[UI.requester].team;
-  $('sugs').innerHTML = SUGGESTIONS[t].map(s => `<button class="sug" data-sug="${esc(s)}">${esc(s)}</button>`).join('');
+  const own = UI.recordings.filter(r => r.requester === UI.requester && !SUGGESTIONS[t].includes(r.text)).map(r => r.text);
+  $('sugs').innerHTML = [...SUGGESTIONS[t], ...own].map(s => { const rep = savedRun(s); return `<span class="sugw"><button class="sug" data-sug="${esc(s)}">${esc(s)}</button>${rep ? `<button class="sugrep" data-replay="${rep}" title="Play a saved run of this request: same foundation, tools and gatekeeper, no AI call" aria-label="Play saved run: ${esc(s)}">▶</button>` : ''}</span>`; }).join('');
 }
 
 /* ---------- keyed patching: only what changed is touched ---------- */
@@ -237,10 +242,14 @@ async function runRequestInner(text, replay, opts = {}) {
     if (replay) {
       for (const line of replay.orch.split('\n')) { if (UI.ctl.signal.aborted) throw { code: 'cancelled' }; await sleep(JSON.parse(line).k === 'task' ? 450 : 650); run.orchText += line + '\n'; onObj(JSON.parse(line)); renderAll(); }
     } else {
-      const feed = streamParser(o => { onObj(o); renderAll(); });
+      /* decisions stream in faster than anyone can read; release them at a readable pace */
+      const queue = []; let pumping = null;
+      const pump = async () => { while (queue.length) { const o = queue.shift(); onObj(o); renderAll(); if (o.k !== 'end') await sleep(o.k === 'task' ? 450 : 750); } pumping = null; };
+      const feed = streamParser(o => { queue.push(o); if (!pumping) pumping = pump(); });
       run.stats.ai++;
       const { text: full } = await AI.sample(orchestratorPrompt(run), { modelTier: 'default', cache: false, signal: UI.ctl.signal, onText: ({ text: t }) => { run.orchText = t; feed(t); updateStream(); } });
       run.orchText = full; feed(full);
+      while (pumping) await pumping;
       if (!run.tasks.length && !run.clarify) {
         run.decisions.push({ type: 'planfix', src: 'code', title: 'Plan unreadable; asking again in strict JSON', detail: 'The first reply had no usable tasks, so orchestration is asked once more for one JSON object.' }); renderAll();
         run.stats.ai++;
@@ -333,7 +342,7 @@ function handleOrch(run, o) {
       const txt = t.title + ' ' + t.objective, rule = ROLE_RULES.find(x => x.test.test(txt));
       if (rule && t.role !== rule.role) { const from = ROLES[t.role] ? ROLES[t.role].name : '—'; t.role = rule.role; t.agent = rule.agent(txt); run.decisions.push({ type: 'registry', src: 'code', title: `“${t.title}” → ${ROLES[rule.role].name}`, detail: `${rule.why}. Moved from ${from}.` }); }
     }
-    t.person = ROLES[t.role] ? (t.role === 'sales.wholesalers' && run.advisor && EMPLOYEES[run.requester].team === 'sales' && ADVISORS[run.advisor].coverage.includes(run.requester) && run.requester !== 'EMP-SAM' ? EMPLOYEES[run.requester].name : ROLES[t.role].person) : '';
+    t.person = ROLES[t.role] ? (t.role === 'sales.wholesalers' && run.advisor && EMPLOYEES[run.requester].team === 'sales' && ADVISORS[run.advisor].coverage.includes(run.requester) ? EMPLOYEES[run.requester].name : ROLES[t.role].person) : '';
     if (!AGENTS[t.agent]) { run.decisions.push({ type: 'registry', src: 'code', title: `Unknown agent “${t.agent}” dropped`, detail: 'Orchestration can only route to registered specialists.' }); return; }
     const bad = t.tools.filter(x => !toolAllowed(t.agent, x));
     if (bad.length) { t.tools = t.tools.filter(x => toolAllowed(t.agent, x)); run.decisions.push({ type: 'registry', src: 'code', title: `${AGENTS[t.agent].name}: ${bad.length} tool${bad.length > 1 ? 's' : ''} removed`, detail: `${bad.join(', ')} ${bad.length > 1 ? 'are' : 'is'} not on this agent’s allow-list at the gateway.` }); UI.totals.blocked++; }
@@ -444,7 +453,8 @@ async function runTask(run, t) {
 function defaultArgs(n, run, t) {
   const tick = mentionsFunds(run.text + ' ' + t.objective), people = (run.resolution.people || []).map(p => p.name);
   const when = /next month/i.test(run.text) ? 'next month' : /next week/i.test(run.text) ? 'next week' : /tomorrow/i.test(run.text) ? 'tomorrow' : 'soon';
-  return { advisor_id: run.advisor || '', ticker: tick[0] || 'GFFFX', tickers: tick.length ? tick : ['GFFFX'], name: tick[0] || '', amount_usd: 1000000, query: t.objective, weights: tick.length > 1 ? { [tick[0]]: 50, [tick[1]]: 50 } : { VIGAX: 70, GFFFX: 30 }, category: tick[0] || 'Large Growth', territory: run.territory || 'LA', content_type: 'advisor email', to: run.advisor ? ADVISORS[run.advisor].name : people[0] || '', subject: t.objective.slice(0, 60), attendees: [run.advisor, ...people].filter(Boolean), when, title: t.objective.slice(0, 60), time: '' };
+  const plan = Object.keys(PLANS).find(k => PLANS[k].adv === run.advisor) || '';
+  return { plan_id: plan, topic: /fee|cost|expense/i.test(run.text) ? 'fees' : /link|access|open/i.test(run.text) ? 'access' : t.objective, case_id: (F.cases.find(c => c.adv === run.advisor && c.status === 'Open') || {}).id || '', note: '', status: '', advisor_id: run.advisor || '', ticker: tick[0] || 'GFFFX', tickers: tick.length ? tick : ['GFFFX'], name: tick[0] || '', amount_usd: 1000000, query: t.objective, weights: tick.length > 1 ? { [tick[0]]: 50, [tick[1]]: 50 } : { VIGAX: 70, GFFFX: 30 }, category: tick[0] || 'Large Growth', territory: run.territory || 'LA', content_type: /linkedin|post/i.test(run.text) ? 'linkedin post' : /committee/i.test(run.text) ? 'committee pack' : 'advisor email', to: run.advisor ? ADVISORS[run.advisor].name : people[0] || '', subject: t.objective.slice(0, 60), attendees: [run.advisor, ...people].filter(Boolean), when, title: t.objective.slice(0, 60), time: '' };
 }
 function errText(e) {
   const map = { not_granted: 'Claude access wasn’t allowed in this view', rate_limited: 'too many requests right now; wait a moment and try again', invalid_json: 'the reply wasn’t valid JSON', empty_completion: 'Claude returned nothing', tools_unavailable: 'tool use isn’t available here', prompt_too_large: 'the request was too large', upstream_error: 'a temporary connection problem', refused: 'Claude declined this request', session_expired: 'your session expired; sign in again', auth_failed: 'the server’s AI key was rejected; check OPENAI_API_KEY', cancelled: 'stopped' };
@@ -594,6 +604,14 @@ function nextHTML(r) {
   const who = EMPLOYEES[r.requester].name.split(' ')[0], acts = nextActions(r), goal = r.decisions.find(d => d.type === 'success');
   return `<div class="dt">WHAT ${esc(who.toUpperCase())} SHOULD DO NEXT</div>${goal ? `<p class="nxgoal">${esc(goal.title)}${goal.detail ? `<small>${esc(goal.detail)}</small>` : ''}</p>` : ''}${acts.length ? acts.map(a => `<div class="nx"><span class="nxt ${a.tag.replace(' ', '').toLowerCase()}">${esc(a.tag)}</span><span>${esc(a.text)}<small>From step ${a.step}</small></span></div>`).join('') : '<p class="hint">Nothing further for you to do: everything was produced and stored.</p>'}`;
 }
+/* ---------- keep a good live run as a replay (and download it for src/replay.js) ---------- */
+function saveRun(r) {
+  if (!r || r.status !== 'done' || r.replay) return;
+  const rec = { name: r.text.slice(0, 60), requester: r.requester, text: r.text, orch: r.record.orch, agents: r.record.agents };
+  UI.recordings = UI.recordings.filter(x => !(x.text === rec.text && x.requester === rec.requester)).concat([rec]);
+  try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['RECORDED.push(' + JSON.stringify(rec, null, 1) + ');\n'], { type: 'text/javascript' })); a.download = 'replay-' + r.text.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40) + '.js'; a.click(); URL.revokeObjectURL(a.href); } catch (e) { }
+  renderSugs(); toast('Saved. Use ▶ next to the suggestion to play it again; add the downloaded file’s contents to src/replay.js to keep it.');
+}
 /* ---------- edit a draft before approval; the gatekeeper re-checks it ---------- */
 function openEdit(id) {
   const o = F.outputs.find(x => x.id === id); if (!o) return;
@@ -631,7 +649,7 @@ function renderUpdates() {
   }
   if (r.status === 'done') items.push({ key: 'final-' + r.id, cls: 'dcard finalcard', html: `<div class="dt">WHAT WAS PRODUCED FOR YOUR REQUEST</div>${r.tasks.map(t => { const o = outOf(t), R = ROLES[t.role]; return `<button class="steprow" data-task="${t.id}"><span class="stepn" style="background:${TC[R.team]}">${t.step}</span><span class="stepb"><b>${esc(o ? o.title : t.title)}</b><small>${esc(R.name)} · ${esc(o ? o.status : t.state === 'failed' ? 'Did not finish' : 'No document; see details')}</small></span><em class="openlink">Open</em></button>`; }).join('')}` });
   if (r.status === 'done') items.push({ key: 'sum-' + r.id, cls: 'summary', html: `<h3>All ${r.tasks.length} tasks done · ${Math.round((r.t1 - r.t0) / 1000)} s</h3><div class="sgrid"><div><b>${r.stats.reused}</b>facts reused</div><div><b>${r.stats.committed}</b>stored</div><div><b>${r.stats.calls}</b>system calls</div></div>` });
-  if (r.status === 'done') items.push({ key: 'next-' + r.id, cls: 'dcard nextcard', html: nextHTML(r) });
+  if (r.status === 'done') items.push({ key: 'next-' + r.id, cls: 'dcard nextcard', html: nextHTML(r) + (r.replay ? '' : `<div style="margin-top:8px"><button class="lbtn" data-act="save-run" title="Keep this run so it can be played again without an AI call, and download it for src/replay.js">Save as replay</button></div>`) });
   if (r.status === 'failed') items.push({ key: 'fail-' + r.id, cls: 'blocked', html: `<b>${esc(r.error)}</b><div style="margin-top:8px"><button class="lbtn" data-act="retry">Try again</button></div>` });
   patchList(pane, items);
 }
@@ -714,6 +732,7 @@ document.addEventListener('click', e => {
   if (d.act === 'cancel-edit') { closeDrawer(); return; }
   if (d.act === 'kg') { openKG(d.adv); return; }
   if (d.act === 'answer' || d.act === 'assume') { const v = d.act === 'assume' ? 'Make your best assumption and continue' : $('clarIn').value.trim(); if (v) { const q = UI.run.clarify, t = UI.run.text.replace(/ \(clarification:.*\)$/, ''); UI.run = null; runRequest(`${t} (clarification: ${v})`, null, { clarified: { question: q, answer: v } }); } return; }
+  if (d.act === 'save-run') { saveRun(UI.run); return; }
   if (d.act === 'retry') { const t = UI.run.text; UI.run = null; runRequest(t); return; }
   if (d.task) { openTask(d.task); return; }
   if (d.agent) { const a = AGENTS[d.agent]; openDrawer(esc(a.name), `<p class="hint">${esc(TEAMS[a.team].name)}</p><p class="lead">${esc(a.does)}</p><div class="h">Tools it may call</div>${a.tools.length ? a.tools.map(t => `<div class="pk"><span class="vbadge ${TOOLS[t].via}">${TOOLS[t].via}</span><span><code style="font:12px var(--code)">${esc(t)}</code><small>${esc(SYSTEMS[TOOLS[t].sys].name)} · ${esc(TOOLS[t].desc)}</small></span></div>`).join('') : '<p class="hint">None. It works only from the foundation.</p>'}<div class="h">Subscribed to</div><p class="hint">${Object.entries(SUBSCRIPTIONS).filter(([, v]) => v.includes(d.agent)).map(([k]) => k).join(', ') || 'No events'}</p>`); return; }
