@@ -47,7 +47,10 @@ Around it sit **37 named specialists** (Sales 7, Product 9, Marketing 11, Servic
 - **Command bar:** pick who you are, type an outcome, press Enter.
 - **Orchestration in nine steps:** Understand, Resolve, Scope, Reuse, Gaps, Memory rule, Controls, Plan, Execute. Each step shows whether it was decided by **AI** or by a **RULE**.
 - **Live architecture:** curved flows show requests, dispatches, reads from and writes to the foundation, system calls (MCP or API) and handoffs between specialists.
-- **Right panel tabs:** Decisions · Agents (exact context packet in, tool calls, contribution out, gatekeeper verdicts) · Memory (per advisor) · Outputs (with approval) · Events.
+- **Right panel tabs:** Updates · Decisions · Agents (exact context packet in, tool calls, contribution out, gatekeeper verdicts) · Memory (per advisor) · Events.
+- **Traceability on every step:** each step in Updates shows *Where this came from*: what the foundation sent (and withheld), the steps it built on, and each system it queried, why, and what came back. The step that is running shows its calls as they happen.
+- **Edit before approval:** drafts waiting for approval can be edited; the edit is re-checked against the same rules (personal notes, numbers traced to a system of record) before it is saved as a new revision.
+- **What to do next:** every run ends with a card for the requester: the agents’ suggested next step, drafts to approve, follow-ups created, preferences to confirm with the advisor and open questions.
 - **Advisor knowledge graph:** click *Expand* in the Memory tab or the Graph tile.
 - **Themes:** four color dots in the top bar (Midnight navy, Graphite, Evergreen, Porcelain light), or `?theme=graphite` in the URL.
 
