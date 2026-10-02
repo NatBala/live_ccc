@@ -30,7 +30,7 @@ The foundation has seven components:
 | **Event-Driven Signals** | What changed, and who needs to act? |
 | **Graph Knowledge Layer** | How are people, firms, meetings, funds and documents connected? |
 
-Around it sit **37 named specialists** (Sales 7, Product 9, Marketing 11, Service 10), an **Intelligence & Orchestration** layer that plans and routes work, and **governed integration** with Salesforce, Microsoft 365, Seismic, the fund data platform and Morningstar, through an MCP gateway for agent tool calls and APIs for typed data.
+Around it sit **37 named specialists** (Sales 7, Product 9, Marketing 11, Service 10), an **Intelligence & Orchestration** layer that plans and routes work, and **governed integration** with Salesforce (CRM, Service Cloud cases, plan records), Microsoft 365, Seismic (content, approved messaging, LiveSend delivery logs), the fund data platform, Morningstar, Genesys Cloud (contact center and service insights), Salesforce Marketing Cloud and Adobe Experience Manager, through an MCP gateway for agent tool calls and APIs for typed data.
 
 ### What the demo proves
 - **Nobody repeats themselves.** One specialist’s verified work becomes the next one’s starting point, visibly, through the foundation.
@@ -57,8 +57,16 @@ Around it sit **37 named specialists** (Sales 7, Product 9, Marketing 11, Servic
 **Good first requests** (as Priya Shah, Sales):
 1. `Identify the growing trends in LA territory`
 2. `Compare BFA and AMBAL for Rachel and schedule a meeting with her next month`
-3. `Prep me for my call with Alex tomorrow`
+3. `Prepare Maya’s retirement committee fee comparison review`
 4. `Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.` Watch it land as *pending*, not memory, then open Alex’s knowledge graph.
+
+**One request per role** (pick the person first):
+- Sam Lee, Sales: `Prep me for my call with Alex tomorrow`. Sam is taking over Alex from Priya (handover HO-101), so the brief reuses Priya’s calls and Product’s work, but Sam owns it.
+- Dana Ortiz, Product: `Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.`
+- Marcus Bell, Marketing: `Write a LinkedIn post on fee transparency for advisors`. Compliance flags the missing disclosures; add them with **Edit** and approve.
+- Kim Nguyen, Service: `Alex says the link in Priya’s email won’t open`. The diagnosis cites the Genesys call, the open case and the Seismic delivery log.
+
+**Saved runs:** a ▶ next to a suggestion plays a saved run of it through the same foundation, tools and gatekeeper, with no AI call. Use them when there is no AI key or for a repeatable demo. The five above and four of Priya’s are included; the five were authored to the demo script rather than captured live. After a good live run, **Save as replay** on the closing card keeps it for the session and downloads it for `src/replay.js`.
 
 ---
 
@@ -159,7 +167,7 @@ live_ccc/
 │  ├─ engine.js           foundation: tools, context packets, gatekeeper, AI connectors (Claude and OpenAI)
 │  ├─ graph.js            advisor knowledge graph
 │  ├─ ui.js               orchestration runtime and rendering
-│  ├─ replay.js           recorded runs used for testing
+│  ├─ replay.js           saved runs, played with ▶ next to a suggestion
 │  └─ base.css, extra.css styles and themes
 ├─ scripts/
 │  ├─ build.mjs           npm run build: src/ → public/index.html
@@ -176,6 +184,6 @@ live_ccc/
 ---
 
 ## Data notice
-- People, firms’ teams, conversations and holdings in the reference data are **fictional**. Firm names are real only for context.
+- People, firms’ teams, conversations, holdings, the retirement plan (PLAN-102), service contacts, delivery logs, campaign results and approved messaging in the reference data are **fictional**. Firm names are real only for context.
 - Fund expense ratios for GFA (F-2 0.40%), BFA (F-2 0.34%), AMBAL (F-2 0.35%), VWUAX (0.25%) and VIGAX (0.05%) come from public sources as of the dates shown in the app; other funds’ numbers are intentionally left out, and performance is never generated.
 - Get compliance and security approval before connecting real client data or sending it to any AI provider.

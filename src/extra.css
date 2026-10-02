@@ -439,3 +439,12 @@
 
 /* editing a draft before approval */
 .editin{width:100%;box-sizing:border-box;margin-top:8px;font:13px/1.5 inherit;font-family:inherit;color:var(--ink);background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:8px 10px;resize:vertical}
+
+/* saved runs: play beside the suggestion */
+.sugw{display:inline-flex;align-items:center;gap:2px}
+.sugrep{border:1px solid rgba(127,212,171,.5);background:none;color:#bff0d6;border-radius:99px;width:20px;height:20px;padding:0;font-size:9px;line-height:1;display:grid;place-items:center}
+.sugrep:hover{background:rgba(127,212,171,.15)}
+:root[data-skin="porcelain"] .sugrep{color:#1f6b48;border-color:#7fbf9f}
+
+/* eight enterprise systems in two rows */
+@media (min-width:861px){.systems{grid-template-columns:repeat(4,minmax(0,1fr))}}

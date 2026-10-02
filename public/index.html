@@ -927,6 +927,15 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 /* editing a draft before approval */
 .editin{width:100%;box-sizing:border-box;margin-top:8px;font:13px/1.5 inherit;font-family:inherit;color:var(--ink);background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:8px 10px;resize:vertical}
+
+/* saved runs: play beside the suggestion */
+.sugw{display:inline-flex;align-items:center;gap:2px}
+.sugrep{border:1px solid rgba(127,212,171,.5);background:none;color:#bff0d6;border-radius:99px;width:20px;height:20px;padding:0;font-size:9px;line-height:1;display:grid;place-items:center}
+.sugrep:hover{background:rgba(127,212,171,.15)}
+:root[data-skin="porcelain"] .sugrep{color:#1f6b48;border-color:#7fbf9f}
+
+/* eight enterprise systems in two rows */
+@media (min-width:861px){.systems{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -1013,7 +1022,7 @@ const EMPLOYEES = {
 };
 
 const SUGGESTIONS = {
-  sales: ['Identify the growing trends in LA territory', 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month', 'Prep me for my call with Alex tomorrow', 'What does Maya care about for her retirement committee?', 'Sofia mentioned ETFs. What should I bring to our next meeting?', 'Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.'],
+  sales: ['Identify the growing trends in LA territory', 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month', 'Prep me for my call with Alex tomorrow', 'Prepare Maya’s retirement committee fee comparison review', 'Sofia mentioned ETFs. What should I bring to our next meeting?', 'Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.'],
   product: ['Compare BFA and AMBAL: costs, approach and who each suits', 'Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.', 'Compare GFA F-2 costs with VWUAX and VIGAX on $38M', 'Check whether our fee comparison for Maya is still current'],
   marketing: ['Draft the follow-up email to Alex using Product’s verified comparison', 'Create an ETF email campaign for Sofia', 'Write a LinkedIn post on fee transparency for advisors'],
   service: ['Alex says the link in Priya’s email won’t open', 'Maya says the benchmark explanation is still unclear']
@@ -1023,39 +1032,39 @@ const SUGGESTIONS = {
 const AGENTS = {
   'sales.lead': { name: 'Lead Me', team: 'sales', does: 'Prioritizes advisors and opportunities using model signals', tools: ['models.sales_alpha', 'models.territory_trends', 'crm.get_opportunities'] },
   'sales.schedule': { name: 'Schedule Me', team: 'sales', does: 'Finds meeting times for advisors or colleagues and places calendar holds', tools: ['calendar.find_times', 'calendar.create_event', 'crm.get_contact'] },
-  'sales.prep': { name: 'Prep Me', team: 'sales', does: 'Builds meeting briefs and agendas from what is known about the advisor', tools: ['crm.get_call_notes', 'crm.get_opportunities', 'crm.get_contact'] },
+  'sales.prep': { name: 'Prep Me', team: 'sales', does: 'Builds meeting briefs and agendas from what is known about the advisor', tools: ['crm.get_call_notes', 'crm.get_opportunities', 'crm.get_contact', 'crm.get_plan'] },
   'sales.engage': { name: 'Engage Me', team: 'sales', does: 'Captures what advisors say in meetings and answers live questions', tools: ['crm.get_call_notes', 'crm.log_activity'] },
   'sales.follow': { name: 'Follow Me', team: 'sales', does: 'Logs outcomes, creates tasks and tracks commitments', tools: ['crm.log_activity', 'crm.create_task', 'crm.get_opportunities'] },
   'sales.coach': { name: 'Coach Me', team: 'sales', does: 'Private coaching for the wholesaler, never shared', tools: [] },
   'sales.territory': { name: 'Territory Planning', team: 'sales', does: 'Territory reviews: trends, coverage and business planning across advisors', tools: ['models.territory_trends', 'models.sales_alpha', 'crm.get_opportunities', 'crm.get_call_notes'] },
   'product.clarify': { name: 'Query Clarifier', team: 'product', does: 'Turns loose questions into precise, answerable ones (funds, share classes, periods)', tools: ['fund.get_facts', 'fund.lookup'] },
   'product.planner': { name: 'Research Planner', team: 'product', does: 'Decides what evidence is needed and where it comes from', tools: ['mstar.get_peers'] },
-  'product.tools': { name: 'Tool Selection', team: 'product', does: 'Runs analytics: fee math, peer data, portfolio construction', tools: ['fund.get_facts', 'fund.lookup', 'models.cost_on_assets', 'models.portfolio_construction', 'mstar.get_peers'] },
+  'product.tools': { name: 'Tool Selection', team: 'product', does: 'Runs analytics: fee math, peer data, portfolio construction', tools: ['fund.get_facts', 'fund.lookup', 'models.cost_on_assets', 'models.portfolio_construction', 'models.plan_fee_comparison', 'mstar.get_peers'] },
   'product.summary': { name: 'Contact Summarizer', team: 'product', does: 'Summarizes the advisor context Product needs for a question', tools: [] },
-  'product.tone': { name: 'Tone/Style Alignment', team: 'product', does: 'Aligns product answers to house style and audience', tools: [] },
+  'product.tone': { name: 'Tone/Style Alignment', team: 'product', does: 'Turns verified product answers into advisor-ready language using approved messaging', tools: ['seismic.get_approved_language'] },
   'product.format': { name: 'Response Formatter', team: 'product', does: 'Formats product answers for the channel', tools: [] },
-  'product.qar': { name: 'QAR', team: 'product', does: 'Produces verified answers; every number traced to a system of record', tools: ['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.cost_on_assets', 'seismic.search_content'] },
+  'product.qar': { name: 'QAR', team: 'product', does: 'Produces verified answers; every number traced to a system of record', tools: ['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.cost_on_assets', 'models.plan_fee_comparison', 'seismic.search_content'] },
   'product.institutional': { name: 'Institutional Pitch Books', team: 'product', does: 'Institutional product materials', tools: ['seismic.search_content'] },
   'product.srg': { name: 'SRG Product Pitch Books', team: 'product', does: 'Product pitch books for the retail advisor channel', tools: ['seismic.search_content'] },
-  'marketing.gather': { name: 'Resource Gatherer', team: 'marketing', does: 'Finds approved content and templates in Seismic', tools: ['seismic.search_content'] },
-  'marketing.analyze': { name: 'Document Analyzer', team: 'marketing', does: 'Extracts key points from approved documents', tools: ['seismic.search_content'] },
-  'marketing.copy': { name: 'Copywriter / Editor', team: 'marketing', does: 'Writes drafts in the audience’s preferred format from verified findings', tools: [] },
+  'marketing.gather': { name: 'Resource Gatherer', team: 'marketing', does: 'Finds approved content, templates, messaging and landing pages', tools: ['seismic.search_content', 'seismic.get_approved_language', 'aem.get_page', 'mcloud.get_engagement'] },
+  'marketing.analyze': { name: 'Document Analyzer', team: 'marketing', does: 'Extracts key points from approved documents', tools: ['seismic.search_content', 'service.get_insights'] },
+  'marketing.copy': { name: 'Copywriter / Editor', team: 'marketing', does: 'Writes drafts in the audience’s preferred format from verified findings', tools: ['seismic.get_approved_language'] },
   'marketing.audit': { name: 'Audit Support', team: 'marketing', does: 'Keeps the audit trail for published material', tools: [] },
-  'marketing.legal': { name: 'Legal & Compliance', team: 'marketing', does: 'Reviews claims, performance presentation and disclosures', tools: ['sharepoint.get_disclosures'] },
+  'marketing.legal': { name: 'Legal & Compliance', team: 'marketing', does: 'Reviews claims, performance presentation and disclosures', tools: ['sharepoint.get_disclosures', 'seismic.get_approved_language'] },
   'marketing.image': { name: 'Image Analyzer', team: 'marketing', does: 'Checks charts and images in materials', tools: [] },
-  'marketing.audience': { name: 'Audience Builder', team: 'marketing', does: 'Builds permitted audiences for campaigns', tools: ['models.sales_alpha', 'models.territory_trends', 'crm.get_contact'] },
+  'marketing.audience': { name: 'Audience Builder', team: 'marketing', does: 'Builds permitted audiences for campaigns', tools: ['models.sales_alpha', 'models.territory_trends', 'crm.get_contact', 'mcloud.get_engagement'] },
   'marketing.dist': { name: 'Distribution', team: 'marketing', does: 'Prepares sends; nothing goes out without human approval', tools: ['mail.draft'] },
-  'marketing.voc': { name: 'Voice of Client', team: 'marketing', does: 'Captures explicit advisor statements and feedback', tools: ['crm.get_call_notes'] },
-  'marketing.linkedin': { name: 'LinkedIn Post', team: 'marketing', does: 'Drafts approved public posts with no client identifiers', tools: ['seismic.search_content'] },
-  'marketing.email': { name: 'Personalized Email', team: 'marketing', does: 'Drafts personalized advisor emails', tools: ['mail.draft', 'seismic.search_content'] },
-  'service.classify': { name: 'Inquiry Classifier', team: 'service', does: 'Classifies incoming advisor inquiries', tools: ['service.get_cases'] },
+  'marketing.voc': { name: 'Voice of Client', team: 'marketing', does: 'Captures explicit advisor statements and feedback, including what advisors ask Service', tools: ['crm.get_call_notes', 'service.get_insights'] },
+  'marketing.linkedin': { name: 'LinkedIn Post', team: 'marketing', does: 'Drafts approved public posts with no client identifiers', tools: ['seismic.search_content', 'seismic.get_approved_language', 'mcloud.get_engagement', 'aem.get_page', 'service.get_insights'] },
+  'marketing.email': { name: 'Personalized Email', team: 'marketing', does: 'Drafts personalized advisor emails', tools: ['mail.draft', 'seismic.search_content', 'seismic.get_approved_language', 'mcloud.get_engagement'] },
+  'service.classify': { name: 'Inquiry Classifier', team: 'service', does: 'Classifies incoming advisor inquiries', tools: ['service.get_cases', 'contact.get_interactions'] },
   'service.identity': { name: 'Identity Verifier', team: 'service', does: 'Verifies who is asking and what they may receive', tools: ['crm.get_contact'] },
   'service.priority': { name: 'Priority Scorer', team: 'service', does: 'Scores urgency with service rules', tools: ['service.get_cases'] },
   'service.knowledge': { name: 'Knowledge Retriever', team: 'service', does: 'Retrieves approved procedures and answers', tools: ['seismic.search_content'] },
-  'service.account': { name: 'Account Lookup', team: 'service', does: 'Looks up the advisor’s account, deliveries and history', tools: ['crm.get_contact', 'service.get_cases'] },
-  'service.resolve': { name: 'Resolve Me', team: 'service', does: 'Resolves access and delivery issues', tools: ['service.get_cases', 'service.update_case', 'seismic.export_pdf'] },
+  'service.account': { name: 'Account Lookup', team: 'service', does: 'Looks up the advisor’s account, deliveries and history', tools: ['crm.get_contact', 'service.get_cases', 'seismic.get_delivery_log', 'contact.get_interactions'] },
+  'service.resolve': { name: 'Resolve Me', team: 'service', does: 'Resolves access and delivery issues', tools: ['service.get_cases', 'service.update_case', 'seismic.export_pdf', 'seismic.get_delivery_log', 'contact.get_interactions'] },
   'service.escalate': { name: 'Escalate Me', team: 'service', does: 'Escalates what it can’t resolve to an owner', tools: ['service.update_case'] },
-  'service.sentiment': { name: 'Sentiment Analyzer', team: 'service', does: 'Reads explicit satisfaction signals', tools: [] },
+  'service.sentiment': { name: 'Sentiment Analyzer', team: 'service', does: 'Reads explicit satisfaction signals', tools: ['contact.get_interactions'] },
   'service.crosssell': { name: 'Cross-sell Detector', team: 'service', does: 'Flags explicit needs for Sales, never infers', tools: [] },
   'service.qa': { name: 'QA Logger', team: 'service', does: 'Logs service quality outcomes', tools: [] }
 };
@@ -1101,13 +1110,16 @@ const LAYERS = {
 const LAYER_ORDER = ['memory', 'knowledge', 'policy', 'models', 'feedback', 'events', 'graph'];
 
 const SYSTEMS = {
-  sf: { name: 'Salesforce', sub: 'CRM · Service Cloud · call transcripts', icon: 'users' },
+  sf: { name: 'Salesforce', sub: 'CRM · Service Cloud cases · plans', icon: 'users' },
   m365: { name: 'Microsoft 365', sub: 'Outlook · Calendar · SharePoint', icon: 'mail' },
   seismic: { name: 'Seismic', sub: 'Approved content', icon: 'book' },
   fund: { name: 'Data & model platform', sub: 'Fund facts · models', icon: 'chart' },
-  mstar: { name: 'Morningstar', sub: 'Licensed peer data', icon: 'globe' }
+  mstar: { name: 'Morningstar', sub: 'Licensed peer data', icon: 'globe' },
+  gen: { name: 'Genesys Cloud', sub: 'Contact center · service insights', icon: 'bell' },
+  mcloud: { name: 'Marketing Cloud', sub: 'Campaign engagement', icon: 'mail' },
+  aem: { name: 'Adobe Experience Manager', sub: 'Published web pages', icon: 'file' }
 };
-const SYS_ORDER = ['sf', 'm365', 'seismic', 'fund', 'mstar'];
+const SYS_ORDER = ['sf', 'm365', 'seismic', 'fund', 'mstar', 'gen', 'mcloud', 'aem'];
 
 /* ---------------- Enterprise reference records ---------------- */
 const FIRMS = {
@@ -1159,6 +1171,9 @@ const MEMORY = [
   { id: 'MEM-021', adv: 'ADV-102', cat: 'relationship', scope: 'advisor', attr: 'Buying units', value: 'Participates in the retirement committee and the wealth team', src: 'Salesforce', speaker: 'System of record', basis: 'System of record', rev: 1, access: 'shared' },
   { id: 'MEM-023', adv: 'ADV-102', cat: 'communication_pref', scope: 'BU-102R', attr: 'Contact channel', value: 'For committee preparation, contact by email', src: 'EMAIL-0811', speaker: 'Maya Chen', basis: 'Direct advisor statement', rev: 1, access: 'shared' },
   { id: 'MEM-024', adv: 'ADV-102', cat: 'priority', scope: 'BU-102R', attr: 'Current priority', value: 'Reviewing the committee’s fee-comparison process this quarter', src: 'CALL-0901', speaker: 'Maya Chen', basis: 'Direct advisor statement', rev: 1, access: 'shared', reviewBy: '2026-12-31' },
+  { id: 'MEM-026', adv: 'ADV-102', cat: 'priority', scope: 'BU-102R', attr: 'Committee objective', value: 'Document a prudent, repeatable fee review in the Nov 12 committee minutes', src: 'CALL-0919', speaker: 'Maya Chen', basis: 'Direct advisor statement', rev: 1, access: 'shared', reviewBy: '2026-11-12' },
+  { id: 'MEM-027', adv: 'ADV-102', cat: 'priority', scope: 'BU-102R', attr: 'Committee concern', value: 'Why the active growth option costs more than the growth index option beside it', src: 'CALL-0919', speaker: 'Maya Chen', basis: 'Direct advisor statement', rev: 1, access: 'shared' },
+  { id: 'MEM-028', adv: 'ADV-102', cat: 'content_pref', scope: 'BU-102R', attr: 'Fee comparison basis', value: 'Compare each option with its Morningstar category median, in dollars and basis points', src: 'CALL-0919', speaker: 'Maya Chen', basis: 'Direct advisor statement', rev: 1, access: 'shared' },
   { id: 'MEM-031', adv: 'ADV-103', cat: 'communication_pref', scope: 'advisor', attr: 'Contact channel', value: 'Prefers phone calls, afternoons', src: 'CALL-0910', speaker: 'Jordan Patel', basis: 'Direct advisor statement', rev: 1, access: 'shared' },
   { id: 'MEM-032', adv: 'ADV-103', cat: 'priority', scope: 'BU-103', attr: 'Focus', value: 'Income and dividend strategies for retirees', src: 'CALL-0910', speaker: 'Jordan Patel', basis: 'Direct advisor statement', rev: 1, access: 'shared' },
   { id: 'MEM-041', adv: 'ADV-104', cat: 'priority', scope: 'BU-104', attr: 'Current priority', value: 'Moving core allocations toward ETFs this year', src: 'CALL-0915', speaker: 'Sofia Martinez', basis: 'Direct advisor statement', rev: 1, access: 'shared' },
@@ -1177,7 +1192,7 @@ const MEMORY = [
 /* Products each advisor holds, uses or is weighing (from Salesforce holdings and recorded calls) */
 const ADVISOR_PRODUCTS = {
   'ADV-101': [{ fund: 'GFFFX', rel: 'Holds ~$38M in legacy accounts', src: 'Salesforce holdings' }, { fund: 'VIGAX', rel: 'Weighing as an index core', src: 'CALL-0922' }, { fund: 'VWUAX', rel: 'Comparing against GFA', src: 'CALL-0922' }],
-  'ADV-102': [{ fund: 'AMBFX', rel: 'On the retirement plan menu', src: 'Salesforce holdings' }, { fund: 'ABNFX', rel: 'On the retirement plan menu', src: 'Salesforce holdings' }],
+  'ADV-102': [{ fund: 'GFFFX', rel: 'Large-cap growth (active) option, PLAN-102', src: 'Salesforce plan record' }, { fund: 'VIGAX', rel: 'Large-cap growth (index) option, PLAN-102', src: 'Salesforce plan record' }, { fund: 'AMBFX', rel: 'Balanced option, PLAN-102', src: 'Salesforce plan record' }, { fund: 'ABNFX', rel: 'Core bond option, PLAN-102', src: 'Salesforce plan record' }],
   'ADV-103': [{ fund: 'AMECX', rel: 'Core income holding for retirees', src: 'Salesforce holdings' }, { fund: 'AWSHX', rel: 'Holds for dividend growth', src: 'Salesforce holdings' }],
   'ADV-104': [{ fund: 'GFFFX', rel: 'Satellite in two model portfolios', src: 'Salesforce holdings' }],
   'ADV-105': [{ fund: 'GFFFX', rel: 'Active satellite in client models', src: 'CALL-0826' }, { fund: 'VIGAX', rel: 'Index core in client models', src: 'CALL-0826' }],
@@ -1198,10 +1213,14 @@ const EPISODES = [
     text: 'Quarterly review. Alex is launching a new discretionary growth model this quarter. Mentioned he is training for the California International Marathon.' },
   { id: 'EMAIL-0719', adv: 'ADV-101', scope: 'advisor', date: 'Jul 19, 2026', kind: 'Email', with: 'Jamie Cho',
     text: 'Jamie: "Alex prefers 30-minute Teams calls at 7:30 a.m. Pacific, Tuesdays or Thursdays. Please book through me."' },
-  { id: 'EMAIL-0811', adv: 'ADV-102', scope: 'BU-102R', date: 'Aug 11, 2026', kind: 'Email', with: 'Priya Shah',
-    text: 'Maya: "For anything to do with committee preparation, please email me rather than calling."' },
+  { id: 'EMAIL-0928', adv: 'ADV-102', scope: 'BU-102R', date: 'Sep 28, 2026', kind: 'Email', with: 'Priya Shah',
+    text: 'Elena Park (for Maya): "Committee materials go to members on November 5 for the November 12 meeting. Maya wants to review a draft first."' },
+  { id: 'CALL-0919', adv: 'ADV-102', scope: 'BU-102R', date: 'Sep 19, 2026', kind: 'Call transcript', with: 'Priya Shah',
+    text: 'Maya: "For November 12 the committee wants a prudent fee review documented in the minutes." Maya: "Compare every option with its Morningstar category median, in dollars as well as basis points." Two committee members asked why the active growth option costs more than the growth index option beside it. She still wants the benchmark question from September answered.' },
   { id: 'CALL-0901', adv: 'ADV-102', scope: 'BU-102R', date: 'Sep 1, 2026', kind: 'Call transcript', with: 'Priya Shah',
     text: 'Maya: "This quarter we are reviewing how the committee compares fees." Asked how to interpret the fee-comparison basis and what the benchmark represents.' },
+  { id: 'EMAIL-0811', adv: 'ADV-102', scope: 'BU-102R', date: 'Aug 11, 2026', kind: 'Email', with: 'Priya Shah',
+    text: 'Maya: "For anything to do with committee preparation, please email me rather than calling."' },
   { id: 'CALL-0910', adv: 'ADV-103', scope: 'BU-103', date: 'Sep 10, 2026', kind: 'Call transcript', with: 'Sam Lee',
     text: 'Jordan: "Call me in the afternoons; I do not read long emails." Focus on income and dividend strategies for retirees.' },
   { id: 'CALL-0915', adv: 'ADV-104', scope: 'BU-104', date: 'Sep 15, 2026', kind: 'Call transcript', with: 'Priya Shah',
@@ -1224,7 +1243,8 @@ const COMMITMENTS = [
 ];
 
 const CASES = [
-  { id: 'CASE-00481', adv: 'ADV-101', status: 'Resolved', text: 'Link to OP-0922 blocked by Morgan Stanley email security; same approved version resent as PDF.' },
+  { id: 'CASE-00517', adv: 'ADV-101', status: 'Open', opened: 'Sep 29, 2026', owner: 'Kim Nguyen', text: 'Opened from Jamie Cho’s call INT-7731: Alex can’t open the link in Priya’s Sep 28 email (Seismic LiveSend LS-0928, fund comparison one-pager). Category: access and delivery.' },
+  { id: 'CASE-00481', adv: 'ADV-101', status: 'Resolved', opened: 'Jul 2026', owner: 'Kim Nguyen', text: 'Link to OP-0922 blocked by Morgan Stanley email security; same approved version resent as PDF. Root cause: the firm’s web gateway blocks external file-sharing links.' },
   { id: 'CASE-00502', adv: 'ADV-102', status: 'Resolved', text: 'Packet access restored. Benchmark explanation still unclear to Maya (tracked as TASK-302).' }
 ];
 
@@ -1233,9 +1253,74 @@ const OPPORTUNITIES = [
   { id: 'OPP-505', adv: 'ADV-106', scope: 'BU-106', name: 'Okafor income sleeve', stage: 'Discovery', note: 'Balanced and bond funds for retirees' },
   { id: 'OPP-506', adv: 'ADV-107', scope: 'BU-107', name: 'Harbor Point core bond', stage: 'Qualified', note: 'Adding fixed income as rates settle' },
   { id: 'OPP-501', adv: 'ADV-101', scope: 'BU-101A', name: 'Rivera growth model', stage: 'Proposal', note: 'Deciding whether GFA stays in the growth sleeve' },
-  { id: 'OPP-502', adv: 'ADV-102', scope: 'BU-102R', name: 'Northstar retirement menu review', stage: 'Discovery', note: 'Committee reviewing fee comparisons' },
+  { id: 'OPP-502', adv: 'ADV-102', scope: 'BU-102R', name: 'Northstar retirement menu review', stage: 'Discovery', note: 'Committee reviewing fee comparisons for PLAN-102 before the Nov 12 meeting' },
   { id: 'OPP-503', adv: 'ADV-104', scope: 'BU-104', name: 'Martinez core allocation', stage: 'Discovery', note: 'Moving core to ETFs' }
 ];
+
+/* Retirement plans an advisor's committee oversees (Salesforce plan record). Plan and assets are fictional. */
+const PLANS = {
+  'PLAN-102': { adv: 'ADV-102', unit: 'BU-102R', name: 'Irvine Precision Manufacturing 401(k) Plan', assets_usd: 62000000, participants: 540,
+    committee: 'Five-member investment committee; Northstar Advisory (Maya Chen) advises; Elena Park coordinates materials', next_meeting: 'Nov 12, 2026', materials_due: 'Nov 5, 2026',
+    lineup: [
+      { option: 'Large-cap growth (active)', fund: 'GFFFX', assets_usd: 18500000, category: 'Large Growth' },
+      { option: 'Large-cap growth (index)', fund: 'VIGAX', assets_usd: 9000000, category: 'Large Growth' },
+      { option: 'Balanced', fund: 'AMBFX', assets_usd: 14200000, category: 'Moderate Allocation' },
+      { option: 'Core bond', fund: 'ABNFX', assets_usd: 6800000, category: 'Intermediate Core Bond' }],
+    other: { label: 'Target-date series and stable value', assets_usd: 13500000, note: 'Expense data not in reference data' } }
+};
+/* Coverage changes between wholesalers (Salesforce) */
+const HANDOVERS = [
+  { id: 'HO-101', adv: 'ADV-101', from: 'EMP-PRIYA', to: 'EMP-SAM', effective: 'Oct 1, 2026', src: 'Salesforce coverage change, Sep 24, 2026',
+    note: 'Sam Lee becomes primary coverage for Alex Rivera as Priya Shah rebalances her book toward San Diego. Priya stays on the account through the Oct 1 committee to hand over; her call notes and commitments carry over.' }
+];
+
+/* Genesys Cloud: advisor contacts with the service center */
+const INTERACTIONS = [
+  { id: 'INT-7731', adv: 'ADV-101', when: 'Sep 29, 2026, 8:14 a.m. PT', channel: 'Phone, advisor service line', caller: 'Jamie Cho, for Alex Rivera', handled_by: 'Kim Nguyen', case: 'CASE-00517',
+    summary: 'Alex tried the link in Priya’s Sep 28 email three times from the office and got a grey page: “This site is blocked by your organization’s security policy.” It opened on his personal phone, but he can’t forward from there.',
+    sentiment: 'Mildly frustrated; his committee meets Thursday' }
+];
+/* Seismic LiveSend: delivery and link activity for content sent to advisors */
+const DELIVERIES = [
+  { id: 'LS-0928', adv: 'ADV-101', sent: 'Sep 28, 2026, 4:12 p.m. PT', from: 'Priya Shah', to: 'Alex Rivera (cc Jamie Cho)', asset: 'SEIS-110', title: 'Fund comparison one-pager',
+    email: 'Delivered; opened 3 times', link_status: 'Active', link_expires: 'Oct 28, 2026', recipient_access: 'Permitted: Alex Rivera and Jamie Cho are on the recipient list',
+    link_events: ['Sep 28, 4:31 p.m.: click from the Morgan Stanley network, stopped at the firm’s web gateway (category: file sharing)', 'Sep 29, 8:02 a.m.: same', 'Sep 29, 8:05 a.m.: same', 'Sep 29, 7:48 p.m.: opened from a mobile carrier network'],
+    content_views: 1 }
+];
+/* Genesys + Service Cloud, aggregated by topic; never advisor identifiers */
+const SERVICE_INSIGHTS = {
+  fees: { period: 'Q3 2026 (Jul 1 to Sep 28)', source: 'Genesys Cloud contact reasons and Service Cloud cases, aggregated; no advisor identifiers', contacts_this_quarter: 46, contacts_last_quarter: 27,
+    top_questions: ['Why does the expense ratio on a client statement differ from the fact sheet? (usually the share class)', 'What is the cost difference between F-2 and Class A shares?', 'How do I show a client what a fee costs in dollars, not just percent?', 'Where is the current prospectus expense ratio published?'],
+    takeaway: 'Advisors ask how to explain fees to clients, not whether fees are too high.' },
+  access: { period: 'Q3 2026', source: 'Service Cloud cases, aggregated', contacts_this_quarter: 9, takeaway: 'Link-access cases come from firms whose web gateways block external file-sharing links; a PDF attachment resolves them.' }
+};
+/* Salesforce Marketing Cloud: how past fee content performed */
+const ENGAGEMENT = {
+  fees: [
+    { name: 'Fee transparency email (SEIS-115), Q2', audience: 'Financial professionals', open_rate_pct: 41, click_rate_pct: 6.2 },
+    { name: 'LinkedIn fee-education posts, Q1 to Q3', audience: 'Public', best_post: 'What a fee costs in dollars', engagement_rate_pct: 3.8, average_engagement_rate_pct: 1.6, takeaway: 'Posts that showed a fee in dollars outperformed percent-only posts.' }]
+};
+/* Adobe Experience Manager: published, approved web pages that posts may link to */
+const AEM_PAGES = [
+  { id: 'AEM-FEES', title: 'Understanding fund expenses', path: '/advisor/insights/understanding-fund-expenses', status: 'Published', audience: 'Public', last_reviewed: 'Aug 2026', tags: 'fees expenses expense ratio share class transparency' },
+  { id: 'AEM-CAPSYS', title: 'How The Capital System works', path: '/advisor/insights/capital-system', status: 'Published', audience: 'Public', last_reviewed: 'Jun 2026', tags: 'capital system active managers' }
+];
+/* Seismic messaging library: approved language, cited by id */
+const APPROVED_LANGUAGE = [
+  { id: 'MSG-201', topic: 'fees', text: 'Costs matter. We show what each share class costs, in dollars as well as percentages, so there are no surprises.', use: 'Social, email, presentations' },
+  { id: 'MSG-202', topic: 'fees', text: 'A lower fee is one input. What you get for the fee (the approach, the people, the long-term results) is the rest of the story.', use: 'Advisor-facing' },
+  { id: 'MSG-203', topic: 'fees', text: 'Ask for the expense ratio, the share class and the as-of date. All three belong in any fee comparison.', use: 'Social, education' },
+  { id: 'MSG-211', topic: 'active index', text: 'Active and index funds do different jobs. An index fund aims to match its benchmark; an active fund aims to do something different, so it will lead and lag at different times.', use: 'Advisor-facing' },
+  { id: 'MSG-212', topic: 'active index capital system', text: 'The Capital System divides each portfolio among several managers who invest independently, so no single view dominates.', use: 'Advisor-facing, investor' },
+  { id: 'MSG-213', topic: 'active index performance benchmark', text: 'Judge a fund over a full market cycle and against the benchmark it is managed to, not a single period or a different index.', use: 'Advisor-facing' }
+];
+/* SharePoint compliance library: disclosures and rules by channel */
+const DISCLOSURES = {
+  email: { required: ['Past results are not predictive of results in future periods.', 'Expense ratios are as of each fund’s prospectus.', 'Indexes are unmanaged; investors cannot invest directly in an index.', 'For financial professional use only.'], rules: ['Attach approved PDFs where the firm blocks links.', 'No performance figures unless inserted from the system of record at approval (POL-3).'] },
+  social: { required: ['Investing involves risk, including loss of principal.', 'Expense ratios are as of each fund’s current prospectus.', 'Educational content, not investment advice.'],
+    rules: ['Public audience: no advisor, firm or client names (POL-8).', 'Name the share class whenever an expense ratio appears.', 'No performance figures, rankings, ratings or forecasts.', 'Fee claims use approved messaging (MSG- ids); no new claims.', 'Link only to a published, approved page.', 'Disclosures go in the post itself, not in a comment.'] },
+  committee: { required: ['Past results are not predictive of results in future periods.', 'Expense ratios are as of each fund’s prospectus; share class shown.', 'Category medians are Morningstar data as of the date shown.', 'For financial professional and plan sponsor use only.'], rules: ['Show each option’s share class and as-of date.', 'Name the comparison category and data source.'] }
+};
 
 /* Fund facts: the only source of fund numbers. null = not in reference data. */
 const FUNDS = {
@@ -1300,7 +1385,8 @@ const SUBSCRIPTIONS = {
   'memory.pending': ['marketing.voc'],
   'commitment.created': ['sales.follow'],
   'content.drafted': ['marketing.legal', 'marketing.dist'],
-  'approval.requested': ['marketing.dist']
+  'approval.requested': ['marketing.dist'],
+  'content.revised': ['marketing.legal', 'marketing.dist']
 };
 </script>
 <script>/* ===== The shared AI foundation (deterministic) + AI runtime ===== */
@@ -1390,8 +1476,14 @@ const TOOLS = {
     run: a => ({ task_id: 'SF-TASK-' + (700 + F.seq), title: S(a.title), owner: S(a.owner), due: S(a.due) }) },
   'service.get_cases': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Service Cloud: service cases for an advisor.', props: { advisor_id: 'string' },
     run: a => F.cases.filter(c => c.adv === advId(a.advisor_id)) },
-  'service.update_case': { sys: 'sf', via: 'MCP', rw: 'write', desc: 'Service Cloud: add a resolution note or status to a case (or open a new one).', props: { case_id: 'string', note: 'string' },
-    run: a => ({ case_id: S(a.case_id) || 'CASE-00' + (600 + F.seq), note: S(a.note).slice(0, 140), status: 'Updated' }) },
+  'service.update_case': { sys: 'sf', via: 'MCP', rw: 'write', desc: 'Service Cloud: add a resolution note and status (Open, Pending advisor, Resolved) to a case, or open a new one.', props: { case_id: 'string', note: 'string', status: 'string' },
+    run: a => { const id = S(a.case_id) || 'CASE-00' + (600 + F.seq), c = F.cases.find(x => x.id === id), status = S(a.status) || 'Updated';
+      if (c && S(a.status)) c.status = status;
+      return { case_id: id, status, note: S(a.note).slice(0, 600), history: c ? `Added to ${id} history in Service Cloud; owner ${c.owner || 'Advisor service'}` : 'New case opened in Service Cloud' }; } },
+  'contact.get_interactions': { sys: 'gen', via: 'MCP', rw: 'read', desc: 'Genesys Cloud: recent calls and chats from an advisor or their team, with what they said and who handled it.', props: { advisor_id: 'string' },
+    run: a => INTERACTIONS.filter(x => x.adv === advId(a.advisor_id)) },
+  'service.get_insights': { sys: 'gen', via: 'API', rw: 'read', desc: 'Genesys Cloud and Service Cloud, aggregated: what advisors ask Service about a topic (fees, access) this quarter. No advisor identifiers.', props: { topic: 'string' },
+    run: a => { const t = S(a.topic).toLowerCase(), k = /fee|cost|expense|transparen/.test(t) ? 'fees' : /link|access|deliver/.test(t) ? 'access' : null; return k ? Object.assign({ topic: k }, SERVICE_INSIGHTS[k]) : { topic: t, note: 'No aggregated insights for this topic. Known topics: fees, access.' }; } },
   'calendar.find_times': { sys: 'm365', via: 'MCP', rw: 'read', desc: 'Outlook calendar: open slots. attendees = advisor ids or colleague names; when = e.g. "tomorrow", "next week", "next month".', props: { attendees: 'array', when: 'string' },
     run: a => { const at = (Array.isArray(a.attendees) ? a.attendees : [a.attendees || a.advisor_id]).map(S).filter(Boolean), w = S(a.when).toLowerCase();
       const isAlex = at.some(x => advId(x) === 'ADV-101');
@@ -1403,10 +1495,19 @@ const TOOLS = {
       return { event_id: 'EVT-CAL-' + (200 + F.seq), title: S(a.title), time: S(a.time), attendees: at.map(x => ADVISORS[advId(x)] ? ADVISORS[advId(x)].name : x), status: ext ? 'Tentative hold; advisor invite goes out after approval' : 'Invite sent to colleagues' }; } },
   'mail.draft': { sys: 'm365', via: 'MCP', rw: 'write', desc: 'Outlook: save an email draft (never sends). Returns the draft id.', props: { to: 'string', subject: 'string' },
     run: a => ({ draft_id: 'DRAFT-' + (400 + F.seq), to: S(a.to), subject: S(a.subject), status: 'Draft saved; sending needs human approval' }) },
-  'sharepoint.get_disclosures': { sys: 'm365', via: 'API', rw: 'read', desc: 'SharePoint compliance library: required disclosures for a content type.', props: { content_type: 'string' },
-    run: () => ['Past results are not predictive of results in future periods.', 'Expense ratios are as of each fund’s prospectus.', 'Indexes are unmanaged; investors cannot invest directly in an index.', 'For financial professional use only.'] },
+  'sharepoint.get_disclosures': { sys: 'm365', via: 'API', rw: 'read', desc: 'SharePoint compliance library: required disclosures and channel rules for a content type (advisor email, LinkedIn post, committee pack).', props: { content_type: 'string' },
+    run: a => { const t = S(a.content_type).toLowerCase(), k = /linkedin|social|post|public/.test(t) ? 'social' : /committee|plan|retirement/.test(t) ? 'committee' : 'email';
+      return { channel: k, required_disclosures: DISCLOSURES[k].required, channel_rules: DISCLOSURES[k].rules }; } },
   'seismic.search_content': { sys: 'seismic', via: 'MCP', rw: 'read', desc: 'Seismic: search approved content by keywords and audience. Returns ids, titles, audience, format.', props: { query: 'string' },
     run: a => { const q = S(a.query).toLowerCase().split(/\W+/).filter(w => w.length > 2); return CONTENT.map(c => ({ c, s: q.filter(w => (c.tags + ' ' + c.title.toLowerCase()).includes(w)).length })).filter(x => x.s).sort((x, y) => y.s - x.s).slice(0, 4).map(x => ({ id: x.c.id, title: x.c.title, audience: x.c.audience, format: x.c.format, status: x.c.status })); } },
+  'seismic.get_approved_language': { sys: 'seismic', via: 'MCP', rw: 'read', desc: 'Seismic messaging library: approved language on a topic (fees, active vs index, performance), with ids to cite.', props: { topic: 'string' },
+    run: a => { const q = S(a.topic).toLowerCase().split(/\W+/).filter(w => w.length > 2); const hits = APPROVED_LANGUAGE.filter(m => q.some(w => (m.topic + ' ' + m.text.toLowerCase()).includes(w))); return (hits.length ? hits : APPROVED_LANGUAGE).slice(0, 4); } },
+  'seismic.get_delivery_log': { sys: 'seismic', via: 'API', rw: 'read', desc: 'Seismic LiveSend: delivery and link activity for content sent to an advisor (opens, link clicks, expiry, recipient access).', props: { advisor_id: 'string' },
+    run: a => DELIVERIES.filter(x => x.adv === advId(a.advisor_id)) },
+  'mcloud.get_engagement': { sys: 'mcloud', via: 'API', rw: 'read', desc: 'Marketing Cloud: how past content on a topic performed (opens, clicks, engagement) and what resonated.', props: { topic: 'string' },
+    run: a => /fee|cost|expense|transparen/.test(S(a.topic).toLowerCase()) ? { topic: 'fees', results: ENGAGEMENT.fees } : { topic: S(a.topic), results: [], note: 'No campaign history for this topic. Known topics: fees.' } },
+  'aem.get_page': { sys: 'aem', via: 'API', rw: 'read', desc: 'Adobe Experience Manager: published, approved web pages a post or email may link to.', props: { query: 'string' },
+    run: a => { const q = S(a.query).toLowerCase().split(/\W+/).filter(w => w.length > 2); return AEM_PAGES.filter(p => q.some(w => (p.tags + ' ' + p.title.toLowerCase()).includes(w))).map(({ tags, ...p }) => p); } },
   'seismic.export_pdf': { sys: 'seismic', via: 'API', rw: 'read', desc: 'Seismic: export an approved asset as a PDF attachment (same version).', props: { asset_id: 'string' },
     run: a => ({ asset: S(a.asset_id), file: S(a.asset_id) + '.pdf', version: 'unchanged' }) },
   'fund.get_facts': { sys: 'fund', via: 'API', rw: 'read', desc: 'Fund data platform: verified facts for a ticker (GFFFX, AGTHX, VWUAX, VIGAX, AWSHX, ABALX, AMECX). Expense ratios in percent.', props: { ticker: 'string' },
@@ -1418,6 +1519,17 @@ const TOOLS = {
   'models.cost_on_assets': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model platform: annual cost in dollars of each fund’s expense ratio on an amount. Use for any dollar fee figure.', props: { tickers: 'array', amount_usd: 'number' },
     run: a => { const amt = Number(a.amount_usd) || 0, tk = (Array.isArray(a.tickers) ? a.tickers : S(a.tickers).split(/[ ,]+/)).map(x => S(x).toUpperCase()).filter(Boolean);
       return { amount_usd: amt, costs: tk.map(x => tickerOf(x) || x).map(t => FUNDS[t] && FUNDS[t].er != null ? { ticker: t, expense_ratio_pct: FUNDS[t].er, annual_cost_usd: Math.round(amt * FUNDS[t].er / 100) } : { ticker: t, annual_cost_usd: null, note: 'Expense ratio not available' }) }; } },
+  'crm.get_plan': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce: retirement plan records an advisor’s committee oversees: plan, assets, participants, committee, meeting dates and lineup.', props: { advisor_id: 'string' },
+    run: a => Object.entries(PLANS).filter(([, p]) => p.adv === advId(a.advisor_id)).map(([id, p]) => ({ plan_id: id, name: p.name, assets_usd: p.assets_usd, participants: p.participants, committee: p.committee, next_meeting: p.next_meeting, materials_due: p.materials_due, lineup: p.lineup.map(o => ({ option: o.option, fund: o.fund, fund_name: FUNDS[o.fund].name, assets_usd: o.assets_usd })), other: p.other })) },
+  'models.plan_fee_comparison': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model platform: fee comparison for a retirement plan lineup: each option’s expense ratio against its Morningstar category median, in basis points and annual dollars on the option’s assets.', props: { plan_id: 'string' },
+    run: a => { const id = PLANS[S(a.plan_id)] ? S(a.plan_id) : Object.keys(PLANS).find(k => PLANS[k].adv === advId(a.plan_id)); if (!id) throw new Error('Unknown plan. Known: ' + Object.keys(PLANS).join(', '));
+      const P = PLANS[id], r2 = x => Math.round(x * 1000) / 1000;
+      const options = P.lineup.map(o => { const f = FUNDS[o.fund], c = PEERS[o.category];
+        return { option: o.option, fund: o.fund, share_class: f.name.split(', ')[1] || '', assets_usd: o.assets_usd, expense_ratio_pct: f.er, er_as_of: f.asOf, category: o.category, category_median_pct: c.medianEr,
+          difference_bps: Math.round((f.er - c.medianEr) * 100), annual_cost_usd: Math.round(o.assets_usd * f.er / 100), annual_cost_at_median_usd: Math.round(o.assets_usd * c.medianEr / 100) }; });
+      const covered = options.reduce((t, o) => t + o.assets_usd, 0), cost = options.reduce((t, o) => t + o.annual_cost_usd, 0);
+      const same = [...new Set(P.lineup.map(o => o.category))].map(cat => options.filter(o => o.category === cat)).filter(g => g.length > 1).map(g => { const base = Math.max(...g.map(o => o.assets_usd)); return { category: g[0].category, on_assets_usd: base, costs: g.map(o => ({ fund: o.fund, option: o.option, annual_cost_usd: Math.round(base * o.expense_ratio_pct / 100) })) }; });
+      return { plan_id: id, plan: P.name, options, covered_assets_usd: covered, covered_annual_cost_usd: cost, covered_weighted_expense_ratio_pct: r2(cost / covered * 100), same_category_on_equal_assets: same, not_covered: P.other, sources: 'Expense ratios: fund data platform (as of dates shown). Category medians: Morningstar (' + [...new Set(P.lineup.map(o => PEERS[o.category].note))].join('; ') + ').' }; } },
   'models.portfolio_construction': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model platform: blended expense ratio for a mix, e.g. {"VIGAX":70,"GFFFX":30}.', props: { weights: 'object' },
     run: a => { const w = a.weights && typeof a.weights === 'object' ? a.weights : {}; let tot = 0, er = 0; const miss = [];
       for (const [k, v] of Object.entries(w)) { const f = FUNDS[tickerOf(k)]; if (!f || f.er == null) { miss.push(k); continue; } er += f.er * Number(v); tot += Number(v); }
@@ -1459,6 +1571,8 @@ function buildPacket(task, run) {
   if (advId) {
     const A = ADVISORS[advId];
     push('graph', advId, 'Resolved advisor', `${A.name} · ${A.title} · ${FIRMS[A.firm].name} · ${Object.entries(A.units).map(([k, v]) => k + ' ' + v).join('; ')}`, 'Graph', 'advisor');
+    HANDOVERS.filter(h => h.adv === advId).forEach(h => push('graph', h.id, 'Coverage handover', `${EMPLOYEES[h.from].name} → ${EMPLOYEES[h.to].name}, effective ${h.effective}. ${h.note}`, h.src, 'advisor'));
+    Object.entries(PLANS).filter(([, p]) => p.adv === advId && (!unit || p.unit === unit)).forEach(([id, p]) => push('graph', id, 'Retirement plan', `${p.name}: $${p.assets_usd / 1e6}M, ${p.participants} participants. ${p.committee}. Next meeting ${p.next_meeting}; materials due ${p.materials_due}. Options: ${p.lineup.map(o => `${o.option} ${o.fund} ($${o.assets_usd / 1e6}M)`).join('; ')}; ${p.other.label} ($${p.other.assets_usd / 1e6}M).`, 'Salesforce plan record', p.unit));
     if (reads.has('memory')) {
       for (const m of F.memory.filter(m => m.adv === advId && m.status !== 'superseded')) {
         const inScope = m.scope === 'advisor' || m.scope === A.firm || !unit || m.scope === unit;
@@ -1511,17 +1625,21 @@ function traceable(value, corpus) {
 }
 /* Everything a task was given: the only place its numbers may come from */
 const corpusOf = ctx => (JSON.stringify(ctx.packet.items) + JSON.stringify(ctx.toolResults) + JSON.stringify(ctx.upstream)).replace(/,/g, '');
+/* Names that identify an advisor or their firm; public content may not contain them (POL-8) */
+const IDENTIFIERS = [...Object.values(ADVISORS).map(a => a.name.split(',')[0]), ...Object.values(FIRMS).map(f => f.name.replace(/\s*\(.*\)/, '').replace(/ (Wealth Management|Wealth|Advisors|Advisory)$/, ''))];
 /* The output checks, shared by the gatekeeper and by human edits before approval */
 function outputProblems(advisor, kind, body, corpus) {
   const clientFacing = /email|post|content/.test(kind || '');
   const personal = clientFacing && F.memory.filter(m => m.access !== 'shared' && m.adv === advisor).some(m => m.value.split(/\W+/).filter(w => w.length > 6).some(w => body.includes(w)));
-  return { clientFacing, personal, miss: traceable(body, corpus) };
+  const identifiers = /post/.test(kind || '') ? IDENTIFIERS.filter(n => new RegExp('\\b' + n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(body)) : [];
+  return { clientFacing, personal, identifiers, miss: traceable(body, corpus) };
 }
 /* A person edited a draft that is waiting for approval: the same rules run again before it is saved */
 function recheckOutput(o, body, by) {
   const p = outputProblems(o.adv, o.kind, body, o.corpus || '');
   const issues = [];
   if (p.personal) issues.push('Contains a personal note; personal notes never go in client-facing content (POL-4).');
+  if (p.identifiers.length) issues.push(`Public content names an advisor or firm: ${p.identifiers.join(', ')} (POL-8).`);
   if (p.miss.length && p.clientFacing) issues.push(`Numbers not traceable to a system of record: ${p.miss.slice(0, 3).join(', ')} (POL-2).`);
   if (issues.length) return issues;
   o.body = body; o.flagged = p.miss; o.rev = (o.rev || 1) + 1; o.editedBy = EMPLOYEES[by] ? EMPLOYEES[by].name : by;
@@ -1587,8 +1705,9 @@ function gatekeep(task, res, ctx) {
   }
   /* output */
   if (res.output && res.output.body) {
-    const { clientFacing, personal, miss } = outputProblems(run.advisor, res.output.kind, res.output.body, corpus);
+    const { clientFacing, personal, identifiers, miss } = outputProblems(run.advisor, res.output.kind, res.output.body, corpus);
     if (personal) V('output', 'blocked', res.output.title, 'Client-facing draft contains a personal note (POL-4)');
+    else if (identifiers.length) V('output', 'blocked', res.output.title, `Public content names an advisor or firm: ${identifiers.join(', ')} (POL-8)`);
     else if (miss.length && clientFacing) V('output', 'blocked', res.output.title, `Client-facing draft has numbers not traceable to a system of record: ${miss.slice(0, 3).join(', ')}`);
     else {
       const id = 'OUT-' + (++F.seq), needs = !!res.needs_approval || /email|post/.test(res.output.kind || '');
@@ -1727,7 +1846,9 @@ function foundationHeadlines() {
     const mem = F.memory.filter(m => m.adv === id && m.status !== 'superseded' && m.access === 'shared').map(m => `${m.attr}: ${m.value} [${m.scope}; ${m.id}]`).join(' | ');
     const com = F.commitments.filter(c => c.adv === id && c.status === 'Open').map(c => `${c.id} ${c.title}`).join('; ');
     const ep = F.episodes.filter(e => e.adv === id).map(e => `${e.id} (${e.date})`).join(', ');
-    return `${id} ${a.name}, ${a.title}, ${FIRMS[a.firm].name}. Units: ${Object.entries(a.units).map(([k, v]) => k + ' ' + v).join('; ')}. Coverage: ${a.coverage.map(c => EMPLOYEES[c].name).join(', ')}.\n  Memory: ${mem || 'none'}\n  Unknown: ${(UNKNOWNS[id] || []).join('; ') || 'nothing flagged'}\n  Open commitments: ${com || 'none'}\n  Episodes: ${ep}`;
+    const plans = Object.entries(PLANS).filter(([, p]) => p.adv === id).map(([k, p]) => `${k} ${p.name} (${p.unit}; options ${p.lineup.map(o => o.fund).join(', ')}; meets ${p.next_meeting})`).join('; ');
+    const ho = HANDOVERS.filter(h => h.adv === id).map(h => `${h.id} ${EMPLOYEES[h.from].name} → ${EMPLOYEES[h.to].name} as primary, effective ${h.effective}`).join('; ');
+    return `${id} ${a.name}, ${a.title}, ${FIRMS[a.firm].name}. Units: ${Object.entries(a.units).map(([k, v]) => k + ' ' + v).join('; ')}. Coverage: ${a.coverage.map(c => EMPLOYEES[c].name).join(', ')}.${ho ? ' Coverage handover: ' + ho + '.' : ''}${plans ? ' Plans: ' + plans + '.' : ''}\n  Memory: ${mem || 'none'}\n  Unknown: ${(UNKNOWNS[id] || []).join('; ') || 'nothing flagged'}\n  Open commitments: ${com || 'none'}\n  Episodes: ${ep}`;
   }).join('\n');
 }
 function orchestratorPrompt(run) {
@@ -1781,7 +1902,7 @@ Requests can be about one advisor, a territory, a product, or internal work with
 Ask for clarification only if acting would be unsafe or impossible: emit {"k":"clarify","question":"..."} after the entity decision, then {"k":"end"}. Otherwise make a sensible assumption and state it in the "missing" decision.
 ${run.clarified ? `You already asked: "${run.clarified.question}". The user answered: "${run.clarified.answer}". Do NOT ask again. Proceed, interpreting the answer as best you can, and state your assumption.` : ''}
 Be precise: titles of 3 to 6 words, details of at most 16 words, no filler. Reuse foundation records instead of redoing work.
-Tell the story a real team would: choose the specialists who genuinely own each part (usually 3 to 5, across teams when the work crosses teams), and chain them with depends_on so later specialists build on what earlier ones publish to the foundation. Tasks that don't depend on each other run in parallel.
+Tell the story a real team would. ${E.name} is the primary actor: the plan ends with a result delivered to them, and other teams appear as contributors whose work they build on. Choose only the specialists the request needs (often 2 to 4); bring in another team only when it owns part of the work or holds evidence ${E.name.split(' ')[0]} lacks, and say so in "why", including which system it will query and for what. Every task must produce a different kind of output (for example a computation, a verified answer, a draft, a compliance review, a case update, a calendar hold); never add a task that only reformats, summarizes or packages an earlier task's output. Chain tasks with depends_on so later specialists build on what earlier ones publish to the foundation. Tasks that don't depend on each other run in parallel.
 Every ask must be covered by at least one task, and every task must serve one ask ("ask" is its 1-based number). Do not add work the person did not ask for.
 Classify new information about the advisor strictly: an employee's request is not an advisor preference.`;
 }
@@ -1810,10 +1931,13 @@ RULES
 - Memory: propose a lasting preference with "basis":"advisor_statement" only when the advisor's own words in a cited episode (CALL-/EMAIL- id) support it. An employee's ask is "employee_request"; a one-time need is "task_requirement"; a guess is "inference". Propose memory only for genuinely new information.
 - Knowledge: publish only reusable, evidence-backed findings with evidence ids.
 - When you mention other contributors, name their team role (for example Investment analytics, Product specialists, SSC, Wholesalers), not internal agent names.
+- You work for ${E.name}. When you reuse a colleague's earlier notes or work (for example call notes another wholesaler recorded), credit them by name and team and say why it helps ${E.name.split(' ')[0]}.
+- When approved messaging (MSG- ids) is available, use it verbatim or lightly edited and cite the ids in "used"; make no new claims beyond it.${a.team === 'service' ? `
+- Diagnose from evidence: for each likely cause, say what you checked and which record (case, interaction, delivery log id) confirms or rules it out. Write case notes the way an experienced service rep would: plain sentences a colleague can follow, not system shorthand.` : ''}
 - "next_step": the one concrete action ${E.name} should take because of your work (who, what, by when if known), addressed to ${E.name.split(' ')[0]}. Use the same number rules. Leave it empty if there is nothing for them to do.
 
 Reply with only a JSON object:
-{"says":"one first-person sentence, at most 22 words: what you did and which team's work you built on (name teams, not agents)","output":{"kind":"brief|email|finding|answer|plan|content_pick|post|case_update|note","title":"...","body":"under 150 words; '- ' bullets; blank line between paragraphs"},"used":["ids"],"knowledge":[{"label":"...","value":"...","evidence":["ids"]}],"memory":[{"attribute":"...","value":"...","scope":"BU-...|advisor","category":"content_pref|communication_pref|priority|relationship","basis":"advisor_statement|employee_request|task_requirement|inference","evidence":["ids"]}],"commitments":[{"title":"...","owner":"...","due":"..."}],"needs_approval":false,"open_questions":[],"next_step":"..."}
+{"says":"one first-person sentence, at most 22 words: what you did and which team's work you built on (name teams, not agents)","output":{"kind":"brief|email|finding|answer|plan|content_pick|post|case_update|note","title":"...","body":"${a.team === 'service' ? 'under 180 words; short plain paragraphs: what happened, what you checked and found (with record ids), what you did and what happens next' : "under 150 words; '- ' bullets; blank line between paragraphs"}"},"used":["ids"],"knowledge":[{"label":"...","value":"...","evidence":["ids"]}],"memory":[{"attribute":"...","value":"...","scope":"BU-...|advisor","category":"content_pref|communication_pref|priority|relationship","basis":"advisor_statement|employee_request|task_requirement|inference","evidence":["ids"]}],"commitments":[{"title":"...","owner":"...","due":"..."}],"needs_approval":false,"open_questions":[],"next_step":"..."}
 Use empty arrays when nothing applies.`;
 }
 function toolDefs(task, onCall) {
@@ -1866,7 +1990,7 @@ const RECORDED = [
       L({ k: 'decision', type: 'known', title: 'She said she’s moving core to ETFs', detail: 'MEM-041 is her own statement (CALL-0915). MEM-013 says Morgan Stanley blocks links, so send a PDF.', uses: ['MEM-041', 'MEM-042', 'MEM-013', 'CALL-0915', 'TASK-303'] }),
       L({ k: 'decision', type: 'missing', title: 'Interest in our ETFs isn’t stated', detail: 'She never asked about Capital Group ETFs. Lead with her question about where active managers fit.' }),
       L({ k: 'decision', type: 'memory', title: 'Marcus’s ask is not Sofia’s preference', detail: 'Wanting an ETF email tells us about Marketing’s plan, not about Sofia (POL-6). Nothing new to remember.', class: 'read_only' }),
-      L({ k: 'decision', type: 'controls', title: 'Draft only; compliance and approval', detail: 'Legal & Compliance reviews; nothing is sent without Priya’s approval; PDF attachment, not a link.' }),
+      L({ k: 'decision', type: 'controls', title: 'Draft only; compliance and approval', detail: 'Legal & Compliance reviews; nothing is sent without approval; it goes out under Priya’s name as a PDF attachment, not a link.' }),
       L({ k: 'task', id: 'T1', agent: 'marketing.gather', title: 'Pick approved ETF content', objective: 'Find approved Seismic content on ETFs and on where active management fits in core-satellite', depends_on: [], reads: ['knowledge', 'policy'], tools: ['seismic.search_content'], why: 'Only approved content can be used.' }),
       L({ k: 'task', id: 'T2', agent: 'marketing.email', title: 'Draft Sofia’s email', objective: 'Draft a short email to Sofia answering her core-satellite question, attaching the approved pieces', depends_on: ['T1'], reads: ['memory', 'knowledge', 'policy'], tools: ['mail.draft'], why: 'Personalized Email writes advisor emails.' }),
       L({ k: 'task', id: 'T3', agent: 'marketing.legal', title: 'Review Sofia’s email', objective: 'Review the draft’s claims and add the required disclosures', depends_on: ['T2'], reads: ['policy', 'knowledge'], tools: ['sharepoint.get_disclosures'], why: 'Nothing client-facing leaves without review.' }),
@@ -1883,8 +2007,8 @@ const RECORDED = [
           output: { kind: 'email', title: 'Where active managers fit in your core-satellite model', body: 'Hi Sofia,\n\nYou mentioned you’re moving more of your core to ETFs this year and asked what active managers still add. Two short pieces may help:\n\n- Core-satellite: where active management fits (3 pages)\n- Capital Group ETF lineup overview (2 pages)\n\nBoth are attached as PDFs. Happy to walk through them whenever suits you.\n\nPriya' },
           used: ['MEM-041', 'MEM-042', 'MEM-013', 'SEIS-117', 'SEIS-120', 'CALL-0915'], knowledge: [], memory: [{ attribute: 'Interest in Capital Group ETFs', value: 'Interested in Capital Group ETFs', scope: 'BU-104', category: 'priority', basis: 'employee_request', evidence: [] }], commitments: [], needs_approval: true, open_questions: [] } },
       T3: { calls: [['sharepoint.get_disclosures', { content_type: 'advisor email' }]],
-        json: { says: 'No performance or fee figures, no personal notes, approved content only. I added the required disclosure. It still needs Priya’s approval to send.',
-          output: { kind: 'note', title: 'Review: email to Sofia', body: '- Claims: none beyond approved content\n- Numbers: none\n- Personal notes: none\n- Disclosure added: For financial professional use only.\n\nResult: approved for sending once Priya approves.' },
+        json: { says: 'No performance or fee figures, no personal notes, approved content only. I added the required disclosure. It needs approval before it goes out under Priya’s name.',
+          output: { kind: 'note', title: 'Review: email to Sofia', body: '- Claims: none beyond approved content\n- Numbers: none\n- Personal notes: none\n- Disclosure added: For financial professional use only.\n\nResult: ready to send once approved.' },
           used: ['POL-1', 'POL-4', 'SEIS-117', 'SEIS-120'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [] } }
     } }
 ];
@@ -1957,6 +2081,177 @@ RECORDED.push(
           used: ['MEM-061'], knowledge: [], memory: [], commitments: [], needs_approval: true, open_questions: [] } }
     } }
 );
+
+/* Saved runs for the five demo-feedback requests. Authored to the demo script (not captured from a live
+   model) and replayed through the same foundation, tools and gatekeeper, so every number must still trace. */
+const D = (type, title, detail, extra) => L(Object.assign({ k: 'decision', type, title, detail }, extra || {}));
+const TK = o => L(Object.assign({ k: 'task', depends_on: [], ask: 1 }, o));
+RECORDED.push(
+  { name: 'Prepare Maya’s retirement committee fee comparison review', requester: 'EMP-PRIYA', text: 'Prepare Maya’s retirement committee fee comparison review',
+    orch: [
+      D('requester', 'Priya Shah, Sales, covers Maya', 'Wholesaler on Maya Chen’s coverage; she owns the committee relationship and this review.'),
+      D('intent', 'Committee review prep with numbers', 'Maya’s committee meets Nov 12 and wants a documented fee review. Priya needs the comparison and a plan.', { intent: 'meeting_prep' }),
+      D('asks', '1 thing requested', 'Prepare the committee fee comparison review.', { asks: ['Prepare Maya’s committee fee comparison review'] }),
+      D('entity', 'Maya → Maya Chen, retirement committee', '“Retirement committee” selects BU-102R, which oversees PLAN-102.', { advisor: 'ADV-102', unit: 'BU-102R', confidence: 'high' }),
+      D('scope', 'Retirement committee only (BU-102R)', 'The wealth team (BU-102W) is out of scope; nothing from it shapes this review.'),
+      D('known', 'Plan, lineup and committee asks on file', 'PLAN-102 lineup, Maya’s comparison basis and the committee’s concern; K-201 already explains active vs index.', { uses: ['PLAN-102', 'MEM-026', 'MEM-027', 'MEM-028', 'CALL-0919', 'K-201', 'TASK-302'] }),
+      D('missing', 'No fee comparison computed yet', 'Category medians and dollar costs per option come from the model platform, never estimates.'),
+      D('memory', 'Read only: basis already recorded', 'MEM-028 already holds how Maya wants fees compared. Nothing new to store.', { class: 'read_only' }),
+      D('controls', 'Internal prep; committee pack later', 'No send. Numbers only from the platform and Morningstar; committee disclosures apply when it goes out.'),
+      TK({ id: 'T1', agent: 'product.tools', role: 'product.analytics', title: 'Compute the plan fee comparison', objective: 'Compare each PLAN-102 option with its Morningstar category median in basis points and dollars, and cost both growth options on equal assets', reads: ['knowledge'], tools: ['models.plan_fee_comparison'], why: 'Investment analytics owns fee math; the model platform and Morningstar are the only sources for these numbers.' }),
+      TK({ id: 'T2', agent: 'product.qar', role: 'product.specialists', title: 'Answer the committee’s two questions', objective: 'Answer why the active growth option (GFFFX) costs more than the index option (VIGAX), and what its benchmark represents (TASK-302), from verified evidence', depends_on: ['T1'], reads: ['memory', 'knowledge', 'policy'], tools: ['fund.get_facts', 'seismic.search_content'], why: 'Product specialists own verified answers; QAR reuses K-201 and checks the fund data platform and approved attribution in Seismic.' }),
+      TK({ id: 'T3', agent: 'sales.prep', role: 'sales.wholesalers', title: 'Prepare Maya’s committee review brief', objective: 'Build Priya’s review brief: plan, lineup and fees, the committee’s objective and concerns, the answers, and what to send by when', depends_on: ['T1', 'T2'], reads: ['memory', 'knowledge', 'policy'], tools: ['crm.get_plan', 'crm.get_call_notes'], why: 'Prep Me builds Priya’s brief from the Salesforce plan record and Maya’s own words on recorded calls.' }),
+      D('success', 'Priya walks Maya through every option', 'Each option against its category in dollars and basis points, both committee questions answered, a clear send plan.'),
+      L({ k: 'end' })
+    ].join('\n'),
+    agents: {
+      T1: { calls: [['models.plan_fee_comparison', { plan_id: 'PLAN-102' }]],
+        json: { says: 'I ran the plan’s lineup through the model platform against Morningstar category medians, the basis Maya asked for: every option with data sits below its median.',
+          output: { kind: 'finding', title: 'PLAN-102 fee comparison vs category medians', body: 'Irvine Precision Manufacturing 401(k), $62M. Four options have expense data:\n\n- Large-cap growth, active (GFA F-2): 0.40% vs 0.75% median; $74,000 a year vs $138,750 at the median\n- Large-cap growth, index (VIGAX): 0.05% vs 0.75%; $4,500 vs $67,500\n- Balanced (AMBAL F-2): 0.35% vs 0.90%; $49,700 vs $127,800\n- Core bond (BFA F-2): 0.34% vs 0.46%; $23,120 vs $31,280\n\nWeighted cost of these four: 0.312%, $151,320 a year.\n\nThe committee’s question, on equal assets: on $18.5M the index option would cost $9,250 a year against GFA’s $74,000.\n\nNot covered: target-date and stable value ($13.5M), no expense data on file.' },
+          used: ['PLAN-102', 'MEM-028'], knowledge: [{ label: 'PLAN-102 fee comparison against Morningstar category medians', value: 'All four options with expense data cost less than their category medians: GFA F-2 0.40% vs 0.75%, VIGAX 0.05% vs 0.75%, AMBAL F-2 0.35% vs 0.90%, BFA F-2 0.34% vs 0.46%. Weighted 0.312%.', evidence: ['models.plan_fee_comparison', 'PLAN-102'] }], memory: [], commitments: [], needs_approval: false, open_questions: [], next_step: '' } },
+      T2: { calls: [['fund.get_facts', { ticker: 'GFFFX' }], ['fund.get_facts', { ticker: 'VIGAX' }], ['seismic.search_content', { query: 'gfa attribution benchmark capital system' }]],
+        json: { says: 'I reused Product’s earlier finding on why GFA trails the index, checked both funds on the data platform, and used Investment analytics’ dollar figures.',
+          output: { kind: 'answer', title: 'Answers for Maya’s committee', body: '1. Why does the active growth option cost more than the index option?\nThey do different jobs. VIGAX tracks the CRSP US Large Cap Growth index, about 166 stocks. GFA is run by several independent managers (The Capital System), benchmarked to the S&P 500, with up to 25% outside the U.S. That research costs more: 0.40% vs 0.05%, or $74,000 vs $9,250 a year on the same $18.5M. Both sit below the 0.75% category median.\n\n2. What does the benchmark represent? (TASK-302)\nGFA is measured against the S&P 500, a broad large-cap index, not a growth index. Comparing it with a growth index measures style, not skill: when a few mega-cap growth stocks lead, the growth index leads (K-201).\n\nSources: GFFFX and VIGAX on the fund data platform; K-201; SEIS-113; SEIS-114.' },
+          used: ['K-201', 'GFFFX', 'VIGAX', 'SEIS-113', 'SEIS-114', 'TASK-302', 'MEM-027'], knowledge: [{ label: 'Why an active growth fund costs more than a growth index option', value: 'Different jobs: VIGAX tracks a growth index; GFA uses several independent managers, the broader S&P 500 benchmark and some non-U.S. stocks. 0.40% vs 0.05%; both below the 0.75% Large Growth median.', evidence: ['GFFFX', 'VIGAX', 'K-201'] }], memory: [], commitments: [], needs_approval: false, open_questions: [], next_step: '' } },
+      T3: { calls: [['crm.get_plan', { advisor_id: 'ADV-102' }], ['crm.get_call_notes', { advisor_id: 'ADV-102' }]],
+        json: { says: 'I built Priya’s brief from the plan record, Maya’s own words on her Sep 19 call, and the numbers and answers Product verified.',
+          output: { kind: 'brief', title: 'Committee fee review: Maya Chen, PLAN-102', body: 'The plan: Irvine Precision Manufacturing 401(k), $62M, 540 participants. Committee meets Nov 12; materials to members Nov 5, and Maya reviews a draft first (EMAIL-0928).\n\nWhat the committee wants (CALL-0919):\n- A prudent fee review documented in the minutes\n- Each option against its Morningstar category median, in dollars and basis points\n- Why the active growth option costs more than the index option\n\nWhat we can now show (Investment analytics, Product specialists):\n- All four options with data are below their category medians; weighted 0.312%\n- Growth options on the same $18.5M: $74,000 active vs $9,250 index, explained by mandate and benchmark\n- The September benchmark question (TASK-302) is answered\n\nGap: no expense data for target-date and stable value ($13.5M).\n\nFormat: committee pack template (SEIS-116), sent by email (MEM-023).' },
+          used: ['PLAN-102', 'CALL-0919', 'EMAIL-0928', 'MEM-023', 'MEM-026', 'MEM-027', 'MEM-028', 'TASK-302', 'SEIS-116', 'OPP-502'], knowledge: [], memory: [], commitments: [{ title: 'Send Maya the committee fee review draft in the committee pack format', owner: 'Priya Shah', due: 'Nov 2, 2026' }], needs_approval: false, open_questions: ['Which target-date series and stable value fund does the plan use? Needed to complete the comparison.'],
+          next_step: 'Email Maya (her channel for committee prep) with the four-option comparison and both answers, and ask for the target-date and stable value fund names so the review covers the whole menu.' } }
+    } },
+
+  { name: 'Prep me for my call with Alex tomorrow (Sam)', requester: 'EMP-SAM', text: 'Prep me for my call with Alex tomorrow',
+    orch: [
+      D('requester', 'Sam Lee, Sales, taking over Alex', 'Sam becomes Alex Rivera’s primary coverage Oct 1 (HO-101). Priya’s notes carry over; her private coaching stays hers.'),
+      D('intent', 'Handover call prep', 'Sam needs to walk in knowing what Priya already covered and what Alex decides at his Oct 1 committee.', { intent: 'meeting_prep' }),
+      D('asks', '1 thing requested', 'Prep Sam for the call with Alex.', { asks: ['Prep Sam for the call with Alex'] }),
+      D('entity', 'Alex → Alex Rivera, Morgan Stanley', 'One graph match; the growth-model unit holds the open decision and the last call.', { advisor: 'ADV-101', unit: 'BU-101A', confidence: 'high' }),
+      D('scope', 'Growth model unit only (BU-101A)', 'The 401(k) committee unit is out of scope for this call.'),
+      D('known', 'Reuse Priya’s calls and Product’s K-201', 'Priya recorded what Alex asked for (CALL-0922); Product already explained why GFA trailed. No re-research.', { uses: ['HO-101', 'CALL-0922', 'CALL-0814', 'K-201', 'MEM-011', 'MEM-017', 'MEM-014', 'TASK-301'] }),
+      D('missing', 'Dollar costs on $38M not stored', 'Investment analytics computes them on the model platform; nobody estimates.'),
+      D('memory', 'Read only: nothing new about Alex', 'A coverage change is workflow, not an advisor preference (POL-6). Memory is read, not changed.', { class: 'read_only' }),
+      D('controls', 'Internal brief; coaching withheld', 'Priya’s private coaching (MEM-016) is not visible to Sam (POL-5). Every number traced.'),
+      TK({ id: 'T1', agent: 'product.tools', role: 'product.analytics', title: 'Cost Alex’s $38M across three funds', objective: 'Compute annual costs on $38M for GFFFX, VWUAX and VIGAX', reads: ['knowledge'], tools: ['models.cost_on_assets'], why: 'Alex wants fees in dollars (MEM-017); only the model platform may produce them.' }),
+      TK({ id: 'T2', agent: 'sales.schedule', role: 'sales.ssc', title: 'Check Alex’s call slot', objective: 'Check tomorrow against Alex’s meeting pattern and propose a slot through Jamie Cho', reads: ['memory'], tools: ['calendar.find_times'], why: 'SSC owns scheduling; Outlook shows Alex’s Tuesday and Thursday 7:30 a.m. pattern.' }),
+      TK({ id: 'T3', agent: 'sales.prep', role: 'sales.wholesalers', title: 'Prepare Sam’s handover brief for Alex', objective: 'Build Sam’s one-page brief from Priya’s recorded calls, K-201 and T1’s dollar costs', depends_on: ['T1', 'T2'], reads: ['memory', 'knowledge', 'policy'], tools: ['crm.get_call_notes', 'crm.get_opportunities'], why: 'Prep Me builds Sam’s brief from Salesforce calls and opportunities, plus Product’s verified work.' }),
+      D('success', 'Sam takes over; Alex repeats nothing', 'Dollar costs, Priya’s context, the Oct 1 decision and a clear first move for Sam.'),
+      L({ k: 'end' })
+    ].join('\n'),
+    agents: {
+      T1: { calls: [['models.cost_on_assets', { tickers: ['GFFFX', 'VWUAX', 'VIGAX'], amount_usd: 38000000 }]],
+        json: { says: 'I ran Alex’s $38M through the model platform: GFA F-2 costs $152,000 a year, VWUAX $95,000 and VIGAX $19,000.',
+          output: { kind: 'finding', title: 'Costs on Alex’s $38M', body: '- GFA F-2 (GFFFX): 0.40%, $152,000 a year\n- Vanguard U.S. Growth (VWUAX): 0.25%, $95,000\n- Vanguard Growth Index (VIGAX): 0.05%, $19,000' },
+          used: ['GFFFX', 'VWUAX', 'VIGAX', 'MEM-017'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], next_step: '' } },
+      T2: { calls: [['calendar.find_times', { advisor_id: 'ADV-101' }]],
+        json: { says: '“Tomorrow” is Wednesday, outside Alex’s Tuesday and Thursday pattern, so I proposed Thursday at 7:30 a.m. PT through Jamie Cho, before his committee.',
+          output: { kind: 'note', title: 'Call slot for Sam and Alex', body: 'Proposed: Thu Oct 1, 7:30 a.m. PT, Teams, before his committee.\nBackup: Tue Oct 6, 7:30 a.m. PT.\nBook through Jamie Cho (MEM-012).' },
+          used: ['MEM-012'], knowledge: [], memory: [], commitments: [{ title: 'Ask Jamie Cho to book Thursday 7:30 a.m. for Alex and Sam', owner: 'Nina Alvarez', due: 'Sep 30' }], needs_approval: false, open_questions: [], next_step: '' } },
+      T3: { calls: [['crm.get_call_notes', { advisor_id: 'ADV-101' }], ['crm.get_opportunities', { advisor_id: 'ADV-101' }]],
+        json: { says: 'I built Sam’s brief from Priya’s recorded calls, Product’s finding on GFA and Investment analytics’ dollar costs, so Alex doesn’t have to repeat himself.',
+          output: { kind: 'brief', title: 'Handover brief: Alex Rivera, for Sam', body: 'Why you’re calling: you become Alex’s primary coverage Oct 1 (HO-101). Priya stays on through his committee.\n\nWhat Priya already covered (CALL-0922, her call on Sep 22):\n- Alex asked for GFA vs the Vanguard growth funds, options for his growth sleeve, and why GFA has trailed\n- He wants one page, data first, no decks (MEM-011), and fees in dollars (MEM-017)\n\nThe decision: keep or replace GFA in his new growth model; committee Oct 1 (OPP-501, Proposal).\n\nLead with dollars on $38M:\n- GFA F-2 $152,000 a year; VWUAX $95,000; VIGAX $19,000\n\nWhy GFA trailed (K-201): different mandate and benchmark, mega-cap concentration in the index, and cost.\n\nStill owed: quarterly attribution in his one-page format (TASK-301), now yours.\n\nRapport (relationship note): training for the California International Marathon in December.' },
+          used: ['HO-101', 'CALL-0922', 'K-201', 'MEM-011', 'MEM-017', 'MEM-014', 'MEM-015', 'TASK-301', 'OPP-501'], knowledge: [], memory: [], commitments: [{ title: 'Take over the quarterly attribution in Alex’s one-page format (TASK-301) from Priya', owner: 'Sam Lee', due: 'Jan 8, 2027' }], needs_approval: false, open_questions: ['Should Priya join Thursday’s call to make the introduction?'],
+          next_step: 'Confirm Thursday 7:30 a.m. with Jamie Cho today, then open the call as Alex’s new primary coverage and walk him through the one-page dollar comparison before his committee.' } }
+    } },
+
+  { name: 'Why has GFA trailed the Vanguard growth index?', requester: 'EMP-DANA', text: 'Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.',
+    orch: [
+      D('requester', 'Dana Ortiz, Product specialist', 'Owns product answers for the field; no advisor relationship data is needed.'),
+      D('intent', 'Verified explanation for advisors', 'A product question with an advisor-facing deliverable.', { intent: 'research' }),
+      D('asks', '2 things requested', '1. Explain why GFA trailed · 2. Make it usable by advisors', { asks: ['Explain why GFA trailed the growth index', 'Make it usable by advisors'] }),
+      D('entity', 'No advisor; GFFFX and VIGAX', 'GFA resolves to GFFFX (F-2); the Vanguard growth index to VIGAX.', { advisor: null, unit: null, territory: null, confidence: 'high' }),
+      D('scope', 'Product level, reusable by anyone', 'No client data. The answer is published for Sales and Marketing to reuse.'),
+      D('known', 'K-201 and the attribution report exist', 'K-201 explains the gap; SEIS-113 is the approved attribution report. Refresh, don’t redo.', { uses: ['K-201', 'SEIS-113', 'SEIS-114', 'GFFFX', 'VIGAX'] }),
+      D('missing', 'Cost gap in dollars not stored', 'Investment analytics computes it per $1M on the platform. Returns are never generated (POL-3).'),
+      D('memory', 'None: no advisor involved', 'Nothing about an advisor is read or stored.', { class: 'none' }),
+      D('controls', 'Approved language for the advisor version', 'Advisor-ready text uses approved messaging (MSG- ids); performance inserted only at approval.'),
+      TK({ id: 'T1', agent: 'product.tools', role: 'product.analytics', title: 'Quantify cost and peer context', objective: 'Compute the cost gap between GFFFX and VIGAX per $1M and pull the Large Growth category median', reads: ['knowledge'], tools: ['models.cost_on_assets', 'mstar.get_peers'], why: 'Investment analytics runs fee math on the model platform and peer data from Morningstar.' }),
+      TK({ id: 'T2', agent: 'product.qar', role: 'product.specialists', title: 'Verify why GFA trailed', objective: 'Refresh K-201 into a verified explanation of mandate, concentration and cost, citing GFFFX, VIGAX and SEIS-113', depends_on: ['T1'], reads: ['knowledge', 'policy'], tools: ['fund.get_facts', 'seismic.search_content', 'fund.get_performance'], why: 'QAR publishes verified findings; it checks the fund data platform and the approved attribution report in Seismic.' }),
+      TK({ id: 'T3', agent: 'product.tone', role: 'product.specialists', ask: 2, title: 'Write advisor-ready talking points', objective: 'Turn the verified explanation into talking points advisors can use, in approved messaging', depends_on: ['T2'], reads: ['knowledge', 'policy'], tools: ['seismic.get_approved_language'], why: 'Tone/Style Alignment owns advisor-facing language; it pulls approved messaging from Seismic so nothing new is claimed.' }),
+      D('success', 'Advisors can explain it in a minute', 'A verified internal finding, then talking points in approved language, each with sources.'),
+      L({ k: 'end' })
+    ].join('\n'),
+    agents: {
+      T1: { calls: [['models.cost_on_assets', { tickers: ['GFFFX', 'VIGAX'], amount_usd: 1000000 }], ['mstar.get_peers', { category: 'Large Growth' }]],
+        json: { says: 'Per $1 million, GFA F-2 costs $4,000 a year and VIGAX $500; the Morningstar Large Growth median is 0.75%, so both sit below it.',
+          output: { kind: 'finding', title: 'Cost and peer context: GFA vs VIGAX', body: '- GFA F-2 (GFFFX): 0.40%, $4,000 a year per $1M\n- Vanguard Growth Index (VIGAX): 0.05%, $500 per $1M\n- Large Growth median: 0.75% (Morningstar)\n\nCost explains 0.35 points a year of any gap, before mandate differences.' },
+          used: ['GFFFX', 'VIGAX', 'K-201'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], next_step: '' } },
+      T2: { calls: [['fund.get_facts', { ticker: 'GFFFX' }], ['fund.get_facts', { ticker: 'VIGAX' }], ['seismic.search_content', { query: 'gfa attribution why trailed' }], ['fund.get_performance', { ticker: 'GFFFX' }]],
+        json: { says: 'I refreshed Product’s K-201 against the data platform and the approved attribution report, and folded in Investment analytics’ cost figures.',
+          output: { kind: 'finding', title: 'Why GFA has trailed the Vanguard growth index (verified)', body: '- Different job: GFA is benchmarked to the S&P 500 and invests flexibly across 282 issuers, with up to 25% outside the U.S. (10.8% non-U.S. equities). VIGAX tracks the CRSP US Large Cap Growth index.\n- Concentration: the index holds about 166 stocks, with the top three roughly a third of assets. When a few mega-cap growth stocks lead, it leads.\n- Cost: 0.40% vs 0.05%, $4,000 vs $500 a year per $1M.\n\nNot a skill verdict: judge GFA against the S&P 500 it is managed to.\n\nPerformance: standardized returns are inserted from the fund data platform at approval; SEIS-113 has the quarter’s attribution.' },
+          used: ['K-201', 'GFFFX', 'VIGAX', 'SEIS-113'], knowledge: [{ label: 'Why GFA has trailed the Vanguard growth index (refreshed)', value: 'Different mandates: GFA is benchmarked to the S&P 500 across 282 issuers with up to 25% outside the U.S.; the growth index holds about 166 stocks with roughly a third in three, so it leads when mega-caps lead; GFA F-2 costs 0.40% vs 0.05% for VIGAX.', evidence: ['GFFFX', 'VIGAX', 'SEIS-113', 'K-201'] }], memory: [], commitments: [], needs_approval: false, open_questions: [], next_step: '' } },
+      T3: { calls: [['seismic.get_approved_language', { topic: 'active index performance benchmark' }]],
+        json: { says: 'I turned Product specialists’ verified finding into talking points built on approved messaging, so advisors can use them without new claims.',
+          output: { kind: 'answer', title: 'Talking points: why GFA has trailed the growth index', body: 'For advisors, in approved language:\n\n- “Active and index funds do different jobs. An index fund aims to match its benchmark; an active fund aims to do something different, so it will lead and lag at different times.” (MSG-211)\n- GFA is managed to the S&P 500, not a growth index. When a handful of mega-cap growth stocks drive the market, a growth index with about a third of its assets in three stocks will lead.\n- “The Capital System divides each portfolio among several managers who invest independently, so no single view dominates.” (MSG-212)\n- “Judge a fund over a full market cycle and against the benchmark it is managed to, not a single period or a different index.” (MSG-213)\n- Cost is part of it: 0.40% for GFA F-2 vs 0.05% for VIGAX.\n\nUse with SEIS-113 (attribution) and SEIS-114 (Capital System explainer). Returns are added from the data platform at approval.' },
+          used: ['MSG-211', 'MSG-212', 'MSG-213', 'K-201', 'SEIS-113', 'SEIS-114'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [],
+          next_step: 'Share the talking points with the Wholesalers alongside SEIS-113 and SEIS-114, so every advisor conversation uses the same verified explanation.' } }
+    } },
+
+  { name: 'Write a LinkedIn post on fee transparency for advisors', requester: 'EMP-MARCUS', text: 'Write a LinkedIn post on fee transparency for advisors',
+    orch: [
+      D('requester', 'Marcus Bell, Marketing', 'Advisor marketing lead; may draft public posts. No advisor or client data is needed.'),
+      D('intent', 'One public LinkedIn post', 'Educational post for financial professionals, published from the company page.', { intent: 'content' }),
+      D('asks', '1 thing requested', 'Write the LinkedIn post.', { asks: ['Write a LinkedIn post on fee transparency'] }),
+      D('entity', 'No advisor: public content', 'Audience is financial professionals on LinkedIn. No advisor, firm or client may be named (POL-8).', { advisor: null, unit: null, territory: null, confidence: 'high' }),
+      D('scope', 'Public and product level only', 'Nothing from advisor memory, notes or cases goes into a public post.'),
+      D('known', 'Approved template and messaging exist', 'SEIS-118 is the approved LinkedIn template; Seismic holds approved fee messaging.', { uses: ['SEIS-118', 'SEIS-115', 'POL-8'] }),
+      D('missing', 'What advisors actually ask about fees', 'Service sees the real questions; Marketing Cloud knows which fee content landed. Pull both before drafting.'),
+      D('memory', 'None: no advisor involved', 'Nothing about an advisor is read or stored.', { class: 'none' }),
+      D('controls', 'Draft, compliance review, approval', 'Approved messaging only, social disclosures in the post, nothing published without Marcus’s approval.'),
+      TK({ id: 'T1', agent: 'marketing.gather', role: 'marketing.content', title: 'Gather approved fee inputs', objective: 'Pull the approved LinkedIn template, approved fee messaging, the page to link to, and how past fee content performed', reads: ['knowledge', 'policy'], tools: ['seismic.search_content', 'seismic.get_approved_language', 'aem.get_page', 'mcloud.get_engagement'], why: 'Resource Gatherer finds approved content in Seismic, the published page in Adobe Experience Manager and past results in Marketing Cloud.' }),
+      TK({ id: 'T2', agent: 'marketing.voc', role: 'marketing.content', title: 'Find advisors’ real fee questions', objective: 'Pull what advisors asked Service about fees this quarter, without identifiers', reads: ['policy'], tools: ['service.get_insights'], why: 'Voice of Client brings in Service’s Genesys and case data, so the post answers real questions.' }),
+      TK({ id: 'T3', agent: 'marketing.linkedin', role: 'marketing.content', title: 'Draft the LinkedIn post', objective: 'Draft one post that answers advisors’ top fee question in approved language and links to the approved page', depends_on: ['T1', 'T2'], reads: ['knowledge', 'policy'], tools: [], why: 'LinkedIn Post drafts public posts with no identifiers.' }),
+      TK({ id: 'T4', agent: 'marketing.legal', role: 'marketing.compliance', title: 'Review the post for social rules', objective: 'Check claims against approved messaging and apply the social disclosures and channel rules', depends_on: ['T3'], reads: ['policy'], tools: ['sharepoint.get_disclosures'], why: 'Legal & Compliance pulls the social-channel rules from the SharePoint compliance library.' }),
+      D('success', 'A post advisors would share', 'Answers the question advisors actually ask, in approved language, compliant and waiting for approval.'),
+      L({ k: 'end' })
+    ].join('\n'),
+    agents: {
+      T1: { calls: [['seismic.search_content', { query: 'linkedin fees transparency' }], ['seismic.get_approved_language', { topic: 'fees' }], ['aem.get_page', { query: 'fees expenses' }], ['mcloud.get_engagement', { topic: 'fees' }]],
+        json: { says: 'I pulled the approved template and fee messaging from Seismic, the published fees page from Adobe Experience Manager, and Marketing Cloud results: dollar framing wins.',
+          output: { kind: 'content_pick', title: 'Approved inputs for the fee post', body: '- Template: SEIS-118, LinkedIn post template for fee education\n- Approved messaging: MSG-201 (costs in dollars and percentages), MSG-203 (expense ratio, share class, as-of date), MSG-202 (what you get for the fee)\n- Link: AEM-FEES “Understanding fund expenses”, published, reviewed Aug 2026\n- What landed before (Marketing Cloud): fee posts that showed the cost in dollars engaged at 3.8% against a 1.6% average' },
+          used: ['SEIS-118', 'MSG-201', 'MSG-202', 'MSG-203', 'AEM-FEES'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], next_step: '' } },
+      T2: { calls: [['service.get_insights', { topic: 'fees' }]],
+        json: { says: 'I pulled what advisors asked Service about fees this quarter from Genesys and Service Cloud: how to explain fees, not whether they are too high.',
+          output: { kind: 'finding', title: 'What advisors ask Service about fees (Q3)', body: '- Fee contacts: 46 this quarter, up from 27\n- Top question: how to show a client what a fee costs in dollars, not just percent\n- Also: why a statement’s expense ratio differs from the fact sheet (share class), and F-2 vs Class A costs\n\nTakeaway: advisors want help explaining fees, not reassurance that fees are low.' },
+          used: [], knowledge: [{ label: 'Advisors’ top fee questions this quarter', value: 'Fee contacts rose to 46 from 27. Advisors most often ask how to show a client what a fee costs in dollars, and why statement expense ratios differ by share class.', evidence: ['service.get_insights'] }], memory: [], commitments: [], needs_approval: false, open_questions: [], next_step: '' } },
+      T3: { calls: [],
+        json: { says: 'I answered the fee question advisors ask Service most, using approved messaging and the dollar framing that has performed best.',
+          output: { kind: 'post', title: 'LinkedIn: what a fee costs, in dollars', body: 'Your clients rarely ask “Is this expense ratio high?” They ask “What does it cost me?”\n\nCosts matter. We show what each share class costs, in dollars as well as percentages, so there are no surprises.\n\nThree things belong in any fee conversation:\n- The expense ratio\n- The share class\n- The as-of date\n\nA lower fee is one input. What you get for the fee (the approach, the people, the long-term results) is the rest of the story.\n\nHow to read fund expenses, in plain terms: Understanding fund expenses [link]' },
+          used: ['MSG-201', 'MSG-202', 'MSG-203', 'SEIS-118', 'AEM-FEES'], knowledge: [], memory: [], commitments: [], needs_approval: true, open_questions: [], next_step: '' } },
+      T4: { calls: [['sharepoint.get_disclosures', { content_type: 'LinkedIn post' }]],
+        json: { says: 'Claims match approved messaging and nothing identifies an advisor; the post still needs the three social disclosures before Marcus approves it.',
+          output: { kind: 'note', title: 'Compliance review: fee transparency post', body: 'Checked against the social-channel rules (SharePoint compliance library):\n- Claims: all from approved messaging (MSG-201, MSG-202, MSG-203). Pass\n- Names: no advisor, firm or client (POL-8). Pass\n- Performance, rankings or forecasts: none. Pass\n- Link: AEM-FEES is published and approved. Pass\n- Disclosures: missing. Add them to the post itself, not a comment:\n“Investing involves risk, including loss of principal. Expense ratios are as of each fund’s current prospectus. Educational content, not investment advice.”\n\nResult: approve once the disclosures are in.' },
+          used: ['POL-8', 'MSG-201', 'MSG-202', 'MSG-203', 'AEM-FEES'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [],
+          next_step: 'Click Edit on the post, add the three disclosures at the end, re-check and approve.' } }
+    } },
+
+  { name: 'Alex says the link in Priya’s email won’t open', requester: 'EMP-KIM', text: 'Alex says the link in Priya’s email won’t open',
+    orch: [
+      D('requester', 'Kim Nguyen, Advisor service', 'Owns access and delivery cases; sees cases, contacts and delivery logs, not relationship notes.'),
+      D('intent', 'Access problem on a sent email', 'Alex can’t open content Priya sent. Diagnose and fix before his Thursday committee.', { intent: 'service' }),
+      D('asks', '1 thing requested', 'Fix the link Alex can’t open.', { asks: ['Fix the link Alex can’t open'] }),
+      D('entity', 'Alex → Alex Rivera; Priya is a colleague', 'Alex Rivera at Morgan Stanley. Priya Shah is the Capital Group sender, not an advisor.', { advisor: 'ADV-101', unit: null, confidence: 'high' }),
+      D('scope', 'Alex’s account and Priya’s Sep 28 send', 'Case CASE-00517, Jamie’s call INT-7731 and the LiveSend link LS-0928.'),
+      D('known', 'An open case and a precedent', 'CASE-00517 is open from Jamie’s call; CASE-00481 resolved the same symptom in July.', { uses: ['CASE-00517', 'CASE-00481', 'INT-7731', 'MEM-013'] }),
+      D('missing', 'Root cause not confirmed yet', 'Check the delivery log before assuming: expired link, recipient access, or the firm’s gateway.'),
+      D('memory', 'Read only: the rule is already known', 'MEM-013 already records that Morgan Stanley blocks external links. Nothing new to store.', { class: 'read_only' }),
+      D('controls', 'Same approved version, no new content', 'Resend the identical approved asset as a PDF; Kim sends it from the case.'),
+      TK({ id: 'T1', agent: 'service.classify', role: 'service.advisor', title: 'Classify and pull the contact', objective: 'Classify the inquiry from Jamie’s call and match it to the open case', reads: ['memory', 'policy'], tools: ['contact.get_interactions', 'service.get_cases'], why: 'Inquiry Classifier reads the call in Genesys Cloud and the cases in Service Cloud.' }),
+      TK({ id: 'T2', agent: 'service.resolve', role: 'service.advisor', title: 'Diagnose and resolve the link', objective: 'Confirm the root cause from the LiveSend delivery log, rule out the other causes, export the same approved one-pager as a PDF and update CASE-00517', depends_on: ['T1'], reads: ['memory', 'policy'], tools: ['seismic.get_delivery_log', 'seismic.export_pdf', 'service.update_case'], why: 'Resolve Me owns access fixes; the Seismic delivery log shows what happened to every click.' }),
+      D('success', 'Alex has the one-pager before Thursday', 'Root cause shown with evidence, the same approved PDF ready, the case updated and Priya informed.'),
+      L({ k: 'end' })
+    ].join('\n'),
+    agents: {
+      T1: { calls: [['contact.get_interactions', { advisor_id: 'ADV-101' }], ['service.get_cases', { advisor_id: 'ADV-101' }]],
+        json: { says: 'I matched Jamie Cho’s call this morning to open case CASE-00517 and classified it as access and delivery; it looks like July’s CASE-00481.',
+          output: { kind: 'note', title: 'Classification: access and delivery', body: 'Jamie Cho called the service line this morning (INT-7731). Alex tried the link in Priya’s Sep 28 email three times from the office and saw “This site is blocked by your organization’s security policy.” It opened on his personal phone.\n\nThat matches open case CASE-00517. Category: access and delivery. Priority: high, because his committee meets Thursday.\n\nWe resolved the same symptom in July (CASE-00481): the firm’s web gateway blocks external file-sharing links.' },
+          used: ['INT-7731', 'CASE-00517', 'CASE-00481', 'MEM-013'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], next_step: '' } },
+      T2: { calls: [['seismic.get_delivery_log', { advisor_id: 'ADV-101' }], ['seismic.export_pdf', { asset_id: 'SEIS-110' }], ['service.update_case', { case_id: 'CASE-00517', status: 'Pending advisor', note: 'Root cause: the Morgan Stanley web gateway blocks external file-sharing links; every office click on LS-0928 stopped there. Link active and recipients permitted. Same approved SEIS-110 exported as a PDF for Jamie Cho.' }]],
+        json: { says: 'The delivery log shows the firm’s gateway stopping every office click, so I exported the same approved one-pager as a PDF and updated the case.',
+          output: { kind: 'case_update', title: 'CASE-00517: link blocked by the firm’s web gateway', body: 'Jamie Cho called this morning for Alex: the link in Priya’s Sep 28 email to the fund comparison one-pager won’t open from his office.\n\nI checked the three usual causes in the Seismic delivery log (LS-0928). The link hasn’t expired; it stays active until Oct 28. Alex and Jamie are both on the recipient list, so it isn’t permissions. Every click from the Morgan Stanley network was stopped at the firm’s web gateway as file sharing, while the open from his phone worked. That’s the cause we resolved in July (CASE-00481), and it matches the firm rule on file (MEM-013).\n\nI exported the same approved one-pager as a PDF (SEIS-110, unchanged) and moved the case to Pending advisor. Next, the PDF goes to Jamie as an attachment; I’ll close the case once Alex confirms it opens.' },
+          used: ['LS-0928', 'CASE-00517', 'CASE-00481', 'MEM-013', 'SEIS-110', 'INT-7731'], knowledge: [], memory: [], commitments: [{ title: 'Send Jamie Cho the SEIS-110 PDF and confirm it opens for Alex', owner: 'Kim Nguyen', due: 'Sep 29' }], needs_approval: false, open_questions: [],
+          next_step: 'Send the PDF to Jamie Cho from CASE-00517 today, and tell Priya that future sends to Morgan Stanley should go as attachments, not links.' } }
+    } }
+);
 </script>
 <script>/* ===== Advisor knowledge graph ===== */
 const KG_CLUSTERS = {
@@ -1992,7 +2287,9 @@ function kgBuild(advId) {
   add('firm', 'office-' + advId, A.office, 'Office', st('office'), [`Territory: ${TERRITORIES[A.territory] ? TERRITORIES[A.territory].name : '—'}`]);
   add('firm', 'team-' + advId, A.team.split('(')[0].trim(), 'Team', st('team'), [A.team, A.practice]);
   for (const [u, l] of Object.entries(A.units)) add('units', u, l, u + (F.session.unit === u && F.session.advisor === advId ? ' · active' : ''), st(u), [`Buying unit ${u}. Preferences stated for this unit apply only here.`]);
-  A.coverage.forEach(c => add('people', c, EMPLOYEES[c].name, EMPLOYEES[c].role, st(c), [`${EMPLOYEES[c].name} covers ${A.short}.`]));
+  for (const [id, p] of Object.entries(PLANS).filter(([, p]) => p.adv === advId)) add('units', id, p.name, `Plan · ${p.unit} · meets ${p.next_meeting}`, st(id), [`$${p.assets_usd / 1e6}M, ${p.participants} participants. ${p.committee}.`, `Options: ${p.lineup.map(o => `${o.option} (${o.fund})`).join('; ')}`]);
+  const ho = HANDOVERS.find(h => h.adv === advId);
+  A.coverage.forEach(c => add('people', c, EMPLOYEES[c].name, ho && ho.to === c ? `Primary from ${ho.effective}` : ho && ho.from === c ? `Handing over ${ho.effective}` : EMPLOYEES[c].role, st(c), [`${EMPLOYEES[c].name} covers ${A.short}.`, ho && (ho.to === c || ho.from === c) ? `${ho.note} (${ho.src})` : null]));
   for (const m of F.memory.filter(m => m.adv === advId)) {
     const cl = m.cat === 'personal' || m.cat === 'coaching' ? 'interests' : m.cat === 'priority' || m.cat === 'relationship' ? 'priorities' : 'prefs';
     if (!vis(m)) { add(cl, m.id, 'Hidden note', m.access === 'relationship' ? 'Relationship team only' : 'Private to its owner', 'locked', [`${EMPLOYEES[viewer].name} can’t see this record. Access rules apply to the graph too.`]); continue; }
@@ -2160,9 +2457,14 @@ function buildStatic() {
 const pillEl = id => $('pl-' + String(id).replace('.', '-'));
 const taskEl = id => $('tc-' + id);
 const opEl = o => (o.task && taskEl(o.task)) || (o.agent && roleOf(o.agent) && $('role-' + roleOf(o.agent).replace('.', '-')));
+function savedRun(text) { /* a run saved in this session wins over the built-in one */
+  const u = UI.recordings.findIndex(r => r.text === text && r.requester === UI.requester); if (u >= 0) return 'u' + u;
+  const b = RECORDED.findIndex(r => r.text === text && r.requester === UI.requester); return b >= 0 ? 'b' + b : null;
+}
 function renderSugs() {
   const t = EMPLOYEES[UI.requester].team;
-  $('sugs').innerHTML = SUGGESTIONS[t].map(s => `<button class="sug" data-sug="${esc(s)}">${esc(s)}</button>`).join('');
+  const own = UI.recordings.filter(r => r.requester === UI.requester && !SUGGESTIONS[t].includes(r.text)).map(r => r.text);
+  $('sugs').innerHTML = [...SUGGESTIONS[t], ...own].map(s => { const rep = savedRun(s); return `<span class="sugw"><button class="sug" data-sug="${esc(s)}">${esc(s)}</button>${rep ? `<button class="sugrep" data-replay="${rep}" title="Play a saved run of this request: same foundation, tools and gatekeeper, no AI call" aria-label="Play saved run: ${esc(s)}">▶</button>` : ''}</span>`; }).join('');
 }
 
 /* ---------- keyed patching: only what changed is touched ---------- */
@@ -2366,10 +2668,14 @@ async function runRequestInner(text, replay, opts = {}) {
     if (replay) {
       for (const line of replay.orch.split('\n')) { if (UI.ctl.signal.aborted) throw { code: 'cancelled' }; await sleep(JSON.parse(line).k === 'task' ? 450 : 650); run.orchText += line + '\n'; onObj(JSON.parse(line)); renderAll(); }
     } else {
-      const feed = streamParser(o => { onObj(o); renderAll(); });
+      /* decisions stream in faster than anyone can read; release them at a readable pace */
+      const queue = []; let pumping = null;
+      const pump = async () => { while (queue.length) { const o = queue.shift(); onObj(o); renderAll(); if (o.k !== 'end') await sleep(o.k === 'task' ? 450 : 750); } pumping = null; };
+      const feed = streamParser(o => { queue.push(o); if (!pumping) pumping = pump(); });
       run.stats.ai++;
       const { text: full } = await AI.sample(orchestratorPrompt(run), { modelTier: 'default', cache: false, signal: UI.ctl.signal, onText: ({ text: t }) => { run.orchText = t; feed(t); updateStream(); } });
       run.orchText = full; feed(full);
+      while (pumping) await pumping;
       if (!run.tasks.length && !run.clarify) {
         run.decisions.push({ type: 'planfix', src: 'code', title: 'Plan unreadable; asking again in strict JSON', detail: 'The first reply had no usable tasks, so orchestration is asked once more for one JSON object.' }); renderAll();
         run.stats.ai++;
@@ -2462,7 +2768,7 @@ function handleOrch(run, o) {
       const txt = t.title + ' ' + t.objective, rule = ROLE_RULES.find(x => x.test.test(txt));
       if (rule && t.role !== rule.role) { const from = ROLES[t.role] ? ROLES[t.role].name : '—'; t.role = rule.role; t.agent = rule.agent(txt); run.decisions.push({ type: 'registry', src: 'code', title: `“${t.title}” → ${ROLES[rule.role].name}`, detail: `${rule.why}. Moved from ${from}.` }); }
     }
-    t.person = ROLES[t.role] ? (t.role === 'sales.wholesalers' && run.advisor && EMPLOYEES[run.requester].team === 'sales' && ADVISORS[run.advisor].coverage.includes(run.requester) && run.requester !== 'EMP-SAM' ? EMPLOYEES[run.requester].name : ROLES[t.role].person) : '';
+    t.person = ROLES[t.role] ? (t.role === 'sales.wholesalers' && run.advisor && EMPLOYEES[run.requester].team === 'sales' && ADVISORS[run.advisor].coverage.includes(run.requester) ? EMPLOYEES[run.requester].name : ROLES[t.role].person) : '';
     if (!AGENTS[t.agent]) { run.decisions.push({ type: 'registry', src: 'code', title: `Unknown agent “${t.agent}” dropped`, detail: 'Orchestration can only route to registered specialists.' }); return; }
     const bad = t.tools.filter(x => !toolAllowed(t.agent, x));
     if (bad.length) { t.tools = t.tools.filter(x => toolAllowed(t.agent, x)); run.decisions.push({ type: 'registry', src: 'code', title: `${AGENTS[t.agent].name}: ${bad.length} tool${bad.length > 1 ? 's' : ''} removed`, detail: `${bad.join(', ')} ${bad.length > 1 ? 'are' : 'is'} not on this agent’s allow-list at the gateway.` }); UI.totals.blocked++; }
@@ -2573,7 +2879,8 @@ async function runTask(run, t) {
 function defaultArgs(n, run, t) {
   const tick = mentionsFunds(run.text + ' ' + t.objective), people = (run.resolution.people || []).map(p => p.name);
   const when = /next month/i.test(run.text) ? 'next month' : /next week/i.test(run.text) ? 'next week' : /tomorrow/i.test(run.text) ? 'tomorrow' : 'soon';
-  return { advisor_id: run.advisor || '', ticker: tick[0] || 'GFFFX', tickers: tick.length ? tick : ['GFFFX'], name: tick[0] || '', amount_usd: 1000000, query: t.objective, weights: tick.length > 1 ? { [tick[0]]: 50, [tick[1]]: 50 } : { VIGAX: 70, GFFFX: 30 }, category: tick[0] || 'Large Growth', territory: run.territory || 'LA', content_type: 'advisor email', to: run.advisor ? ADVISORS[run.advisor].name : people[0] || '', subject: t.objective.slice(0, 60), attendees: [run.advisor, ...people].filter(Boolean), when, title: t.objective.slice(0, 60), time: '' };
+  const plan = Object.keys(PLANS).find(k => PLANS[k].adv === run.advisor) || '';
+  return { plan_id: plan, topic: /fee|cost|expense/i.test(run.text) ? 'fees' : /link|access|open/i.test(run.text) ? 'access' : t.objective, case_id: (F.cases.find(c => c.adv === run.advisor && c.status === 'Open') || {}).id || '', note: '', status: '', advisor_id: run.advisor || '', ticker: tick[0] || 'GFFFX', tickers: tick.length ? tick : ['GFFFX'], name: tick[0] || '', amount_usd: 1000000, query: t.objective, weights: tick.length > 1 ? { [tick[0]]: 50, [tick[1]]: 50 } : { VIGAX: 70, GFFFX: 30 }, category: tick[0] || 'Large Growth', territory: run.territory || 'LA', content_type: /linkedin|post/i.test(run.text) ? 'linkedin post' : /committee/i.test(run.text) ? 'committee pack' : 'advisor email', to: run.advisor ? ADVISORS[run.advisor].name : people[0] || '', subject: t.objective.slice(0, 60), attendees: [run.advisor, ...people].filter(Boolean), when, title: t.objective.slice(0, 60), time: '' };
 }
 function errText(e) {
   const map = { not_granted: 'Claude access wasn’t allowed in this view', rate_limited: 'too many requests right now; wait a moment and try again', invalid_json: 'the reply wasn’t valid JSON', empty_completion: 'Claude returned nothing', tools_unavailable: 'tool use isn’t available here', prompt_too_large: 'the request was too large', upstream_error: 'a temporary connection problem', refused: 'Claude declined this request', session_expired: 'your session expired; sign in again', auth_failed: 'the server’s AI key was rejected; check OPENAI_API_KEY', cancelled: 'stopped' };
@@ -2723,6 +3030,14 @@ function nextHTML(r) {
   const who = EMPLOYEES[r.requester].name.split(' ')[0], acts = nextActions(r), goal = r.decisions.find(d => d.type === 'success');
   return `<div class="dt">WHAT ${esc(who.toUpperCase())} SHOULD DO NEXT</div>${goal ? `<p class="nxgoal">${esc(goal.title)}${goal.detail ? `<small>${esc(goal.detail)}</small>` : ''}</p>` : ''}${acts.length ? acts.map(a => `<div class="nx"><span class="nxt ${a.tag.replace(' ', '').toLowerCase()}">${esc(a.tag)}</span><span>${esc(a.text)}<small>From step ${a.step}</small></span></div>`).join('') : '<p class="hint">Nothing further for you to do: everything was produced and stored.</p>'}`;
 }
+/* ---------- keep a good live run as a replay (and download it for src/replay.js) ---------- */
+function saveRun(r) {
+  if (!r || r.status !== 'done' || r.replay) return;
+  const rec = { name: r.text.slice(0, 60), requester: r.requester, text: r.text, orch: r.record.orch, agents: r.record.agents };
+  UI.recordings = UI.recordings.filter(x => !(x.text === rec.text && x.requester === rec.requester)).concat([rec]);
+  try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['RECORDED.push(' + JSON.stringify(rec, null, 1) + ');\n'], { type: 'text/javascript' })); a.download = 'replay-' + r.text.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40) + '.js'; a.click(); URL.revokeObjectURL(a.href); } catch (e) { }
+  renderSugs(); toast('Saved. Use ▶ next to the suggestion to play it again; add the downloaded file’s contents to src/replay.js to keep it.');
+}
 /* ---------- edit a draft before approval; the gatekeeper re-checks it ---------- */
 function openEdit(id) {
   const o = F.outputs.find(x => x.id === id); if (!o) return;
@@ -2760,7 +3075,7 @@ function renderUpdates() {
   }
   if (r.status === 'done') items.push({ key: 'final-' + r.id, cls: 'dcard finalcard', html: `<div class="dt">WHAT WAS PRODUCED FOR YOUR REQUEST</div>${r.tasks.map(t => { const o = outOf(t), R = ROLES[t.role]; return `<button class="steprow" data-task="${t.id}"><span class="stepn" style="background:${TC[R.team]}">${t.step}</span><span class="stepb"><b>${esc(o ? o.title : t.title)}</b><small>${esc(R.name)} · ${esc(o ? o.status : t.state === 'failed' ? 'Did not finish' : 'No document; see details')}</small></span><em class="openlink">Open</em></button>`; }).join('')}` });
   if (r.status === 'done') items.push({ key: 'sum-' + r.id, cls: 'summary', html: `<h3>All ${r.tasks.length} tasks done · ${Math.round((r.t1 - r.t0) / 1000)} s</h3><div class="sgrid"><div><b>${r.stats.reused}</b>facts reused</div><div><b>${r.stats.committed}</b>stored</div><div><b>${r.stats.calls}</b>system calls</div></div>` });
-  if (r.status === 'done') items.push({ key: 'next-' + r.id, cls: 'dcard nextcard', html: nextHTML(r) });
+  if (r.status === 'done') items.push({ key: 'next-' + r.id, cls: 'dcard nextcard', html: nextHTML(r) + (r.replay ? '' : `<div style="margin-top:8px"><button class="lbtn" data-act="save-run" title="Keep this run so it can be played again without an AI call, and download it for src/replay.js">Save as replay</button></div>`) });
   if (r.status === 'failed') items.push({ key: 'fail-' + r.id, cls: 'blocked', html: `<b>${esc(r.error)}</b><div style="margin-top:8px"><button class="lbtn" data-act="retry">Try again</button></div>` });
   patchList(pane, items);
 }
@@ -2843,6 +3158,7 @@ document.addEventListener('click', e => {
   if (d.act === 'cancel-edit') { closeDrawer(); return; }
   if (d.act === 'kg') { openKG(d.adv); return; }
   if (d.act === 'answer' || d.act === 'assume') { const v = d.act === 'assume' ? 'Make your best assumption and continue' : $('clarIn').value.trim(); if (v) { const q = UI.run.clarify, t = UI.run.text.replace(/ \(clarification:.*\)$/, ''); UI.run = null; runRequest(`${t} (clarification: ${v})`, null, { clarified: { question: q, answer: v } }); } return; }
+  if (d.act === 'save-run') { saveRun(UI.run); return; }
   if (d.act === 'retry') { const t = UI.run.text; UI.run = null; runRequest(t); return; }
   if (d.task) { openTask(d.task); return; }
   if (d.agent) { const a = AGENTS[d.agent]; openDrawer(esc(a.name), `<p class="hint">${esc(TEAMS[a.team].name)}</p><p class="lead">${esc(a.does)}</p><div class="h">Tools it may call</div>${a.tools.length ? a.tools.map(t => `<div class="pk"><span class="vbadge ${TOOLS[t].via}">${TOOLS[t].via}</span><span><code style="font:12px var(--code)">${esc(t)}</code><small>${esc(SYSTEMS[TOOLS[t].sys].name)} · ${esc(TOOLS[t].desc)}</small></span></div>`).join('') : '<p class="hint">None. It works only from the foundation.</p>'}<div class="h">Subscribed to</div><p class="hint">${Object.entries(SUBSCRIPTIONS).filter(([, v]) => v.includes(d.agent)).map(([k]) => k).join(', ') || 'No events'}</p>`); return; }

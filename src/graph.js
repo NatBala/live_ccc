@@ -32,7 +32,9 @@ function kgBuild(advId) {
   add('firm', 'office-' + advId, A.office, 'Office', st('office'), [`Territory: ${TERRITORIES[A.territory] ? TERRITORIES[A.territory].name : '—'}`]);
   add('firm', 'team-' + advId, A.team.split('(')[0].trim(), 'Team', st('team'), [A.team, A.practice]);
   for (const [u, l] of Object.entries(A.units)) add('units', u, l, u + (F.session.unit === u && F.session.advisor === advId ? ' · active' : ''), st(u), [`Buying unit ${u}. Preferences stated for this unit apply only here.`]);
-  A.coverage.forEach(c => add('people', c, EMPLOYEES[c].name, EMPLOYEES[c].role, st(c), [`${EMPLOYEES[c].name} covers ${A.short}.`]));
+  for (const [id, p] of Object.entries(PLANS).filter(([, p]) => p.adv === advId)) add('units', id, p.name, `Plan · ${p.unit} · meets ${p.next_meeting}`, st(id), [`$${p.assets_usd / 1e6}M, ${p.participants} participants. ${p.committee}.`, `Options: ${p.lineup.map(o => `${o.option} (${o.fund})`).join('; ')}`]);
+  const ho = HANDOVERS.find(h => h.adv === advId);
+  A.coverage.forEach(c => add('people', c, EMPLOYEES[c].name, ho && ho.to === c ? `Primary from ${ho.effective}` : ho && ho.from === c ? `Handing over ${ho.effective}` : EMPLOYEES[c].role, st(c), [`${EMPLOYEES[c].name} covers ${A.short}.`, ho && (ho.to === c || ho.from === c) ? `${ho.note} (${ho.src})` : null]));
   for (const m of F.memory.filter(m => m.adv === advId)) {
     const cl = m.cat === 'personal' || m.cat === 'coaching' ? 'interests' : m.cat === 'priority' || m.cat === 'relationship' ? 'priorities' : 'prefs';
     if (!vis(m)) { add(cl, m.id, 'Hidden note', m.access === 'relationship' ? 'Relationship team only' : 'Private to its owner', 'locked', [`${EMPLOYEES[viewer].name} can’t see this record. Access rules apply to the graph too.`]); continue; }
