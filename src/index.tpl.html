@@ -42,18 +42,20 @@
       <div class="tabs" role="tablist">
         <button class="tab" data-tab="updates" aria-selected="true">Updates<i class="badge"></i></button>
         <button class="tab" data-tab="decisions" aria-selected="false">Decisions<i class="badge"></i></button>
+        <button class="tab" data-tab="packets" aria-selected="false">Agents</button>
         <button class="tab" data-tab="memory" aria-selected="false">Memory<i class="badge"></i></button>
         <button class="tab" data-tab="events" aria-selected="false">Events</button>
       </div>
       <div class="panes">
         <div class="pane" id="pane-updates"></div>
         <div class="pane" id="pane-decisions" hidden></div>
+        <div class="pane" id="pane-packets" hidden></div>
         <div class="pane" id="pane-memory" hidden></div>
         <div class="pane" id="pane-events" hidden></div>
       </div>
     </aside>
   </main>
-  <nav class="mnav" id="mnav"><button data-view="live" aria-current="true">Live</button><button data-view="updates">Updates</button><button data-view="decisions">Decisions</button><button data-view="memory">Memory</button><button data-view="events">Events</button></nav>
+  <nav class="mnav" id="mnav"><button data-view="live" aria-current="true">Live</button><button data-view="updates">Updates</button><button data-view="decisions">Decisions</button><button data-view="packets">Agents</button><button data-view="memory">Memory</button><button data-view="events">Events</button></nav>
 </div>
 <div class="scrim" id="scrim" hidden></div>
 <div class="drawer" id="drawer" role="dialog" aria-modal="true" hidden><div class="dhead"><h2 id="drawerTitle"></h2><button class="x" id="drawerClose" aria-label="Close"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="dbody" id="drawerBody"></div></div>

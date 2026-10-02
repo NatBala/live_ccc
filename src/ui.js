@@ -405,6 +405,7 @@ async function runTask(run, t) {
   /* gatekeeper */
   const ctx = { run, packet: t.packet, toolIds: t.calls.flatMap(c => [c.name, ...JSON.stringify(c.out || '').match(/[A-Z]+-[A-Z0-9-]+/g) || []]), toolResults: t.toolResults, upstream, upstreamIds: upstream.flatMap(u => u.ids.concat([u.task])) };
   t.verdicts = gatekeep(t, res, ctx);
+  if (res.next_step && traceable(res.next_step, corpusOf(ctx)).length) res.next_step = '';
   /* count reuse the foundation made possible */
   const usedIds = new Set(res.used || []);
   const reused = reusedItems.filter(i => usedIds.has(i.id)).length + (upstream.length ? 1 : 0) * upstream.length;
@@ -489,7 +490,7 @@ function taskHTML(r, t) {
   return `<summary><span class="av" style="background:${TC[a.team]};width:28px;height:28px;border-radius:8px;font-size:12px;font-weight:800;color:#0e2135">${t.id}</span><span><b>${esc(a.name)}</b><small>${esc(TEAMS[a.team].name)} · ${esc(t.objective)}</small></span><span class="st ${st}">${st === 'queued' ? 'Waiting' : st === 'running' ? 'Working' : st === 'done' ? 'Done' : 'Failed'}</span></summary><div class="tbody">
     ${p ? `<div class="sec"><b>${icon('memory')} Foundation → ${esc(a.name)} · ${p.items.length} items</b>${byLayer.map(([l, its]) => its.map(i => `<div class="pk"><span class="lid">${esc(i.id)}</span><span>${esc(i.label)}: ${esc(String(i.value).slice(0, 150))}<small>${esc(LAYERS[l].short)} · from ${esc(i.from)} · scope ${esc(i.scope)}</small></span></div>`).join('')).join('')}${p.withheld.map(w => `<div class="wh">Withheld ${esc(w.id)}: ${esc(w.why)}</div>`).join('')}</div>` : ''}
     ${t.calls && t.calls.length ? `<div class="sec"><b>${icon('arrow')} ${esc(a.name)} → enterprise systems</b>${t.calls.map(c => `<div class="pk"><span class="vbadge ${c.via || 'API'}">${c.via || '—'}</span><span><code style="font:11.5px var(--code)">${esc(c.name)}(${esc(JSON.stringify(c.input || {}).slice(0, 90))})</code><small>${c.error ? 'Blocked: ' + esc(c.error) : esc(SYSTEMS[c.sys].name) + ' · ' + esc(JSON.stringify(c.out).slice(0, 140))}</small></span></div>`).join('')}</div>` : ''}
-    ${t.result ? `<div class="sec"><b>${icon('bolt')} ${esc(a.name)} → foundation</b><p class="says">“${esc(t.result.says || '')}”</p>${t.result.output ? `<div class="outbody"><b>${esc(t.result.output.title)}</b>\n${md(t.result.output.body)}</div>` : ''}${(t.result.open_questions || []).length ? `<p class="hint" style="margin:6px 0 0">Open question: ${esc(t.result.open_questions.join(' '))}</p>` : ''}</div>` : ''}
+    ${t.result ? `<div class="sec"><b>${icon('bolt')} ${esc(a.name)} → foundation</b><p class="says">“${esc(t.result.says || '')}”</p>${t.result.output ? `<div class="outbody"><b>${esc(t.result.output.title)}</b>\n${md(t.result.output.body)}</div>` : ''}${t.result.next_step ? `<p class="hint" style="margin:6px 0 0">Next step for the requester: ${esc(t.result.next_step)}</p>` : ''}${(t.result.open_questions || []).length ? `<p class="hint" style="margin:6px 0 0">Open question: ${esc(t.result.open_questions.join(' '))}</p>` : ''}</div>` : ''}
     ${t.verdicts ? `<div class="sec"><b>${icon('shield')} Gatekeeper</b>${t.verdicts.length ? t.verdicts.map(v => `<div class="vd"><span class="vb ${v.status}">${v.status.toUpperCase()}</span><span><b>${esc(v.kind)}: ${esc(v.title)}</b><small>${esc(v.reason)}${v.event ? ` · event ${esc(v.event.type)} → ${esc(v.event.subscribers.map(agentName).join(', ') || 'no subscribers')}` : ''}</small></span></div>`).join('') : '<p class="hint">Nothing proposed for storage. Read only.</p>'}</div>` : ''}
     ${t.retry ? `<p class="hint" style="margin-top:6px">First attempt failed (${esc(t.retry)}); retried once.</p>` : ''}
     ${st === 'failed' ? `<div class="blocked">This agent failed: ${esc(t.error)}. The rest of the plan continued.</div>` : ''}
@@ -550,8 +551,59 @@ function verdictLines(t) {
 }
 function outputHTML(o) {
   if (!o) return '';
-  const body = md(o.body);
-  return o.kind === 'email' ? `<div class="olk" style="margin-top:6px"><div class="bar"><span>Outlook draft</span><span>${esc(o.status)}</span></div><div class="bd"><b>${esc(o.title)}</b>\n\n${body}</div></div>` : `<div class="outbody" style="margin-top:6px"><b>${esc(o.title)}</b>\n${body}</div>`;
+  const body = md(o.body), rev = (o.rev > 1 ? `<p class="hint" style="margin:4px 0 0">Edited by ${esc(o.editedBy)} · rev ${o.rev} · re-checked by the gatekeeper</p>` : '') + (o.flagged && o.flagged.length ? `<div class="uv pending">Check before use: ${esc(o.flagged.join(', '))} not traced to a system of record</div>` : '');
+  return (o.kind === 'email' ? `<div class="olk" style="margin-top:6px"><div class="bar"><span>Outlook draft</span><span>${esc(o.status)}</span></div><div class="bd"><b>${esc(o.title)}</b>\n\n${body}</div></div>` : `<div class="outbody" style="margin-top:6px"><b>${esc(o.title)}</b>\n${body}</div>`) + rev;
+}
+/* ---------- traceability: which systems each step queried, what came back, and why ---------- */
+const toolPurpose = n => { const d = TOOLS[n].desc; return d.slice(d.indexOf(':') + 1).trim().split(/\.\s/)[0].replace(/\.$/, ''); };
+function resultGist(out) {
+  if (out == null) return 'nothing returned';
+  const ids = [...new Set(JSON.stringify(out).match(/\b[A-Z]{2,}-[A-Z0-9]+(?:-[A-Z0-9]+)*\b/g) || [])].slice(0, 4);
+  if (Array.isArray(out)) return `${out.length} ${out.length === 1 ? 'record' : 'records'}${ids.length ? ': ' + ids.join(', ') : ''}`;
+  if (typeof out !== 'object') return String(out).slice(0, 90);
+  const bits = Object.entries(out).filter(([, v]) => v != null && v !== '').slice(0, 3).map(([k, v]) => `${k.replace(/_/g, ' ')} ${Array.isArray(v) ? v.length + ' items' : typeof v === 'object' ? Object.keys(v).length + ' fields' : String(v).slice(0, 40)}`);
+  return bits.join(' · ');
+}
+function sourcesHTML(r, t) {
+  const p = t.packet; if (!p) return '';
+  const used = new Set((t.result && t.result.used) || []), counts = LAYER_ORDER.map(l => [l, p.items.filter(i => i.layer === l).length]).filter(x => x[1]);
+  const cited = p.items.filter(i => used.has(i.id)).slice(0, 5);
+  const ups = t.depends_on.map(d => r.tasks.find(x => x.id === d)).filter(x => x && x.result);
+  const calls = (t.calls || []).map(c => `<div class="srcl"><span class="vbadge ${c.via || 'API'}">${c.via || '—'}</span><span><b>${esc(c.sys ? SYSTEMS[c.sys].name : TOOLS[c.name] ? SYSTEMS[TOOLS[c.name].sys].name : c.name)}</b> · <code>${esc(c.name)}</code>${c.error ? `<small class="bad">Blocked: ${esc(c.error)}</small>` : `<small>Why: ${esc(toolPurpose(c.name))}</small><small>Returned: ${esc(resultGist(c.out))}</small>`}</span></div>`).join('');
+  return `<div class="srcs"><div class="srch">${icon('network')} Where this came from</div>
+    <div class="srcl"><span class="vbadge Internal">FDN</span><span><b>Shared foundation</b> · sent ${p.items.length} records (${counts.map(([l, n]) => `${esc(LAYERS[l].short)} ${n}`).join(' · ')})${p.withheld.length ? ` · withheld ${p.withheld.length}` : ''}<small>Why: only what this role is permitted to see for ${esc(r.advisor ? ADVISORS[r.advisor].short : r.territory ? TERRITORIES[r.territory].name : 'this request')}</small>${cited.length ? `<small>Cited: ${cited.map(i => `${esc(i.id)} ${esc(i.label)}`).join(' · ')}</small>` : ''}</span></div>
+    ${ups.map(x => `<div class="srcl"><span class="vbadge Event">STEP ${x.step}</span><span><b>${esc(ROLES[x.role].name)}</b> · ${esc((x.result.output && x.result.output.title) || x.title)}<small>Why: this step builds on that verified work instead of redoing it</small></span></div>`).join('')}
+    ${calls || (t.state === 'running' ? '' : '<div class="srcl"><span class="vbadge Internal">—</span><span><small>No enterprise system calls: worked from the foundation alone</small></span></div>')}</div>`;
+}
+/* ---------- closing card: what the requester should do next ---------- */
+function nextActions(r) {
+  const out = [], seen = new Set(), add = (tag, text, step) => { const k = text.toLowerCase(); if (text && !seen.has(k)) { seen.add(k); out.push({ tag, text, step }); } };
+  r.tasks.forEach(t => t.result && t.result.next_step && add('Next', t.result.next_step, t.step));
+  for (const t of r.tasks) {
+    const o = outOf(t);
+    if (o && o.status === 'Waiting for approval') add('Approve', `Review “${o.title}”, edit if needed, and approve it. Nothing is sent until you do.`, t.step);
+    for (const v of t.verdicts || []) {
+      if (v.kind === 'commitment' && v.status === 'committed') { const c = F.commitments.find(x => x.id === v.id); add('Follow up', `${v.title}${c ? ` (${c.owner}, due ${c.due})` : ''}`, t.step); }
+      if (v.kind === 'memory' && v.status === 'pending') add('Confirm', `Confirm with ${r.advisor ? ADVISORS[r.advisor].short : 'the advisor'} before it becomes a lasting preference: ${v.title}`, t.step);
+    }
+    (t.result && t.result.open_questions || []).forEach(q => add('Resolve', q, t.step));
+  }
+  return out.slice(0, 5);
+}
+function nextHTML(r) {
+  const who = EMPLOYEES[r.requester].name.split(' ')[0], acts = nextActions(r), goal = r.decisions.find(d => d.type === 'success');
+  return `<div class="dt">WHAT ${esc(who.toUpperCase())} SHOULD DO NEXT</div>${goal ? `<p class="nxgoal">${esc(goal.title)}${goal.detail ? `<small>${esc(goal.detail)}</small>` : ''}</p>` : ''}${acts.length ? acts.map(a => `<div class="nx"><span class="nxt ${a.tag.replace(' ', '').toLowerCase()}">${esc(a.tag)}</span><span>${esc(a.text)}<small>From step ${a.step}</small></span></div>`).join('') : '<p class="hint">Nothing further for you to do: everything was produced and stored.</p>'}`;
+}
+/* ---------- edit a draft before approval; the gatekeeper re-checks it ---------- */
+function openEdit(id) {
+  const o = F.outputs.find(x => x.id === id); if (!o) return;
+  openDrawer('Edit before approval', `<p class="hint" style="margin-top:0">${esc(o.title)} · drafted by ${esc(agentName(o.agent))}. Your edit goes through the same checks as the agent’s draft: no personal notes in client-facing content (POL-4), and every number traced to a system of record (POL-2).</p><textarea id="editIn" class="editin" rows="14" aria-label="Draft text">${esc(o.body)}</textarea><div id="editIssues"></div><div style="display:flex;gap:6px;margin-top:8px"><button class="lbtn primary" data-act="save-edit" data-out="${o.id}">${icon('check')} Re-check and save</button><button class="lbtn" data-act="cancel-edit">Cancel</button></div>`);
+}
+function saveEdit(id) {
+  const o = F.outputs.find(x => x.id === id), body = $('editIn').value.trim(); if (!o) return;
+  const issues = body ? recheckOutput(o, body, UI.requester) : ['The draft is empty.'];
+  if (issues.length) { $('editIssues').innerHTML = issues.map(x => `<div class="uv blocked">Not saved: ${esc(x)}</div>`).join(''); return; }
+  closeDrawer(); toast(`Re-checked and saved as rev ${o.rev}${o.flagged.length ? `; ${o.flagged.join(', ')} flagged for a number check` : ''}. Still waiting for approval.`); renderAll();
 }
 function renderUpdates() {
   const r = UI.run, pane = $('pane-updates');
@@ -569,11 +621,17 @@ function renderUpdates() {
   for (const t of done) {
     const R = ROLES[t.role], o = outOf(t), [cls, label] = taskStatus(t);
     items.push({ key: 'out-' + r.id + t.id, cls: 'dcard uout ' + cls, html: `<div class="uh"><i style="background:${TC[R.team]}"></i><span><b>Step ${t.step || '?'} · ${esc(R.name)}</b> · ${esc(TEAMS[R.team].name)}${t.person ? ' · ' + esc(t.person) : ''}<small>${esc(t.title)}</small></span><em class="bst ${cls}">${label}</em></div>
-      ${t.state === 'failed' ? `<div class="blocked">This task didn’t finish: ${esc(t.error)}</div>` : ''}${t.result && t.result.says ? `<p class="says">${esc(t.result.says)}</p>` : ''}${outputHTML(o)}${verdictLines(t)}
-      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">${o && o.status === 'Waiting for approval' ? `<button class="lbtn primary" data-approve="${o.id}">${icon('check')} Approve</button>` : ''}<button class="lbtn" data-task="${t.id}">Open full output</button></div>` });
+      ${t.state === 'failed' ? `<div class="blocked">This task didn’t finish: ${esc(t.error)}</div>` : ''}${t.result && t.result.says ? `<p class="says">${esc(t.result.says)}</p>` : ''}${outputHTML(o)}${verdictLines(t)}${sourcesHTML(r, t)}
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">${o && o.status === 'Waiting for approval' ? `<button class="lbtn primary" data-approve="${o.id}">${icon('check')} Approve</button><button class="lbtn" data-edit="${o.id}">Edit</button>` : ''}<button class="lbtn" data-task="${t.id}">Open full output</button></div>` });
+  }
+  /* the step that is working right now, with each system call as it happens */
+  for (const t of r.tasks.filter(t => t.state === 'running')) {
+    const R = ROLES[t.role];
+    items.push({ key: 'run-' + r.id + t.id, cls: 'dcard uout running', html: `<div class="uh"><i style="background:${TC[R.team]}"></i><span><b>Step ${t.step || '?'} · ${esc(R.name)}</b> · ${esc(TEAMS[R.team].name)}${t.person ? ' · ' + esc(t.person) : ''}<small>${esc(t.title)}</small></span><em class="bst running">In progress</em></div>${t.packet ? sourcesHTML(r, t) : ''}<p class="hint" style="margin:6px 0 0"><span class="spin"></span> ${!t.packet ? 'The foundation is assembling what this role may see…' : t.calls && t.calls.length ? 'Working from these sources…' : 'Reading the foundation; calling systems if anything is missing…'}</p>` });
   }
   if (r.status === 'done') items.push({ key: 'final-' + r.id, cls: 'dcard finalcard', html: `<div class="dt">WHAT WAS PRODUCED FOR YOUR REQUEST</div>${r.tasks.map(t => { const o = outOf(t), R = ROLES[t.role]; return `<button class="steprow" data-task="${t.id}"><span class="stepn" style="background:${TC[R.team]}">${t.step}</span><span class="stepb"><b>${esc(o ? o.title : t.title)}</b><small>${esc(R.name)} · ${esc(o ? o.status : t.state === 'failed' ? 'Did not finish' : 'No document; see details')}</small></span><em class="openlink">Open</em></button>`; }).join('')}` });
   if (r.status === 'done') items.push({ key: 'sum-' + r.id, cls: 'summary', html: `<h3>All ${r.tasks.length} tasks done · ${Math.round((r.t1 - r.t0) / 1000)} s</h3><div class="sgrid"><div><b>${r.stats.reused}</b>facts reused</div><div><b>${r.stats.committed}</b>stored</div><div><b>${r.stats.calls}</b>system calls</div></div>` });
+  if (r.status === 'done') items.push({ key: 'next-' + r.id, cls: 'dcard nextcard', html: nextHTML(r) });
   if (r.status === 'failed') items.push({ key: 'fail-' + r.id, cls: 'blocked', html: `<b>${esc(r.error)}</b><div style="margin-top:8px"><button class="lbtn" data-act="retry">Try again</button></div>` });
   patchList(pane, items);
 }
@@ -588,14 +646,16 @@ function openTask(id) {
     <div class="ohd"><span>${esc(TEAMS[R.team].name)} · ${esc(R.name)}${t.person ? ' · ' + esc(t.person) : ''}</span><em class="bst ${cls}">${label}</em></div>
     ${ask ? `<div class="fulfills"><small>Fulfills part ${t.ask} of the request</small><b>“${esc(ask.text)}”</b></div>` : ''}
     <div class="h">Output</div>${body}
-    ${o && o.status === 'Waiting for approval' ? `<button class="lbtn primary" data-approve="${o.id}" style="margin-top:8px">${icon('check')} Approve</button>` : ''}
+    ${o && o.status === 'Waiting for approval' ? `<div style="display:flex;gap:6px;margin-top:8px"><button class="lbtn primary" data-approve="${o.id}">${icon('check')} Approve</button><button class="lbtn" data-edit="${o.id}">Edit</button></div>` : ''}
+    ${t.result && t.result.next_step ? `<div class="h">Suggested next step</div><p class="hint" style="margin:0">${esc(t.result.next_step)}</p>` : ''}
     ${verdictLines(t) ? `<div class="h">What this step added to the foundation</div>${verdictLines(t)}` : ''}
+    ${sourcesHTML(r, t)}
     <div class="h">How it was produced</div>
     <dl class="kv"><dt>Agent</dt><dd>${esc(A.name)}: ${esc(A.does)}</dd><dt>Task</dt><dd>${esc(t.objective)}</dd>${ups.length ? `<dt>Built on</dt><dd>${ups.map(x => `Step ${x.step}: ${esc(x.title)}`).join('; ')}</dd>` : ''}${t.result && t.result.says ? `<dt>Agent’s note</dt><dd>${esc(t.result.says)}</dd>` : ''}</dl>
     <details class="tcard" style="margin-top:8px"><summary style="padding:8px 10px"><span><b>Full trace</b><small>What the foundation sent, every system call and result, and each gatekeeper decision</small></span></summary>${taskHTML(r, t).replace(/^<summary>[\s\S]*?<\/summary>/, '')}</details>
     <div style="display:flex;justify-content:space-between;margin-top:14px">${prev ? `<button class="lbtn" data-task="${prev.id}">← Step ${prev.step}</button>` : '<span></span>'}${next ? `<button class="lbtn" data-task="${next.id}">Step ${next.step} →</button>` : ''}</div>`);
 }
-const PANES = { updates: renderUpdates, decisions: renderDecisions, memory: renderMemory, events: renderEvents };
+const PANES = { updates: renderUpdates, decisions: renderDecisions, packets: renderPackets, memory: renderMemory, events: renderEvents };
 let RQ = 0;
 function renderAll() { if (RQ) return; RQ = requestAnimationFrame(() => { RQ = 0; renderOrch(); renderDiagram(); renderStats(); (PANES[UI.tab] || renderUpdates)(); autoScroll(); if (KG.open) renderKG(); }); }
 /* Follow the work while agents run; pause for 5 s whenever the person scrolls. */
@@ -631,7 +691,8 @@ function openHelp() {
   openDrawer('How it works', `<p class="lead">Type a request as anyone in Sales, Product, Marketing or Service and press Enter.</p>
   <dl class="kv"><dt>Orchestration</dt><dd>The AI decides who the request is about, what can be reused, what’s missing and how to treat anything new about the advisor, then plans the work. Nine steps, each shown as AI or RULE.</dd>
   <dt>Workbench</dt><dd>Each task is assigned to a team and role: Wholesalers (meeting prep), SSC (scheduling and follow-up), Internal wholesalers, Product specialists, Investment analytics, Content & campaigns, Compliance review, Distribution, Advisor service. Cards move from Assigned to In progress to Done.</dd>
-  <dt>Updates</dt><dd>Each team’s output appears on the right the moment its task finishes, with what was shared, remembered or held for approval. Click Details on any task to see the context the foundation gave it and the systems it called.</dd>
+  <dt>Updates</dt><dd>Each team’s output appears on the right the moment its task finishes, with what was shared, remembered or held for approval. Each step shows where its answer came from: what the foundation sent, which systems it queried and why, and what came back. Drafts can be edited before approval; edits are re-checked. The run ends with what you should do next.</dd>
+  <dt>Agents</dt><dd>The full trace for each specialist: the exact context packet, every tool call and result, and each gatekeeper verdict.</dd>
   <dt>Foundation</dt><dd>Plain rules, not AI: what each task may see, evidence and number checks, memory rules, approvals, events and the knowledge graph.</dd></dl>
   <div class="h">Try</div><ol style="font-size:13.5px;padding-left:18px;margin:0"><li>Identify the growing trends in LA territory</li><li>Compare BFA and AMBAL for Rachel and schedule a meeting with her next month</li><li>Prep me for my call with Alex tomorrow</li><li>Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.</li></ol>
   <div class="h">Reference data</div><p class="hint">Advisors and teams are fictional. Expense ratios for GFA, BFA, AMBAL, VWUAX and VIGAX are from public sources as of the dates shown.</p>`);
@@ -639,7 +700,7 @@ function openHelp() {
 
 /* ---------- events ---------- */
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-task],[data-who],[data-sug],[data-replay],[data-tab],[data-view],[data-act],[data-approve],[data-madv],[data-agent],[data-layer],[data-sys]'); if (!el) return;
+  const el = e.target.closest('[data-task],[data-who],[data-sug],[data-replay],[data-tab],[data-view],[data-act],[data-approve],[data-edit],[data-madv],[data-agent],[data-layer],[data-sys]'); if (!el) return;
   const d = el.dataset;
   if (d.who) { UI.requester = d.who; buildStaticWho(); return; }
   if (d.sug) { $('cmdIn').value = d.sug; $('cmdIn').focus(); return; }
@@ -647,7 +708,10 @@ document.addEventListener('click', e => {
   if (d.tab) { setTab(d.tab); return; }
   if (d.view) { setView(d.view); return; }
   if (d.madv) { UI.memAdv = d.madv; renderMemory(); return; }
-  if (d.approve) { const o = F.outputs.find(x => x.id === d.approve); if (o) { o.status = 'Approved · ready to send'; logEvent('approval.granted', o.title, UI.requester, o.adv); toast('Approved by ' + EMPLOYEES[UI.requester].name + '. Queued for the approved channel.'); renderAll(); } return; }
+  if (d.approve) { const o = F.outputs.find(x => x.id === d.approve); if (o) { o.status = 'Approved · ready to send'; logEvent('approval.granted', o.title, UI.requester, o.adv); toast('Approved by ' + EMPLOYEES[UI.requester].name + (o.rev > 1 ? ` (edited version, rev ${o.rev})` : '') + '. Queued for the approved channel.'); renderAll(); } return; }
+  if (d.edit) { openEdit(d.edit); return; }
+  if (d.act === 'save-edit') { saveEdit(d.out); return; }
+  if (d.act === 'cancel-edit') { closeDrawer(); return; }
   if (d.act === 'kg') { openKG(d.adv); return; }
   if (d.act === 'answer' || d.act === 'assume') { const v = d.act === 'assume' ? 'Make your best assumption and continue' : $('clarIn').value.trim(); if (v) { const q = UI.run.clarify, t = UI.run.text.replace(/ \(clarification:.*\)$/, ''); UI.run = null; runRequest(`${t} (clarification: ${v})`, null, { clarified: { question: q, answer: v } }); } return; }
   if (d.act === 'retry') { const t = UI.run.text; UI.run = null; runRequest(t); return; }

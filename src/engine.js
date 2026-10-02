@@ -204,10 +204,29 @@ function traceable(value, corpus) {
   }
   return missing;
 }
+/* Everything a task was given: the only place its numbers may come from */
+const corpusOf = ctx => (JSON.stringify(ctx.packet.items) + JSON.stringify(ctx.toolResults) + JSON.stringify(ctx.upstream)).replace(/,/g, '');
+/* The output checks, shared by the gatekeeper and by human edits before approval */
+function outputProblems(advisor, kind, body, corpus) {
+  const clientFacing = /email|post|content/.test(kind || '');
+  const personal = clientFacing && F.memory.filter(m => m.access !== 'shared' && m.adv === advisor).some(m => m.value.split(/\W+/).filter(w => w.length > 6).some(w => body.includes(w)));
+  return { clientFacing, personal, miss: traceable(body, corpus) };
+}
+/* A person edited a draft that is waiting for approval: the same rules run again before it is saved */
+function recheckOutput(o, body, by) {
+  const p = outputProblems(o.adv, o.kind, body, o.corpus || '');
+  const issues = [];
+  if (p.personal) issues.push('Contains a personal note; personal notes never go in client-facing content (POL-4).');
+  if (p.miss.length && p.clientFacing) issues.push(`Numbers not traceable to a system of record: ${p.miss.slice(0, 3).join(', ')} (POL-2).`);
+  if (issues.length) return issues;
+  o.body = body; o.flagged = p.miss; o.rev = (o.rev || 1) + 1; o.editedBy = EMPLOYEES[by] ? EMPLOYEES[by].name : by;
+  logEvent('content.revised', `${o.title} (rev ${o.rev}, re-checked)`, by, o.adv);
+  return [];
+}
 function gatekeep(task, res, ctx) {
   const verdicts = [], run = ctx.run, a = AGENTS[task.agent];
   const known = new Set([...ctx.packet.items.map(i => i.id), ...ctx.toolIds, ...ctx.upstreamIds]);
-  const corpus = (JSON.stringify(ctx.packet.items) + JSON.stringify(ctx.toolResults) + JSON.stringify(ctx.upstream)).replace(/,/g, '');
+  const corpus = corpusOf(ctx);
   const V = (kind, status, title, reason, extra) => verdicts.push(Object.assign({ kind, status, title, reason }, extra || {}));
   /* knowledge */
   for (const k of (res.knowledge || []).slice(0, 3)) {
@@ -263,14 +282,12 @@ function gatekeep(task, res, ctx) {
   }
   /* output */
   if (res.output && res.output.body) {
-    const clientFacing = /email|post|content/.test(res.output.kind || '');
-    const personal = F.memory.filter(m => m.access !== 'shared' && m.adv === run.advisor).some(m => clientFacing && m.value.split(/\W+/).filter(w => w.length > 6).some(w => res.output.body.includes(w)));
-    const miss = traceable(res.output.body, corpus);
+    const { clientFacing, personal, miss } = outputProblems(run.advisor, res.output.kind, res.output.body, corpus);
     if (personal) V('output', 'blocked', res.output.title, 'Client-facing draft contains a personal note (POL-4)');
     else if (miss.length && clientFacing) V('output', 'blocked', res.output.title, `Client-facing draft has numbers not traceable to a system of record: ${miss.slice(0, 3).join(', ')}`);
     else {
       const id = 'OUT-' + (++F.seq), needs = !!res.needs_approval || /email|post/.test(res.output.kind || '');
-      F.outputs.push({ id, task: task.id, agent: task.agent, run: run.id, adv: run.advisor, kind: res.output.kind, title: res.output.title, body: res.output.body, status: needs ? 'Waiting for approval' : miss.length ? 'Needs number check' : 'Ready', flagged: miss, used: res.used || [] });
+      F.outputs.push({ id, task: task.id, agent: task.agent, run: run.id, adv: run.advisor, kind: res.output.kind, title: res.output.title, body: res.output.body, status: needs ? 'Waiting for approval' : miss.length ? 'Needs number check' : 'Ready', flagged: miss, used: res.used || [], corpus, rev: 1 });
       if (miss.length) V('output', 'flagged', res.output.title, `Internal only. Numbers not traceable to a system of record are marked for checking: ${miss.slice(0, 3).join(', ')}`);
       F.graph.nodes.push({ id, label: res.output.title, type: 'output', run: run.id }); if (run.advisor) F.graph.edges.push({ from: id, to: run.advisor, label: 'for', run: run.id });
       const evt = logEvent(needs ? 'approval.requested' : 'content.drafted', res.output.title, task.agent, run.advisor);
@@ -305,7 +322,7 @@ function sanitizeResult(r) {
     knowledge: arr(r.knowledge).filter(k => k && k.label && k.value).map(k => ({ label: str(k.label, 160), value: str(k.value, 600), evidence: arr(k.evidence).map(x => str(x, 60)) })),
     memory: arr(r.memory).filter(m => m && m.attribute && m.value).map(m => ({ attribute: str(m.attribute, 80), value: str(m.value, 300), scope: str(m.scope || '', 20), category: str(m.category || 'content_pref', 30), basis: str(m.basis || 'inference', 30), evidence: arr(m.evidence).map(x => str(x, 40)) })),
     commitments: arr(r.commitments).filter(c => c && c.title).map(c => ({ title: str(c.title, 160), owner: str(c.owner, 60), due: str(c.due, 40) })),
-    needs_approval: !!r.needs_approval, open_questions: arr(r.open_questions).map(x => str(x, 240))
+    needs_approval: !!r.needs_approval, open_questions: arr(r.open_questions).map(x => str(x, 240)), next_step: str(typeof r.next_step === 'string' ? r.next_step.replace(/^[\s.…]+$/, '') : '', 240)
   };
 }
 function capResult(out) {
@@ -488,9 +505,10 @@ RULES
 - Memory: propose a lasting preference with "basis":"advisor_statement" only when the advisor's own words in a cited episode (CALL-/EMAIL- id) support it. An employee's ask is "employee_request"; a one-time need is "task_requirement"; a guess is "inference". Propose memory only for genuinely new information.
 - Knowledge: publish only reusable, evidence-backed findings with evidence ids.
 - When you mention other contributors, name their team role (for example Investment analytics, Product specialists, SSC, Wholesalers), not internal agent names.
+- "next_step": the one concrete action ${E.name} should take because of your work (who, what, by when if known), addressed to ${E.name.split(' ')[0]}. Use the same number rules. Leave it empty if there is nothing for them to do.
 
 Reply with only a JSON object:
-{"says":"one first-person sentence, at most 22 words: what you did and which team's work you built on (name teams, not agents)","output":{"kind":"brief|email|finding|answer|plan|content_pick|post|case_update|note","title":"...","body":"under 150 words; '- ' bullets; blank line between paragraphs"},"used":["ids"],"knowledge":[{"label":"...","value":"...","evidence":["ids"]}],"memory":[{"attribute":"...","value":"...","scope":"BU-...|advisor","category":"content_pref|communication_pref|priority|relationship","basis":"advisor_statement|employee_request|task_requirement|inference","evidence":["ids"]}],"commitments":[{"title":"...","owner":"...","due":"..."}],"needs_approval":false,"open_questions":[]}
+{"says":"one first-person sentence, at most 22 words: what you did and which team's work you built on (name teams, not agents)","output":{"kind":"brief|email|finding|answer|plan|content_pick|post|case_update|note","title":"...","body":"under 150 words; '- ' bullets; blank line between paragraphs"},"used":["ids"],"knowledge":[{"label":"...","value":"...","evidence":["ids"]}],"memory":[{"attribute":"...","value":"...","scope":"BU-...|advisor","category":"content_pref|communication_pref|priority|relationship","basis":"advisor_statement|employee_request|task_requirement|inference","evidence":["ids"]}],"commitments":[{"title":"...","owner":"...","due":"..."}],"needs_approval":false,"open_questions":[],"next_step":"..."}
 Use empty arrays when nothing applies.`;
 }
 function toolDefs(task, onCall) {
