@@ -527,3 +527,27 @@ dl.interp dd small{color:var(--mute)}
 
 /* demo evidence generated from the business context */
 .vbadge.Syn{background:#efe6ff;color:#5b3fa8;border:1px dashed #a48be0}
+
+/* behind the scenes while intelligence and orchestration think */
+.btscard{border-left:3px solid var(--gold)}
+.bts-flow{display:flex;align-items:center;gap:8px;margin:10px 0 6px}
+.bts-srcs{display:flex;flex-direction:column;gap:3px}
+.bts-src{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:1px 7px;border-radius:6px;border:1px solid var(--rule);background:var(--soft);color:var(--ink);animation:btsglow 2s ease-in-out infinite;animation-delay:var(--d)}
+.bts-src .ic{width:12px;height:12px}
+.bts-pipe{flex:1;min-width:40px;height:3px;border-radius:2px;background:linear-gradient(90deg,transparent 0,var(--gold) 40%,transparent 80%) 0 0/60px 3px repeat-x;animation:btsflow 1.1s linear infinite;opacity:.85}
+.bts-core{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:800;padding:6px 10px;border-radius:10px;border:1.5px solid var(--gold);color:var(--hl-fg);background:var(--hl);animation:btspulse 1.6s ease-in-out infinite}
+.bts-core .ic{width:14px;height:14px}
+.bts-steps{list-style:none;margin:4px 0 0;padding:0;counter-reset:bts}
+.bts-steps li{position:relative;padding:5px 0 5px 24px;border-top:1px solid var(--rule);font-size:12.5px;opacity:0;animation:btsin .35s ease forwards}
+.bts-steps li::before{content:'✓';position:absolute;left:2px;top:5px;width:16px;height:16px;border-radius:50%;background:#e3f5ec;color:#1f6b48;font-size:10px;font-weight:800;display:grid;place-items:center}
+.bts-steps li small{display:block;color:var(--mute);font-size:11.5px}
+.bts-steps li:nth-child(1){animation-delay:.1s}.bts-steps li:nth-child(2){animation-delay:.5s}.bts-steps li:nth-child(3){animation-delay:.9s}.bts-steps li:nth-child(4){animation-delay:1.3s}.bts-steps li:nth-child(5){animation-delay:1.7s}.bts-steps li:nth-child(6){animation-delay:2.1s}
+.bts-routes{display:flex!important;flex-wrap:wrap;gap:2px;margin-top:2px}
+.btslive{display:flex;gap:10px;align-items:center;font-size:13px;border-style:dashed}
+.btslive small{display:block;color:var(--mute);font-size:11.5px}
+.btsmini{color:var(--mute);font-weight:400}
+@keyframes btsflow{from{background-position:-60px 0}to{background-position:60px 0}}
+@keyframes btspulse{0%,100%{box-shadow:0 0 0 0 rgba(231,181,78,.45)}50%{box-shadow:0 0 0 6px rgba(231,181,78,0)}}
+@keyframes btsglow{0%,100%{border-color:var(--rule)}50%{border-color:var(--gold)}}
+@keyframes btsin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.bts-steps li{opacity:1;animation:none}.bts-pipe,.bts-core,.bts-src{animation:none}}

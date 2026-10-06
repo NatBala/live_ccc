@@ -88,7 +88,7 @@ function renderOrch() {
   if (r) {
     const act = st.find(x => x.state === 'active');
     const last = [...r.decisions].reverse()[0];
-    if (r.status === 'thinking') think = `<span class="spin"></span><b>${act ? act.name : 'Thinking'}</b>${last ? ' · ' + esc(last.title) : ''}`;
+    if (r.status === 'thinking') think = `<span class="spin"></span><b>${act ? act.name : 'Thinking'}</b>${last && last.type !== 'lookup' ? ' · ' + esc(last.title) : ''}${r.bts ? ` · <span class="btsmini">${r.bts.done ? 'plan received, laying it out' : r.bts.firstAt ? 'drafting ' + esc(DRAFT_LABEL[r.bts.drafting] || r.bts.drafting) : 'waiting for the model'} · ${Math.round((Date.now() - r.bts.t0) / 1000)}s</span>` : ''}`;
     else if (r.status === 'running') { const run = [...new Set(r.tasks.filter(t => t.state === 'running').map(t => ROLES[t.role].name))]; think = `<span class="spin"></span><b>Workbench</b> · ${run.length ? esc(run.join(' and ')) + ' working' : 'assigning'} · ${r.tasks.filter(t => t.state === 'done').length} of ${r.tasks.length} tasks done`; }
     else if (r.status === 'clarify') think = '<b>Gaps</b> · waiting for your answer';
     else if (r.status === 'planned') think = `<b>Plan ready</b> · ${r.tasks.length} steps in ${new Set(r.tasks.map(t => t.wave)).size} waves · nothing has run yet`;
@@ -236,20 +236,28 @@ async function runRequestInner(text, replay, opts = {}) {
   R.territories.forEach(t => bits.push(`${t.name} territory: ${t.advisors.length} advisors`));
   R.funds.forEach(f => bits.push(`${f.ticker}: ${f.name}`));
   run.decisions.push({ type: 'lookup', src: 'code', title: bits.length ? `${bits.length} ${bits.length === 1 ? 'entity' : 'entities'} resolved` : 'Nothing the graph recognizes', detail: bits.join(' · ') || 'No advisor, colleague, territory or fund matched. Orchestration will interpret the request.' });
-  flashTile('graph', 'read'); renderAll();
+  flashTile('graph', 'read');
+  /* what has already happened before the model answers, shown while it thinks */
+  const pats = cataloguePatterns(text);
+  run.bts = { t0: Date.now(), lookup: bits, patterns: pats.map(c => ({ n: c.n, intent: c.intent, ask: c.ask })), authority: authorityFromText(text, EMPLOYEES[requester].team), replay: !!replay, chars: 0, firstAt: null, drafting: 'start',
+    routes: [...new Set(pats.flatMap(c => parseRoute(c.exec).stages.flat().filter(i => i.kind === 'agent').map(i => i.route)))].slice(0, 8),
+    context: { advisors: Object.keys(ADVISORS).length, memories: F.memory.length + F.episodes.length, content: CONTENT.length, funds: Object.keys(FUNDS).length, routes: Object.values(SUBAGENTS).reduce((t, A) => t + Object.keys(A.subs).length, 0), services: Object.keys(SERVICES).length, rules: POLICIES.length } };
+  run.bts.promptChars = orchestratorPrompt(run).length;
+  const ticker = setInterval(() => { if (UI.run === run && run.status === 'thinking') renderAll(); else clearInterval(ticker); }, 500);
+  renderAll();
   /* 1. orchestrator */
   const onObj = o => handleOrch(run, o);
   try {
     if (replay) {
-      for (const line of replay.orch.split('\n')) { if (UI.ctl.signal.aborted) throw { code: 'cancelled' }; await sleep(JSON.parse(line).k === 'task' ? 450 : 650); run.orchText += line + '\n'; onObj(JSON.parse(line)); renderAll(); }
+      for (const line of replay.orch.split('\n')) { if (UI.ctl.signal.aborted) throw { code: 'cancelled' }; await sleep(JSON.parse(line).k === 'task' ? 450 : 650); run.orchText += line + '\n'; run.bts.firstAt = run.bts.firstAt || Date.now(); run.bts.chars = run.orchText.length; run.bts.drafting = draftingOf(run.orchText); onObj(JSON.parse(line)); renderAll(); }
     } else {
       /* decisions stream in faster than anyone can read; release them at a readable pace */
       const queue = []; let pumping = null;
       const pump = async () => { while (queue.length) { const o = queue.shift(); onObj(o); renderAll(); if (o.k !== 'end') await sleep(o.k === 'task' ? 450 : 750); } pumping = null; };
       const feed = streamParser(o => { queue.push(o); if (!pumping) pumping = pump(); });
       run.stats.ai++;
-      const { text: full } = await AI.sample(orchestratorPrompt(run), { modelTier: 'default', cache: false, signal: UI.ctl.signal, onText: ({ text: t }) => { run.orchText = t; feed(t); updateStream(); } });
-      run.orchText = full; feed(full);
+      const { text: full } = await AI.sample(orchestratorPrompt(run), { modelTier: 'default', cache: false, signal: UI.ctl.signal, onText: ({ text: t }) => { run.orchText = t; run.bts.firstAt = run.bts.firstAt || Date.now(); run.bts.chars = t.length; run.bts.drafting = draftingOf(t); feed(t); updateStream(); } });
+      run.orchText = full; run.bts.done = true; feed(full);
       while (pumping) await pumping;
       if (!run.tasks.length && !run.clarify) {
         run.decisions.push({ type: 'planfix', src: 'code', title: 'Plan unreadable; asking again in strict JSON', detail: 'The first reply had no usable tasks, so orchestration is asked once more for one JSON object.' }); renderAll();
@@ -659,6 +667,36 @@ function sourcesHTML(r, t) {
     ${(t.gaps || []).map(k => `<div class="srcl"><span class="vbadge Gap">GAP</span><span><b>[${esc(k)}]</b> · not connected in this demo<small>Needed for: ${esc(SERVICES[k] ? SERVICES[k].does : k)}. The step reports what it could not establish.</small></span></div>`).join('')}
     ${calls || (t.state === 'running' ? '' : '<div class="srcl"><span class="vbadge Internal">—</span><span><small>No enterprise system calls: worked from the foundation alone</small></span></div>')}</div>`;
 }
+/* ---------- behind the scenes: what intelligence and orchestration are doing while the model thinks ---------- */
+const DRAFT_LABEL = { start: 'its first decision', next: 'the next decision', requester: 'who is asking', intent: 'the business intent', asks: 'what was asked', interpretation: 'the structured interpretation', entity: 'who it is about', scope: 'the scope', known: 'what can be reused', missing: 'the gaps', memory: 'the memory rule', controls: 'the controls', task: 'a plan step', success: 'the done-when check', clarify: 'a clarifying question' };
+/* Which decision the model is writing right now: the start of the next, not yet complete, object in the stream */
+function draftingOf(text) {
+  const objs = jsonObjects(text), last = objs[objs.length - 1], tail = last ? text.slice(text.lastIndexOf(last) + last.length) : text;
+  if (/"k"\s*:\s*"task"/.test(tail)) return 'task';
+  if (/"k"\s*:\s*"clarify"/.test(tail)) return 'clarify';
+  const m = tail.match(/"type"\s*:\s*"(\w+)"/); return m ? m[1] : objs.length ? 'next' : 'start';
+}
+function btsHTML(r) {
+  const B = r.bts, C = B.context, A = AUTHORITY[B.authority.authority];
+  const srcs = [['Graph', 'network'], ['Memory', 'memory'], ['Catalogue', 'book'], ['Policy', 'shield'], ['Agents', 'users']];
+  return `<div class="dt">BEHIND THE SCENES · INTELLIGENCE & ORCHESTRATION</div>
+    <div class="bts-flow" aria-hidden="true"><div class="bts-srcs">${srcs.map(([n, ic], k) => `<span class="bts-src" style="--d:${k * 0.25}s">${icon(ic)}${n}</span>`).join('')}</div><span class="bts-pipe"></span><span class="bts-core">${icon('network')}Orchestrator</span></div>
+    <ol class="bts-steps">
+      <li><b>Resolved from the graph</b><small>${B.lookup.length ? esc(B.lookup.join(' · ')) : 'Nothing matched by name; the model will interpret the request'}</small></li>
+      <li><b>Packed the context</b><small>${C.advisors} advisors · ${C.memories} memories and notes · ${C.content} approved pieces · ${C.funds} funds · ${C.routes} sub-agent routes · ${C.services} shared services · ${C.rules} rules</small></li>
+      <li><b>Matched the query catalogue</b><small>${B.patterns.length ? B.patterns.map(p => `#${p.n} ${esc(p.intent)}: “${esc(p.ask)}”`).join('<br>') : 'No close pattern; planning from the registry alone'}</small></li>
+      ${B.routes.length ? `<li><b>Candidate sub-agents</b><small class="bts-routes">${B.routes.map(rt => { const ri = routeInfo(rt); return `<span class="rc ag" style="--c:${TC[AGENTS[ri.agent].team]}">${esc(rt)}</span>`; }).join('')}</small></li>` : ''}
+      <li><b>Action authority by rule: ${esc(A.label)}</b><small>${esc(B.authority.why)}</small></li>
+      <li><b>${B.replay ? 'Replaying the saved orchestration' : 'Sent to the orchestration model'}</b><small>About ${Math.max(1, Math.round(B.promptChars / 4 / 100) / 10)}k tokens of context, asked for an interpretation, then a plan in waves</small></li>
+    </ol>`;
+}
+function btsLiveHTML(r) {
+  const B = r.bts, secs = Math.round((Date.now() - B.t0) / 1000), tasks = r.tasks.length, shown = r.decisions.filter(d => d.src === 'ai').length + tasks, received = jsonObjects(r.orchText || '').length;
+  if (B.done || (B.replay && B.firstAt)) return `<span class="spin"></span><span><b>${B.replay ? 'Laying out the saved plan' : 'Plan received from the model'}</b><small>${secs}s · showing ${Math.min(shown, received || shown)} of ${received || shown} decisions and steps, one at a time so you can follow them</small></span>`;
+  return B.firstAt
+    ? `<span class="spin"></span><span><b>Model is writing ${esc(DRAFT_LABEL[B.drafting] || B.drafting)}</b><small>${secs}s · ${B.chars.toLocaleString()} characters received · ${received} ${received === 1 ? 'decision' : 'decisions'} received, ${shown} shown${tasks ? ` · ${tasks} plan ${tasks === 1 ? 'step' : 'steps'}` : ''}</small></span>`
+    : `<span class="spin"></span><span><b>Waiting for the model’s first decision</b><small>${secs}s · reading ${Math.max(1, Math.round(B.promptChars / 4 / 100) / 10)}k tokens of context</small></span>`;
+}
 /* ---------- intelligence and orchestration views ---------- */
 const routeChip = t => t.route ? `<span class="rc ag" style="--c:${TC[AGENTS[t.agent].team]}">${esc(t.route)}</span>` : '';
 const svcChip = k => `<span class="rc sv ${serviceStatus(k).replace(' ', '-')}" title="${esc((SERVICES[k] ? SERVICES[k].does : k) + ' · ' + serviceStatus(k))}">[${esc(k)}]</span>`;
@@ -747,7 +785,7 @@ function renderUpdates() {
   const r = UI.run, pane = $('pane-updates');
   if (!r) { patchList(pane, [{ key: 'empty', cls: 'empty', html: `<p style="font:400 19px/1.4 var(--serif);color:var(--ink);margin:0 0 8px">Ask for an outcome and press Enter.</p>Orchestration decides the plan, then assigns each task to the right team: Wholesalers, SSC, Product specialists, Content & campaigns and so on. The tasks appear on the workbench, and each team’s output shows up here the moment it’s done.` }]); return; }
   const items = [{ key: 'req-' + r.id, cls: 'dcard', html: `<div class="dt">REQUEST · ${esc(EMPLOYEES[r.requester].name)}, ${esc(TEAMS[EMPLOYEES[r.requester].team].name)}</div><b class="tt2">“${esc(r.text)}”</b>` }];
-  if (r.status === 'thinking') { const act = stepStates(r).find(x => x.state === 'active'); items.push({ key: 'plan-wait', cls: 'dcard ustat', html: `<span class="spin"></span> Orchestration is planning${act ? ' · ' + esc(act.name) : ''}` }); }
+  if (r.status === 'thinking' && r.bts) { items.push({ key: 'bts-' + r.id, cls: 'dcard btscard', html: btsHTML(r) }); items.push({ key: 'btslive-' + r.id, cls: 'dcard btslive', html: btsLiveHTML(r) }); }
   if (r.status === 'clarify') items.push({ key: 'clar-' + r.id, cls: 'clar', html: `<b>One question before planning</b><p style="margin:4px 0 0">${esc(r.clarify)}</p><input id="clarIn" placeholder="Your answer"><div style="display:flex;gap:6px;margin-top:6px"><button class="lbtn primary" data-act="answer">Continue</button><button class="lbtn" data-act="assume">Let it assume</button></div>` });
   if (r.interp) items.push({ key: 'interp-' + r.id, cls: 'dcard interpcard', html: interpHTML(r) });
   if (r.tasks.length && r.tasks[0].wave) items.push({ key: 'plan-' + r.id, cls: 'dcard plancard', html: planHTML(r) });

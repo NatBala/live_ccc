@@ -261,8 +261,10 @@ const CATALOGUE = [
 
 /* The catalogue entries closest to a request (word overlap, intent words weigh more). Shown to the planner as reference patterns. */
 function cataloguePatterns(text, k = 3) {
-  const stop = new Set(['what', 'this', 'that', 'with', 'their', 'they', 'have', 'from', 'about', 'should', 'which', 'when', 'them', 'me', 'my', 'the', 'and', 'for', 'are', 'you', 'your', 'show', 'give']);
-  const toks = s => new Set(String(s).toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 2 && !stop.has(w)).map(w => w.replace(/(ing|ed|es|s)$/, '')));
+  const stop = new Set(['what', 'this', 'that', 'with', 'their', 'they', 'have', 'from', 'about', 'should', 'which', 'when', 'them', 'me', 'my', 'the', 'and', 'for', 'are', 'you', 'your', 'show', 'give', 'next', 'month', 'week', 'tomorrow', 'today', 'last', 'year']);
+  /* fund nicknames and tickers count as "fund", so "Compare BFA and AMBAL" matches fund comparisons */
+  const funds = /\b(gfa|bfa|ambal|wmif|ifa|gfffx|agthx|vwuax|vigax|abnfx|abndx|ambfx|awshx|abalx|amecx|cggr|cgdv|cgcp|cgui|cgxu)\b/g;
+  const toks = s => new Set(String(s).toLowerCase().replace(funds, 'fund').replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 2 && !stop.has(w)).map(w => w.replace(/(ing|ed|es|s)$/, '')));
   const q = toks(text);
   return CATALOGUE.map(c => { const t = toks(c.ask + ' ' + c.decomp); let s = 0; q.forEach(w => { if (t.has(w)) s += 1; }); return { c, s: s / Math.sqrt(t.size + 1) }; })
     .filter(x => x.s > 0).sort((a, b) => b.s - a.s).slice(0, k).map(x => x.c);
