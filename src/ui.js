@@ -442,7 +442,16 @@ async function runTask(run, t) {
     if (!T || !toolAllowed(t.agent, name)) { t.calls.push({ name, input, error: 'Not permitted for this agent' }); UI.totals.blocked++; renderAll(); throw new Error(`${name} is not permitted for ${a.name}`); }
     if (toolAct(name) > authN(run.authority)) { t.calls.push({ name, input, error: `Not permitted at ${AUTHORITY[run.authority].label.toLowerCase()} authority` }); UI.totals.blocked++; renderAll(); throw new Error(`${name} is not permitted: the request is ${AUTHORITY[run.authority].label.toLowerCase()}`); }
     addOp({ kind: 'call', agent: t.agent, task: t.id, sys: T.sys, via: T.via, dur: 1500 });
-    let out; try { out = capResult(T.run(input && typeof input === 'object' ? input : {})); } catch (e) { t.calls.push({ name, input, error: e.message }); renderAll(); throw e; }
+    input = input && typeof input === 'object' ? input : {};
+    if (name === 'evidence.synthesize' && !input.advisor_id && run.advisor) input.advisor_id = run.advisor;
+    let out; try { out = capResult(T.run(input)); } catch (e) { t.calls.push({ name, input, error: e.message }); renderAll(); throw e; }
+    /* demo evidence: an empty result (or an explicit request) is filled from the business context; the AI writes it when no generator fits */
+    const live = AI.mode === 'live' && !(run.replay && !run.replay.orchOnly), aiGen = async () => { try { const g = await AI.sample.json(synthesisPrompt(name, input, run, t), { modelTier: 'quick', signal: sig }); return g && typeof g === 'object' ? g : null; } catch (e) { return null; } };
+    if (name === 'evidence.synthesize' || (isThin(out) && !SYNTH_EXCLUDE.has(name) && T.rw !== 'write')) {
+      let g = name === 'evidence.synthesize' ? (live ? await aiGen() : null) || out : synthesizeEvidence(name, input, run);
+      if (!g && live) g = await aiGen();
+      if (g && !isThin(g)) out = capResult(Object.assign(Array.isArray(g) ? { records: g } : g, { synthesized: true, synthesized_note: 'Demo evidence generated from the business context; no system held this data.' }));
+    }
     t.calls.push({ name, input, sys: T.sys, via: T.via, rw: T.rw, out }); t.toolResults.push({ name, out });
     run.stats.calls++; UI.totals.calls++; if (T.via === 'MCP') { run.stats.mcp++; UI.totals.mcp++; }
     run.record.agents[t.id] = run.record.agents[t.id] || { calls: [] }; run.record.agents[t.id].calls.push([name, input]);
@@ -460,8 +469,10 @@ async function runTask(run, t) {
     const useTools = AI.tools && t.tools.length;
     if (!useTools && t.tools.length) { /* fetch the planned tools for the agent */
       t.prefetched = {};
-      for (const n of t.tools) { try { t.prefetched[n] = await onCall(n, defaultArgs(n, run, t)); } catch (e) { } }
+      for (const n of t.tools) { if (n === 'evidence.synthesize') continue; try { t.prefetched[n] = await onCall(n, defaultArgs(n, run, t)); } catch (e) { } }
+      if (!Object.values(t.prefetched).some(v => v && !isThin(v))) { try { t.prefetched['evidence.synthesize'] = await onCall('evidence.synthesize', { need: t.objective + ' ' + run.text, advisor_id: run.advisor || '' }); } catch (e) { } }
     }
+    if (!useTools && !t.tools.length) { t.prefetched = {}; try { t.prefetched['evidence.synthesize'] = await onCall('evidence.synthesize', { need: t.objective + ' ' + run.text, advisor_id: run.advisor || '' }); } catch (e) { } }
     run.stats.ai++;
     try {
       res = await AI.sample.json(agentPrompt(t, run, t.packet, upstream, useTools), Object.assign({ modelTier: AI.deep ? 'default' : 'quick', signal: sig }, useTools ? { tools: toolDefs(t, onCall) } : { cache: false }));
@@ -641,7 +652,7 @@ function sourcesHTML(r, t) {
   const used = new Set((t.result && t.result.used) || []), counts = LAYER_ORDER.map(l => [l, p.items.filter(i => i.layer === l).length]).filter(x => x[1]);
   const cited = p.items.filter(i => used.has(i.id)).slice(0, 5);
   const ups = t.depends_on.map(d => r.tasks.find(x => x.id === d)).filter(x => x && x.result);
-  const calls = (t.calls || []).map(c => `<div class="srcl"><span class="vbadge ${c.via || 'API'}">${c.via || '—'}</span><span><b>${esc(c.sys ? SYSTEMS[c.sys].name : TOOLS[c.name] ? SYSTEMS[TOOLS[c.name].sys].name : c.name)}</b> · <code>${esc(c.name)}</code>${c.error ? `<small class="bad">Blocked: ${esc(c.error)}</small>` : `<small>Why: ${esc(toolPurpose(c.name))}</small><small>Returned: ${esc(resultGist(c.out))}</small>`}</span></div>`).join('');
+  const calls = (t.calls || []).map(c => `<div class="srcl"><span class="vbadge ${c.out && c.out.synthesized ? 'Syn' : c.via || 'API'}" ${c.out && c.out.synthesized ? 'title="Demo evidence generated from the business context; no system held this data"' : ''}>${c.out && c.out.synthesized ? 'DEMO' : c.via || '—'}</span><span><b>${esc(c.sys ? SYSTEMS[c.sys].name : TOOLS[c.name] ? SYSTEMS[TOOLS[c.name].sys].name : c.name)}</b> · <code>${esc(c.name)}</code>${c.error ? `<small class="bad">Blocked: ${esc(c.error)}</small>` : `<small>Why: ${esc(toolPurpose(c.name))}</small><small>Returned${c.out && c.out.synthesized ? ' (demo evidence, generated from the business context)' : ''}: ${esc(resultGist(c.out))}</small>`}</span></div>`).join('');
   return `<div class="srcs"><div class="srch">${icon('network')} Where this came from</div>
     <div class="srcl"><span class="vbadge Internal">FDN</span><span><b>Shared foundation</b> · sent ${p.items.length} records (${counts.map(([l, n]) => `${esc(LAYERS[l].short)} ${n}`).join(' · ')})${p.withheld.length ? ` · withheld ${p.withheld.length}` : ''}<small>Why: only what this role is permitted to see for ${esc(r.advisor ? ADVISORS[r.advisor].short : r.territory ? TERRITORIES[r.territory].name : 'this request')}</small>${cited.length ? `<small>Cited: ${cited.map(i => `${esc(i.id)} ${esc(i.label)}`).join(' · ')}</small>` : ''}</span></div>
     ${ups.map(x => `<div class="srcl"><span class="vbadge Event">STEP ${x.step}</span><span><b>${esc(ROLES[x.role].name)}</b> · ${esc((x.result.output && x.result.output.title) || x.title)}<small>Why: this step builds on that verified work instead of redoing it</small></span></div>`).join('')}
@@ -672,7 +683,8 @@ function planHTML(r) {
 }
 function contractHTML(t) {
   const c = t.contract; if (!c) return '';
-  return `<div class="contract"><span class="cs ${c.status}">${esc(c.status)}</span><span><b>${c.sources.length}</b> sources</span><span>As of: ${c.as_of.length ? esc(c.as_of.join(', ')) : '<span class="mute">not stated</span>'}</span><span><b>${c.unresolved.length}</b> unresolved</span></div>${c.unresolved.length ? `<div class="unres">${c.unresolved.map(u => `<div>• ${esc(u)}</div>`).join('')}</div>` : ''}`;
+  const syn = (t.calls || []).filter(x => x.out && x.out.synthesized).length;
+  return `<div class="contract"><span class="cs ${c.status}">${esc(c.status)}</span><span><b>${c.sources.length}</b> sources${syn ? ` · <b>${syn}</b> demo` : ''}</span><span>As of: ${c.as_of.length ? esc(c.as_of.join(', ')) : '<span class="mute">not stated</span>'}</span><span><b>${c.unresolved.length}</b> unresolved</span></div>${c.unresolved.length ? `<div class="unres">${c.unresolved.map(u => `<div>• ${esc(u)}</div>`).join('')}</div>` : ''}`;
 }
 /* ---------- the query catalogue: what users ask, how it is decomposed, which sub-agents run ---------- */
 function routeHTML(route) {

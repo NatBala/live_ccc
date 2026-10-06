@@ -137,7 +137,8 @@ const SERVICES = {
   'change history': { name: 'Change history', status: 'simulated', tools: ['insights.changes_since'], does: 'Everything that changed since the last completed meeting (or a date): assets, flows, transactions, pipeline, platform, engagement, events' },
   activity: { name: 'Activity feed', status: 'simulated', tools: ['book.get_activity'], does: 'Daily purchases and redemptions for any advisor and period, generated from the advisor’s own book and trend' },
   'relationship graph': { name: 'Relationship graph', status: 'foundation', tools: ['crm.get_team'], does: 'The advisor’s team, Capital Group’s coverage team, firms and units' },
-  'action review': { name: 'Action review', status: 'foundation', tools: [], does: 'Human review of any change before it is made' }
+  'action review': { name: 'Action review', status: 'foundation', tools: [], does: 'Human review of any change before it is made' },
+  'evidence synthesis': { name: 'Evidence synthesis', status: 'simulated', tools: ['evidence.synthesize'], does: 'Demo evidence generated from the business context when no system holds it' }
 };
 const SERVICE_ALIASES = { 'flows calculations': 'flows', 'assets history': 'assets', 'metric definitions': 'market share', 'dealer changes': 'platform eligibility', 'pipeline history': 'pipeline', tasks: 'task state', 'plan master': 'plans', 'plans pagination': 'plans', service: 'service state', 'task state': 'task state' };
 /* "[assets/pipeline]" → ['assets', 'pipeline'] (known keys, or the raw name when unknown) */

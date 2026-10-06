@@ -167,6 +167,80 @@ function changesSince(a) {
     flows_by_vehicle: Object.values(byVeh), transactions: tx, pipeline_changes: pipe, platform_changes: shelf, digital_engagement: digital, business_events: events, other_contacts: contacts, service_cases: cases, highlights,
     source: 'Change history service: recorded activity plus a generated activity feed for the period (simulated)' };
 }
+/* ---------- Demo evidence: when a system holds nothing for a question, generate plausible evidence from the business context ----------
+   Generated evidence is marked synthesized and shown with a badge in the trace. Facts the checks depend on are never generated:
+   fund numbers, availability, approved content and disclosures, evidence verification and computed rankings. */
+const SYNTH_EXCLUDE = new Set(['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'fund.compare', 'models.cost_on_assets', 'models.portfolio_construction', 'models.plan_fee_comparison', 'mstar.get_peers',
+  'platform.get_availability', 'platform.get_program_rules', 'models.get_allocations', 'seismic.search_content', 'seismic.resolve_evidence', 'seismic.get_approved_language', 'aem.get_page', 'sharepoint.get_disclosures',
+  'taxonomy.resolve', 'crm.get_plan', 'lead.discover', 'lead.get_ranking_trace', 'pipeline.score', 'territory.coverage', 'peer.compare', 'models.territory_trends', 'models.sales_alpha', 'calendar.find_times', 'evidence.synthesize']);
+function isThin(out) {
+  if (out == null) return true;
+  if (Array.isArray(out)) return out.length === 0;
+  if (typeof out !== 'object') return false;
+  const arrays = Object.values(out).filter(Array.isArray), anyRows = arrays.some(a => a.length);
+  if (out.note && /^(no |unknown|name )/i.test(out.note) && !anyRows) return true;
+  return arrays.length > 0 && !anyRows;
+}
+/* What the business context says about an advisor: the raw material for any generated evidence */
+function ctxOf(id) {
+  const A = ADVISORS[id]; if (!A) return null;
+  const pri = F.memory.filter(m => m.adv === id && m.access === 'shared' && m.status !== 'superseded' && /priority|content_pref/.test(m.cat)).map(m => ({ id: m.id, value: m.value }));
+  return { id, A, first: A.short, firm: FIRMS[A.firm].name, units: Object.entries(A.units), priorities: pri.length ? pri : [{ id: null, value: A.practice }],
+    holdings: (BOOK[id] ? BOOK[id].funds : []).filter(f => f[1] !== 'SMA'), team: (ADVISOR_TEAMS[id] || [[A.name, 'Lead advisor']]), covering: A.coverage.map(c => EMPLOYEES[c].name), book_usd_m: BOOK[id] ? M1(BOOK[id].funds.reduce((t, f) => t + f[2], 0)) : null };
+}
+const synDay = (rnd, from = 'Jul 1, 2026', to = 'Sep 28, 2026') => fmtDay(dayMs(from) + Math.floor(rnd() * Math.max(1, (dayMs(to) - dayMs(from)) / 864e5)) * 864e5);
+const pick = (rnd, arr) => arr[Math.floor(rnd() * arr.length)];
+const fundName = t => FUNDS[t] ? FUNDS[t].name.split(',')[0] : 'Capital Group ' + t;
+const topicOf = v => String(v).replace(/[.;].*$/, '').replace(/^(current (priority|decision)|focus): /i, '').toLowerCase();
+/* Deterministic generators by tool, keyed on the advisor and the arguments (same question, same evidence) */
+function synthesizeEvidence(name, args, run) {
+  const id = advId(args && args.advisor_id) || (run && run.advisor), C = id && ctxOf(id), rnd = seededRandom('syn|' + name + '|' + (id || '') + '|' + JSON.stringify(args || {}));
+  const member = C ? (C.team[1] || C.team[0])[0] : 'the advisor’s team', topic = C ? topicOf(pick(rnd, C.priorities).value) : 'their current priorities', hold = C && C.holdings.length ? pick(rnd, C.holdings) : null;
+  const S2 = x => String(x ?? '').trim();
+  switch (name) {
+    case 'crm.get_tasks': return C && { tasks: C.priorities.slice(0, 2).map((p, k) => ({ id: 'SF-TASK-' + (810 + k + C.id.slice(-1) * 3), title: `Follow up with ${C.first} on ${topicOf(p.value)}`, owner: C.covering[0], due: synDay(rnd, 'Oct 1, 2026', 'Oct 30, 2026'), status: 'Open', scope: C.units[0][0], based_on: p.id })) };
+    case 'service.get_cases': return C && [{ id: 'CASE-00' + (540 + Number(C.id.slice(-1))), adv: C.id, status: 'Resolved', opened: synDay(rnd), owner: 'Kim Nguyen', text: `${member} asked for ${pick(rnd, [`updated fact sheets for ${hold ? fundName(hold[0]) : 'their holdings'}`, 'a share-class explanation for a client statement', 'year-end distribution estimates'])}; resolved the same day.` }];
+    case 'contact.get_interactions': return C && [{ id: 'INT-' + (7810 + Number(C.id.slice(-1))), adv: C.id, when: synDay(rnd, 'Sep 1, 2026') + ', 10:20 a.m. PT', channel: pick(rnd, ['Phone, advisor service line', 'Chat, advisor portal']), caller: `${member}, for ${C.A.name}`, handled_by: 'Kim Nguyen', summary: `Asked for the latest material on ${hold ? fundName(hold[0]) : 'their core holdings'} ahead of a client review; tied to ${topic}.`, sentiment: 'Positive' }];
+    case 'seismic.get_delivery_log': { const r = C && ((CONTENT_RECS[C.id] || [])[0] || ['SEIS-117']); return C && [{ id: 'LS-' + (1000 + Number(C.id.slice(-1)) * 7), adv: C.id, sent: synDay(rnd, 'Sep 1, 2026') + ', 9:10 a.m. PT', from: C.covering[0], to: C.A.name, asset: r[0], title: CONTENT.find(c => c.id === r[0]).title, email: 'Delivered; opened 2 times', link_status: 'Active', link_expires: 'Oct 30, 2026', recipient_access: `Permitted: ${C.A.name} is on the recipient list`, link_events: ['Opened from the office network', 'Opened again two days later'], content_views: 2 }]; }
+    case 'engage.get_digital': return C && { note: 'Observed events only; a visit is not intent to buy.', events: [hold && { advisor: C.A.name, date: synDay(rnd, 'Sep 1, 2026'), kind: 'Page visit', item: fundName(hold[0]) + ' fund page' }, { advisor: C.A.name, date: synDay(rnd, 'Sep 1, 2026'), kind: 'Article open', item: (CONTENT.find(c => topic.split(/\W+/).some(w => w.length > 4 && c.tags.includes(w))) || CONTENT[6]).title }].filter(Boolean) };
+    case 'events.get_changes': return C && { events: [{ advisor: C.A.name, date: synDay(rnd, 'Aug 15, 2026'), event: pick(rnd, [`${C.team[0][0].split(',')[0]}’s team onboarded a new client family`, `${member} took on a larger role in portfolio reviews`, `${C.firm} updated its advisory platform guidelines`]), source: 'Salesforce' }] };
+    case 'book.get_fund_transactions': return C && BOOK[C.id] && { window: 'Jul 1 to Sep 28, 2026', transactions: activityFeed(C.id, 'Jul 1, 2026', 'Sep 28, 2026').map(t => ({ advisor: C.A.name, date: t.date, fund: t.fund, type: t.type, amount_usd_m: t.amount_usd_m })) };
+    case 'seismic.get_recommendations': return C && { advisor: C.A.name, recommendations: CONTENT.map(c => ({ c, s: C.priorities.reduce((t, p) => t + c.tags.split(' ').filter(w => w.length > 3 && p.value.toLowerCase().includes(w)).length, 0) })).filter(x => x.s).sort((a, b) => b.s - a.s).slice(0, 2).map(x => ({ id: x.c.id, title: x.c.title, basis: 'Advisor’s stated need', reason: 'Matches a recorded priority: ' + topicOf(C.priorities[0].value), evidence: C.priorities[0].id })) };
+    case 'pipeline.get': case 'crm.get_opportunities': { const o = C && { id: 'OPP-5' + (20 + Number(C.id.slice(-1))), name: `${C.first} ${topic.split(' ').slice(0, 3).join(' ')} review`, unit: C.units[0][0], stage: 'Discovery', open: true, history: [{ date: synDay(rnd, 'Sep 1, 2026'), stage: 'Discovery' }] }; return o && (name === 'pipeline.get' ? { as_of: 'Sep 29, 2026', opportunities: [o] } : [{ id: o.id, adv: C.id, scope: o.unit, name: o.name, stage: o.stage, note: 'Opened from ' + topic }]); }
+    case 'crm.get_call_notes': return C && [{ id: 'MTG-' + synDay(rnd, 'Jun 1, 2026', 'Aug 31, 2026').replace(/\D/g, '').slice(0, 4), date: synDay(rnd, 'Jun 1, 2026', 'Aug 31, 2026'), kind: 'Meeting notes', scope: C.units[0][0], text: `${C.first} and ${member}: ${topic}. ${hold ? 'Discussed the role of ' + fundName(hold[0]) + ' in their lineup.' : ''}` }];
+    case 'news.get_items': return { window: 'Sep 14 to Sep 28, 2026', items: [{ id: 'N-3' + (40 + Math.floor(rnd() * 50)), date: synDay(rnd, 'Sep 14, 2026'), title: C ? `${C.firm.split(' ')[0]} advisors lean into ${topic.split(' ').slice(0, 4).join(' ')}` : 'Advisors revisit core allocations', source: 'Industry newsletter (licensed)', matches: 1 }] };
+    case 'mcloud.get_engagement': { const t = S2(args && args.topic) || 'this topic'; return { topic: t, results: [{ name: `${t} email series, Q3`, audience: 'Financial professionals', open_rate_pct: M1(28 + rnd() * 18), click_rate_pct: M1(2 + rnd() * 5) }, { name: `LinkedIn posts on ${t}, Q2 to Q3`, audience: 'Public', engagement_rate_pct: M1(1 + rnd() * 3), takeaway: 'Posts with a concrete example outperformed general commentary.' }] }; }
+    case 'service.get_insights': { const t = S2(args && args.topic) || 'this topic'; const now = 8 + Math.floor(rnd() * 30); return { topic: t, period: 'Q3 2026 (Jul 1 to Sep 28)', source: 'Genesys Cloud and Service Cloud, aggregated; no advisor identifiers', contacts_this_quarter: now, contacts_last_quarter: Math.max(1, now - 4 - Math.floor(rnd() * 8)), top_questions: [`How do I explain ${t} to clients?`, `Where is the latest approved material on ${t}?`, `Which share classes does ${t} apply to?`], takeaway: `Advisors want client-ready explanations of ${t}.` }; }
+    case 'coach.get_playbook': { const t = S2(args && args.topic) || 'this objection'; return { topic: t, steps: ['Acknowledge the concern and ask what prompted it', `Clarify what “${t}” means for this advisor’s clients`, 'Answer from verified facts and approved messaging only', 'Offer one approved piece that addresses it'], avoid: ['Performance claims not inserted from the system of record'], questions: [`What would change your mind on ${t}?`] }; }
+    default: return null;
+  }
+}
+/* For questions no system covers: evidence of the kind the step says it needs, built from the advisor's context */
+function evidenceFor(need, id) {
+  const C = ctxOf(id), n = String(need || '').toLowerCase(), rnd = seededRandom('need|' + id + '|' + n); if (!C) return { note: 'Name an advisor so the evidence fits their business.' };
+  const member = (C.team[1] || C.team[0])[0], topic = topicOf(C.priorities[0].value), hold = C.holdings.length ? pick(rnd, C.holdings) : null;
+  const make = (kind, rows) => ({ evidence_type: kind, advisor: C.A.name, records: rows, basis: `Built from ${C.first}’s recorded priorities, holdings and team` });
+  if (/feedback|survey|think|thought|sentiment|satisf|react|liked/.test(n)) return make('Client and advisor feedback', [1, 2, 3].map(k => ({ id: 'FB-' + (600 + k + Number(C.id.slice(-1)) * 10), date: synDay(rnd, 'Sep 1, 2026'), from: k === 1 ? member : `A client household of ${C.first}’s`, channel: k === 1 ? 'Post-meeting survey' : 'Client review notes', rating_of_5: 3 + Math.floor(rnd() * 3), comment: k === 1 ? `Useful; wants more on ${topic}.` : pick(rnd, ['Wants simpler explanations of costs.', 'Asked how income is paid out.', 'Liked the one-page summary.']) })));
+  if (/competit|other manager|rival|vanguard|blackrock|ishares/.test(n)) return make('Competitive context', [{ id: 'CI-' + (700 + Number(C.id.slice(-1))), date: synDay(rnd, 'Sep 1, 2026'), observed_by: C.covering[0], note: `Another manager pitched a lower-cost model to ${C.first}’s team; ${member} asked us for a side-by-side on ${topic}.` }]);
+  if (/transact|bought|buy|sold|sell|flow|redeem|purchase|sales/.test(n)) return make('Recent transactions', activityFeed(id, 'Aug 30, 2026', 'Sep 29, 2026'));
+  if (/web|visit|engag|click|open|webinar/.test(n)) return synthesizeEvidence('engage.get_digital', { advisor_id: id });
+  if (/task|commit|promis|follow/.test(n)) return synthesizeEvidence('crm.get_tasks', { advisor_id: id });
+  if (/event|news|change|hire|joined/.test(n)) return synthesizeEvidence('events.get_changes', { advisor_id: id });
+  if (/meeting|note|said|told|conversation|call|asked/.test(n)) return synthesizeEvidence('crm.get_call_notes', { advisor_id: id });
+  return make('Observations', [
+    { id: 'OBS-' + (800 + Number(C.id.slice(-1)) * 3), date: synDay(rnd, 'Sep 1, 2026'), observation: `${member} raised ${topic} during a team call`, source: 'Salesforce activity' },
+    hold && { id: 'OBS-' + (801 + Number(C.id.slice(-1)) * 3), date: synDay(rnd, 'Sep 1, 2026'), observation: `${fundName(hold[0])} is ${C.first}’s largest Capital Group position at $${hold[2]}M`, source: 'Assets service' },
+    { id: 'OBS-' + (802 + Number(C.id.slice(-1)) * 3), date: synDay(rnd, 'Sep 1, 2026'), observation: `${C.covering[0]} noted interest in a follow-up on ${topic}`, source: 'Salesforce activity' }].filter(Boolean));
+}
+function synthesisPrompt(name, args, run, task) {
+  const id = advId(args && args.advisor_id) || run.advisor, C = id && ctxOf(id), T = TOOLS[name];
+  return `You generate realistic demo evidence for Capital Group's Connected Client Experience demo. ${name === 'evidence.synthesize' ? 'An agent needs evidence that no system holds.' : `The tool ${name} returned no data.`}
+Create plausible records that fit the business context below and the step's purpose. Rules: ${name === 'evidence.synthesize' ? 'return {"evidence_type":"...","records":[...]} with 2 to 4 records, each with an id, a date and the fields that matter' : 'keep the tool’s usual output shape: ' + T.desc}; dates between Jul 1 and Sep 28, 2026; amounts in $ millions with one decimal and small relative to the advisor's book; name team members only from the context and use roles or "a client household" for clients; never invent fund expense ratios, returns, ratings, platform availability or compliance approvals. Reply with one JSON object only.
+Arguments: ${JSON.stringify(args || {})}
+What the step is doing: ${task ? task.objective : ''}
+Request: "${run.text}"
+Business context: ${JSON.stringify(C ? { advisor: C.A.name, title: C.A.title, firm: C.firm, practice: C.A.practice, units: C.units, priorities: C.priorities.map(p => p.value), holdings: C.holdings.map(h => `${h[0]} $${h[2]}M`), team: C.team, coverage: C.covering, recent: F.episodes.filter(e => e.adv === id).slice(0, 3).map(e => `${e.date}: ${e.text}`) } : { territory: run.territory, note: 'no advisor resolved' })}`;
+}
 const TOOLS = {
   'crm.get_contact': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce: advisor contact, firm, team, buying units and coverage.', props: { advisor_id: 'string' },
     run: a => { const x = adv(a.advisor_id), id = advId(a.advisor_id), sh = SHELF[x.firm]; return { name: x.name, title: x.title, firm: FIRMS[x.firm].name, office: x.office, team: x.team, units: x.units, coverage: x.coverage.map(c => EMPLOYEES[c].name), platform_programs: sh && sh.advisor_programs[id] ? sh.advisor_programs[id] : 'not in reference data' }; } },
@@ -274,6 +348,8 @@ const TOOLS = {
       return { as_of: 'Sep 29, 2026', definition: 'Meaningful contact = a completed call, meeting or two-way email recorded in Salesforce; scheduled meetings do not count.',
         advisors: ids.map(id => { const eps = F.episodes.filter(e => e.adv === id).sort((x, y) => Date.parse(y.date) - Date.parse(x.date)), last = eps[0];
           return { advisor: ADVISORS[id].name, last_completed: last ? { id: last.id, date: last.date, kind: last.kind, with: last.with } : null, days_since: last ? Math.round((now - Date.parse(last.date)) / 864e5) : null, completed_last_90_days: eps.filter(e => now - Date.parse(e.date) <= 90 * 864e5).length }; }) }; } },
+  'evidence.synthesize': { sys: 'fund', via: 'API', rw: 'read', desc: 'Demo evidence: when no system holds the evidence a step needs (feedback, competitive context, observations, notes, engagement), generates plausible records from the advisor’s business context. Say what you need in "need".', props: { need: 'string', advisor_id: 'string' },
+    run: a => evidenceFor(a.need, advId(a.advisor_id) || F.session.advisor) },
   'insights.changes_since': { sys: 'fund', via: 'API', rw: 'read', desc: 'Change history: everything that changed for an advisor since their last completed meeting (or a given date): assets at start and end of the period split into net flows and market movement, flows by vehicle, transactions, pipeline moves, platform changes, digital engagement, business events and other contacts, with ranked highlights. Amounts in $ millions.', props: { advisor_id: 'string', since: 'string' },
     run: a => changesSince(a) },
   'book.get_activity': { sys: 'fund', via: 'API', rw: 'read', desc: 'Activity feed: daily purchases and redemptions for an advisor between two dates (default: the last 30 days), with net flows by vehicle. Amounts in $ millions.', props: { advisor_id: 'string', since: 'string', until: 'string' },
@@ -357,6 +433,7 @@ const TOOLS = {
     run: a => { const tk = tickerOf(a.category); const cat = tk && FUNDS[tk].category ? FUNDS[tk].category : Object.keys(PEERS).find(c => c.toLowerCase().includes(S(a.category).toLowerCase().split(' ')[0])) || 'Large Growth';
       return { category: cat, peers: PEERS[cat].peers, median_expense_ratio_pct: PEERS[cat].medianEr, note: PEERS[cat].note, categories_available: Object.keys(PEERS) }; } }
 };
+Object.values(AGENTS).forEach(a => { if (!a.tools.includes('evidence.synthesize')) a.tools.push('evidence.synthesize'); });
 const toolAllowed = (agent, tool) => (AGENTS[agent]?.tools || []).includes(tool);
 
 /* ---------- Action authority: decided by rule from the request's own words ---------- */
@@ -747,6 +824,7 @@ Requests can be about one advisor, a territory, a product, or internal work with
 Ask for clarification only if acting would be unsafe or impossible: emit {"k":"clarify","question":"..."} after the entity decision, then {"k":"end"}. Otherwise make a sensible assumption and state it in the "missing" decision.
 ${run.clarified ? `You already asked: "${run.clarified.question}". The user answered: "${run.clarified.answer}". Do NOT ask again. Proceed, interpreting the answer as best you can, and state your assumption.` : ''}
 Be precise: titles of 3 to 6 words, details of at most 16 words, no filler. Reuse foundation records instead of redoing work.
+Where no system holds the evidence a question needs, still plan the step: empty results are filled with demo evidence built from the business context, and every agent can call evidence.synthesize. Never drop part of a request for lack of data.
 Plan in waves. Independent reads go first with empty depends_on so they run together (for example Prep.Profile, Prep.Notes and data-service reads). Checks (Prep.Fact Check, Product.QAR) depend on the reads they check. Building steps (Prep.Agenda, drafts) come last. A step depends only on steps whose output it actually needs. Numbers come from data services (assets, flows, market share, platform eligibility), never from narrative notes.
 Every step returns its output, source references, as-of dates, unresolved issues and completion status.
 Tell the story a real team would. ${E.name} is the primary actor: the plan ends with a result delivered to them, and other teams appear as contributors whose work they build on. Choose only the steps the request needs (often 2 to 5); bring in another team only when it owns part of the work or holds evidence ${E.name.split(' ')[0]} lacks, and say so in "why", including which system it will query and for what. Every task must produce a different kind of output (for example a computation, a verified answer, a draft, a compliance review, a case update, a calendar hold); never add a task that only reformats, summarizes or packages an earlier task's output. Chain tasks with depends_on so later specialists build on what earlier ones publish to the foundation. Tasks that don't depend on each other run in parallel.
@@ -784,6 +862,7 @@ RULES
 - You work for ${E.name}. When you reuse a colleague's earlier notes or work (for example call notes another wholesaler recorded), credit them by name and team and say why it helps ${E.name.split(' ')[0]}.
 - When approved messaging (MSG- ids) is available, use it verbatim or lightly edited and cite the ids in "used"; make no new claims beyond it.${a.team === 'service' ? `
 - Diagnose from evidence: for each likely cause, say what you checked and which record (case, interaction, delivery log id) confirms or rules it out. Write case notes the way an experienced service rep would: plain sentences a colleague can follow, not system shorthand.` : ''}
+- Evidence: use the packet and your tools first. If they hold nothing for part of the task, call evidence_synthesize with what you need (and the advisor id); its records are demo evidence built from the business context. Treat them like any other tool result and cite them. Tool results marked "synthesized" are also demo evidence; use them normally. Never write figures that are not in a tool result.
 - When your step reads data, write the output body the way an analyst would, in three short parts: "What I checked:" the sources you used and the period you compared; "What changed:" the specific changes with numbers from the tool results, each against its prior period or starting point; "What it means:" one to three insights for ${E.name.split(' ')[0]}, each tied to a change above. If one source shows no change, say so in a single line and move on to the sources that did change. Never conclude that nothing changed while any tool result shows activity. (Emails, posts and case notes keep their own format.)
 - Step contract: "as_of" lists the dates of the data you relied on; "status" is complete, partial (something material could not be established) or blocked; "open_questions" lists unresolved issues and conflicts.
 - "next_step": the one concrete action ${E.name} should take because of your work (who, what, by when if known), addressed to ${E.name.split(' ')[0]}. Use the same number rules. Leave it empty if there is nothing for them to do.
@@ -793,7 +872,7 @@ Reply with only a JSON object:
 Use empty arrays when nothing applies.`;
 }
 function toolDefs(task, onCall) {
-  return (task.tools || []).filter(t => TOOLS[t]).map(name => {
+  return [...new Set([...(task.tools || []), 'evidence.synthesize'])].filter(t => TOOLS[t]).map(name => { /* every step may ask for demo evidence */
     const T = TOOLS[name], props = {};
     for (const [k, v] of Object.entries(T.props)) props[k] = v === 'array' ? { type: 'array', items: { type: 'string' } } : { type: v };
     return { name: name.replace('.', '_'), description: `${T.desc} (${SYSTEMS[T.sys].name} via ${T.via})`, inputSchema: { type: 'object', properties: props }, execute: async input => onCall(name, input) };

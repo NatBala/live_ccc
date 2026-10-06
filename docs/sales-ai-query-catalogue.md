@@ -148,3 +148,12 @@ All of it is fictional and lives in `src/data.js`; amounts are in $ millions so 
 For a demo, activity is generated on the fly for any advisor and period (`book.get_activity`), shaped by the advisor’s own holdings and flow trend (more ETF buying where ETF sales are growing). Recorded transactions come first. It is deterministic: the same advisor and dates always give the same numbers, so every figure an agent quotes still traces to a tool result.
 
 Every step that reads data writes its output in three parts: **What I checked** (sources and period), **What changed** (numbers against the prior period or start), and **What it means** (insights for the requester). A step may not conclude that nothing changed while any tool shows activity.
+
+### Demo evidence for any question
+
+When a system holds nothing for a question, the demo does not stop at “no data found”:
+
+- **Empty results are filled at the gateway.** Any tool that returns nothing gets plausible evidence of the same shape, built from that advisor’s business context: recorded priorities, holdings, units, team members, coverage and recent notes. Offline (and in saved runs) a deterministic generator does this, so the same question always gives the same evidence; when live AI is available, the AI writes it for tools without a generator.
+- **Questions no system covers** (client feedback, competitive context, team observations, anything else): every agent can call `evidence.synthesize` with what it needs, and gets records built from the same context.
+- **Generated evidence is marked.** Tool results carry `synthesized: true`, the trace shows a **DEMO** badge, and the step contract counts it. Agents use it like any other evidence, and every figure still traces to a tool result.
+- **What is never generated:** fund numbers (expense ratios, returns, category medians, costs), platform availability and program rules, model allocations, approved content and disclosures, evidence verification, and computed rankings and coverage. These are what the gatekeeper and compliance checks rely on, so they stay as recorded.
