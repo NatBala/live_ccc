@@ -67,7 +67,7 @@ function patchList(box, items) {
 }
 
 /* ---------- orchestration: nine precise steps ---------- */
-const OSTEPS = [['understand', 'Understand', ['requester', 'intent', 'asks']], ['resolve', 'Resolve', ['lookup', 'entity']], ['scope', 'Scope', ['scope']], ['reuse', 'Reuse', ['known']], ['gaps', 'Gaps', ['missing']], ['memory', 'Memory rule', ['memory']], ['controls', 'Controls', ['controls', 'registry']], ['plan', 'Plan', ['planfix', 'success']], ['execute', 'Execute', []]];
+const OSTEPS = [['understand', 'Understand', ['requester', 'intent', 'asks', 'interpretation']], ['resolve', 'Resolve', ['lookup', 'entity']], ['scope', 'Scope', ['scope']], ['reuse', 'Reuse', ['known']], ['gaps', 'Gaps', ['missing']], ['memory', 'Memory rule', ['memory']], ['controls', 'Controls', ['controls', 'registry', 'authority']], ['plan', 'Plan', ['planfix', 'success']], ['execute', 'Execute', []]];
 function stepStates(r) {
   const s = OSTEPS.map(([id, name, types]) => ({ id, name, items: r ? r.decisions.filter(d => types.includes(d.type)) : [], state: 'pending' }));
   if (!r) return s;
@@ -75,7 +75,7 @@ function stepStates(r) {
   s[7].state = r.tasks.length ? (r.status === 'thinking' ? 'active' : 'done') : 'pending';
   s[8].state = r.status === 'running' ? 'active' : r.status === 'done' ? 'done' : 'pending';
   if (r.status === 'thinking') { const f = s.find(x => x.state === 'pending'); if (f) f.state = 'active'; }
-  if (['running', 'done'].includes(r.status)) s.slice(0, 7).forEach(x => { if (x.state === 'pending') x.state = 'skipped'; });
+  if (['running', 'done', 'planned'].includes(r.status)) s.slice(0, 7).forEach(x => { if (x.state === 'pending') x.state = 'skipped'; });
   if (r.status === 'clarify') s[4].state = 'active';
   if (r.status === 'failed') { const f = s.find(x => x.state === 'pending' || x.state === 'active'); if (f) f.state = 'failed'; }
   return s;
@@ -91,10 +91,11 @@ function renderOrch() {
     if (r.status === 'thinking') think = `<span class="spin"></span><b>${act ? act.name : 'Thinking'}</b>${last ? ' · ' + esc(last.title) : ''}`;
     else if (r.status === 'running') { const run = [...new Set(r.tasks.filter(t => t.state === 'running').map(t => ROLES[t.role].name))]; think = `<span class="spin"></span><b>Workbench</b> · ${run.length ? esc(run.join(' and ')) + ' working' : 'assigning'} · ${r.tasks.filter(t => t.state === 'done').length} of ${r.tasks.length} tasks done`; }
     else if (r.status === 'clarify') think = '<b>Gaps</b> · waiting for your answer';
+    else if (r.status === 'planned') think = `<b>Plan ready</b> · ${r.tasks.length} steps in ${new Set(r.tasks.map(t => t.wave)).size} waves · nothing has run yet`;
     else if (r.status === 'done') think = `<b>Complete</b> · ${r.tasks.length} tasks across ${new Set(r.tasks.map(t => ROLES[t.role].team)).size} teams in ${Math.round((r.t1 - r.t0) / 1000)} s`;
     else if (r.status === 'failed') think = `<b>Stopped</b> · ${esc(r.error || '')}`;
   }
-  if (r && r.presentationPause) { const t = r.tasks.find(t => t.id === r.presentationPause.task); think = `<b>Step ${t?.step || ''} output ready</b> · Next step in ${r.presentationPause.seconds}s · Review the output below`; }
+  if (r && r.presentationPause) { const P = r.presentationPause; think = `<b>Wave ${P.wave} output ready</b> · ${P.wave < P.of ? 'Next wave' : 'Closing'} in ${P.seconds}s · Review the output below`; }
   setHTML($('othink'), think);
   patchList($('tchips'), r ? r.tasks.map(t => ({ key: t.id, cls: 'tchip ' + (t.state || ''), html: `<i style="--c:${TC[ROLES[t.role].team]}"></i>${esc(ROLES[t.role].name)}: ${esc(t.title)}` })) : []);
   $('orch').classList.toggle('active', !!r && ['thinking', 'running'].includes(r.status));
@@ -221,9 +222,9 @@ async function runRequestInner(text, replay, opts = {}) {
   if (!replay && AI.mode !== 'live') { toast(AI.mode === 'checking' ? 'Connecting to the AI… try again in a moment.' : 'Live AI isn’t available here. Run it on claude.ai or with the deployment package.'); return; }
   const requester = replay ? replay.requester : UI.requester;
   if (replay) { UI.requester = requester; buildStaticWho(); }
-  const run = { id: 'RUN-' + (++RUNSEQ), requester, text, clarified: opts.clarified || null, territory: null, t0: Date.now(), decisions: [], tasks: [], status: 'thinking', advisor: null, unit: null, stats: { reused: 0, reads: 0, calls: 0, mcp: 0, committed: 0, pending: 0, blocked: 0, rejected: 0, task: 0, ai: 0 }, orchText: '', record: { name: text.slice(0, 60), requester, text, orch: '', agents: {} }, replay };
+  const run = { id: 'RUN-' + (++RUNSEQ), requester, text, planOnly: !!opts.planOnly, clarified: opts.clarified || null, territory: null, t0: Date.now(), decisions: [], tasks: [], status: 'thinking', advisor: null, unit: null, stats: { reused: 0, reads: 0, calls: 0, mcp: 0, committed: 0, pending: 0, blocked: 0, rejected: 0, task: 0, ai: 0 }, orchText: '', record: { name: text.slice(0, 60), requester, text, orch: '', agents: {} }, replay };
   UI.run = run; UI.ctl = new AbortController(); F.runs.push(run); UI.totals.runs++;
-  $('runBtn').disabled = true; $('stopBtn').hidden = false; $('cmdIn').value = ''; $('cmdIn').blur();
+  $('runBtn').disabled = true; $('planBtn').disabled = true; $('stopBtn').hidden = false; $('cmdIn').value = ''; $('cmdIn').blur();
   setTab('updates');
   logEvent('request.received', `${EMPLOYEES[requester].name}: ${text}`, requester);
   addOp({ kind: 'request', dur: 900 });
@@ -276,25 +277,36 @@ async function runRequestInner(text, replay, opts = {}) {
   }
   if (run.tasks.length) finalizePlan(run);
   run.record.orch = run.orchText.split('\n').filter(s => s.trim().startsWith('{')).join('\n');
-  if (run.clarify) { run.status = 'clarify'; renderAll(); $('runBtn').disabled = false; $('stopBtn').hidden = true; return; }
+  if (run.clarify) { run.status = 'clarify'; renderAll(); $('runBtn').disabled = false; $('planBtn').disabled = false; $('stopBtn').hidden = true; return; }
   if (!run.tasks.length) return finishRun(run, 'Orchestration produced no tasks.');
-  /* registry governance on the plan */
+  if (run.planOnly) { run.status = 'planned'; run.t1 = Date.now(); logEvent('plan.ready', `${run.tasks.length} steps in ${new Set(run.tasks.map(t => t.wave)).size} waves (not run)`, 'orch', run.advisor); $('runBtn').disabled = false; $('planBtn').disabled = false; $('stopBtn').hidden = true; renderAll(); return; }
+  await executePlan(run);
+}
+/* Orchestration: run the plan wave by wave. Steps in a wave run together; each wave waits for the one before. */
+async function executePlan(run) {
   if (run.advisor) { F.session.advisor = run.advisor; F.session.unit = run.unit || null; }
-  F.session.requests.push({ text, adv: run.advisor });
-  run.status = 'running'; renderAll();
-  /* Execute one step at a time, allowing the completed output to be read. */
-  const done = new Set();
-  while (run.tasks.some(t => !t.state || t.state === 'queued')) {
+  F.session.requests.push({ text: run.text, adv: run.advisor });
+  if (run.status === 'planned') run.t0 = Date.now();
+  run.status = 'running'; $('runBtn').disabled = true; $('planBtn').disabled = true; $('stopBtn').hidden = false; renderAll();
+  const waves = [...new Set(run.tasks.map(t => t.wave))].sort((a, b) => a - b);
+  for (const w of waves) {
     if (UI.ctl.signal.aborted) return finishRun(run, 'Stopped.');
-    const ready = run.tasks.filter(t => (!t.state || t.state === 'queued') && t.depends_on.every(d => done.has(d)));
-    if (!ready.length) { run.tasks.filter(t => t.state === 'queued').forEach(t => t.depends_on = []); continue; }
-    for (const t of ready) {
-      await runTask(run, t).catch(e => { t.state = 'failed'; t.error = errText(e); renderAll(); });
-      done.add(t.id);
-      if (UI.ctl.signal.aborted) return finishRun(run, 'Stopped.');
-    }
+    const ws = run.tasks.filter(t => t.wave === w && (!t.state || t.state === 'queued'));
+    await Promise.all(ws.map(t => runTask(run, t).catch(e => { t.state = 'failed'; t.error = errText(e); renderAll(); })));
+    if (UI.ctl.signal.aborted) return finishRun(run, 'Stopped.');
+    await holdForReading(run, w, waves.length);
   }
   finishRun(run);
+}
+/* Each wave's finished output stays on screen for READ_PAUSE_S before the next wave starts. */
+async function holdForReading(run, wave, of) {
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  run.presentationPause = { wave, of, seconds: READ_PAUSE_S };
+  for (let left = READ_PAUSE_S; left > 0 && !UI.ctl.signal.aborted; left--) {
+    run.presentationPause.seconds = left; renderAll();
+    for (let k = 0; k < 10 && !UI.ctl.signal.aborted; k++) await sleep(100);
+  }
+  run.presentationPause = null; renderAll();
 }
 /* Tie every task to what was asked, and put the tasks in a clear order. */
 function splitAsks(text) {
@@ -313,6 +325,23 @@ function finalizePlan(run) {
     run.asks[t.ask - 1].tasks.push(t.id);
   }
   run.asks.forEach((a, k) => { if (!a.tasks.length) run.decisions.push({ type: 'registry', src: 'code', title: `Not covered: “${a.text}”`, detail: 'No task serves this part of the request. Flagged so nothing is silently dropped.' }); });
+  /* intelligence: there is always an interpretation; authority is settled by rule from the request's own words */
+  if (!run.interp) { const d = run.decisions.find(x => x.type === 'intent'), LEGACY = { meeting_prep: 'prepare', research: 'retrieve', content: 'draft', campaign: 'draft', service: 'diagnose', profile_update: 'remember', question: 'retrieve' }; run.interp = ruleInterpretation(run, d ? (INTENTS[d.intent] ? d.intent : LEGACY[d.intent] || null) : null); run.decisions.push({ type: 'interpretation', src: 'code', title: 'Interpretation built from rules', detail: 'Orchestration didn’t state one, so it comes from the graph lookup and the request’s wording.' }); }
+  const rule = authorityFromText(run.text, EMPLOYEES[run.requester].team), asked = run.interp.authority;
+  run.authority = asked && authN(asked) < authN(rule.authority) ? asked : rule.authority;
+  run.authorityNote = asked && authN(asked) > authN(rule.authority) ? `Orchestration asked for ${AUTHORITY[asked].label.toLowerCase()}; capped by rule.` : '';
+  run.decisions.push({ type: 'authority', src: 'code', title: `Action authority: ${AUTHORITY[run.authority].label}`, detail: `${run.authorityNote} ${rule.why}`.trim() });
+  for (const t of run.tasks) {
+    const over = t.tools.filter(n => toolAct(n) > authN(run.authority));
+    if (over.length) { t.tools = t.tools.filter(n => !over.includes(n)); run.decisions.push({ type: 'registry', src: 'code', title: `${taskLabel(t)}: ${over.join(', ')} removed`, detail: `${AUTHORITY[run.authority].label}: the request didn’t ask for ${over.some(n => toolAct(n) === 1) ? 'drafts' : 'changes'}.` }); }
+    t.gaps = (t.services || []).filter(k => serviceStatus(k) === 'not connected');
+  }
+  const gaps = [...new Set(run.tasks.flatMap(t => t.gaps))];
+  if (gaps.length) run.decisions.push({ type: 'registry', src: 'code', title: `Not connected here: ${gaps.map(g => '[' + g + ']').join(', ')}`, detail: 'Planned for, but unavailable in this demo; the steps that need it will report partial results.' });
+  /* waves: a step runs one wave after the latest step it depends on */
+  run.tasks.forEach(t => { t.wave = 0; });
+  const waveOf = t => t.wave || (t.wave = 1 + Math.max(0, ...t.depends_on.map(d => run.tasks.find(x => x.id === d)).filter(Boolean).map(waveOf)));
+  run.tasks.forEach(waveOf);
   /* sequential order: dependencies first, then plan order */
   const order = [], seen = new Set();
   const visit = t => { if (seen.has(t.id)) return; seen.add(t.id); t.depends_on.forEach(d => { const x = run.tasks.find(y => y.id === d); if (x) visit(x); }); order.push(t); };
@@ -325,25 +354,30 @@ function handleOrch(run, o) {
     run.decisions.push(Object.assign({ src: 'ai' }, o));
     if (o.type === 'entity') { if (o.advisor && ADVISORS[o.advisor]) run.advisor = o.advisor; if (o.unit && run.advisor && ADVISORS[run.advisor].units[o.unit]) run.unit = o.unit; if (o.territory && TERRITORIES[o.territory]) run.territory = o.territory; else if (!run.advisor && run.resolution.territories[0]) run.territory = run.resolution.territories[0].id; UI.memAdv = run.advisor || UI.memAdv; flashTile('graph', 'read'); }
     if (o.type === 'known') flashTile('memory', 'read');
+    if (o.type === 'interpretation') run.interp = normInterp(o);
     if (o.type === 'asks' && Array.isArray(o.asks)) run.asks = o.asks.map(String).filter(Boolean).slice(0, 5).map(text => ({ text, tasks: [] }));
   } else if (o.k === 'task') {
-    if (run.tasks.length >= 5) return;
+    if (run.tasks.length >= 6) return;
     const arr = x => Array.isArray(x) ? x : x ? [x] : [];
     let id = String(o.id || 'T' + (run.tasks.length + 1)); if (run.tasks.some(x => x.id === id)) id = 'T' + (run.tasks.length + 1);
-    const t = { id, agent: resolveAgentId(o.agent) || String(o.agent || ''), objective: String(o.objective || o.task || '').slice(0, 300), depends_on: arr(o.depends_on || o.dependsOn).map(String), reads: arr(o.reads).map(String), tools: arr(o.tools).map(resolveToolName).filter(Boolean), why: String(o.why || '').slice(0, 200) };
+    const ri = routeInfo(o.route);
+    const t = { id, route: ri ? ri.route : null, sub: ri && !Array.isArray(SUBAGENTS[ri.family].subs[ri.sub]) ? ri.sub : null, services: [...new Set(arr(o.services).flatMap(x => serviceKeys(String(x))))], returns: String(o.returns || '').slice(0, 200), agent: ri ? ri.agent : resolveAgentId(o.agent) || String(o.agent || ''), objective: String(o.objective || o.task || '').slice(0, 300), depends_on: arr(o.depends_on || o.dependsOn).map(String), reads: arr(o.reads).map(String), tools: arr(o.tools).map(resolveToolName).filter(Boolean), why: String(o.why || '').slice(0, 200) };
     const rr = ROLES[o.role] ? o.role : null;
     if (!AGENTS[t.agent] && rr) t.agent = ROLE_DEFAULT_AGENT[rr];
     if (!t.objective) t.objective = AGENTS[t.agent] ? AGENTS[t.agent].does : 'Contribute to the request';
     t.role = rr && roleOf(t.agent) && ROLES[rr].team === AGENTS[t.agent]?.team ? rr : roleOf(t.agent);
     t.title = String(o.title || '').trim().slice(0, 60) || t.objective.split(/[,.;]/)[0].split(' ').slice(0, 6).join(' ');
     t.ask = Number(o.ask) || null;
-    /* business assignment rules for Sales work */
-    if (AGENTS[t.agent] && AGENTS[t.agent].team === 'sales') {
+    /* business assignment rules for Sales work that orchestration didn't route to a sub-agent */
+    if (!t.route && AGENTS[t.agent] && AGENTS[t.agent].team === 'sales') {
       const txt = t.title + ' ' + t.objective, rule = ROLE_RULES.find(x => x.test.test(txt));
       if (rule && t.role !== rule.role) { const from = ROLES[t.role] ? ROLES[t.role].name : '—'; t.role = rule.role; t.agent = rule.agent(txt); run.decisions.push({ type: 'registry', src: 'code', title: `“${t.title}” → ${ROLES[rule.role].name}`, detail: `${rule.why}. Moved from ${from}.` }); }
     }
     t.person = ROLES[t.role] ? (t.role === 'sales.wholesalers' && run.advisor && EMPLOYEES[run.requester].team === 'sales' && ADVISORS[run.advisor].coverage.includes(run.requester) ? EMPLOYEES[run.requester].name : ROLES[t.role].person) : '';
     if (!AGENTS[t.agent]) { run.decisions.push({ type: 'registry', src: 'code', title: `Unknown agent “${t.agent}” dropped`, detail: 'Orchestration can only route to registered specialists.' }); return; }
+    if (!t.route) t.route = routeOfTask(t.agent, t.sub);
+    /* a shared service a step reads brings its tools, when the step's agent may use them */
+    t.services.forEach(k => (SERVICES[k] ? SERVICES[k].tools : []).forEach(n => { if (toolAllowed(t.agent, n) && !t.tools.includes(n)) t.tools.push(n); }));
     const bad = t.tools.filter(x => !toolAllowed(t.agent, x));
     if (bad.length) { t.tools = t.tools.filter(x => toolAllowed(t.agent, x)); run.decisions.push({ type: 'registry', src: 'code', title: `${AGENTS[t.agent].name}: ${bad.length} tool${bad.length > 1 ? 's' : ''} removed`, detail: `${bad.join(', ')} ${bad.length > 1 ? 'are' : 'is'} not on this agent’s allow-list at the gateway.` }); UI.totals.blocked++; }
     t.depends_on = t.depends_on.filter(d => run.tasks.some(x => x.id === d));
@@ -352,6 +386,35 @@ function handleOrch(run, o) {
     if (run.clarified) run.decisions.push({ type: 'missing', src: 'code', title: 'Proceeding on your earlier answer', detail: `Orchestration wanted to ask “${o.question}” again; the app lets it ask only once, so it continues with stated assumptions.` });
     else run.clarify = String(o.question || 'Which advisor do you mean?');
   }
+}
+const taskLabel = t => t.route || (AGENTS[t.agent] ? AGENTS[t.agent].name : t.agent);
+function normInterp(o) {
+  const arr = x => Array.isArray(x) ? x.map(v => String(v)).filter(Boolean).slice(0, 5) : x ? [String(x)] : [];
+  const sub = o.subject && typeof o.subject === 'object' ? { kind: String(o.subject.kind || 'none'), id: o.subject.id ? String(o.subject.id) : null, label: String(o.subject.label || o.subject.id || '') } : { kind: 'none', id: null, label: String(o.subject || '') };
+  return { title: String(o.title || ''), subject: sub, intent: INTENTS[o.intent] ? o.intent : null, scope: String(o.scope || ''), time: String(o.time || ''), constraints: arr(o.constraints), output: String(o.output || ''), missing: arr(o.missing), authority: AUTHORITY[o.authority] ? o.authority : null, patterns: (Array.isArray(o.patterns) ? o.patterns : []).map(Number).filter(n => CATALOGUE.some(c => c.n === n)).slice(0, 3), src: o.src === 'code' ? 'code' : 'ai' };
+}
+/* A catalogue route, turned into the same orchestration stream the AI produces (no AI call) */
+function catalogueReplay(entry, requester) {
+  const p = parseRoute(entry.exec), E = EMPLOYEES[requester], L2 = o => JSON.stringify(o.k === 'decision' ? Object.assign({ src: 'code' }, o) : o), lines = [], tasks = []; /* built by rule from the route, so tagged RULE */
+  const gaps = [...new Set(p.stages.flat().filter(i => i.kind === 'service').flatMap(i => i.keys).filter(k => serviceStatus(k) === 'not connected'))];
+  lines.push(L2({ k: 'decision', type: 'requester', title: `${E.name}, ${TEAMS[E.team].name}`, detail: E.role }));
+  lines.push(L2({ k: 'decision', type: 'intent', title: `${entry.intent[0].toUpperCase() + entry.intent.slice(1)}: ${INTENTS[entry.intent]}`, detail: `Catalogue #${entry.n}, group ${entry.group}: ${CATALOGUE_GROUPS[entry.group].title}.`, intent: entry.intent }));
+  lines.push(L2({ k: 'decision', type: 'asks', title: '1 thing requested', detail: entry.ask, asks: [entry.ask.replace(/[.?]$/, '')] }));
+  lines.push(L2({ k: 'decision', type: 'interpretation', title: entry.decomp, detail: `Catalogue #${entry.n}`, subject: null, intent: entry.intent, output: p.output, constraints: [], missing: gaps.map(g => `[${g}] is not connected in this demo`), authority: entry.auth, patterns: [entry.n] }));
+  let prev = [], pending = [];
+  p.stages.forEach((st, k) => {
+    const agents = st.filter(i => i.kind === 'agent'), svc = [...pending, ...st.filter(i => i.kind === 'service').flatMap(i => i.keys)], checks = st.filter(i => i.kind === 'check');
+    checks.forEach(c => lines.push(L2({ k: 'decision', type: 'controls', title: `Checkpoint: ${c.raw}`, detail: 'A person reviews before the next step.' })));
+    if (!agents.length) { if (prev.length) prev.forEach(t => t.services.push(...svc)); else pending = svc; return; } /* a service on its own serves the step before it */
+    pending = [];
+    const ids = agents.map((a, j) => { const t = { k: 'task', id: 'T' + (tasks.length + 1), ask: 1, route: a.route, title: a.sub, objective: `${a.does}, for: ${entry.ask}`, depends_on: prev.map(x => x.id), services: j === 0 ? [...svc] : [], /* a read listed with parallel steps goes to the first of them */ tools: [], reads: ['memory', 'knowledge', 'policy'], returns: k === p.stages.length - 1 ? p.output : 'its output, sources and as-of dates to the next wave', why: `Catalogue #${entry.n} route` }; tasks.push(t); return t; });
+    prev = ids;
+  });
+  if (pending.length && prev.length) prev.forEach(t => t.services.push(...pending));
+  tasks.forEach(t => lines.push(L2(t)));
+  lines.push(L2({ k: 'decision', type: 'success', title: p.output.charAt(0).toUpperCase() + p.output.slice(1), detail: `The output catalogue #${entry.n} calls for.` }));
+  lines.push(L2({ k: 'end' }));
+  return { name: `Catalogue #${entry.n}`, requester, text: entry.ask, orch: lines.join('\n'), agents: {}, orchOnly: true };
 }
 /* How long each step's finished output stays on screen before the next step starts */
 const READ_PAUSE_S = 5;
@@ -376,6 +439,7 @@ async function runTask(run, t) {
     if (sig.aborted) throw new Error('stopped');
     const T = TOOLS[name];
     if (!T || !toolAllowed(t.agent, name)) { t.calls.push({ name, input, error: 'Not permitted for this agent' }); UI.totals.blocked++; renderAll(); throw new Error(`${name} is not permitted for ${a.name}`); }
+    if (toolAct(name) > authN(run.authority)) { t.calls.push({ name, input, error: `Not permitted at ${AUTHORITY[run.authority].label.toLowerCase()} authority` }); UI.totals.blocked++; renderAll(); throw new Error(`${name} is not permitted: the request is ${AUTHORITY[run.authority].label.toLowerCase()}`); }
     addOp({ kind: 'call', agent: t.agent, task: t.id, sys: T.sys, via: T.via, dur: 1500 });
     let out; try { out = capResult(T.run(input && typeof input === 'object' ? input : {})); } catch (e) { t.calls.push({ name, input, error: e.message }); renderAll(); throw e; }
     t.calls.push({ name, input, sys: T.sys, via: T.via, rw: T.rw, out }); t.toolResults.push({ name, out });
@@ -385,12 +449,13 @@ async function runTask(run, t) {
     return out;
   };
   let res;
-  if (run.replay) {
+  if (run.replay && !run.replay.orchOnly) {
     const rec = run.replay.agents[t.id] || { calls: [], json: { says: 'No recording for this task.', output: null } };
     await sleep(700);
     for (const [n, inp] of rec.calls) await onCall(n, inp);
     await sleep(900); res = clone(rec.json);
   } else {
+    if (AI.mode !== 'live') throw new Error('live AI is needed to run this step');
     const useTools = AI.tools && t.tools.length;
     if (!useTools && t.tools.length) { /* fetch the planned tools for the agent */
       t.prefetched = {};
@@ -417,6 +482,11 @@ async function runTask(run, t) {
   const ctx = { run, packet: t.packet, toolIds: t.calls.flatMap(c => [c.name, ...JSON.stringify(c.out || '').match(/[A-Z]+-[A-Z0-9-]+/g) || []]), toolResults: t.toolResults, upstream, upstreamIds: upstream.flatMap(u => u.ids.concat([u.task])) };
   t.verdicts = gatekeep(t, res, ctx);
   if (res.next_step && traceable(res.next_step, corpusOf(ctx)).length) res.next_step = '';
+  /* the step contract: output, sources, as-of dates, unresolved issues, status */
+  const asof = new Set(res.as_of || []);
+  t.toolResults.forEach(r => JSON.stringify(r.out).replace(/"(as_of|numerator_as_of|denominator_as_of|er_as_of|asOf)":"([^"]+)"/g, (m, k, v) => { asof.add(v); return m; }));
+  const outBlocked = t.verdicts.some(v => v.kind === 'output' && v.status === 'blocked');
+  t.contract = { status: outBlocked ? 'blocked' : res.status === 'complete' && ((t.gaps || []).length || t.calls.some(c => c.error)) ? 'partial' : res.status, sources: [...new Set([...(res.used || []), ...t.calls.filter(c => !c.error).map(c => c.name)])], as_of: [...asof].slice(0, 4), unresolved: res.open_questions || [] };
   /* count reuse the foundation made possible */
   const usedIds = new Set(res.used || []);
   const reused = reusedItems.filter(i => usedIds.has(i.id)).length + (upstream.length ? 1 : 0) * upstream.length;
@@ -440,16 +510,6 @@ async function runTask(run, t) {
   if (t.verdicts.some(v => v.kind === 'output')) badge('updates', true);
   setTab('updates');
   renderAll();
-  // Start the reading interval only after the completed result has painted.
-  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-  const seconds = READ_PAUSE_S;
-  run.presentationPause = { task: t.id, seconds };
-  renderAll();
-  for (let remaining = seconds; remaining > 0 && !UI.ctl.signal.aborted; remaining--) {
-    run.presentationPause.seconds = remaining; renderAll();
-    for (let k = 0; k < 10 && !UI.ctl.signal.aborted; k++) await sleep(100);
-  }
-  run.presentationPause = null; renderAll();
 }
 function defaultArgs(n, run, t) {
   const tick = mentionsFunds(run.text + ' ' + t.objective), people = (run.resolution.people || []).map(p => p.name);
@@ -463,7 +523,7 @@ function errText(e) {
 }
 function finishRun(run, error) {
   run.status = error ? 'failed' : 'done'; run.error = error; run.t1 = Date.now();
-  $('runBtn').disabled = false; $('stopBtn').hidden = true;
+  $('runBtn').disabled = false; $('planBtn').disabled = false; $('stopBtn').hidden = true;
 
   if (!error) logEvent('plan.completed', `${run.tasks.length} tasks · ${run.stats.reused} reused · ${run.stats.committed} stored`, 'orch', run.advisor);
   renderAll();
@@ -475,7 +535,7 @@ const SI = { done: '✓', active: '', pending: '', skipped: '–', failed: '!' }
 function stepBody(r, s) {
   if (s.id === 'plan') {
     const succ = s.items.filter(d => d.type === 'success'), fixes = s.items.filter(d => d.type === 'planfix');
-    return `${fixes.map(d => `<div class="dl"><span class="tag2 code">RULE</span><span><b>${esc(d.title)}</b> ${esc(d.detail || '')}</span></div>`).join('')}${r.tasks.map(t => `<div class="dl"><span class="tid" style="background:${TC[ROLES[t.role].team]}">${t.id}</span><span><b>${esc(t.title)}</b> → ${esc(TEAMS[ROLES[t.role].team].name)} · ${esc(ROLES[t.role].name)}<small>${esc(t.objective)}${t.depends_on.length ? ' · after ' + t.depends_on.join(', ') : ''}</small></span></div>`).join('')}${succ.map(d => `<div class="dl"><span class="tag2 ai">DONE WHEN</span><span>${esc(d.title)}</span></div>`).join('')}`;
+    return `${fixes.map(d => `<div class="dl"><span class="tag2 code">RULE</span><span><b>${esc(d.title)}</b> ${esc(d.detail || '')}</span></div>`).join('')}${r.tasks.map(t => `<div class="dl"><span class="tid" style="background:${TC[ROLES[t.role].team]}">${t.id}</span><span><b>W${t.wave} · ${esc(taskLabel(t))}: ${esc(t.title)}</b> → ${esc(TEAMS[ROLES[t.role].team].name)} · ${esc(ROLES[t.role].name)}<small>${esc(t.objective)}${t.depends_on.length ? ' · after ' + t.depends_on.join(', ') : ' · no dependencies, runs in wave 1'}${(t.services || []).length ? ' · reads ' + t.services.map(k => '[' + k + ']').join(' ') : ''}</small></span></div>`).join('')}${succ.map(d => `<div class="dl"><span class="tag2 ai">DONE WHEN</span><span>${esc(d.title)}</span></div>`).join('')}`;
   }
   if (s.id === 'execute') {
     return r.tasks.map(t => { const up = t.depends_on.map(d => r.tasks.find(x => x.id === d)).filter(Boolean);
@@ -556,8 +616,8 @@ function verdictLines(t) {
   return (t.verdicts || []).filter(v => v.kind !== 'output' || v.status === 'blocked').map(v => {
     const txt = v.kind === 'knowledge' ? (v.status === 'published' ? `Shared with all teams: ${v.title}` : `Not shared: ${v.title} (${v.reason})`)
       : v.kind === 'memory' ? ({ committed: `Remembered: ${v.title}`, pending: `Needs the advisor’s confirmation: ${v.title}`, task: `Kept with this task only: ${v.title}`, rejected: `Not remembered: ${v.title} (a guess, not stated)`, read: `Already known: ${v.title}`, blocked: `Not allowed: ${v.title}` }[v.status] || v.title)
-      : v.kind === 'commitment' ? `New follow-up task: ${v.title}` : `Blocked: ${v.reason}`;
-    return `<div class="uv ${v.status}">${esc(txt)}</div>`;
+      : v.kind === 'commitment' ? (v.status === 'proposed' ? `Proposed follow-up, not created: ${v.title}` : `New follow-up task: ${v.title}`) : `Blocked: ${v.reason}`;
+    return `<div class="uv ${v.status}">${esc(txt)}${v.status === 'proposed' ? ` <button class="lbtn mini" data-commit="${t.id}|${t.verdicts.indexOf(v)}">Create task</button>` : ''}</div>`;
   }).join('');
 }
 function outputHTML(o) {
@@ -584,8 +644,53 @@ function sourcesHTML(r, t) {
   return `<div class="srcs"><div class="srch">${icon('network')} Where this came from</div>
     <div class="srcl"><span class="vbadge Internal">FDN</span><span><b>Shared foundation</b> · sent ${p.items.length} records (${counts.map(([l, n]) => `${esc(LAYERS[l].short)} ${n}`).join(' · ')})${p.withheld.length ? ` · withheld ${p.withheld.length}` : ''}<small>Why: only what this role is permitted to see for ${esc(r.advisor ? ADVISORS[r.advisor].short : r.territory ? TERRITORIES[r.territory].name : 'this request')}</small>${cited.length ? `<small>Cited: ${cited.map(i => `${esc(i.id)} ${esc(i.label)}`).join(' · ')}</small>` : ''}</span></div>
     ${ups.map(x => `<div class="srcl"><span class="vbadge Event">STEP ${x.step}</span><span><b>${esc(ROLES[x.role].name)}</b> · ${esc((x.result.output && x.result.output.title) || x.title)}<small>Why: this step builds on that verified work instead of redoing it</small></span></div>`).join('')}
+    ${(t.gaps || []).map(k => `<div class="srcl"><span class="vbadge Gap">GAP</span><span><b>[${esc(k)}]</b> · not connected in this demo<small>Needed for: ${esc(SERVICES[k] ? SERVICES[k].does : k)}. The step reports what it could not establish.</small></span></div>`).join('')}
     ${calls || (t.state === 'running' ? '' : '<div class="srcl"><span class="vbadge Internal">—</span><span><small>No enterprise system calls: worked from the foundation alone</small></span></div>')}</div>`;
 }
+/* ---------- intelligence and orchestration views ---------- */
+const routeChip = t => t.route ? `<span class="rc ag" style="--c:${TC[AGENTS[t.agent].team]}">${esc(t.route)}</span>` : '';
+const svcChip = k => `<span class="rc sv ${serviceStatus(k).replace(' ', '-')}" title="${esc((SERVICES[k] ? SERVICES[k].does : k) + ' · ' + serviceStatus(k))}">[${esc(k)}]</span>`;
+function interpHTML(r) {
+  const I = r.interp, first = EMPLOYEES[r.requester].name.split(' ')[0], list = (a, none) => a && a.length ? a.map(esc).join('<br>') : `<span class="mute">${none}</span>`;
+  const subj = I.subject && (I.subject.label || I.subject.id) ? `${esc(I.subject.label || I.subject.id)}${I.subject.kind && I.subject.kind !== 'none' ? ` <small>${esc(I.subject.kind.replace('_', ' '))}${I.subject.id && I.subject.label ? ' · ' + esc(I.subject.id) : ''}</small>` : ''}` : r.advisor ? `${esc(ADVISORS[r.advisor].name)} <small>advisor · from the graph</small>` : '<span class="mute">Not resolved</span>';
+  const au = r.authority || I.authority, val = {
+    subject: subj, intent: I.intent ? `<b class="ib">${esc(I.intent)}</b> <small>${esc(INTENTS[I.intent])}</small>` : '<span class="mute">Not stated</span>',
+    scope: I.scope ? esc(I.scope) : '<span class="mute">Not stated</span>', time: I.time ? esc(I.time) : '<span class="mute">Current</span>',
+    constraints: list(I.constraints, 'None stated'), output: I.output ? esc(I.output) : '<span class="mute">Not stated</span>', missing: list(I.missing, 'Nothing material'),
+    authority: au ? `<b>${esc(AUTHORITY[au].label)}</b> <small>${esc(AUTHORITY[au].does)}${r.authority ? ' · settled by rule' : ' · pending rule check'}</small>${r.authorityNote ? `<small class="warn">${esc(r.authorityNote)}</small>` : ''}` : '<span class="mute">Pending</span>' };
+  return `<div class="dt">INTELLIGENCE · WHAT ${esc(first.toUpperCase())} ACTUALLY WANTS <span class="tag2 ${I.src === 'code' ? 'code' : 'ai'}">${I.src === 'code' ? 'RULE' : 'AI'}</span></div>${I.title ? `<p class="ihead">${esc(I.title)}</p>` : ''}<dl class="interp">${INTERP_FIELDS.map(([k, l]) => `<dt>${l}</dt><dd>${val[k]}</dd>`).join('')}</dl>${I.patterns && I.patterns.length ? `<p class="hint" style="margin:6px 0 0">Closest catalogue pattern${I.patterns.length > 1 ? 's' : ''}: ${I.patterns.map(n => `<button class="linkbtn" data-cat-open="${n}">#${n}</button>`).join(', ')}</p>` : ''}`;
+}
+function planHTML(r) {
+  const waves = [...new Set(r.tasks.map(t => t.wave))].sort((a, b) => a - b), uncovered = (r.asks || []).filter(a => !a.tasks.length), succ = r.decisions.find(d => d.type === 'success');
+  return `<div class="dt">ORCHESTRATION · ${r.tasks.length} ${r.tasks.length === 1 ? 'STEP' : 'STEPS'} IN ${waves.length} ${waves.length === 1 ? 'WAVE' : 'WAVES'}</div>${waves.map(w => { const ts = r.tasks.filter(t => t.wave === w);
+    return `<div class="wave"><div class="waveh"><span class="wn">Wave ${w}</span><small>${ts.length > 1 ? `${ts.length} steps run together` : w > 1 ? 'waits for the wave before' : 'starts immediately'}</small></div>${ts.map(t => { const [cls, label] = taskStatus(t), R = ROLES[t.role], tools = [...new Set((t.calls || []).map(c => c.name))];
+      return `<button class="steprow" data-task="${t.id}"><span class="stepn" style="background:${TC[R.team]}">${t.step}</span><span class="stepb"><b>${routeChip(t)} ${esc(t.title)}</b><small>${esc(R.name)}${t.person ? ' · ' + esc(t.person) : ''}${t.depends_on.length ? ' · uses step ' + t.depends_on.map(d => (r.tasks.find(x => x.id === d) || {}).step).filter(Boolean).join(', ') : ''}${(r.asks || []).length > 1 ? ' · ask ' + t.ask : ''}</small>${(t.services || []).length ? `<small class="svcl">${t.services.map(svcChip).join(' ')}</small>` : ''}<small class="agentline">${tools.length ? 'called: ' + esc(tools.join(', ')) : t.tools.length ? 'may call: ' + esc(t.tools.join(', ')) : 'works from the foundation and upstream steps'}</small></span><em class="bst ${cls}">${label}</em></button>`; }).join('')}</div>`; }).join('')}
+    <div class="wave ret"><span class="wn">Returns</span> ${esc((r.interp && r.interp.output) || (succ && succ.title) || 'The requested output')}</div>
+    ${uncovered.map(a => `<div class="uv blocked">Not covered: “${esc(a.text)}”</div>`).join('')}
+    ${r.status === 'planned' ? `<div style="display:flex;gap:6px;margin-top:8px"><button class="lbtn primary" data-act="run-plan">Run this plan</button><span class="hint" style="align-self:center">Nothing has run yet.</span></div>` : '<p class="hint" style="margin:6px 0 0">Click any step to see exactly what it produced.</p>'}`;
+}
+function contractHTML(t) {
+  const c = t.contract; if (!c) return '';
+  return `<div class="contract"><span class="cs ${c.status}">${esc(c.status)}</span><span><b>${c.sources.length}</b> sources</span><span>As of: ${c.as_of.length ? esc(c.as_of.join(', ')) : '<span class="mute">not stated</span>'}</span><span><b>${c.unresolved.length}</b> unresolved</span></div>${c.unresolved.length ? `<div class="unres">${c.unresolved.map(u => `<div>• ${esc(u)}</div>`).join('')}</div>` : ''}`;
+}
+/* ---------- the query catalogue: what users ask, how it is decomposed, which sub-agents run ---------- */
+function routeHTML(route) {
+  const p = parseRoute(route), chip = i => i.kind === 'agent' ? `<span class="rc ag" style="--c:${TC[AGENTS[i.agent].team]}" title="${esc(i.label + ': ' + i.does)}">${esc(i.route)}</span>` : i.kind === 'service' ? i.keys.map(svcChip).join('') : `<span class="rc ck">${esc(i.raw)}</span>`;
+  return `<div class="rt">${p.stages.map(st => `<span class="rts${st.length > 1 ? ' par' : ''}">${st.map(chip).join('')}</span>`).join('<span class="rta">→</span>')}<span class="rta">→</span><span class="rto">${esc(p.output)}</span></div>`;
+}
+function renderCatalogue() {
+  const pane = $('pane-catalogue'); if (pane._built) return; pane._built = true;
+  const intentBadge = k => `<span class="ib" title="${esc(INTENTS[k])}">${esc(k)}</span>`;
+  pane.innerHTML = `<div class="dcard catintro"><div class="dt">SALES AI QUERY CATALOGUE</div><p class="lead2">What users ask, how the intelligence layer decomposes it, and which sub-agents run. These are requirements and example prompts, not claims that every integration exists.</p>
+    <div class="legend2"><span class="rc ag" style="--c:${TC.sales}">Prep.Notes</span> sub-agent route <span class="rc sv simulated">[assets]</span> simulated here <span class="rc sv foundation">[memory]</span> built into the foundation <span class="rc sv not-connected">[peer analytics]</span> not connected <span class="rts par" style="display:inline-flex"><span class="rc ag" style="--c:${TC.sales}">A</span><span class="rc ag" style="--c:${TC.sales}">B</span></span> run together</div>
+    <p class="hint" style="margin:6px 0 0"><b>Decompose</b> turns a route into a plan without an AI call. <b>Ask</b> puts the request in the command bar; <b>Plan only</b> shows the live AI’s own decomposition.</p></div>
+    <div class="dcard"><div class="dt">SAME WORD, DIFFERENT INTENT</div><p class="hint" style="margin:0 0 6px">Organize by business intent, not keywords. Each of these mentions ETFs and needs a different plan, data and controls.</p>${ETF_CONTRAST.map(e => `<div class="catq"><div class="catqh"><b>${esc(e.ask)}</b>${intentBadge(e.intent)}</div>${routeHTML(e.route)}<small class="mute">${esc(e.control)}</small></div>`).join('')}</div>
+    <details class="dcard catsec"><summary><b>What the intelligence layer establishes</b><small>Eight fields, then eleven intents</small></summary><dl class="interp">${INTERP_FIELDS.map(([, l, d]) => `<dt>${l}</dt><dd>${esc(d)}</dd>`).join('')}</dl><div class="intents">${INTENT_ORDER.map(k => `<div>${intentBadge(k)} ${esc(INTENTS[k])}</div>`).join('')}</div><p class="hint">“Help me prepare” should not silently mean “book a meeting and send an email.” Action authority is settled by rule from the request’s own words, and write tools above it are removed at the gateway.</p></details>
+    <details class="dcard catsec"><summary><b>Sub-agents and shared services</b><small>Route notation: Prep.Notes = Prep Me → Notes Summarizer</small></summary>${Object.entries(SUBAGENTS).map(([fam, A]) => `<div class="fam"><b>${esc(fam)}</b> <small>${esc(A.name)}</small><div>${Object.keys(A.subs).map(sub => { const ri = routeInfo(fam + '.' + sub); return `<span class="rc ag" style="--c:${TC[AGENTS[ri.agent].team]}" title="${esc(ri.does)}">${esc(sub)}</span>`; }).join('')}</div></div>`).join('')}<div class="fam"><b>Shared services</b> <small>[brackets]: tools, not autonomous agents</small><div>${Object.keys(SERVICES).map(svcChip).join('')}</div></div></details>
+    ${Object.entries(CATALOGUE_GROUPS).map(([g, G], gi) => `<details class="dcard catsec" ${gi === 0 ? 'open' : ''}><summary><b>${g}. ${esc(G.title)}</b><small>${CATALOGUE.filter(c => c.group === g).length} queries</small></summary>${G.note ? `<p class="catnote">${esc(G.note)}</p>` : ''}${CATALOGUE.filter(c => c.group === g).map(c => `<div class="catq" id="cat-${c.n}"><div class="catqh"><span class="catn">${c.n}</span><b>“${esc(c.ask)}”</b>${intentBadge(c.intent)}</div><small class="mute">${esc(c.decomp)}</small>${routeHTML(c.route)}<div class="catbtns"><button class="lbtn mini" data-cat-plan="${c.n}">Decompose</button><button class="lbtn mini" data-cat-use="${c.n}">Ask</button>${c.auth ? `<small class="mute">${esc(AUTHORITY[c.auth].label)}</small>` : ''}</div></div>`).join('')}</details>`).join('')}`;
+}
+function openCatalogueEntry(n) { setTab('catalogue'); const el = $('cat-' + n); if (!el) return; const d = el.closest('details'); if (d) d.open = true; el.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' }); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+function salesRequester() { return EMPLOYEES[UI.requester].team === 'sales' ? UI.requester : 'EMP-PRIYA'; }
 /* ---------- closing card: what the requester should do next ---------- */
 function nextActions(r) {
   const out = [], seen = new Set(), add = (tag, text, step) => { const k = text.toLowerCase(); if (text && !seen.has(k)) { seen.add(k); out.push({ tag, text, step }); } };
@@ -595,6 +700,7 @@ function nextActions(r) {
     if (o && o.status === 'Waiting for approval') add('Approve', `Review “${o.title}”, edit if needed, and approve it. Nothing is sent until you do.`, t.step);
     for (const v of t.verdicts || []) {
       if (v.kind === 'commitment' && v.status === 'committed') { const c = F.commitments.find(x => x.id === v.id); add('Follow up', `${v.title}${c ? ` (${c.owner}, due ${c.due})` : ''}`, t.step); }
+      if (v.kind === 'commitment' && v.status === 'proposed') add('Proposed', `${v.title} (${v.proposal.owner}, due ${v.proposal.due}). Not created: use Create task on step ${t.step} if you want it.`, t.step);
       if (v.kind === 'memory' && v.status === 'pending') add('Confirm', `Confirm with ${r.advisor ? ADVISORS[r.advisor].short : 'the advisor'} before it becomes a lasting preference: ${v.title}`, t.step);
     }
     (t.result && t.result.open_questions || []).forEach(q => add('Resolve', q, t.step));
@@ -630,23 +736,19 @@ function renderUpdates() {
   const items = [{ key: 'req-' + r.id, cls: 'dcard', html: `<div class="dt">REQUEST · ${esc(EMPLOYEES[r.requester].name)}, ${esc(TEAMS[EMPLOYEES[r.requester].team].name)}</div><b class="tt2">“${esc(r.text)}”</b>` }];
   if (r.status === 'thinking') { const act = stepStates(r).find(x => x.state === 'active'); items.push({ key: 'plan-wait', cls: 'dcard ustat', html: `<span class="spin"></span> Orchestration is planning${act ? ' · ' + esc(act.name) : ''}` }); }
   if (r.status === 'clarify') items.push({ key: 'clar-' + r.id, cls: 'clar', html: `<b>One question before planning</b><p style="margin:4px 0 0">${esc(r.clarify)}</p><input id="clarIn" placeholder="Your answer"><div style="display:flex;gap:6px;margin-top:6px"><button class="lbtn primary" data-act="answer">Continue</button><button class="lbtn" data-act="assume">Let it assume</button></div>` });
-  if (r.tasks.length) {
-    const asks = r.asks && r.asks.length ? r.asks : [{ text: r.text, tasks: r.tasks.map(t => t.id) }];
-    items.push({ key: 'plan-' + r.id, cls: 'dcard plancard', html: `<div class="dt">YOUR REQUEST, BROKEN INTO ${r.tasks.length} ${r.tasks.length === 1 ? 'STEP' : 'STEPS'}</div>${asks.map((a, k) => `<div class="ask"><div class="askh"><span class="askn">${k + 1}</span><b>${esc(a.text)}</b>${a.tasks.length ? '' : '<em class="bst blocked">Not covered</em>'}</div>${a.tasks.map(id => r.tasks.find(t => t.id === id)).filter(Boolean).sort((x, y) => x.step - y.step).map(t => { const [cls, label] = taskStatus(t), R = ROLES[t.role], A = AGENTS[t.agent];
-      const tools = [...new Set((t.calls || []).map(c => c.name))];
-      return `<button class="steprow" data-task="${t.id}"><span class="stepn" style="background:${TC[R.team]}">${t.step}</span><span class="stepb"><b>${esc(t.title)}</b><small>${esc(TEAMS[R.team].name)} · ${esc(R.name)}${t.person ? ' · ' + esc(t.person) : ''}${t.depends_on.length ? ' · after step ' + t.depends_on.map(d => (r.tasks.find(x => x.id === d) || {}).step).filter(Boolean).join(', ') : ''}</small><small class="agentline">Agent: ${esc(A.name)}${tools.length ? ' · tools: ' + esc(tools.join(', ')) : t.tools.length ? ' · can use: ' + esc(t.tools.join(', ')) : ''}</small></span><em class="bst ${cls}">${label}</em></button>`; }).join('')}</div>`).join('')}<p class="hint" style="margin:6px 0 0">Click any step to see exactly what it produced.</p>` });
-  }
+  if (r.interp) items.push({ key: 'interp-' + r.id, cls: 'dcard interpcard', html: interpHTML(r) });
+  if (r.tasks.length && r.tasks[0].wave) items.push({ key: 'plan-' + r.id, cls: 'dcard plancard', html: planHTML(r) });
   const done = r.tasks.filter(t => ['done', 'failed'].includes(t.state)).sort((a, b) => (a.t1 || 0) - (b.t1 || 0));
   for (const t of done) {
     const R = ROLES[t.role], o = outOf(t), [cls, label] = taskStatus(t);
-    items.push({ key: 'out-' + r.id + t.id, cls: 'dcard uout ' + cls, html: `<div class="uh"><i style="background:${TC[R.team]}"></i><span><b>Step ${t.step || '?'} · ${esc(R.name)}</b> · ${esc(TEAMS[R.team].name)}${t.person ? ' · ' + esc(t.person) : ''}<small>${esc(t.title)}</small></span><em class="bst ${cls}">${label}</em></div>
-      ${t.state === 'failed' ? `<div class="blocked">This task didn’t finish: ${esc(t.error)}</div>` : ''}${t.result && t.result.says ? `<p class="says">${esc(t.result.says)}</p>` : ''}${outputHTML(o)}${verdictLines(t)}${sourcesHTML(r, t)}
+    items.push({ key: 'out-' + r.id + t.id, cls: 'dcard uout ' + cls, html: `<div class="uh"><i style="background:${TC[R.team]}"></i><span><b>Step ${t.step || '?'} · ${esc(R.name)}</b> · ${esc(TEAMS[R.team].name)}${t.person ? ' · ' + esc(t.person) : ''}<small>${routeChip(t)} ${esc(t.title)} · wave ${t.wave}</small></span><em class="bst ${cls}">${label}</em></div>
+      ${t.state === 'failed' ? `<div class="blocked">This task didn’t finish: ${esc(t.error)}</div>` : ''}${t.result && t.result.says ? `<p class="says">${esc(t.result.says)}</p>` : ''}${outputHTML(o)}${verdictLines(t)}${contractHTML(t)}${sourcesHTML(r, t)}
       <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">${o && o.status === 'Waiting for approval' ? `<button class="lbtn primary" data-approve="${o.id}">${icon('check')} Approve</button><button class="lbtn" data-edit="${o.id}">Edit</button>` : ''}<button class="lbtn" data-task="${t.id}">Open full output</button></div>` });
   }
   /* the step that is working right now, with each system call as it happens */
   for (const t of r.tasks.filter(t => t.state === 'running')) {
     const R = ROLES[t.role];
-    items.push({ key: 'run-' + r.id + t.id, cls: 'dcard uout running', html: `<div class="uh"><i style="background:${TC[R.team]}"></i><span><b>Step ${t.step || '?'} · ${esc(R.name)}</b> · ${esc(TEAMS[R.team].name)}${t.person ? ' · ' + esc(t.person) : ''}<small>${esc(t.title)}</small></span><em class="bst running">In progress</em></div>${t.packet ? sourcesHTML(r, t) : ''}<p class="hint" style="margin:6px 0 0"><span class="spin"></span> ${!t.packet ? 'The foundation is assembling what this role may see…' : t.calls && t.calls.length ? 'Working from these sources…' : 'Reading the foundation; calling systems if anything is missing…'}</p>` });
+    items.push({ key: 'run-' + r.id + t.id, cls: 'dcard uout running', html: `<div class="uh"><i style="background:${TC[R.team]}"></i><span><b>Step ${t.step || '?'} · ${esc(R.name)}</b> · ${esc(TEAMS[R.team].name)}${t.person ? ' · ' + esc(t.person) : ''}<small>${routeChip(t)} ${esc(t.title)} · wave ${t.wave}</small></span><em class="bst running">In progress</em></div>${t.packet ? sourcesHTML(r, t) : ''}<p class="hint" style="margin:6px 0 0"><span class="spin"></span> ${!t.packet ? 'The foundation is assembling what this role may see…' : t.calls && t.calls.length ? 'Working from these sources…' : 'Reading the foundation; calling systems if anything is missing…'}</p>` });
   }
   if (r.status === 'done') items.push({ key: 'final-' + r.id, cls: 'dcard finalcard', html: `<div class="dt">WHAT WAS PRODUCED FOR YOUR REQUEST</div>${r.tasks.map(t => { const o = outOf(t), R = ROLES[t.role]; return `<button class="steprow" data-task="${t.id}"><span class="stepn" style="background:${TC[R.team]}">${t.step}</span><span class="stepb"><b>${esc(o ? o.title : t.title)}</b><small>${esc(R.name)} · ${esc(o ? o.status : t.state === 'failed' ? 'Did not finish' : 'No document; see details')}</small></span><em class="openlink">Open</em></button>`; }).join('')}` });
   if (r.status === 'done') items.push({ key: 'sum-' + r.id, cls: 'summary', html: `<h3>All ${r.tasks.length} tasks done · ${Math.round((r.t1 - r.t0) / 1000)} s</h3><div class="sgrid"><div><b>${r.stats.reused}</b>facts reused</div><div><b>${r.stats.committed}</b>stored</div><div><b>${r.stats.calls}</b>system calls</div></div>` });
@@ -674,7 +776,7 @@ function openTask(id) {
     <details class="tcard" style="margin-top:8px"><summary style="padding:8px 10px"><span><b>Full trace</b><small>What the foundation sent, every system call and result, and each gatekeeper decision</small></span></summary>${taskHTML(r, t).replace(/^<summary>[\s\S]*?<\/summary>/, '')}</details>
     <div style="display:flex;justify-content:space-between;margin-top:14px">${prev ? `<button class="lbtn" data-task="${prev.id}">← Step ${prev.step}</button>` : '<span></span>'}${next ? `<button class="lbtn" data-task="${next.id}">Step ${next.step} →</button>` : ''}</div>`);
 }
-const PANES = { updates: renderUpdates, decisions: renderDecisions, packets: renderPackets, memory: renderMemory, events: renderEvents };
+const PANES = { updates: renderUpdates, decisions: renderDecisions, packets: renderPackets, catalogue: renderCatalogue, memory: renderMemory, events: renderEvents };
 let RQ = 0;
 function renderAll() { if (RQ) return; RQ = requestAnimationFrame(() => { RQ = 0; renderOrch(); renderDiagram(); renderStats(); (PANES[UI.tab] || renderUpdates)(); autoScroll(); if (KG.open) renderKG(); }); }
 /* Follow the work while agents run; pause for 5 s whenever the person scrolls. */
@@ -719,7 +821,7 @@ function openHelp() {
 
 /* ---------- events ---------- */
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-task],[data-who],[data-sug],[data-replay],[data-tab],[data-view],[data-act],[data-approve],[data-edit],[data-madv],[data-agent],[data-layer],[data-sys]'); if (!el) return;
+  const el = e.target.closest('[data-task],[data-who],[data-sug],[data-replay],[data-tab],[data-view],[data-act],[data-approve],[data-edit],[data-commit],[data-cat-plan],[data-cat-use],[data-cat-open],[data-madv],[data-agent],[data-layer],[data-sys]'); if (!el) return;
   const d = el.dataset;
   if (d.who) { UI.requester = d.who; buildStaticWho(); return; }
   if (d.sug) { $('cmdIn').value = d.sug; $('cmdIn').focus(); return; }
@@ -729,6 +831,11 @@ document.addEventListener('click', e => {
   if (d.madv) { UI.memAdv = d.madv; renderMemory(); return; }
   if (d.approve) { const o = F.outputs.find(x => x.id === d.approve); if (o) { o.status = 'Approved · ready to send'; logEvent('approval.granted', o.title, UI.requester, o.adv); toast('Approved by ' + EMPLOYEES[UI.requester].name + (o.rev > 1 ? ` (edited version, rev ${o.rev})` : '') + '. Queued for the approved channel.'); renderAll(); } return; }
   if (d.edit) { openEdit(d.edit); return; }
+  if (d.commit) { const [tid, k] = d.commit.split('|'), t = UI.run && UI.run.tasks.find(x => x.id === tid), v = t && t.verdicts[+k]; if (v && v.status === 'proposed') { const id = 'TASK-' + (400 + (++F.seq)), P = v.proposal; F.commitments.push({ id, adv: UI.run.advisor, scope: UI.run.unit || 'advisor', title: P.title, owner: P.owner, due: P.due, status: 'Open', run: UI.run.id }); v.status = 'committed'; v.id = id; v.reason = `Created by ${EMPLOYEES[UI.requester].name}`; logEvent('commitment.created', P.title, UI.requester, UI.run.advisor); toast('Task created: ' + P.title); renderAll(); } return; }
+  if (d.catPlan) { const c = CATALOGUE.find(x => x.n === +d.catPlan); if (c && !(UI.run && ['thinking', 'running'].includes(UI.run.status))) { const who = salesRequester(); UI.requester = who; buildStaticWho(); runRequest(c.ask, catalogueReplay(c, who), { planOnly: true }); } return; }
+  if (d.catUse) { const c = CATALOGUE.find(x => x.n === +d.catUse); if (c) { UI.requester = salesRequester(); buildStaticWho(); $('cmdIn').value = c.ask; $('cmdIn').focus(); toast('In the command bar. Run it, or use Plan only to see the decomposition first.'); } return; }
+  if (d.catOpen) { openCatalogueEntry(+d.catOpen); return; }
+  if (d.act === 'run-plan') { const r = UI.run; if (r && r.status === 'planned') { if (AI.mode !== 'live' && !(r.replay && !r.replay.orchOnly)) { toast('Running the steps needs live AI. The plan above is the decomposition.'); return; } UI.ctl = new AbortController(); executePlan(r).catch(e => finishRun(r, 'Unexpected problem: ' + errText(e))); } return; }
   if (d.act === 'save-edit') { saveEdit(d.out); return; }
   if (d.act === 'cancel-edit') { closeDrawer(); return; }
   if (d.act === 'kg') { openKG(d.adv); return; }
@@ -743,6 +850,8 @@ document.addEventListener('click', e => {
   if (d.sys) { const k = d.sys, tools = Object.entries(TOOLS).filter(([, t]) => t.sys === k); openDrawer(esc(SYSTEMS[k].name), `<p class="hint">${esc(SYSTEMS[k].sub)}</p>${tools.map(([n, t]) => `<div class="pk"><span class="vbadge ${t.via}">${t.via}</span><span><code style="font:12px var(--code)">${esc(n)}</code> · ${t.rw}<small>${esc(t.desc)}</small></span></div>`).join('')}`); return; }
 });
 $('runBtn').onclick = () => runRequest($('cmdIn').value);
+/* Plan only: show the interpretation and the waves without running any step */
+$('planBtn').onclick = () => { const v = $('cmdIn').value.trim(); if (!v) return; const c = catalogueExact(v); if (AI.mode !== 'live' && c) { const who = salesRequester(); UI.requester = who; buildStaticWho(); runRequest(c.ask, catalogueReplay(c, who), { planOnly: true }); } else runRequest(v, null, { planOnly: true }); };
 $('stopBtn').onclick = () => UI.ctl && UI.ctl.abort();
 $('cmdIn').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); runRequest($('cmdIn').value); } });
 $('sessionBtn').onclick = () => { F.session = { advisor: null, unit: null, requests: [], requirements: [] }; toast('New session. The conversation is closed; lasting memory, findings and commitments remain.'); renderAll(); };

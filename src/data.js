@@ -21,7 +21,7 @@ const EMPLOYEES = {
 };
 
 const SUGGESTIONS = {
-  sales: ['Identify the growing trends in LA territory', 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month', 'Prep me for my call with Alex tomorrow', 'Prepare Maya’s retirement committee fee comparison review', 'Sofia mentioned ETFs. What should I bring to our next meeting?', 'Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.'],
+  sales: ['Identify the growing trends in LA territory', 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month', 'Prep me for my call with Alex tomorrow', 'Prepare Maya’s retirement committee fee comparison review', 'Sofia mentioned ETFs. What should I bring to our next meeting?', 'Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.', 'Why are Daniel’s overall sales down when his ETF sales are up?', 'Which CG ETFs are available at Wells Fargo for Daniel?', 'Prepare me for tomorrow’s meeting with Daniel’s team'],
   product: ['Compare BFA and AMBAL: costs, approach and who each suits', 'Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.', 'Compare GFA F-2 costs with VWUAX and VIGAX on $38M', 'Check whether our fee comparison for Maya is still current'],
   marketing: ['Draft the follow-up email to Alex using Product’s verified comparison', 'Create an ETF email campaign for Sofia', 'Write a LinkedIn post on fee transparency for advisors'],
   service: ['Alex says the link in Priya’s email won’t open', 'Maya says the benchmark explanation is still unclear']
@@ -29,20 +29,20 @@ const SUGGESTIONS = {
 
 /* The full registry of 37 specialists. tools = what each may call through the MCP or API gateway. */
 const AGENTS = {
-  'sales.lead': { name: 'Lead Me', team: 'sales', does: 'Prioritizes advisors and opportunities using model signals', tools: ['models.sales_alpha', 'models.territory_trends', 'crm.get_opportunities'] },
+  'sales.lead': { name: 'Lead Me', team: 'sales', does: 'Prioritizes advisors and opportunities using model signals', tools: ['models.sales_alpha', 'models.territory_trends', 'crm.get_opportunities', 'book.get_assets', 'book.get_flows', 'book.get_market_share', 'taxonomy.resolve', 'pipeline.get', 'engage.get_history', 'platform.get_availability'] },
   'sales.schedule': { name: 'Schedule Me', team: 'sales', does: 'Finds meeting times for advisors or colleagues and places calendar holds', tools: ['calendar.find_times', 'calendar.create_event', 'crm.get_contact'] },
-  'sales.prep': { name: 'Prep Me', team: 'sales', does: 'Builds meeting briefs and agendas from what is known about the advisor', tools: ['crm.get_call_notes', 'crm.get_opportunities', 'crm.get_contact', 'crm.get_plan'] },
-  'sales.engage': { name: 'Engage Me', team: 'sales', does: 'Captures what advisors say in meetings and answers live questions', tools: ['crm.get_call_notes', 'crm.log_activity'] },
-  'sales.follow': { name: 'Follow Me', team: 'sales', does: 'Logs outcomes, creates tasks and tracks commitments', tools: ['crm.log_activity', 'crm.create_task', 'crm.get_opportunities'] },
+  'sales.prep': { name: 'Prep Me', team: 'sales', does: 'Builds meeting briefs and agendas from what is known about the advisor', tools: ['crm.get_call_notes', 'crm.get_opportunities', 'crm.get_contact', 'crm.get_plan', 'book.get_assets', 'pipeline.get', 'engage.get_history', 'seismic.search_content'] },
+  'sales.engage': { name: 'Engage Me', team: 'sales', does: 'Captures what advisors say in meetings and answers live questions', tools: ['crm.get_call_notes', 'crm.log_activity', 'fund.get_facts', 'seismic.search_content'] },
+  'sales.follow': { name: 'Follow Me', team: 'sales', does: 'Logs outcomes, creates tasks and tracks commitments', tools: ['crm.log_activity', 'crm.create_task', 'crm.get_opportunities', 'pipeline.get'] },
   'sales.coach': { name: 'Coach Me', team: 'sales', does: 'Private coaching for the wholesaler, never shared', tools: [] },
-  'sales.territory': { name: 'Territory Planning', team: 'sales', does: 'Territory reviews: trends, coverage and business planning across advisors', tools: ['models.territory_trends', 'models.sales_alpha', 'crm.get_opportunities', 'crm.get_call_notes'] },
+  'sales.territory': { name: 'Territory Planning', team: 'sales', does: 'Territory reviews: trends, coverage and business planning across advisors', tools: ['models.territory_trends', 'models.sales_alpha', 'crm.get_opportunities', 'crm.get_call_notes', 'engage.get_history', 'taxonomy.resolve', 'book.get_market_share', 'pipeline.get'] },
   'product.clarify': { name: 'Query Clarifier', team: 'product', does: 'Turns loose questions into precise, answerable ones (funds, share classes, periods)', tools: ['fund.get_facts', 'fund.lookup'] },
-  'product.planner': { name: 'Research Planner', team: 'product', does: 'Decides what evidence is needed and where it comes from', tools: ['mstar.get_peers'] },
-  'product.tools': { name: 'Tool Selection', team: 'product', does: 'Runs analytics: fee math, peer data, portfolio construction', tools: ['fund.get_facts', 'fund.lookup', 'models.cost_on_assets', 'models.portfolio_construction', 'models.plan_fee_comparison', 'mstar.get_peers'] },
+  'product.planner': { name: 'Research Planner', team: 'product', does: 'Decides what evidence is needed and where it comes from', tools: ['mstar.get_peers', 'platform.get_availability', 'taxonomy.resolve', 'fund.lookup'] },
+  'product.tools': { name: 'Tool Selection', team: 'product', does: 'Runs analytics: fee math, peer data, portfolio construction', tools: ['fund.get_facts', 'fund.lookup', 'models.cost_on_assets', 'models.portfolio_construction', 'models.plan_fee_comparison', 'mstar.get_peers', 'taxonomy.resolve', 'book.get_assets'] },
   'product.summary': { name: 'Contact Summarizer', team: 'product', does: 'Summarizes the advisor context Product needs for a question', tools: [] },
   'product.tone': { name: 'Tone/Style Alignment', team: 'product', does: 'Turns verified product answers into advisor-ready language using approved messaging', tools: ['seismic.get_approved_language'] },
-  'product.format': { name: 'Response Formatter', team: 'product', does: 'Formats product answers for the channel', tools: [] },
-  'product.qar': { name: 'QAR', team: 'product', does: 'Produces verified answers; every number traced to a system of record', tools: ['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.cost_on_assets', 'models.plan_fee_comparison', 'seismic.search_content'] },
+  'product.format': { name: 'Response Formatter', team: 'product', does: 'Formats product answers for the channel', tools: ['taxonomy.resolve'] },
+  'product.qar': { name: 'QAR', team: 'product', does: 'Produces verified answers; every number traced to a system of record', tools: ['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.cost_on_assets', 'models.plan_fee_comparison', 'seismic.search_content', 'platform.get_availability', 'taxonomy.resolve'] },
   'product.institutional': { name: 'Institutional Pitch Books', team: 'product', does: 'Institutional product materials', tools: ['seismic.search_content'] },
   'product.srg': { name: 'SRG Product Pitch Books', team: 'product', does: 'Product pitch books for the retail advisor channel', tools: ['seismic.search_content'] },
   'marketing.gather': { name: 'Resource Gatherer', team: 'marketing', does: 'Finds approved content, templates, messaging and landing pages', tools: ['seismic.search_content', 'seismic.get_approved_language', 'aem.get_page', 'mcloud.get_engagement'] },
@@ -146,7 +146,7 @@ const ADVISORS = {
   'ADV-106': { name: 'Rachel Okafor', short: 'Rachel', title: 'Senior Vice President, Wealth Advisor', firm: 'FIRM-UBS', office: 'Pasadena, Los Angeles', territory: 'LA', team: 'Okafor Wealth Group',
     practice: 'Retirees and pre-retirees who need income', coverage: ['EMP-PRIYA', 'EMP-SAM'], units: { 'BU-106': 'Okafor retirement income portfolios' } },
   'ADV-107': { name: 'Luis Herrera', short: 'Luis', title: 'Principal', firm: 'FIRM-HP', office: 'Long Beach, Los Angeles', territory: 'LA', team: 'Harbor Point Wealth',
-    practice: 'Independent RIA; core portfolios for families and small businesses', coverage: ['EMP-SAM'], units: { 'BU-107': 'Harbor Point core portfolios' } }
+    practice: 'Independent RIA; core portfolios for families and small businesses', coverage: ['EMP-SAM'], units: { 'BU-107': 'Harbor Point core portfolios', 'BU-107R': 'Harbor Point small-business retirement plans' } }
 };
 const TERRITORIES = {
   LA: { name: 'Los Angeles', aliases: ['la', 'los angeles', 'l.a.'], advisors: ['ADV-105', 'ADV-106', 'ADV-107'], wholesaler: 'Priya Shah' },
@@ -230,6 +230,8 @@ const EPISODES = [
     text: 'Rachel: "My retirees want reliable income, and I am reviewing balanced and bond funds for them." Asked how American Balanced and The Bond Fund of America fit an income plan.' },
   { id: 'EMAIL-0925', adv: 'ADV-107', scope: 'BU-107', date: 'Sep 25, 2026', kind: 'Email', with: 'Sam Lee',
     text: 'Luis: "We are adding more fixed income as rates settle. Send me your core bond story, and keep an eye on fees."' },
+  { id: 'EMAIL-0902', adv: 'ADV-107', scope: 'BU-107R', date: 'Sep 2, 2026', kind: 'Email', with: 'Sam Lee',
+    text: 'Luis: "The Forsyth paperwork is with the sponsor now; it should be signed in a week or two."' },
   { id: 'CALL-0826', adv: 'ADV-105', scope: 'BU-105', date: 'Aug 26, 2026', kind: 'Call transcript', with: 'Sam Lee',
     text: 'Daniel moved two client models to a core-satellite structure with an index core. Wants to review the satellite funds each quarter.' }
 ];
@@ -253,7 +255,9 @@ const OPPORTUNITIES = [
   { id: 'OPP-506', adv: 'ADV-107', scope: 'BU-107', name: 'Harbor Point core bond', stage: 'Qualified', note: 'Adding fixed income as rates settle' },
   { id: 'OPP-501', adv: 'ADV-101', scope: 'BU-101A', name: 'Rivera growth model', stage: 'Proposal', note: 'Deciding whether GFA stays in the growth sleeve' },
   { id: 'OPP-502', adv: 'ADV-102', scope: 'BU-102R', name: 'Northstar retirement menu review', stage: 'Discovery', note: 'Committee reviewing fee comparisons for PLAN-102 before the Nov 12 meeting' },
-  { id: 'OPP-503', adv: 'ADV-104', scope: 'BU-104', name: 'Martinez core allocation', stage: 'Discovery', note: 'Moving core to ETFs' }
+  { id: 'OPP-503', adv: 'ADV-104', scope: 'BU-104', name: 'Martinez core allocation', stage: 'Discovery', note: 'Moving core to ETFs' },
+  { id: 'OPP-512', adv: 'ADV-107', scope: 'BU-107R', name: 'Forsyth Components 401(k)', stage: 'Closed lost', type: '401(k)', note: 'Small-business plan; sponsor decision Sep 10' },
+  { id: 'OPP-513', adv: 'ADV-107', scope: 'BU-107R', name: 'Long Beach Marine SIMPLE IRA', stage: 'Discovery', type: 'SIMPLE IRA', note: 'Owner asked about a plan for twelve employees' }
 ];
 
 /* Retirement plans an advisor's committee oversees (Salesforce plan record). Plan and assets are fictional. */
@@ -321,6 +325,56 @@ const DISCLOSURES = {
   committee: { required: ['Past results are not predictive of results in future periods.', 'Expense ratios are as of each fund’s prospectus; share class shown.', 'Category medians are Morningstar data as of the date shown.', 'For financial professional and plan sponsor use only.'], rules: ['Show each option’s share class and as-of date.', 'Name the comparison category and data source.'] }
 };
 
+/* ---------- Sales AI shared services (all values fictional; amounts in $ millions) ---------- */
+/* [assets] CG assets for an advisor's team, two snapshots */
+const BOOK = {
+  'ADV-105': { entity: 'The Kim Group (team level), Capital Group assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
+    funds: [['GFFFX', 'Mutual fund', 54.0], ['AMBFX', 'Mutual fund', 31.3], ['ABNFX', 'Mutual fund', 22.8], ['AWSHX', 'Mutual fund', 20.5], ['AMECX', 'Mutual fund', 19.6],
+      ['CGGR', 'ETF', 18.4], ['CGDV', 'ETF', 12.6], ['CGCP', 'ETF', 10.2], ['Global Equity SMA', 'SMA', 26.1], ['Municipal SMA', 'SMA', 16.5]],
+    prior_by_vehicle: { 'Mutual fund': 171.5, ETF: 22.0, SMA: 44.0 } }
+};
+/* [flows] gross sales and redemptions by vehicle and channel, trailing twelve months vs the twelve before */
+const FLOWS = {
+  'ADV-105': { current: 'Sep 2025 to Aug 2026', prior: 'Sep 2024 to Aug 2025',
+    sales: { 'Mutual fund': [21.4, 33.1], ETF: [11.6, 5.2], SMA: [5.2, 6.6] },
+    redemptions: { 'Mutual fund': [18.9, 12.4], ETF: [1.1, 0.6], SMA: [3.0, 2.8] },
+    channels: { 'Kim Group model portfolios': [24.0, 33.5], 'Advisor-directed accounts': [14.2, 11.4] },
+    limitations: ['Fund-level transactions are not connected, so sales are explained by vehicle and channel only.', 'Flows exclude in-kind transfers between share classes.'] }
+};
+/* [market share] definition and inputs; numerator and denominator dates differ on purpose */
+const MARKET_SHARE = {
+  'ADV-105': { definition: 'CG share = CG mutual fund and ETF assets in a Morningstar category ÷ the advisor’s assets in that category across all managers (industry book). Excludes SMAs, cash and money market.',
+    numerator_as_of: 'Aug 31, 2026', denominator_as_of: 'Jun 30, 2026', denominator_source: 'Dealer industry-book feed',
+    categories: [['Large Growth', ['GFFFX', 'CGGR'], 310.0], ['Large Value and Blend', ['AWSHX', 'CGDV'], 185.0], ['Moderate Allocation', ['AMBFX', 'AMECX'], 120.0], ['Intermediate Core Bond', ['ABNFX', 'CGCP'], 140.0]] }
+};
+/* [platform eligibility] dealer shelf by program, with effective dates */
+const SHELF = {
+  'FIRM-WF': { firm: 'Wells Fargo Advisors', as_of: 'Sep 28, 2026', source: 'Dealer intelligence feed', advisor_programs: { 'ADV-105': ['Personalized UMA', 'Brokerage'] },
+    items: [
+      ['CGGR', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGGR', 'Personalized UMA', 'Available', 'Sep 22, 2026'],
+      ['CGDV', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGDV', 'Personalized UMA', 'Available', 'Jun 1, 2025'],
+      ['CGCP', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGCP', 'Personalized UMA', 'Under review', 'Aug 15, 2026'],
+      ['CGUI', 'Brokerage', 'Available', 'Nov 1, 2025'], ['CGUI', 'Personalized UMA', 'Not available', null],
+      ['CGXU', 'Brokerage', 'Available', 'Jan 15, 2026'], ['CGXU', 'Personalized UMA', 'Not available', null],
+      ['GFFFX', 'Personalized UMA', 'Available', 'Feb 1, 2019']] }
+};
+/* [taxonomy] what a category actually includes */
+const TAXONOMY = {
+  'equity funds': { include: ['GFFFX', 'AGTHX', 'AWSHX', 'CGGR', 'CGDV', 'CGXU'], exclude: [['AMBFX', 'Multi-asset: classified as allocation, not equity'], ['AMECX', 'Multi-asset: classified as allocation, not equity']], unmapped: ['Global Equity SMA (separately managed account, outside the fund taxonomy)'] },
+  'fixed income': { include: ['ABNFX', 'ABNDX', 'CGCP', 'CGUI'], exclude: [], unmapped: ['Municipal SMA (separately managed account, outside the fund taxonomy)'] },
+  etfs: { include: ['CGGR', 'CGDV', 'CGCP', 'CGUI', 'CGXU'], exclude: [], unmapped: [] },
+  'multi-asset': { include: ['AMBFX', 'ABALX', 'AMECX'], exclude: [], unmapped: [] },
+  'large growth': { include: ['GFFFX', 'AGTHX', 'CGGR'], exclude: [], unmapped: [] }
+};
+/* [pipeline] status history behind each opportunity */
+const PIPELINE_HISTORY = {
+  'OPP-501': [['Aug 14, 2026', 'Discovery'], ['Sep 22, 2026', 'Proposal']],
+  'OPP-502': [['Sep 1, 2026', 'Discovery']],
+  'OPP-504': [['Sep 18, 2026', 'Discovery']], 'OPP-505': [['Sep 23, 2026', 'Discovery']], 'OPP-506': [['Sep 25, 2026', 'Qualified']], 'OPP-503': [['Sep 15, 2026', 'Discovery']],
+  'OPP-512': [['Aug 12, 2026', 'Proposal'], ['Sep 2, 2026', 'Paperwork'], ['Sep 10, 2026', 'Closed lost: sponsor stayed with its incumbent recordkeeper']],
+  'OPP-513': [['Sep 25, 2026', 'Discovery']]
+};
+
 /* Fund facts: the only source of fund numbers. null = not in reference data. */
 const FUNDS = {
   GFFFX: { name: 'The Growth Fund of America, Class F-2', family: 'Capital Group', er: 0.40, mgmt: 0.25, other: 0.15, bench: 'S&P 500', approach: 'Active, multi-manager (The Capital System); 282 issuers; up to 25% outside the U.S. (10.8% non-U.S. equities)', asOf: '8/31/26', src: 'capitalgroup.com fund page; prospectus 11/1/25', verified: true },
@@ -332,6 +386,11 @@ const FUNDS = {
   AMBFX: { name: 'American Balanced Fund, Class F-2', family: 'Capital Group', er: 0.35, bench: '60% S&P 500 / 40% Bloomberg U.S. Aggregate', category: 'Moderate Allocation', approach: 'Active balanced: at least 50% stocks (mostly dividend payers) and at least 25% bonds; multi-manager', asOf: 'Apr 2026', src: 'Morningstar prospectus-adjusted expense ratio', verified: true },
   AWSHX: { name: 'Washington Mutual Investors Fund', family: 'Capital Group', er: null, bench: 'S&P 500', approach: 'Active growth-and-income', asOf: null, src: 'Expense ratio not in reference data', verified: false },
   ABALX: { name: 'American Balanced Fund, Class A', family: 'Capital Group', er: null, bench: '60% S&P 500 / 40% Bloomberg U.S. Aggregate', category: 'Moderate Allocation', approach: 'Same portfolio as F-2; sales charge may apply', asOf: null, src: 'Class A expense ratio not in reference data', verified: false },
+  CGGR: { name: 'Capital Group Growth ETF', family: 'Capital Group', vehicle: 'ETF', er: null, bench: 'S&P 500', approach: 'Active growth ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
+  CGDV: { name: 'Capital Group Dividend Value ETF', family: 'Capital Group', vehicle: 'ETF', er: null, bench: 'S&P 500', approach: 'Active dividend-oriented ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
+  CGCP: { name: 'Capital Group Core Plus Income ETF', family: 'Capital Group', vehicle: 'ETF', er: null, bench: 'Bloomberg U.S. Aggregate', approach: 'Active core-plus bond ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
+  CGUI: { name: 'Capital Group Ultra Short Income ETF', family: 'Capital Group', vehicle: 'ETF', er: null, bench: 'Ultra-short bond index', approach: 'Active ultra-short income ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
+  CGXU: { name: 'Capital Group International Focus Equity ETF', family: 'Capital Group', vehicle: 'ETF', er: null, bench: 'MSCI ACWI ex USA', approach: 'Active international equity ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
   AMECX: { name: 'The Income Fund of America', family: 'Capital Group', er: null, bench: 'Blended equity/bond index', approach: 'Active income-focused', asOf: null, src: 'Expense ratio not in reference data', verified: false }
 };
 const PEERS = {

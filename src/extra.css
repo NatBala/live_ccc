@@ -411,9 +411,9 @@
 @media (min-width:861px) and (max-width:1280px){.app:not(.norail) .main{grid-template-columns:360px minmax(0,1fr)}}
 .tbtn[aria-pressed="true"] .ic{transform:scaleX(-1)}
 
-/* five tabs fit the narrow rail */
-.tabs{overflow-x:auto;scrollbar-width:none}
-.tab{padding:9px 8px;font-size:13px;white-space:nowrap;flex:none}
+/* six tabs: wrap onto a second line in the narrow rail rather than hide any */
+.tabs{flex-wrap:wrap;row-gap:0}
+.tab{padding:8px 7px;font-size:12.5px;white-space:nowrap;flex:none}
 
 /* traceability: where each step's answer came from */
 .srcs{margin-top:8px;border:1px solid var(--rule);border-radius:8px;padding:6px 9px 4px;background:var(--soft)}
@@ -448,3 +448,74 @@
 
 /* eight enterprise systems in two rows */
 @media (min-width:861px){.systems{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* ===== Sales AI: intelligence, orchestration and the query catalogue ===== */
+.planbtn{border:1px solid var(--gold);border-radius:10px;background:none;color:var(--gold);font-weight:700;padding:0 12px;white-space:nowrap}
+.planbtn:disabled{opacity:.5}
+.mute{color:var(--mute)}
+.warn{display:block;color:var(--hl-fg)}
+.linkbtn{background:none;border:0;padding:0;color:var(--hl-fg);font-weight:700;text-decoration:underline;cursor:pointer}
+.ib{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;padding:1px 6px;border-radius:5px;background:#e9e3fb;color:#4b3592;white-space:nowrap}
+
+/* the interpretation card */
+.interpcard{border-left:3px solid #8f7ae0}
+.ihead{font:400 15px/1.4 var(--serif);margin:6px 0 4px}
+dl.interp{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:6px 0 0;font-size:12.5px}
+dl.interp dt{color:var(--mute);font-weight:700;white-space:nowrap}
+dl.interp dd{margin:0}
+dl.interp dd small{color:var(--mute)}
+
+/* the plan, in waves */
+.wave{border:1px dashed var(--rule);border-radius:10px;padding:6px 8px 8px;margin-top:8px}
+.wave .steprow{margin:5px 0 0;width:100%}
+.waveh{display:flex;align-items:center;gap:8px}
+.wn{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--hl-fg);background:var(--hl);border-radius:5px;padding:1px 6px}
+.waveh small{color:var(--mute);font-size:11.5px}
+.wave.ret{border-style:solid;font-size:13px;display:flex;gap:8px;align-items:center}
+.svcl{display:flex!important;flex-wrap:wrap;gap:3px;margin-top:3px}
+
+/* route chips */
+.rc{display:inline-block;font-size:11px;line-height:1.5;padding:0 6px;border-radius:5px;margin:1px 2px 1px 0;white-space:nowrap;font-weight:600}
+.rc.ag{border:1px solid var(--c);color:var(--ink);background:color-mix(in srgb,var(--c) 18%,transparent)}
+.rc.sv{border:1px solid var(--rule);font-family:var(--code);font-weight:500}
+.rc.sv.simulated{background:#e3f5ec;color:#1f6b48;border-color:#9fd3b6}
+.rc.sv.foundation{background:#e3eefb;color:#23548a;border-color:#a9c6ea}
+.rc.sv.not-connected{background:none;color:var(--mute);border-style:dashed}
+.rc.ck{border:1px dotted var(--mute);color:var(--mute)}
+.rt{display:flex;flex-wrap:wrap;align-items:center;gap:3px;margin:5px 0 3px}
+.rts{display:inline-flex;flex-wrap:wrap;align-items:center}
+.rts.par{border:1px solid var(--rule);border-radius:7px;padding:1px 3px;background:var(--soft)}
+.rta{color:var(--mute);font-size:12px}
+.rto{font-size:12px;font-style:italic;color:var(--ink)}
+
+/* the step contract */
+.contract{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;font-size:11.5px;color:var(--mute);margin-top:8px;padding-top:6px;border-top:1px solid var(--rule)}
+.contract b{color:var(--ink)}
+.cs{font-size:10px;font-weight:800;text-transform:uppercase;padding:1px 6px;border-radius:5px}
+.cs.complete{background:#e3f5ec;color:#1f6b48}
+.cs.partial{background:var(--hl);color:var(--hl-fg)}
+.cs.blocked{background:var(--bad-bg);color:var(--bad-fg)}
+.unres{font-size:12px;margin-top:4px;color:var(--hl-fg)}
+.vbadge.Gap{background:none;border:1px dashed var(--mute);color:var(--mute)}
+.uv.proposed{background:var(--soft);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lbtn.mini{padding:2px 8px;font-size:11.5px}
+
+/* the catalogue tab */
+.catintro{border-left:3px solid var(--gold)}
+.lead2{font:400 14.5px/1.45 var(--serif);margin:6px 0}
+.legend2{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;font-size:11.5px;color:var(--mute)}
+.catsec>summary{cursor:pointer;display:flex;flex-direction:column;gap:1px;list-style:none}
+.catsec>summary::-webkit-details-marker{display:none}
+.catsec>summary small{color:var(--mute);font-size:11.5px}
+.catnote{font-size:12px;color:var(--hl-fg);background:var(--hl);border-radius:7px;padding:5px 8px;margin:8px 0 2px}
+.catq{border-top:1px solid var(--rule);padding:8px 0 6px}
+.catq.flash{animation:catflash 1.6s ease-out}
+@keyframes catflash{0%{background:var(--hl)}100%{background:transparent}}
+.catqh{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap;font-size:13px}
+.catqh b{font-weight:600}
+.catn{font-size:10.5px;font-weight:800;color:var(--mute);min-width:18px}
+.catbtns{display:flex;gap:6px;align-items:center;margin-top:3px}
+.fam{margin-top:8px;font-size:12.5px}
+.fam small{color:var(--mute)}
+.intents{display:grid;gap:3px;font-size:12px;margin-top:8px}
+@media (prefers-color-scheme:dark){:root:not([data-skin="porcelain"]) .ib{background:#2c2550;color:#cfc3ff}:root:not([data-skin="porcelain"]) .rc.sv.simulated,:root:not([data-skin="porcelain"]) .cs.complete{background:#143a2a;color:#9fe3c2;border-color:#2f6b4f}:root:not([data-skin="porcelain"]) .rc.sv.foundation{background:#16304d;color:#a9cdf5;border-color:#2c527c}}

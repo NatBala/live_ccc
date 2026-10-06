@@ -899,9 +899,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 @media (min-width:861px) and (max-width:1280px){.app:not(.norail) .main{grid-template-columns:360px minmax(0,1fr)}}
 .tbtn[aria-pressed="true"] .ic{transform:scaleX(-1)}
 
-/* five tabs fit the narrow rail */
-.tabs{overflow-x:auto;scrollbar-width:none}
-.tab{padding:9px 8px;font-size:13px;white-space:nowrap;flex:none}
+/* six tabs: wrap onto a second line in the narrow rail rather than hide any */
+.tabs{flex-wrap:wrap;row-gap:0}
+.tab{padding:8px 7px;font-size:12.5px;white-space:nowrap;flex:none}
 
 /* traceability: where each step's answer came from */
 .srcs{margin-top:8px;border:1px solid var(--rule);border-radius:8px;padding:6px 9px 4px;background:var(--soft)}
@@ -936,6 +936,77 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 /* eight enterprise systems in two rows */
 @media (min-width:861px){.systems{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* ===== Sales AI: intelligence, orchestration and the query catalogue ===== */
+.planbtn{border:1px solid var(--gold);border-radius:10px;background:none;color:var(--gold);font-weight:700;padding:0 12px;white-space:nowrap}
+.planbtn:disabled{opacity:.5}
+.mute{color:var(--mute)}
+.warn{display:block;color:var(--hl-fg)}
+.linkbtn{background:none;border:0;padding:0;color:var(--hl-fg);font-weight:700;text-decoration:underline;cursor:pointer}
+.ib{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;padding:1px 6px;border-radius:5px;background:#e9e3fb;color:#4b3592;white-space:nowrap}
+
+/* the interpretation card */
+.interpcard{border-left:3px solid #8f7ae0}
+.ihead{font:400 15px/1.4 var(--serif);margin:6px 0 4px}
+dl.interp{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:6px 0 0;font-size:12.5px}
+dl.interp dt{color:var(--mute);font-weight:700;white-space:nowrap}
+dl.interp dd{margin:0}
+dl.interp dd small{color:var(--mute)}
+
+/* the plan, in waves */
+.wave{border:1px dashed var(--rule);border-radius:10px;padding:6px 8px 8px;margin-top:8px}
+.wave .steprow{margin:5px 0 0;width:100%}
+.waveh{display:flex;align-items:center;gap:8px}
+.wn{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--hl-fg);background:var(--hl);border-radius:5px;padding:1px 6px}
+.waveh small{color:var(--mute);font-size:11.5px}
+.wave.ret{border-style:solid;font-size:13px;display:flex;gap:8px;align-items:center}
+.svcl{display:flex!important;flex-wrap:wrap;gap:3px;margin-top:3px}
+
+/* route chips */
+.rc{display:inline-block;font-size:11px;line-height:1.5;padding:0 6px;border-radius:5px;margin:1px 2px 1px 0;white-space:nowrap;font-weight:600}
+.rc.ag{border:1px solid var(--c);color:var(--ink);background:color-mix(in srgb,var(--c) 18%,transparent)}
+.rc.sv{border:1px solid var(--rule);font-family:var(--code);font-weight:500}
+.rc.sv.simulated{background:#e3f5ec;color:#1f6b48;border-color:#9fd3b6}
+.rc.sv.foundation{background:#e3eefb;color:#23548a;border-color:#a9c6ea}
+.rc.sv.not-connected{background:none;color:var(--mute);border-style:dashed}
+.rc.ck{border:1px dotted var(--mute);color:var(--mute)}
+.rt{display:flex;flex-wrap:wrap;align-items:center;gap:3px;margin:5px 0 3px}
+.rts{display:inline-flex;flex-wrap:wrap;align-items:center}
+.rts.par{border:1px solid var(--rule);border-radius:7px;padding:1px 3px;background:var(--soft)}
+.rta{color:var(--mute);font-size:12px}
+.rto{font-size:12px;font-style:italic;color:var(--ink)}
+
+/* the step contract */
+.contract{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;font-size:11.5px;color:var(--mute);margin-top:8px;padding-top:6px;border-top:1px solid var(--rule)}
+.contract b{color:var(--ink)}
+.cs{font-size:10px;font-weight:800;text-transform:uppercase;padding:1px 6px;border-radius:5px}
+.cs.complete{background:#e3f5ec;color:#1f6b48}
+.cs.partial{background:var(--hl);color:var(--hl-fg)}
+.cs.blocked{background:var(--bad-bg);color:var(--bad-fg)}
+.unres{font-size:12px;margin-top:4px;color:var(--hl-fg)}
+.vbadge.Gap{background:none;border:1px dashed var(--mute);color:var(--mute)}
+.uv.proposed{background:var(--soft);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lbtn.mini{padding:2px 8px;font-size:11.5px}
+
+/* the catalogue tab */
+.catintro{border-left:3px solid var(--gold)}
+.lead2{font:400 14.5px/1.45 var(--serif);margin:6px 0}
+.legend2{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;font-size:11.5px;color:var(--mute)}
+.catsec>summary{cursor:pointer;display:flex;flex-direction:column;gap:1px;list-style:none}
+.catsec>summary::-webkit-details-marker{display:none}
+.catsec>summary small{color:var(--mute);font-size:11.5px}
+.catnote{font-size:12px;color:var(--hl-fg);background:var(--hl);border-radius:7px;padding:5px 8px;margin:8px 0 2px}
+.catq{border-top:1px solid var(--rule);padding:8px 0 6px}
+.catq.flash{animation:catflash 1.6s ease-out}
+@keyframes catflash{0%{background:var(--hl)}100%{background:transparent}}
+.catqh{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap;font-size:13px}
+.catqh b{font-weight:600}
+.catn{font-size:10.5px;font-weight:800;color:var(--mute);min-width:18px}
+.catbtns{display:flex;gap:6px;align-items:center;margin-top:3px}
+.fam{margin-top:8px;font-size:12.5px}
+.fam small{color:var(--mute)}
+.intents{display:grid;gap:3px;font-size:12px;margin-top:8px}
+@media (prefers-color-scheme:dark){:root:not([data-skin="porcelain"]) .ib{background:#2c2550;color:#cfc3ff}:root:not([data-skin="porcelain"]) .rc.sv.simulated,:root:not([data-skin="porcelain"]) .cs.complete{background:#143a2a;color:#9fe3c2;border-color:#2f6b4f}:root:not([data-skin="porcelain"]) .rc.sv.foundation{background:#16304d;color:#a9cdf5;border-color:#2c527c}}
 </style>
 </head>
 <body>
@@ -958,7 +1029,7 @@ button{font:inherit;color:inherit;cursor:pointer}
         <svg class="wires" id="wires" aria-hidden="true"></svg>
         <div class="row cmd" id="cmd">
           <div class="cmd-top" id="whoRow"></div>
-          <div class="cmd-row"><textarea class="cmd-in" id="cmdIn" rows="1" placeholder="Ask for an outcome, in your own words…" aria-label="Request"></textarea><button class="runbtn" id="runBtn"><svg class="ic" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z" fill="currentColor" stroke="none"/></svg>Run</button><button class="stopbtn" id="stopBtn" hidden>Stop</button></div>
+          <div class="cmd-row"><textarea class="cmd-in" id="cmdIn" rows="1" placeholder="Ask for an outcome, in your own words…" aria-label="Request"></textarea><button class="planbtn" id="planBtn" title="Show how the request is interpreted and decomposed into waves, without running any step">Plan only</button><button class="runbtn" id="runBtn"><svg class="ic" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z" fill="currentColor" stroke="none"/></svg>Run</button><button class="stopbtn" id="stopBtn" hidden>Stop</button></div>
           <div class="sugs" id="sugs"></div>
         </div>
         <div class="row orch" id="orch" role="button" tabindex="0"></div>
@@ -972,6 +1043,7 @@ button{font:inherit;color:inherit;cursor:pointer}
         <button class="tab" data-tab="updates" aria-selected="true">Updates<i class="badge"></i></button>
         <button class="tab" data-tab="decisions" aria-selected="false">Decisions<i class="badge"></i></button>
         <button class="tab" data-tab="packets" aria-selected="false">Agents</button>
+        <button class="tab" data-tab="catalogue" aria-selected="false">Catalogue</button>
         <button class="tab" data-tab="memory" aria-selected="false">Memory<i class="badge"></i></button>
         <button class="tab" data-tab="events" aria-selected="false">Events</button>
       </div>
@@ -979,12 +1051,13 @@ button{font:inherit;color:inherit;cursor:pointer}
         <div class="pane" id="pane-updates"></div>
         <div class="pane" id="pane-decisions" hidden></div>
         <div class="pane" id="pane-packets" hidden></div>
+        <div class="pane" id="pane-catalogue" hidden></div>
         <div class="pane" id="pane-memory" hidden></div>
         <div class="pane" id="pane-events" hidden></div>
       </div>
     </aside>
   </main>
-  <nav class="mnav" id="mnav"><button data-view="live" aria-current="true">Live</button><button data-view="updates">Updates</button><button data-view="decisions">Decisions</button><button data-view="packets">Agents</button><button data-view="memory">Memory</button><button data-view="events">Events</button></nav>
+  <nav class="mnav" id="mnav"><button data-view="live" aria-current="true">Live</button><button data-view="updates">Updates</button><button data-view="decisions">Decisions</button><button data-view="packets">Agents</button><button data-view="catalogue">Catalogue</button><button data-view="memory">Memory</button><button data-view="events">Events</button></nav>
 </div>
 <div class="scrim" id="scrim" hidden></div>
 <div class="drawer" id="drawer" role="dialog" aria-modal="true" hidden><div class="dhead"><h2 id="drawerTitle"></h2><button class="x" id="drawerClose" aria-label="Close"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="dbody" id="drawerBody"></div></div>
@@ -1022,7 +1095,7 @@ const EMPLOYEES = {
 };
 
 const SUGGESTIONS = {
-  sales: ['Identify the growing trends in LA territory', 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month', 'Prep me for my call with Alex tomorrow', 'Prepare Maya’s retirement committee fee comparison review', 'Sofia mentioned ETFs. What should I bring to our next meeting?', 'Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.'],
+  sales: ['Identify the growing trends in LA territory', 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month', 'Prep me for my call with Alex tomorrow', 'Prepare Maya’s retirement committee fee comparison review', 'Sofia mentioned ETFs. What should I bring to our next meeting?', 'Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.', 'Why are Daniel’s overall sales down when his ETF sales are up?', 'Which CG ETFs are available at Wells Fargo for Daniel?', 'Prepare me for tomorrow’s meeting with Daniel’s team'],
   product: ['Compare BFA and AMBAL: costs, approach and who each suits', 'Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.', 'Compare GFA F-2 costs with VWUAX and VIGAX on $38M', 'Check whether our fee comparison for Maya is still current'],
   marketing: ['Draft the follow-up email to Alex using Product’s verified comparison', 'Create an ETF email campaign for Sofia', 'Write a LinkedIn post on fee transparency for advisors'],
   service: ['Alex says the link in Priya’s email won’t open', 'Maya says the benchmark explanation is still unclear']
@@ -1030,20 +1103,20 @@ const SUGGESTIONS = {
 
 /* The full registry of 37 specialists. tools = what each may call through the MCP or API gateway. */
 const AGENTS = {
-  'sales.lead': { name: 'Lead Me', team: 'sales', does: 'Prioritizes advisors and opportunities using model signals', tools: ['models.sales_alpha', 'models.territory_trends', 'crm.get_opportunities'] },
+  'sales.lead': { name: 'Lead Me', team: 'sales', does: 'Prioritizes advisors and opportunities using model signals', tools: ['models.sales_alpha', 'models.territory_trends', 'crm.get_opportunities', 'book.get_assets', 'book.get_flows', 'book.get_market_share', 'taxonomy.resolve', 'pipeline.get', 'engage.get_history', 'platform.get_availability'] },
   'sales.schedule': { name: 'Schedule Me', team: 'sales', does: 'Finds meeting times for advisors or colleagues and places calendar holds', tools: ['calendar.find_times', 'calendar.create_event', 'crm.get_contact'] },
-  'sales.prep': { name: 'Prep Me', team: 'sales', does: 'Builds meeting briefs and agendas from what is known about the advisor', tools: ['crm.get_call_notes', 'crm.get_opportunities', 'crm.get_contact', 'crm.get_plan'] },
-  'sales.engage': { name: 'Engage Me', team: 'sales', does: 'Captures what advisors say in meetings and answers live questions', tools: ['crm.get_call_notes', 'crm.log_activity'] },
-  'sales.follow': { name: 'Follow Me', team: 'sales', does: 'Logs outcomes, creates tasks and tracks commitments', tools: ['crm.log_activity', 'crm.create_task', 'crm.get_opportunities'] },
+  'sales.prep': { name: 'Prep Me', team: 'sales', does: 'Builds meeting briefs and agendas from what is known about the advisor', tools: ['crm.get_call_notes', 'crm.get_opportunities', 'crm.get_contact', 'crm.get_plan', 'book.get_assets', 'pipeline.get', 'engage.get_history', 'seismic.search_content'] },
+  'sales.engage': { name: 'Engage Me', team: 'sales', does: 'Captures what advisors say in meetings and answers live questions', tools: ['crm.get_call_notes', 'crm.log_activity', 'fund.get_facts', 'seismic.search_content'] },
+  'sales.follow': { name: 'Follow Me', team: 'sales', does: 'Logs outcomes, creates tasks and tracks commitments', tools: ['crm.log_activity', 'crm.create_task', 'crm.get_opportunities', 'pipeline.get'] },
   'sales.coach': { name: 'Coach Me', team: 'sales', does: 'Private coaching for the wholesaler, never shared', tools: [] },
-  'sales.territory': { name: 'Territory Planning', team: 'sales', does: 'Territory reviews: trends, coverage and business planning across advisors', tools: ['models.territory_trends', 'models.sales_alpha', 'crm.get_opportunities', 'crm.get_call_notes'] },
+  'sales.territory': { name: 'Territory Planning', team: 'sales', does: 'Territory reviews: trends, coverage and business planning across advisors', tools: ['models.territory_trends', 'models.sales_alpha', 'crm.get_opportunities', 'crm.get_call_notes', 'engage.get_history', 'taxonomy.resolve', 'book.get_market_share', 'pipeline.get'] },
   'product.clarify': { name: 'Query Clarifier', team: 'product', does: 'Turns loose questions into precise, answerable ones (funds, share classes, periods)', tools: ['fund.get_facts', 'fund.lookup'] },
-  'product.planner': { name: 'Research Planner', team: 'product', does: 'Decides what evidence is needed and where it comes from', tools: ['mstar.get_peers'] },
-  'product.tools': { name: 'Tool Selection', team: 'product', does: 'Runs analytics: fee math, peer data, portfolio construction', tools: ['fund.get_facts', 'fund.lookup', 'models.cost_on_assets', 'models.portfolio_construction', 'models.plan_fee_comparison', 'mstar.get_peers'] },
+  'product.planner': { name: 'Research Planner', team: 'product', does: 'Decides what evidence is needed and where it comes from', tools: ['mstar.get_peers', 'platform.get_availability', 'taxonomy.resolve', 'fund.lookup'] },
+  'product.tools': { name: 'Tool Selection', team: 'product', does: 'Runs analytics: fee math, peer data, portfolio construction', tools: ['fund.get_facts', 'fund.lookup', 'models.cost_on_assets', 'models.portfolio_construction', 'models.plan_fee_comparison', 'mstar.get_peers', 'taxonomy.resolve', 'book.get_assets'] },
   'product.summary': { name: 'Contact Summarizer', team: 'product', does: 'Summarizes the advisor context Product needs for a question', tools: [] },
   'product.tone': { name: 'Tone/Style Alignment', team: 'product', does: 'Turns verified product answers into advisor-ready language using approved messaging', tools: ['seismic.get_approved_language'] },
-  'product.format': { name: 'Response Formatter', team: 'product', does: 'Formats product answers for the channel', tools: [] },
-  'product.qar': { name: 'QAR', team: 'product', does: 'Produces verified answers; every number traced to a system of record', tools: ['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.cost_on_assets', 'models.plan_fee_comparison', 'seismic.search_content'] },
+  'product.format': { name: 'Response Formatter', team: 'product', does: 'Formats product answers for the channel', tools: ['taxonomy.resolve'] },
+  'product.qar': { name: 'QAR', team: 'product', does: 'Produces verified answers; every number traced to a system of record', tools: ['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.cost_on_assets', 'models.plan_fee_comparison', 'seismic.search_content', 'platform.get_availability', 'taxonomy.resolve'] },
   'product.institutional': { name: 'Institutional Pitch Books', team: 'product', does: 'Institutional product materials', tools: ['seismic.search_content'] },
   'product.srg': { name: 'SRG Product Pitch Books', team: 'product', does: 'Product pitch books for the retail advisor channel', tools: ['seismic.search_content'] },
   'marketing.gather': { name: 'Resource Gatherer', team: 'marketing', does: 'Finds approved content, templates, messaging and landing pages', tools: ['seismic.search_content', 'seismic.get_approved_language', 'aem.get_page', 'mcloud.get_engagement'] },
@@ -1147,7 +1220,7 @@ const ADVISORS = {
   'ADV-106': { name: 'Rachel Okafor', short: 'Rachel', title: 'Senior Vice President, Wealth Advisor', firm: 'FIRM-UBS', office: 'Pasadena, Los Angeles', territory: 'LA', team: 'Okafor Wealth Group',
     practice: 'Retirees and pre-retirees who need income', coverage: ['EMP-PRIYA', 'EMP-SAM'], units: { 'BU-106': 'Okafor retirement income portfolios' } },
   'ADV-107': { name: 'Luis Herrera', short: 'Luis', title: 'Principal', firm: 'FIRM-HP', office: 'Long Beach, Los Angeles', territory: 'LA', team: 'Harbor Point Wealth',
-    practice: 'Independent RIA; core portfolios for families and small businesses', coverage: ['EMP-SAM'], units: { 'BU-107': 'Harbor Point core portfolios' } }
+    practice: 'Independent RIA; core portfolios for families and small businesses', coverage: ['EMP-SAM'], units: { 'BU-107': 'Harbor Point core portfolios', 'BU-107R': 'Harbor Point small-business retirement plans' } }
 };
 const TERRITORIES = {
   LA: { name: 'Los Angeles', aliases: ['la', 'los angeles', 'l.a.'], advisors: ['ADV-105', 'ADV-106', 'ADV-107'], wholesaler: 'Priya Shah' },
@@ -1231,6 +1304,8 @@ const EPISODES = [
     text: 'Rachel: "My retirees want reliable income, and I am reviewing balanced and bond funds for them." Asked how American Balanced and The Bond Fund of America fit an income plan.' },
   { id: 'EMAIL-0925', adv: 'ADV-107', scope: 'BU-107', date: 'Sep 25, 2026', kind: 'Email', with: 'Sam Lee',
     text: 'Luis: "We are adding more fixed income as rates settle. Send me your core bond story, and keep an eye on fees."' },
+  { id: 'EMAIL-0902', adv: 'ADV-107', scope: 'BU-107R', date: 'Sep 2, 2026', kind: 'Email', with: 'Sam Lee',
+    text: 'Luis: "The Forsyth paperwork is with the sponsor now; it should be signed in a week or two."' },
   { id: 'CALL-0826', adv: 'ADV-105', scope: 'BU-105', date: 'Aug 26, 2026', kind: 'Call transcript', with: 'Sam Lee',
     text: 'Daniel moved two client models to a core-satellite structure with an index core. Wants to review the satellite funds each quarter.' }
 ];
@@ -1254,7 +1329,9 @@ const OPPORTUNITIES = [
   { id: 'OPP-506', adv: 'ADV-107', scope: 'BU-107', name: 'Harbor Point core bond', stage: 'Qualified', note: 'Adding fixed income as rates settle' },
   { id: 'OPP-501', adv: 'ADV-101', scope: 'BU-101A', name: 'Rivera growth model', stage: 'Proposal', note: 'Deciding whether GFA stays in the growth sleeve' },
   { id: 'OPP-502', adv: 'ADV-102', scope: 'BU-102R', name: 'Northstar retirement menu review', stage: 'Discovery', note: 'Committee reviewing fee comparisons for PLAN-102 before the Nov 12 meeting' },
-  { id: 'OPP-503', adv: 'ADV-104', scope: 'BU-104', name: 'Martinez core allocation', stage: 'Discovery', note: 'Moving core to ETFs' }
+  { id: 'OPP-503', adv: 'ADV-104', scope: 'BU-104', name: 'Martinez core allocation', stage: 'Discovery', note: 'Moving core to ETFs' },
+  { id: 'OPP-512', adv: 'ADV-107', scope: 'BU-107R', name: 'Forsyth Components 401(k)', stage: 'Closed lost', type: '401(k)', note: 'Small-business plan; sponsor decision Sep 10' },
+  { id: 'OPP-513', adv: 'ADV-107', scope: 'BU-107R', name: 'Long Beach Marine SIMPLE IRA', stage: 'Discovery', type: 'SIMPLE IRA', note: 'Owner asked about a plan for twelve employees' }
 ];
 
 /* Retirement plans an advisor's committee oversees (Salesforce plan record). Plan and assets are fictional. */
@@ -1322,6 +1399,56 @@ const DISCLOSURES = {
   committee: { required: ['Past results are not predictive of results in future periods.', 'Expense ratios are as of each fund’s prospectus; share class shown.', 'Category medians are Morningstar data as of the date shown.', 'For financial professional and plan sponsor use only.'], rules: ['Show each option’s share class and as-of date.', 'Name the comparison category and data source.'] }
 };
 
+/* ---------- Sales AI shared services (all values fictional; amounts in $ millions) ---------- */
+/* [assets] CG assets for an advisor's team, two snapshots */
+const BOOK = {
+  'ADV-105': { entity: 'The Kim Group (team level), Capital Group assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
+    funds: [['GFFFX', 'Mutual fund', 54.0], ['AMBFX', 'Mutual fund', 31.3], ['ABNFX', 'Mutual fund', 22.8], ['AWSHX', 'Mutual fund', 20.5], ['AMECX', 'Mutual fund', 19.6],
+      ['CGGR', 'ETF', 18.4], ['CGDV', 'ETF', 12.6], ['CGCP', 'ETF', 10.2], ['Global Equity SMA', 'SMA', 26.1], ['Municipal SMA', 'SMA', 16.5]],
+    prior_by_vehicle: { 'Mutual fund': 171.5, ETF: 22.0, SMA: 44.0 } }
+};
+/* [flows] gross sales and redemptions by vehicle and channel, trailing twelve months vs the twelve before */
+const FLOWS = {
+  'ADV-105': { current: 'Sep 2025 to Aug 2026', prior: 'Sep 2024 to Aug 2025',
+    sales: { 'Mutual fund': [21.4, 33.1], ETF: [11.6, 5.2], SMA: [5.2, 6.6] },
+    redemptions: { 'Mutual fund': [18.9, 12.4], ETF: [1.1, 0.6], SMA: [3.0, 2.8] },
+    channels: { 'Kim Group model portfolios': [24.0, 33.5], 'Advisor-directed accounts': [14.2, 11.4] },
+    limitations: ['Fund-level transactions are not connected, so sales are explained by vehicle and channel only.', 'Flows exclude in-kind transfers between share classes.'] }
+};
+/* [market share] definition and inputs; numerator and denominator dates differ on purpose */
+const MARKET_SHARE = {
+  'ADV-105': { definition: 'CG share = CG mutual fund and ETF assets in a Morningstar category ÷ the advisor’s assets in that category across all managers (industry book). Excludes SMAs, cash and money market.',
+    numerator_as_of: 'Aug 31, 2026', denominator_as_of: 'Jun 30, 2026', denominator_source: 'Dealer industry-book feed',
+    categories: [['Large Growth', ['GFFFX', 'CGGR'], 310.0], ['Large Value and Blend', ['AWSHX', 'CGDV'], 185.0], ['Moderate Allocation', ['AMBFX', 'AMECX'], 120.0], ['Intermediate Core Bond', ['ABNFX', 'CGCP'], 140.0]] }
+};
+/* [platform eligibility] dealer shelf by program, with effective dates */
+const SHELF = {
+  'FIRM-WF': { firm: 'Wells Fargo Advisors', as_of: 'Sep 28, 2026', source: 'Dealer intelligence feed', advisor_programs: { 'ADV-105': ['Personalized UMA', 'Brokerage'] },
+    items: [
+      ['CGGR', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGGR', 'Personalized UMA', 'Available', 'Sep 22, 2026'],
+      ['CGDV', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGDV', 'Personalized UMA', 'Available', 'Jun 1, 2025'],
+      ['CGCP', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGCP', 'Personalized UMA', 'Under review', 'Aug 15, 2026'],
+      ['CGUI', 'Brokerage', 'Available', 'Nov 1, 2025'], ['CGUI', 'Personalized UMA', 'Not available', null],
+      ['CGXU', 'Brokerage', 'Available', 'Jan 15, 2026'], ['CGXU', 'Personalized UMA', 'Not available', null],
+      ['GFFFX', 'Personalized UMA', 'Available', 'Feb 1, 2019']] }
+};
+/* [taxonomy] what a category actually includes */
+const TAXONOMY = {
+  'equity funds': { include: ['GFFFX', 'AGTHX', 'AWSHX', 'CGGR', 'CGDV', 'CGXU'], exclude: [['AMBFX', 'Multi-asset: classified as allocation, not equity'], ['AMECX', 'Multi-asset: classified as allocation, not equity']], unmapped: ['Global Equity SMA (separately managed account, outside the fund taxonomy)'] },
+  'fixed income': { include: ['ABNFX', 'ABNDX', 'CGCP', 'CGUI'], exclude: [], unmapped: ['Municipal SMA (separately managed account, outside the fund taxonomy)'] },
+  etfs: { include: ['CGGR', 'CGDV', 'CGCP', 'CGUI', 'CGXU'], exclude: [], unmapped: [] },
+  'multi-asset': { include: ['AMBFX', 'ABALX', 'AMECX'], exclude: [], unmapped: [] },
+  'large growth': { include: ['GFFFX', 'AGTHX', 'CGGR'], exclude: [], unmapped: [] }
+};
+/* [pipeline] status history behind each opportunity */
+const PIPELINE_HISTORY = {
+  'OPP-501': [['Aug 14, 2026', 'Discovery'], ['Sep 22, 2026', 'Proposal']],
+  'OPP-502': [['Sep 1, 2026', 'Discovery']],
+  'OPP-504': [['Sep 18, 2026', 'Discovery']], 'OPP-505': [['Sep 23, 2026', 'Discovery']], 'OPP-506': [['Sep 25, 2026', 'Qualified']], 'OPP-503': [['Sep 15, 2026', 'Discovery']],
+  'OPP-512': [['Aug 12, 2026', 'Proposal'], ['Sep 2, 2026', 'Paperwork'], ['Sep 10, 2026', 'Closed lost: sponsor stayed with its incumbent recordkeeper']],
+  'OPP-513': [['Sep 25, 2026', 'Discovery']]
+};
+
 /* Fund facts: the only source of fund numbers. null = not in reference data. */
 const FUNDS = {
   GFFFX: { name: 'The Growth Fund of America, Class F-2', family: 'Capital Group', er: 0.40, mgmt: 0.25, other: 0.15, bench: 'S&P 500', approach: 'Active, multi-manager (The Capital System); 282 issuers; up to 25% outside the U.S. (10.8% non-U.S. equities)', asOf: '8/31/26', src: 'capitalgroup.com fund page; prospectus 11/1/25', verified: true },
@@ -1333,6 +1460,11 @@ const FUNDS = {
   AMBFX: { name: 'American Balanced Fund, Class F-2', family: 'Capital Group', er: 0.35, bench: '60% S&P 500 / 40% Bloomberg U.S. Aggregate', category: 'Moderate Allocation', approach: 'Active balanced: at least 50% stocks (mostly dividend payers) and at least 25% bonds; multi-manager', asOf: 'Apr 2026', src: 'Morningstar prospectus-adjusted expense ratio', verified: true },
   AWSHX: { name: 'Washington Mutual Investors Fund', family: 'Capital Group', er: null, bench: 'S&P 500', approach: 'Active growth-and-income', asOf: null, src: 'Expense ratio not in reference data', verified: false },
   ABALX: { name: 'American Balanced Fund, Class A', family: 'Capital Group', er: null, bench: '60% S&P 500 / 40% Bloomberg U.S. Aggregate', category: 'Moderate Allocation', approach: 'Same portfolio as F-2; sales charge may apply', asOf: null, src: 'Class A expense ratio not in reference data', verified: false },
+  CGGR: { name: 'Capital Group Growth ETF', family: 'Capital Group', vehicle: 'ETF', er: null, bench: 'S&P 500', approach: 'Active growth ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
+  CGDV: { name: 'Capital Group Dividend Value ETF', family: 'Capital Group', vehicle: 'ETF', er: null, bench: 'S&P 500', approach: 'Active dividend-oriented ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
+  CGCP: { name: 'Capital Group Core Plus Income ETF', family: 'Capital Group', vehicle: 'ETF', er: null, bench: 'Bloomberg U.S. Aggregate', approach: 'Active core-plus bond ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
+  CGUI: { name: 'Capital Group Ultra Short Income ETF', family: 'Capital Group', vehicle: 'ETF', er: null, bench: 'Ultra-short bond index', approach: 'Active ultra-short income ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
+  CGXU: { name: 'Capital Group International Focus Equity ETF', family: 'Capital Group', vehicle: 'ETF', er: null, bench: 'MSCI ACWI ex USA', approach: 'Active international equity ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
   AMECX: { name: 'The Income Fund of America', family: 'Capital Group', er: null, bench: 'Blended equity/bond index', approach: 'Active income-focused', asOf: null, src: 'Expense ratio not in reference data', verified: false }
 };
 const PEERS = {
@@ -1388,6 +1520,250 @@ const SUBSCRIPTIONS = {
   'approval.requested': ['marketing.dist'],
   'content.revised': ['marketing.legal', 'marketing.dist']
 };
+</script>
+<script>/* ===== Sales AI: business intents, sub-agents, shared services and the query catalogue =====
+   The catalogue holds example requests and the plan each one should produce. It is a set of
+   application requirements, not a claim that every integration exists: each [service] says
+   whether it is simulated in this demo, built into the foundation, or not connected. */
+
+/* What the person wants done. The intelligence layer picks exactly one per request. */
+const INTENTS = {
+  retrieve: 'Fetch specific records or facts as they are',
+  summarize: 'Condense what is known into a short read',
+  compare: 'Put two things side by side on the same basis or across time',
+  diagnose: 'Explain why something happened or why the system produced a result',
+  prioritize: 'Rank or filter candidates against stated criteria',
+  prepare: 'Assemble what someone needs for a meeting, call or decision',
+  verify: 'Confirm a fact, status or availability against the system of record',
+  draft: 'Write something for review; nothing is sent',
+  execute: 'Make a change the person explicitly asked for (still reviewed)',
+  remember: 'Store a fact or preference under the memory rules',
+  monitor: 'Watch for a condition and report or alert when it occurs'
+};
+const INTENT_ORDER = Object.keys(INTENTS);
+
+/* The eight fields the intelligence layer must establish before anything runs */
+const INTERP_FIELDS = [
+  ['subject', 'Subject', 'Advisor, buying unit, firm, territory, plan, opportunity, fund or document'],
+  ['intent', 'Business intent', 'Retrieve, summarize, compare, diagnose, prioritize, prepare, verify, draft, execute, remember or monitor'],
+  ['scope', 'Scope', 'Wealth or retirement, territory, dealer or platform, vehicle, audience'],
+  ['time', 'Time', 'As-of date, comparison period, last meeting or a requested historical date'],
+  ['constraints', 'Constraints', 'Exclusions, approved content only, do not send, one page'],
+  ['output', 'Requested output', 'Answer, ranked list, comparison, agenda, brief, draft, task or alert'],
+  ['missing', 'Missing information', 'Only what materially changes the answer or the action'],
+  ['authority', 'Action authority', 'Read-only, draft-only, proposed change, or an explicitly requested external action']
+];
+
+/* Action authority, lowest to highest. A tool may run only at or below the run's authority. */
+const AUTHORITY = {
+  read_only: { n: 0, label: 'Read-only', does: 'Reads and answers. No drafts, no changes.' },
+  draft_only: { n: 1, label: 'Draft-only', does: 'May save drafts for review. Nothing is sent or changed.' },
+  proposed_change: { n: 2, label: 'Proposed change', does: 'May place holds, update records or create tasks the person asked for; external sends still need approval.' },
+  external_action: { n: 3, label: 'External action', does: 'May prepare an explicitly requested send; a person approves the exact payload (POL-1).' }
+};
+/* What each tool does to the world: read (0), save a draft (1), change a record or calendar (2) */
+const TOOL_ACT = { 'mail.draft': 1, 'crm.log_activity': 2, 'crm.create_task': 2, 'calendar.create_event': 2, 'service.update_case': 2 };
+const toolAct = name => TOOL_ACT[name] ?? 0;
+
+/* Agents and their sub-agents (skills). Route notation: Prep.Notes = Prep Me → Notes Summarizer. */
+const SUBAGENTS = {
+  Prep: { agent: 'sales.prep', name: 'Prep Me', subs: {
+    Profile: 'Advisor, buying-unit and team profile from CRM',
+    Notes: 'Notes Summarizer: meeting notes and dated statements, attributed to who said them',
+    Content: 'Selects approved content that fits the meeting and the advisor’s stated needs',
+    'Fact Check': 'Checks every claim, number and date against its source; flags conflicts',
+    Agenda: 'Builds the agenda from verified topics',
+    Themes: 'Themes relevant to this advisor this week',
+    News: 'Authorized news, filtered for relevance' } },
+  Lead: { agent: 'sales.lead', name: 'Lead Me', subs: {
+    Discover: 'Self Service Leads: finds relationships that match explicit criteria',
+    Insights: 'Insights Generator: explains changes in assets, flows and pipeline',
+    Products: 'Product Recommender: discussion candidates, never suitability conclusions' } },
+  Territory: { agent: 'sales.territory', name: 'Territory Planning', subs: {
+    'Health Check': 'Coverage and activity health across the territory',
+    Calibration: 'Compares relationships with permitted peer cohorts',
+    Teaming: 'Who on the internal team and the advisor’s team should be involved',
+    Reviews: 'Coverage reviews and balance',
+    Strategy: 'Turns priorities into a sequenced plan',
+    'Business Planning': 'Goals, capacity and pipeline into a territory plan' } },
+  Schedule: { agent: 'sales.schedule', name: 'Schedule Me', subs: {
+    Calendar: 'Finds times and proposes or places meetings', Email: 'Drafts scheduling emails',
+    Compliance: 'Checks a meeting change against rules before it is made', Zoning: 'Groups visits by geography and travel time' } },
+  Engage: { agent: 'sales.engage', name: 'Engage Me', subs: {
+    'Q&A': 'Answers live questions from verified sources', Recommendations: 'In-meeting suggestions',
+    Capture: 'Captures what the advisor says', Scenario: 'What-if scenarios on approved tools' } },
+  Follow: { agent: 'sales.follow', name: 'Follow Me', subs: {
+    Dictation: 'Turns dictated notes into a structured record', Tasks: 'Commitments, owners and due dates', Expenses: 'Matches visits to receipts and policy' } },
+  Coach: { agent: 'sales.coach', name: 'Coach Me', subs: {
+    Simulation: 'Labeled role-play from sourced preferences', Guide: 'Supported responses to objections' } },
+  Product: { name: 'Product specialists', subs: {
+    'Research Planner': ['product.planner', 'Decides what evidence is needed and where it comes from'],
+    'Tool Selection': ['product.tools', 'Runs approved analytics tools'],
+    'Response Formatter': ['product.format', 'Formats the verified answer for its audience'],
+    QAR: ['product.qar', 'Verified answers; every number traced to a system of record'] } },
+  Marketing: { name: 'Marketing specialists', subs: {
+    'Resource Gatherer': ['marketing.gather', 'Finds approved content, messaging and pages'],
+    'Document Analyzer': ['marketing.analyze', 'Extracts key points from approved documents'],
+    Editor: ['marketing.copy', 'Edits and writes from verified findings'],
+    'Audience Builder': ['marketing.audience', 'Builds permitted audiences'],
+    Distribution: ['marketing.dist', 'Prepares sends; nothing goes out without approval'] } }
+};
+/* "Prep.Notes" → { route, agent, sub, label, does } */
+function routeInfo(route) {
+  const m = String(route || '').trim().match(/^(\w+)\.(.+)$/); if (!m) return null;
+  const A = SUBAGENTS[m[1]]; if (!A) return null;
+  const sub = Object.keys(A.subs).find(s => s.toLowerCase() === m[2].trim().toLowerCase()); if (!sub) return null;
+  const v = A.subs[sub], agent = Array.isArray(v) ? v[0] : A.agent, does = Array.isArray(v) ? v[1] : v;
+  return { route: m[1] + '.' + sub, family: m[1], agent, sub, label: Array.isArray(v) ? sub : `${A.name} → ${sub}`, does };
+}
+const routeOfTask = (agent, sub) => { for (const [fam, A] of Object.entries(SUBAGENTS)) for (const [s, v] of Object.entries(A.subs)) { const a = Array.isArray(v) ? v[0] : A.agent; if (a === agent && (Array.isArray(v) || s === sub)) return fam + '.' + s; } return null; };
+
+/* Shared tools and services: [name] in a route. Not autonomous agents. */
+const SERVICES = {
+  assets: { name: 'Assets', status: 'simulated', tools: ['book.get_assets'], does: 'CG assets by vehicle and fund, as of a date' },
+  flows: { name: 'Flows', status: 'simulated', tools: ['book.get_flows'], does: 'Gross sales, redemptions and net flows by vehicle and channel, period over period' },
+  'market share': { name: 'Market share', status: 'simulated', tools: ['book.get_market_share'], does: 'Metric definition, numerator, denominator and share by category' },
+  taxonomy: { name: 'Taxonomy', status: 'simulated', tools: ['taxonomy.resolve'], does: 'Maps a category (equity funds, ETFs) to the actual funds, with exclusions' },
+  'platform eligibility': { name: 'Platform eligibility', status: 'simulated', tools: ['platform.get_availability'], does: 'Dealer platform and program availability with effective dates' },
+  pipeline: { name: 'Pipeline', status: 'simulated', tools: ['pipeline.get'], does: 'Opportunities with current status and status history' },
+  plans: { name: 'Plans', status: 'simulated', tools: ['crm.get_plan'], does: 'Retirement plan records and lineups' },
+  engagements: { name: 'Engagements', status: 'simulated', tools: ['engage.get_history'], does: 'Completed and scheduled interactions per advisor' },
+  memory: { name: 'Memory', status: 'foundation', tools: [], does: 'Scoped, sourced advisor memory in the shared foundation' },
+  policy: { name: 'Policy', status: 'foundation', tools: [], does: 'Rules applied to every packet and contribution' },
+  'task state': { name: 'Task state', status: 'foundation', tools: [], does: 'Open commitments, owners and due dates' },
+  'approved search': { name: 'Approved search', status: 'foundation', tools: ['seismic.search_content'], does: 'Search over approved content only' },
+  'change history': { name: 'Change history', status: 'foundation', tools: [], does: 'Memory revisions and events since a date' },
+  'relationship graph': { name: 'Relationship graph', status: 'foundation', tools: [], does: 'People, firms, units and coverage' },
+  'action review': { name: 'Action review', status: 'foundation', tools: [], does: 'Human review of any change before it is made' },
+  'service state': { name: 'Service state', status: 'simulated', tools: ['service.get_cases'], does: 'Open and resolved service cases' },
+  'peer analytics': { name: 'Peer analytics', status: 'not connected', tools: [], does: 'Permitted peer cohorts and comparisons' },
+  'engagement graph': { name: 'Engagement graph', status: 'not connected', tools: [], does: 'Web and content engagement attributable to advisors' },
+  'ranking trace': { name: 'Ranking trace', status: 'not connected', tools: [], does: 'Why a ranked list came out the way it did' },
+  'recommendation trace': { name: 'Recommendation trace', status: 'not connected', tools: [], does: 'Why a content item was recommended' },
+  'evidence resolver': { name: 'Evidence resolver', status: 'not connected', tools: [], does: 'Resolves a claim to the source page and version' },
+  positions: { name: 'Positions', status: 'not connected', tools: [], does: 'Position-level holdings' },
+  'program rules': { name: 'Program rules', status: 'not connected', tools: [], does: 'Account and program minimums and rules' },
+  'allocation versions': { name: 'Allocation versions', status: 'not connected', tools: [], does: 'Dated model allocations by dealer version' },
+  'approved comparison tool': { name: 'Approved comparison tool', status: 'not connected', tools: [], does: 'Like-for-like fund comparisons' },
+  'coverage analytics': { name: 'Coverage analytics', status: 'not connected', tools: [], does: 'Coverage frequency against priorities' },
+  'pipeline scoring': { name: 'Pipeline scoring', status: 'not connected', tools: [], does: 'Scores opportunities for attention' },
+  'change events': { name: 'Change events', status: 'not connected', tools: [], does: 'Business events after a date' },
+  'expense system': { name: 'Expense system', status: 'not connected', tools: [], does: 'Receipts, policies and allocations' }
+};
+const SERVICE_ALIASES = { 'flows calculations': 'flows', transactions: 'flows', 'assets history': 'assets', 'metric definitions': 'market share', 'dealer changes': 'platform eligibility', 'pipeline history': 'pipeline', tasks: 'task state', 'plan master': 'plans', 'plans pagination': 'plans', service: 'service state', 'task state': 'task state' };
+/* "[assets/pipeline]" → ['assets', 'pipeline'] (known keys, or the raw name when unknown) */
+function serviceKeys(raw) {
+  const inner = String(raw).replace(/^\[|\]$/g, '').trim();
+  return inner.split(/\s*(?:\/|\+)\s*/).map(s => s.trim().toLowerCase()).filter(Boolean).map(s => SERVICES[s] ? s : SERVICE_ALIASES[s] || s);
+}
+const serviceStatus = k => SERVICES[k] ? SERVICES[k].status : 'not connected';
+
+/* Parse a catalogue route into stages. Items in one stage run together; stages run in order.
+   The last stage is the output. Brackets may contain "+" or "/", so split only outside them. */
+function parseRoute(route) {
+  const splitTop = (s, sep) => { const out = []; let depth = 0, cur = ''; for (let i = 0; i < s.length; i++) { const c = s[i]; if (c === '[') depth++; if (c === ']') depth--; if (depth === 0 && s.startsWith(sep, i)) { out.push(cur); cur = ''; i += sep.length - 1; continue; } cur += c; } out.push(cur); return out.map(x => x.trim()).filter(Boolean); };
+  const stages = splitTop(String(route).replace(/\.\s*$/, ''), '→');
+  const output = stages.length > 1 ? stages.pop() : '';
+  return { output, stages: stages.map(st => splitTop(st, ' + ').flatMap(item => {
+    if (/^\[.*\]$/.test(item)) return [{ kind: 'service', raw: item, keys: serviceKeys(item) }];
+    const m = item.match(/^(\w+)\.(.+)$/);
+    if (m && SUBAGENTS[m[1]]) return m[2].split('/').map(s => { const r = routeInfo(m[1] + '.' + s.trim()); return r ? Object.assign({ kind: 'agent', grp: item }, r) : { kind: 'check', raw: m[1] + '.' + s.trim() }; });
+    return [{ kind: 'check', raw: item }];
+  })).flatMap(st => st.length > 1 && st.every(i => i.grp && i.grp === st[0].grp) ? st.map(i => [i]) : [st]) }; /* "Schedule.Compliance/Calendar" alone in a stage runs in order */
+}
+
+/* Same word, different intent: why the catalogue is organized by intent, not keywords */
+const ETF_CONTRAST = [
+  { ask: 'Find ETF leads.', intent: 'prioritize', route: 'Territory.Health Check + [taxonomy] → Lead.Discover → Lead.Insights → ranked ETF leads with reasons', control: 'Read-only; a score is a signal, not intent' },
+  { ask: 'Explain this advisor’s ETF sales.', intent: 'diagnose', route: 'Lead.Insights + [flows] → Prep.Fact Check → contribution analysis with limits', control: 'Read-only; numbers only from the flows tool' },
+  { ask: 'Check whether this ETF is available on the advisor’s platform.', intent: 'verify', route: 'Prep.Profile + Product.Research Planner + [platform eligibility] → Product.QAR → scoped availability with effective date', control: 'Read-only; dealer-wide, platform and suitability kept separate' },
+  { ask: 'Prepare an ETF discussion.', intent: 'prepare', route: 'Prep.Notes + Lead.Products → Prep.Content → Prep.Agenda → discussion agenda', control: 'Read-only; returns the agenda, no email or CRM update' },
+  { ask: 'Send the approved ETF material.', intent: 'execute', route: 'Prep.Content → Marketing.Distribution → reviewable send', control: 'External action; a person approves the exact payload' }
+];
+
+const CATALOGUE_GROUPS = {
+  A: { title: 'Understand an advisor and prepare for a meeting', note: '“Prepare me” should normally reuse a confirmed meeting context. It should not require the user to name every source or sub-agent.' },
+  B: { title: 'Understand assets, flows and market share', note: 'Numerical aggregation comes from validated data tools. The model explains the result; it does not calculate from loosely related narrative snippets.' },
+  C: { title: 'Identify leads and prioritize coverage', note: 'A page visit is an observed event. A model score is a signal. Neither becomes “this advisor intends to buy.”' },
+  D: { title: 'Verify products, dealer availability and model portfolios', note: 'Dealer-wide availability, availability on a particular platform, and suitability for a particular client are separate questions.' },
+  E: { title: 'Select and personalize content', note: 'A recommendation reason distinguishes “relevant because of the advisor’s stated need” from “popular among other users.”' },
+  F: { title: 'Retirement plans and pipeline', note: 'An old note about paperwork does not automatically reopen a closed opportunity.' },
+  G: { title: 'Scheduling, territory planning and administration', note: 'Calendar, mapping and travel, expense and complete engagement data are integration dependencies, not proven available.' },
+  H: { title: 'In-meeting support and coaching', note: '' }
+};
+
+/* [n, group, intent, what the user asks, intelligence decomposition, calls and resulting output, authority override,
+    executable route when the written route is prose (as in #7)] */
+const CATALOGUE = [
+  [1, 'A', 'prepare', 'Prepare me for tomorrow’s meeting with this buying unit.', 'Resolve meeting, buying unit, purpose, duration.', 'Prep.Profile + Prep.Notes + [assets/pipeline] → Prep.Content → Prep.Agenda → meeting-specific brief.'],
+  [2, 'A', 'summarize', 'I have one minute. What do I need to know before this call?', 'Same subject; compressed internal briefing.', 'Prep.Profile + Prep.Notes → Prep.Fact Check → three priorities, one open commitment, key unknowns.'],
+  [3, 'A', 'compare', 'What has changed since my last meeting?', 'Find last completed meeting; compare relevant records after that date.', 'Prep.Notes + [change history] → Lead.Insights → dated changes, not a full profile repeat.'],
+  [4, 'A', 'prepare', 'Who on this team should be in the meeting?', 'Identify roles relevant to the meeting purpose.', 'Territory.Teaming + Prep.Profile → [relationship graph] → suggested participants with role evidence.'],
+  [5, 'A', 'summarize', 'Explain how this team invests and what they have told us they prefer.', 'Separate recorded statements, holdings, and model classifications.', 'Prep.Notes + Prep.Profile → Prep.Fact Check → source-attributed investment approach.'],
+  [6, 'A', 'retrieve', 'What did we promise them that is still outstanding?', 'Retrieve commitments; verify current status.', 'Follow.Tasks + Prep.Notes → [task state] → open commitments, owners, deadlines.'],
+  [7, 'A', 'prepare', 'Prepare the retirement discussion separately from their wealth business.', 'Split buying-unit or business-purpose context.', 'Prep.Profile → two scoped Prep.Notes/Content branches → Prep.Agenda → two distinct sections.', null, 'Prep.Profile → Prep.Notes + Prep.Content → Prep.Agenda → two distinct sections.'],
+  [8, 'A', 'prepare', 'Give me three product topics and one practice-management topic.', 'Requested topic mix; relevant evidence required.', 'Lead.Products + Prep.Content → Prep.Agenda → supported topics; disclose when fewer qualify.'],
+  [9, 'B', 'retrieve', 'How much business do we have with this advisor, and where is it invested?', 'Define CG book, entity level, date, vehicle and fund breakdown.', 'Prep.Profile → [assets] → Prep.Fact Check → dated holdings summary with units and scope.'],
+  [10, 'B', 'diagnose', 'Why are overall sales down when ETF sales are up?', 'Compare matching periods; distinguish percentage growth from dollar contribution.', 'Lead.Insights → [flows calculations] → Prep.Fact Check → contribution analysis and limitations.'],
+  [11, 'B', 'diagnose', 'Are they redeeming, or are they simply buying less?', 'Separate gross sales, redemptions, and net flows.', 'Lead.Insights → [transactions/flows] → verified movement; unknown when redemption data is unavailable.'],
+  [12, 'B', 'retrieve', 'How much of this book is in equity versus fixed income?', 'Resolve asset class independently of vehicle.', 'Product.Tool Selection → [taxonomy] + [positions] → Prep.Fact Check → classified exposure with unmapped items.'],
+  [13, 'B', 'compare', 'How has their mutual fund, ETF, and SMA mix changed?', 'Align comparable snapshots and denominators.', 'Lead.Insights → [assets history] → percentage-point and dollar changes, separately labeled.'],
+  [14, 'B', 'verify', 'Explain our reported market share. Which assets are included?', 'Retrieve metric definition, eligible numerator, denominator, and date.', 'Prep.Fact Check → [metric definitions] + [market share] → reconciled calculation or discrepancy flag.'],
+  [15, 'B', 'compare', 'How does this buying unit compare with similar advisors?', 'Define a permitted peer cohort and comparison measures.', 'Territory.Calibration → [peer analytics] → Lead.Insights → comparison with cohort and coverage caveats.'],
+  [16, 'B', 'prioritize', 'What are the three most significant changes in their book?', 'Define significance: dollar change, mix change, or net-flow change.', 'Lead.Insights → [assets/flows] → ranked changes with the ranking basis stated.'],
+  [17, 'C', 'prioritize', 'Find my top 10 equity-fund leads.', 'Territory, equity taxonomy, activity window, lead objective, ranking criteria.', 'Territory.Health Check + [taxonomy] → Lead.Discover → Lead.Insights → ranked eligible relationships.'],
+  [18, 'C', 'prioritize', 'Who redeemed GFA and then revisited the fund page?', 'Identify posted redemptions and subsequent attributable visits within a window.', 'Lead.Discover → [transactions + engagement graph] → Lead.Insights → matching advisors and event chronology.'],
+  [19, 'C', 'prioritize', 'Which advisors could benefit from a discussion about newly available products?', 'Platform change, eligible relationships, relevant business context.', '[platform eligibility] + Territory.Health Check → Lead.Products/Insights → discussion candidates, not suitability conclusions.'],
+  [20, 'C', 'prioritize', 'Find advisors with meaningful large-growth assets but low CG share.', 'Category, minimum assets, share threshold, comparable data coverage.', '[taxonomy/market share] → Lead.Discover → Lead.Insights → evidence-backed opportunity list.'],
+  [21, 'C', 'prioritize', 'Find relationships similar to this buying unit that I have not contacted in 90 days.', 'Professional similarity criteria plus coverage and last-contact filter.', 'Territory.Calibration + [engagements] → Lead.Discover → matched, uncontacted relationships.'],
+  [22, 'C', 'prioritize', 'Separate retention conversations from potential new-business conversations.', 'Classify lead purpose using observed flows, requests, and current relationship state.', 'Lead.Insights + [service/task state] → [policy] → separate queues with reasons.'],
+  [23, 'C', 'prioritize', 'Find retirement advisors, but do not include irrelevant wealth-product pitches.', 'Resolve retirement context and permitted vehicle/product scope.', 'Territory.Health Check → Lead.Discover → Lead.Products + [platform eligibility] → retirement-specific shortlist.'],
+  [24, 'C', 'diagnose', 'Why did these three advisors rank highest, and who was excluded?', 'Explain the current ranked artifact—not generate a new ranking.', 'Lead.Insights → [ranking trace] → evidence, filters, exclusions, model contribution, and unknowns.'],
+  [25, 'D', 'verify', 'Which CG ETFs are available at Wells Fargo for this advisor?', 'Advisor’s actual platform, account context, product vehicle, effective date.', 'Prep.Profile → Product.Research Planner + [platform eligibility] → Product.QAR → scoped availability list.'],
+  [26, 'D', 'verify', 'Can I discuss CGUI for their Personalized UMA business?', 'Resolve fund, exact program, purpose, and current availability evidence.', 'Product.Research Planner → [platform eligibility] → Product.QAR → supported status or clarification required.'],
+  [27, 'D', 'compare', 'What changed on their dealer shelf since my last visit?', 'Last visit date versus effective-dated availability changes.', 'Prep.Notes + [dealer changes] → Lead.Insights → relevant additions, removals, and restrictions.'],
+  [28, 'D', 'verify', 'What minimum applies to this ETF model on their platform?', 'Distinguish product minimum from account/program minimum.', 'Product.Tool Selection → [program rules] → Product.QAR → exact scoped rule and source.'],
+  [29, 'D', 'compare', 'What changed in the Moderate Growth model allocation?', 'Select correct model, dealer version, and two allocation dates.', 'Product.Research Planner → [allocation versions] → Product.QAR → component-level change comparison.'],
+  [30, 'D', 'prepare', 'They already use a value-oriented core. What should I investigate without duplicating it?', 'Retrieve stated approach; identify complementary research questions—not infer suitability.', 'Prep.Notes → Lead.Products → Product.Research Planner → candidates for investigation and missing facts.'],
+  [31, 'D', 'compare', 'Compare these two funds on the same basis.', 'Specify share class, date, currency, measures, and intended use.', 'Product.Tool Selection → [approved comparison tool] → Product.QAR → like-for-like comparison.'],
+  [32, 'D', 'verify', 'When I say equity funds, which actual funds are you including?', 'Resolve category-to-fund mapping and relevant restrictions.', '[taxonomy] → Product.Response Formatter → canonical fund list and excluded/unmapped items.'],
+  [33, 'E', 'prioritize', 'Which three articles should I use for this meeting?', 'Meeting objective, advisor context, audience, freshness, relevance.', 'Prep.Notes + Prep.Content → [approved search] → Prep.Fact Check → three items with specific reasons.'],
+  [34, 'E', 'diagnose', 'Why are you recommending the estate-planning article?', 'Inspect the existing recommendation’s basis.', 'Prep.Content → [recommendation trace] → advisor-specific evidence versus popularity-only rationale.'],
+  [35, 'E', 'draft', 'Remove duplicate topics from my agenda.', 'Compare semantic topic overlap while preserving distinct evidence.', 'Prep.Content + Prep.Agenda → consolidated topics with retained source references.'],
+  [36, 'E', 'draft', 'Turn these selected articles into concise agenda one-liners.', 'Transform selected content; preserve meaning and audience boundaries.', 'Marketing.Document Analyzer → Marketing.Editor → Prep.Fact Check → concise internal agenda lines.'],
+  [37, 'E', 'verify', 'Show the exact page supporting that allocation statement.', 'Trace claim to original document and version.', 'Prep.Fact Check → [evidence resolver] → page/passage; disclose missing original evidence.'],
+  [38, 'E', 'prepare', 'Give me something useful for their practice, not another fund pitch.', 'Focus on business problems stated in notes.', 'Prep.Notes → Prep.Content → Marketing.Editor → relevant practice-management discussion.'],
+  [39, 'E', 'summarize', 'What themes are relevant to this advisor this week?', 'Time window, authorized sources, advisor context, source freshness.', 'Prep.Themes + Prep.News → Prep.Content → sourced themes with relevance—not a generic news dump.'],
+  [40, 'E', 'draft', 'Draft personalized outreach for these ten advisors using only approved material.', 'Ten scoped drafts, recipient context, audience rights, no implied sending.', 'Marketing.Audience Builder → Prep.Content → Marketing.Editor → [policy] → ten reviewable drafts.', 'draft_only'],
+  [41, 'F', 'retrieve', 'How many retirement plans does this relationship cover, and which are largest?', 'Entity scope, plan universe, asset definition, as-of date.', 'Prep.Profile → [plans] → Prep.Fact Check → plan count and ranked assets.'],
+  [42, 'F', 'retrieve', 'The summary says 15 plans. Show all of them, not just the three displayed.', 'Full underlying dataset versus visible subset.', '[plans pagination] → Prep.Fact Check → complete permitted list or explicit coverage limitation.'],
+  [43, 'F', 'retrieve', 'Separate the 401(k) opportunities from the SIMPLE IRA relationships.', 'Resolve plan type, not just text similarity.', '[plan master] → Lead.Insights → separate populations and applicable next questions.'],
+  [44, 'F', 'verify', 'Which opportunities are actually open?', 'Current authoritative status and stage; exclude stale narrative-only claims.', '[pipeline] → Prep.Fact Check → Lead.Insights → open/in-progress list with dates.'],
+  [45, 'F', 'diagnose', 'Why does the Forsyth narrative mention paperwork while the pipeline says closed?', 'Compare source dates, status history, and record identity.', 'Prep.Notes + [pipeline history] → Prep.Fact Check → chronology or unresolved conflict.'],
+  [46, 'F', 'summarize', 'What happened on this opportunity after our last meeting?', 'Opportunity-specific event timeline since the meeting.', 'Prep.Notes + [pipeline/tasks] → Lead.Insights → changes, owner actions, and remaining gaps.'],
+  [47, 'F', 'prioritize', 'Which retirement opportunities deserve attention first?', 'Business criteria, verified stage, size, age, and next action.', 'Lead.Insights → [pipeline scoring] → Territory.Strategy → ranked work queue with rationale.'],
+  [48, 'F', 'diagnose', 'Has anything changed that justifies revisiting a closed opportunity?', 'New evidence after closure; no automatic reopening.', '[change events] + Prep.Notes → Lead.Insights → review candidates and supporting changes.'],
+  [49, 'G', 'prepare', 'Find 30 minutes next week with my internal partner to review these leads.', 'Internal participants, dates, duration, time zone, purpose.', 'Territory.Teaming → Schedule.Calendar → available proposals; no invitation unless requested.'],
+  [50, 'G', 'prepare', 'Plan four advisor visits in Savannah next month.', 'Geography, lead priority, availability, travel constraints.', 'Territory.Strategy + Lead.Insights → Schedule.Zoning/Calendar → proposed route and meeting slots.'],
+  [51, 'G', 'execute', 'Invite my partner to the selected meeting.', 'Resolve exact meeting and attendee; modify one event.', 'Territory.Teaming → Schedule.Compliance/Calendar → reviewed update and provider result.', 'proposed_change'],
+  [52, 'G', 'execute', 'Move that meeting to Thursday afternoon.', 'Resolve “that meeting,” date, time zone, attendees, conflicts.', 'Schedule.Calendar → [action review] → rescheduling proposal or confirmed authorized change.', 'proposed_change'],
+  [53, 'G', 'monitor', 'Which assigned advisors have not had meaningful contact in 90 days?', 'Define meaningful contact; distinguish completed from scheduled activity.', 'Territory.Health Check → [engagements] → coverage gaps with last completed interaction.'],
+  [54, 'G', 'diagnose', 'Are we over-covering some relationships and neglecting others?', 'Compare engagement frequency with approved coverage priorities.', 'Territory.Reviews/Calibration → [coverage analytics] → imbalances and review recommendations.'],
+  [55, 'G', 'prepare', 'What should my territory priorities be for next month?', 'Goals, pipeline, coverage, capacity, and current constraints.', 'Territory.Business Planning + Lead.Insights → Territory.Strategy → proposed territory plan.'],
+  [56, 'G', 'draft', 'Prepare my expense report for these visits.', 'Match actual visits to receipts, policies, and allocations.', 'Follow.Expenses → [expense system] → review → draft report; no invented expense amounts.', 'draft_only'],
+  [57, 'H', 'prepare', 'Role-play the meeting using the advisor’s recorded fixed-income preferences.', 'Practice scenario; use sourced preferences without impersonation claims.', 'Prep.Notes → Coach.Simulation → labeled role-play with conditional responses.'],
+  [58, 'H', 'prepare', 'Help me respond if they challenge the fee.', 'Conditional objection; exact product and fee basis required.', 'Product.Research Planner/QAR → Coach.Guide → supported response and clarifying questions.']
+].map(([n, group, intent, ask, decomp, route, auth, exec]) => ({ n, group, intent, ask, decomp, route, auth: auth || null, exec: exec || route }));
+
+/* The catalogue entries closest to a request (word overlap, intent words weigh more). Shown to the planner as reference patterns. */
+function cataloguePatterns(text, k = 3) {
+  const stop = new Set(['what', 'this', 'that', 'with', 'their', 'they', 'have', 'from', 'about', 'should', 'which', 'when', 'them', 'me', 'my', 'the', 'and', 'for', 'are', 'you', 'your', 'show', 'give']);
+  const toks = s => new Set(String(s).toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 2 && !stop.has(w)).map(w => w.replace(/(ing|ed|es|s)$/, '')));
+  const q = toks(text);
+  return CATALOGUE.map(c => { const t = toks(c.ask + ' ' + c.decomp); let s = 0; q.forEach(w => { if (t.has(w)) s += 1; }); return { c, s: s / Math.sqrt(t.size + 1) }; })
+    .filter(x => x.s > 0).sort((a, b) => b.s - a.s).slice(0, k).map(x => x.c);
+}
+const catalogueExact = text => CATALOGUE.find(c => c.ask.replace(/[.?]$/, '').toLowerCase() === String(text).trim().replace(/[.?]$/, '').toLowerCase());
 </script>
 <script>/* ===== The shared AI foundation (deterministic) + AI runtime ===== */
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -1461,11 +1837,12 @@ const tickerOf = x => { const s = String(x || '').trim(), u = s.toUpperCase(); r
 
 /* ---------- Enterprise tools (reached through the MCP or API gateway) ---------- */
 const S = v => String(v ?? '').trim();
+const M1 = x => Math.round(x * 10) / 10, pct1 = (c, p) => p ? Math.round((c - p) / p * 1000) / 10 : null;
 const adv = id => { const a = ADVISORS[S(id)] || Object.entries(ADVISORS).find(([k, x]) => x.short.toLowerCase() === S(id).toLowerCase() || x.name.toLowerCase().includes(S(id).toLowerCase()))?.[1]; if (!a) throw new Error('Unknown advisor id. Use ids like ADV-101.'); return a; };
 const advId = id => ADVISORS[S(id)] ? S(id) : Object.keys(ADVISORS).find(k => ADVISORS[k].short.toLowerCase() === S(id).toLowerCase() || ADVISORS[k].name.toLowerCase().includes(S(id).toLowerCase()));
 const TOOLS = {
   'crm.get_contact': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce: advisor contact, firm, team, buying units and coverage.', props: { advisor_id: 'string' },
-    run: a => { const x = adv(a.advisor_id); return { name: x.name, title: x.title, firm: FIRMS[x.firm].name, office: x.office, team: x.team, units: x.units, coverage: x.coverage.map(c => EMPLOYEES[c].name) }; } },
+    run: a => { const x = adv(a.advisor_id), id = advId(a.advisor_id), sh = SHELF[x.firm]; return { name: x.name, title: x.title, firm: FIRMS[x.firm].name, office: x.office, team: x.team, units: x.units, coverage: x.coverage.map(c => EMPLOYEES[c].name), platform_programs: sh && sh.advisor_programs[id] ? sh.advisor_programs[id] : 'not in reference data' }; } },
   'crm.get_call_notes': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce: recorded call transcripts and emails for an advisor, newest first (ids like CALL-0922).', props: { advisor_id: 'string' },
     run: a => { const id = advId(a.advisor_id); return F.episodes.filter(e => e.adv === id).slice(0, 3).map(e => ({ id: e.id, date: e.date, kind: e.kind, scope: e.scope, text: e.text })); } },
   'crm.get_opportunities': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce: open opportunities for an advisor.', props: { advisor_id: 'string' },
@@ -1530,6 +1907,46 @@ const TOOLS = {
       const covered = options.reduce((t, o) => t + o.assets_usd, 0), cost = options.reduce((t, o) => t + o.annual_cost_usd, 0);
       const same = [...new Set(P.lineup.map(o => o.category))].map(cat => options.filter(o => o.category === cat)).filter(g => g.length > 1).map(g => { const base = Math.max(...g.map(o => o.assets_usd)); return { category: g[0].category, on_assets_usd: base, costs: g.map(o => ({ fund: o.fund, option: o.option, annual_cost_usd: Math.round(base * o.expense_ratio_pct / 100) })) }; });
       return { plan_id: id, plan: P.name, options, covered_assets_usd: covered, covered_annual_cost_usd: cost, covered_weighted_expense_ratio_pct: r2(cost / covered * 100), same_category_on_equal_assets: same, not_covered: P.other, sources: 'Expense ratios: fund data platform (as of dates shown). Category medians: Morningstar (' + [...new Set(P.lineup.map(o => PEERS[o.category].note))].join('; ') + ').' }; } },
+  /* ---- Sales AI shared services: amounts in $ millions so every figure an agent quotes traces to the tool ---- */
+  'book.get_assets': { sys: 'fund', via: 'API', rw: 'read', desc: 'Assets service: Capital Group assets for an advisor’s team by vehicle and fund as of a date, with the prior-year snapshot and mix change. Amounts in $ millions.', props: { advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id), B = BOOK[id]; if (!B) return { advisor: id ? ADVISORS[id].name : S(a.advisor_id), note: 'No book data for this advisor in the assets service.' };
+      const veh = {}; B.funds.forEach(([, v, x]) => { veh[v] = M1((veh[v] || 0) + x); });
+      const total = M1(Object.values(veh).reduce((t, x) => t + x, 0)), ptotal = M1(Object.values(B.prior_by_vehicle).reduce((t, x) => t + x, 0));
+      return { advisor: ADVISORS[id].name, entity: B.entity, as_of: B.as_of, total_usd_m: total, prior_as_of: B.prior_as_of, prior_total_usd_m: ptotal,
+        by_vehicle: Object.entries(veh).map(([v, x]) => { const p = B.prior_by_vehicle[v] || 0; return { vehicle: v, assets_usd_m: x, share_pct: M1(x / total * 100), prior_assets_usd_m: p, prior_share_pct: M1(p / ptotal * 100), change_usd_m: M1(x - p), share_change_pp: M1(x / total * 100 - p / ptotal * 100) }; }),
+        by_fund: B.funds.map(([f, v, x]) => ({ fund: f, name: FUNDS[f] ? FUNDS[f].name : 'Capital Group ' + f, vehicle: v, assets_usd_m: x })) }; } },
+  'book.get_flows': { sys: 'fund', via: 'API', rw: 'read', desc: 'Flows service: gross sales, redemptions and net flows by vehicle and channel, trailing twelve months against the prior twelve, with each vehicle’s contribution to the change in sales. Amounts in $ millions.', props: { advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id), X = FLOWS[id]; if (!X) return { advisor: id ? ADVISORS[id].name : S(a.advisor_id), note: 'No flow data for this advisor in the flows service.' };
+      const row = o => Object.entries(o).map(([k, [c, p]]) => ({ name: k, current_usd_m: c, prior_usd_m: p, change_usd_m: M1(c - p), change_pct: pct1(c, p) }));
+      const sum = (o, i) => M1(Object.values(o).reduce((t, x) => t + x[i], 0)), tS = [sum(X.sales, 0), sum(X.sales, 1)], tR = [sum(X.redemptions, 0), sum(X.redemptions, 1)], dS = M1(tS[0] - tS[1]);
+      return { advisor: ADVISORS[id].name, current_period: X.current, prior_period: X.prior,
+        totals: { gross_sales: { current_usd_m: tS[0], prior_usd_m: tS[1], change_usd_m: dS, change_pct: pct1(tS[0], tS[1]) }, redemptions: { current_usd_m: tR[0], prior_usd_m: tR[1], change_usd_m: M1(tR[0] - tR[1]), change_pct: pct1(tR[0], tR[1]) }, net_flows: { current_usd_m: M1(tS[0] - tR[0]), prior_usd_m: M1(tS[1] - tR[1]) } },
+        gross_sales_by_vehicle: row(X.sales), redemptions_by_vehicle: row(X.redemptions),
+        net_flows_by_vehicle: Object.keys(X.sales).map(v => ({ vehicle: v, current_usd_m: M1(X.sales[v][0] - X.redemptions[v][0]), prior_usd_m: M1(X.sales[v][1] - X.redemptions[v][1]) })),
+        contribution_to_sales_change: Object.entries(X.sales).map(([v, [c, p]]) => ({ vehicle: v, change_usd_m: M1(c - p), share_of_total_change_pct: dS ? M1((c - p) / dS * 100) : null })),
+        gross_sales_by_channel: row(X.channels), limitations: X.limitations }; } },
+  'book.get_market_share': { sys: 'fund', via: 'API', rw: 'read', desc: 'Market share service: the metric definition, numerator and denominator by category, their as-of dates, and any discrepancy. Amounts in $ millions.', props: { advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id), X = MARKET_SHARE[id], B = BOOK[id]; if (!X || !B) return { advisor: id ? ADVISORS[id].name : S(a.advisor_id), note: 'No market-share data for this advisor.' };
+      const amt = f => (B.funds.find(x => x[0] === f) || [0, 0, 0])[2];
+      return { advisor: ADVISORS[id].name, definition: X.definition, numerator_as_of: X.numerator_as_of, denominator_as_of: X.denominator_as_of, denominator_source: X.denominator_source,
+        categories: X.categories.map(([c, fs, ind]) => { const cg = M1(fs.reduce((t, f) => t + amt(f), 0)); return { category: c, cg_funds: fs, cg_assets_usd_m: cg, industry_assets_usd_m: ind, share_pct: M1(cg / ind * 100) }; }),
+        excluded_usd_m: M1(B.funds.filter(f => f[1] === 'SMA').reduce((t, f) => t + f[2], 0)), excluded_note: 'SMA assets are excluded by the definition',
+        discrepancy: X.numerator_as_of !== X.denominator_as_of ? `Numerator (${X.numerator_as_of}) and denominator (${X.denominator_as_of}) dates differ; shares can be off until the industry book refreshes.` : null }; } },
+  'platform.get_availability': { sys: 'fund', via: 'API', rw: 'read', desc: 'Platform eligibility: dealer platform and program availability for Capital Group funds and ETFs with effective dates. Pass advisor_id (uses their firm and programs), optionally ticker, program, or since (a date) to list changes after it.', props: { advisor_id: 'string', ticker: 'string', program: 'string', since: 'string' },
+    run: a => { const id = advId(a.advisor_id), firm = id ? ADVISORS[id].firm : null, X = SHELF[firm]; if (!X) return { firm: firm ? FIRMS[firm].name : null, note: 'No platform data for this firm in the eligibility service.' };
+      const tk = tickerOf(a.ticker), prog = S(a.program).toLowerCase(), since = Date.parse(S(a.since));
+      const items = X.items.filter(([t, p]) => (!tk || t === tk) && (!prog || p.toLowerCase().includes(prog))).map(([t, p, st, eff]) => ({ ticker: t, name: FUNDS[t] ? FUNDS[t].name : t, program: p, status: st, effective: eff }));
+      return { firm: X.firm, as_of: X.as_of, source: X.source, advisor_programs: X.advisor_programs[id] || [], items, changes_since: isNaN(since) ? undefined : items.filter(i => i.effective && Date.parse(i.effective) > since), note: 'Availability on a platform is not a suitability conclusion for any client.' }; } },
+  'taxonomy.resolve': { sys: 'fund', via: 'API', rw: 'read', desc: 'Taxonomy: which actual funds a category includes (equity funds, fixed income, ETFs, multi-asset, large growth), with exclusions and unmapped holdings.', props: { term: 'string' },
+    run: a => { const t = S(a.term).toLowerCase(), k = Object.keys(TAXONOMY).find(x => t.includes(x) || x.includes(t.replace(/s$/, ''))); if (!k) return { term: t, note: 'No mapping. Known categories: ' + Object.keys(TAXONOMY).join(', ') };
+      const X = TAXONOMY[k]; return { category: k, includes: X.include.map(f => ({ ticker: f, name: FUNDS[f].name })), excludes: X.exclude.map(([f, why]) => ({ ticker: f, name: FUNDS[f].name, why })), unmapped: X.unmapped }; } },
+  'pipeline.get': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce pipeline: an advisor’s opportunities with current stage, plan type and full status history.', props: { advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id); return { as_of: 'Sep 29, 2026', opportunities: OPPORTUNITIES.filter(o => o.adv === id).map(o => ({ id: o.id, name: o.name, unit: o.scope, plan_type: o.type || null, stage: o.stage, open: !/closed/i.test(o.stage), history: (PIPELINE_HISTORY[o.id] || []).map(([d, st]) => ({ date: d, stage: st })) })) }; } },
+  'engage.get_history': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce engagements: last completed interaction and completed interactions in the last 90 days, for one advisor or a territory (LA, OC, SD).', props: { advisor_id: 'string', territory: 'string' },
+    run: a => { const T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === S(a.territory).toLowerCase()), one = advId(a.advisor_id), ids = one ? [one] : T ? TERRITORIES[T].advisors : Object.keys(ADVISORS), now = Date.parse('Sep 29, 2026');
+      return { as_of: 'Sep 29, 2026', definition: 'Meaningful contact = a completed call, meeting or two-way email recorded in Salesforce; scheduled meetings do not count.',
+        advisors: ids.map(id => { const eps = F.episodes.filter(e => e.adv === id).sort((x, y) => Date.parse(y.date) - Date.parse(x.date)), last = eps[0];
+          return { advisor: ADVISORS[id].name, last_completed: last ? { id: last.id, date: last.date, kind: last.kind, with: last.with } : null, days_since: last ? Math.round((now - Date.parse(last.date)) / 864e5) : null, completed_last_90_days: eps.filter(e => now - Date.parse(e.date) <= 90 * 864e5).length }; }) }; } },
   'models.portfolio_construction': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model platform: blended expense ratio for a mix, e.g. {"VIGAX":70,"GFFFX":30}.', props: { weights: 'object' },
     run: a => { const w = a.weights && typeof a.weights === 'object' ? a.weights : {}; let tot = 0, er = 0; const miss = [];
       for (const [k, v] of Object.entries(w)) { const f = FUNDS[tickerOf(k)]; if (!f || f.er == null) { miss.push(k); continue; } er += f.er * Number(v); tot += Number(v); }
@@ -1557,6 +1974,25 @@ const TOOLS = {
       return { category: cat, peers: PEERS[cat].peers, median_expense_ratio_pct: PEERS[cat].medianEr, note: PEERS[cat].note, categories_available: Object.keys(PEERS) }; } }
 };
 const toolAllowed = (agent, tool) => (AGENTS[agent]?.tools || []).includes(tool);
+
+/* ---------- Action authority: decided by rule from the request's own words ---------- */
+function authorityFromText(text, team) {
+  const t = ' ' + String(text).toLowerCase().replace(/[’']/g, "'") + ' ';
+  let a = 'read_only', why = 'Nothing in the request asks to draft, change or send anything.';
+  if (/\b(send|publish|distribute)\b/.test(t)) { a = 'external_action'; why = 'The request explicitly asks to send or publish; a person still approves the exact payload.'; }
+  else if (/\bbook (a|an|the|time|it|me|us|him|her|them|meeting|call)\b|\b(schedule|invite|move|reschedul\w*|log|update|set up (a )?(call|meeting)|create (a )?task|add (a )?task|fix|resolve)\b|won't open|can't open|not working/.test(t)) { a = 'proposed_change'; why = 'The request asks for a change (a booking, an update, a fix).'; }
+  else if (/\b(draft|write|compose|create|campaign|outreach|email|post|letter|report)\b/.test(t)) { a = 'draft_only'; why = 'The request asks for something written; drafts only, nothing sent.'; }
+  if (team === 'service' && AUTHORITY[a].n < 2) { a = 'proposed_change'; why = 'Service requests are handled as cases, which may be updated.'; }
+  return { authority: a, why };
+}
+const authN = a => (AUTHORITY[a] || AUTHORITY.read_only).n;
+/* Interpretation built from rules when orchestration didn't state one (saved runs, fallbacks, catalogue routes) */
+function ruleInterpretation(run, intent) {
+  const R = run.resolution || {}, A = run.advisor && ADVISORS[run.advisor], au = authorityFromText(run.text, EMPLOYEES[run.requester].team);
+  const subj = A ? { kind: run.unit ? 'buying_unit' : 'advisor', id: run.unit || run.advisor, label: A.name + (run.unit ? ' · ' + A.units[run.unit] : '') } : run.territory ? { kind: 'territory', id: run.territory, label: TERRITORIES[run.territory].name } : R.funds && R.funds.length ? { kind: 'fund', id: R.funds[0].ticker, label: R.funds.map(f => f.ticker).join(', ') } : { kind: 'none', id: null, label: 'Not resolved from the request' };
+  const time = /tomorrow|today|next week|next month|this week|90 days|since|last (meeting|visit)/i.exec(run.text);
+  return { subject: subj, intent: intent || null, scope: A ? `${FIRMS[A.firm].name}${run.unit ? ' · ' + run.unit : ''}` : run.territory ? 'Territory' : 'Product level', time: time ? time[0] : `Current, as of ${TODAY}`, constraints: [], output: null, missing: [], authority: au.authority, src: 'code' };
+}
 
 /* ---------- Context packets: what the foundation sends each agent ---------- */
 function mentionsFunds(text) {
@@ -1587,7 +2023,7 @@ function buildPacket(task, run) {
     }
     if (reads.has('events')) F.events.filter(e => e.adv === advId).slice(-3).forEach(e => push('events', e.id, e.type, e.detail, AGENTS[e.by]?.name || e.by, 'advisor'));
     if (reads.has('feedback')) F.feedback.filter(f => f.adv === advId).slice(-3).forEach(f => push('feedback', f.id, 'Feedback', f.text, AGENTS[f.by]?.name || f.by, f.scope));
-    if ((team === 'sales' || team === 'marketing') && (reads.has('models') || task.agent === 'sales.lead')) push('models', 'MOD-ALPHA', 'Sales Alpha signal', `${ALPHA[advId].score}/100: ${ALPHA[advId].note}. A signal, not intent.`, 'Model platform', 'advisor');
+    if ((team === 'sales' || team === 'marketing') && (reads.has('models') || task.agent === 'sales.lead') && ALPHA[advId]) push('models', 'MOD-ALPHA', 'Sales Alpha signal', `${ALPHA[advId].score}/100: ${ALPHA[advId].note}. A signal, not intent.`, 'Model platform', 'advisor');
   } else if (run.territory && TERRITORIES[run.territory]) {
     const T = TERRITORIES[run.territory];
     push('graph', run.territory, 'Territory', `${T.name}: ${T.advisors.map(a => ADVISORS[a].name + ' (' + FIRMS[ADVISORS[a].firm].name + ')').join('; ')}. Wholesaler ${T.wholesaler}.`, 'Graph', 'territory');
@@ -1697,6 +2133,7 @@ function gatekeep(task, res, ctx) {
   }
   /* commitments */
   for (const c of (res.commitments || []).slice(0, 2)) {
+    if (authN(run.authority) < 2) { V('commitment', 'proposed', S(c.title), `Proposed, not created: the request is ${AUTHORITY[run.authority].label.toLowerCase()}, so tasks wait for ${EMPLOYEES[run.requester].name.split(' ')[0]} to create them`, { proposal: { title: S(c.title), owner: S(c.owner) || EMPLOYEES[run.requester].name, due: S(c.due) || 'TBD' } }); continue; }
     const id = 'TASK-' + (400 + (++F.seq));
     F.commitments.push({ id, adv: run.advisor, scope: run.unit || 'advisor', title: S(c.title), owner: S(c.owner) || EMPLOYEES[run.requester].name, due: S(c.due) || 'TBD', status: 'Open', run: run.id });
     F.graph.edges.push({ from: run.advisor || run.requester, to: id, label: 'owed', run: run.id }); F.graph.nodes.push({ id, label: S(c.title), type: 'task', run: run.id });
@@ -1746,7 +2183,7 @@ function sanitizeResult(r) {
     knowledge: arr(r.knowledge).filter(k => k && k.label && k.value).map(k => ({ label: str(k.label, 160), value: str(k.value, 600), evidence: arr(k.evidence).map(x => str(x, 60)) })),
     memory: arr(r.memory).filter(m => m && m.attribute && m.value).map(m => ({ attribute: str(m.attribute, 80), value: str(m.value, 300), scope: str(m.scope || '', 20), category: str(m.category || 'content_pref', 30), basis: str(m.basis || 'inference', 30), evidence: arr(m.evidence).map(x => str(x, 40)) })),
     commitments: arr(r.commitments).filter(c => c && c.title).map(c => ({ title: str(c.title, 160), owner: str(c.owner, 60), due: str(c.due, 40) })),
-    needs_approval: !!r.needs_approval, open_questions: arr(r.open_questions).map(x => str(x, 240)), next_step: str(typeof r.next_step === 'string' ? r.next_step.replace(/^[\s.…]+$/, '') : '', 240)
+    needs_approval: !!r.needs_approval, open_questions: arr(r.open_questions || r.unresolved).map(x => str(x, 240)), as_of: arr(r.as_of).map(x => str(x, 60)).slice(0, 4), status: /^(complete|partial|blocked)$/.test(r.status) ? r.status : 'complete', next_step: str(typeof r.next_step === 'string' ? r.next_step.replace(/^[\s.…]+$/, '') : '', 240)
   };
 }
 function capResult(out) {
@@ -1851,8 +2288,13 @@ function foundationHeadlines() {
     return `${id} ${a.name}, ${a.title}, ${FIRMS[a.firm].name}. Units: ${Object.entries(a.units).map(([k, v]) => k + ' ' + v).join('; ')}. Coverage: ${a.coverage.map(c => EMPLOYEES[c].name).join(', ')}.${ho ? ' Coverage handover: ' + ho + '.' : ''}${plans ? ' Plans: ' + plans + '.' : ''}\n  Memory: ${mem || 'none'}\n  Unknown: ${(UNKNOWNS[id] || []).join('; ') || 'nothing flagged'}\n  Open commitments: ${com || 'none'}\n  Episodes: ${ep}`;
   }).join('\n');
 }
+function subagentText() {
+  return Object.entries(SUBAGENTS).flatMap(([fam, A]) => Object.keys(A.subs).map(sub => { const r = routeInfo(fam + '.' + sub); return `${r.route} | ${r.label} | agent ${r.agent} | ${r.does} | tools: ${(AGENTS[r.agent].tools || []).join(', ') || 'none'}`; })).join('\n');
+}
+function serviceText() { return Object.entries(SERVICES).map(([k, v]) => `${k} [${v.status}]${v.tools.length ? ' tools: ' + v.tools.join(', ') : ''} | ${v.does}`).join('\n'); }
 function orchestratorPrompt(run) {
-  const E = EMPLOYEES[run.requester];
+  const E = EMPLOYEES[run.requester], first = E.name.split(' ')[0];
+  const pats = cataloguePatterns(run.text);
   return `You are the Intelligence & Orchestration layer of Capital Group's Connected Client Experience: an AI workbench where named specialist agents in Sales, Product, Marketing and Service share one governed AI foundation (memory, knowledge, verification, models, feedback, events, graph) connected to Salesforce, Microsoft 365, Seismic and the fund data platform. Today is ${TODAY}.
 
 REQUEST
@@ -1882,27 +2324,48 @@ Routing rules: meeting preparation goes to sales.wholesalers; scheduling and any
 AGENT REGISTRY (choose only these ids)
 ${registryText()}
 
+SUB-AGENT ROUTES (a task runs exactly one route; route notation Prep.Notes = Prep Me → Notes Summarizer)
+${subagentText()}
+
+SHARED SERVICES (tools a step uses; not autonomous agents). simulated = available here with demo data; foundation = built in; not connected = plan for it, and the step will report what it could not establish.
+${serviceText()}
+
+BUSINESS INTENTS (pick exactly one; organize by intent, not keywords)
+${INTENT_ORDER.map(k => k + ': ' + INTENTS[k]).join('\n')}
+The word "ETF" can carry five intents: "Find ETF leads" is prioritize, "Explain this advisor's ETF sales" is diagnose, "Check whether this ETF is available on the advisor's platform" is verify, "Prepare an ETF discussion" is prepare, "Send the approved ETF material" is execute. Each needs a different plan, different data and different controls.
+
+ACTION AUTHORITY (lowest that satisfies the request)
+${Object.entries(AUTHORITY).map(([k, v]) => k + ': ' + v.does).join('\n')}
+"Help me prepare" is read_only: it never books a meeting, sends an email or updates CRM unless ${first} explicitly asked. A rule also checks the request's own words and caps the authority you state.
+
+CATALOGUE PATTERNS closest to this request (reference decompositions from the Sales AI query catalogue; adapt them, do not copy blindly)
+${pats.map(c => `#${c.n} ${c.intent} · "${c.ask}" · decomposition: ${c.decomp} · route: ${c.exec}`).join('\n') || 'None close.'}
+
 RULES
 ${POLICIES.map(p => p.id + ' ' + p.text).join('\n')}
 
+Work in two layers. INTELLIGENCE first: establish what ${first} actually wants as a structured interpretation. ORCHESTRATION second: turn that interpretation into an executable plan of routes in waves.
 Output ONLY newline-delimited JSON, one object per line, no prose and no code fences, in this order:
 {"k":"decision","type":"requester","title":"...","detail":"..."}
-{"k":"decision","type":"intent","title":"...","detail":"...","intent":"meeting_prep|research|content|campaign|service|profile_update|question"}
+{"k":"decision","type":"intent","title":"...","detail":"...","intent":"${INTENT_ORDER.join('|')}"}
 {"k":"decision","type":"asks","title":"N things requested","detail":"...","asks":["each distinct thing the person asked for, in their words, 2 to 8 words each"]}
+{"k":"decision","type":"interpretation","title":"one line: what ${first} actually wants","detail":"...","subject":{"kind":"advisor|buying_unit|firm|territory|plan|opportunity|fund|document|internal|none","id":"ADV-...|BU-...|PLAN-...|OPP-...|ticker|null","label":"..."},"intent":"one business intent","scope":"wealth or retirement, territory, dealer or platform, vehicle, audience","time":"as-of date, comparison period or last meeting","constraints":["..."],"output":"answer|ranked_list|comparison|agenda|brief|draft|task|alert","missing":["only what materially changes the answer or action"],"authority":"read_only|draft_only|proposed_change|external_action","patterns":[catalogue numbers you followed]}
 {"k":"decision","type":"entity","title":"...","detail":"...","advisor":"ADV-...|null","unit":"BU-...|null","territory":"LA|OC|SD|null","confidence":"high|medium|low"}
 {"k":"decision","type":"scope","title":"...","detail":"..."}
 {"k":"decision","type":"known","title":"...","detail":"...","uses":["ids you will reuse"]}
 {"k":"decision","type":"missing","title":"...","detail":"..."}
 {"k":"decision","type":"memory","title":"...","detail":"...","class":"read_only|task_requirement|lasting_preference_candidate|none"}
 {"k":"decision","type":"controls","title":"...","detail":"..."}
-then 2 to 5 lines {"k":"task","id":"T1","ask":1,"title":"3 to 6 words, as it appears on the team's workbench","role":"workbench role id","agent":"registry id from that role","objective":"one sentence","depends_on":[],"reads":["memory","knowledge","policy","models","events","feedback"],"tools":["tool names from that agent's list"],"why":"why this specialist"}
+then 2 to 6 lines {"k":"task","id":"T1","ask":1,"route":"Prep.Notes (a sub-agent route; use agent only for non-Sales work without a route)","title":"3 to 6 words, as it appears on the team's workbench","objective":"one sentence","depends_on":[],"services":["shared service names this step reads"],"tools":["tool names from the route's agent list, within the action authority"],"reads":["memory","knowledge","policy","models","events","feedback"],"returns":"what this step hands on","why":"why this sub-agent, which system it queries and for what"}
 {"k":"decision","type":"success","title":"...","detail":"..."}
 {"k":"end"}
 Requests can be about one advisor, a territory, a product, or internal work with colleagues. Not every request needs an advisor: for a territory set advisor null and territory; for product-only or internal work set both null.
 Ask for clarification only if acting would be unsafe or impossible: emit {"k":"clarify","question":"..."} after the entity decision, then {"k":"end"}. Otherwise make a sensible assumption and state it in the "missing" decision.
 ${run.clarified ? `You already asked: "${run.clarified.question}". The user answered: "${run.clarified.answer}". Do NOT ask again. Proceed, interpreting the answer as best you can, and state your assumption.` : ''}
 Be precise: titles of 3 to 6 words, details of at most 16 words, no filler. Reuse foundation records instead of redoing work.
-Tell the story a real team would. ${E.name} is the primary actor: the plan ends with a result delivered to them, and other teams appear as contributors whose work they build on. Choose only the specialists the request needs (often 2 to 4); bring in another team only when it owns part of the work or holds evidence ${E.name.split(' ')[0]} lacks, and say so in "why", including which system it will query and for what. Every task must produce a different kind of output (for example a computation, a verified answer, a draft, a compliance review, a case update, a calendar hold); never add a task that only reformats, summarizes or packages an earlier task's output. Chain tasks with depends_on so later specialists build on what earlier ones publish to the foundation. Tasks that don't depend on each other run in parallel.
+Plan in waves. Independent reads go first with empty depends_on so they run together (for example Prep.Profile, Prep.Notes and data-service reads). Checks (Prep.Fact Check, Product.QAR) depend on the reads they check. Building steps (Prep.Agenda, drafts) come last. A step depends only on steps whose output it actually needs. Numbers come from data services (assets, flows, market share, platform eligibility), never from narrative notes.
+Every step returns its output, source references, as-of dates, unresolved issues and completion status.
+Tell the story a real team would. ${E.name} is the primary actor: the plan ends with a result delivered to them, and other teams appear as contributors whose work they build on. Choose only the steps the request needs (often 2 to 5); bring in another team only when it owns part of the work or holds evidence ${E.name.split(' ')[0]} lacks, and say so in "why", including which system it will query and for what. Every task must produce a different kind of output (for example a computation, a verified answer, a draft, a compliance review, a case update, a calendar hold); never add a task that only reformats, summarizes or packages an earlier task's output. Chain tasks with depends_on so later specialists build on what earlier ones publish to the foundation. Tasks that don't depend on each other run in parallel.
 Every ask must be covered by at least one task, and every task must serve one ask ("ask" is its 1-based number). Do not add work the person did not ask for.
 Classify new information about the advisor strictly: an employee's request is not an advisor preference.`;
 }
@@ -1911,8 +2374,11 @@ function agentPrompt(task, run, packet, upstream, withTools) {
   const lines = packet.items.map(i => `[${i.id}] (${i.layer}, from ${i.from}, scope ${i.scope}) ${i.label}: ${i.value}`).join('\n');
   const up = upstream.length ? upstream.map(u => { const R = ROLES[roleOf(u.agent)]; return `${u.task} by ${R ? R.name + ' (' + TEAMS[R.team].name + ')' : AGENTS[u.agent].name}: ${u.title}\n${u.body}\nPublished: ${u.ids.join(', ') || 'nothing'}`; }).join('\n\n') : 'None.';
   const tl = withTools ? `\nYou can call your enterprise tools (Salesforce and Microsoft 365 through the MCP gateway; the data and model platform, Seismic exports and Morningstar through APIs). Call a tool only when the packet lacks what you need.` : `\nTool results fetched for you:\n${JSON.stringify(task.prefetched || {})}`;
-  return `You are ${a.name}, a ${TEAMS[a.team].name} specialist agent working for the ${ROLES[task.role] ? ROLES[task.role].name : TEAMS[a.team].name} team in Capital Group's Connected Client Experience. Your job: ${a.does}. Today is ${TODAY}.
-Task from orchestration (${task.id}): ${task.objective}
+  const ri = task.route && routeInfo(task.route), gaps = (task.services || []).filter(k => serviceStatus(k) === 'not connected');
+  return `You are ${ri ? `${ri.label} (route ${ri.route}), a skill of ${a.name},` : a.name + ','} a ${TEAMS[a.team].name} specialist agent working for the ${ROLES[task.role] ? ROLES[task.role].name : TEAMS[a.team].name} team in Capital Group's Connected Client Experience. Your job: ${ri ? ri.does : a.does}. Today is ${TODAY}.
+Task from orchestration (${task.id}): ${task.objective}${task.returns ? `\nHand on: ${task.returns}` : ''}
+How the request was interpreted: ${JSON.stringify(run.interp ? { intent: run.interp.intent, scope: run.interp.scope, time: run.interp.time, constraints: run.interp.constraints, output: run.interp.output } : {})}. Action authority: ${run.authority || 'read_only'} (${AUTHORITY[run.authority || 'read_only'].does})
+Shared services for this step: ${(task.services || []).map(k => `${k} (${serviceStatus(k)})`).join(', ') || 'none'}.${gaps.length ? ` NOT CONNECTED: ${gaps.join(', ')}. Say plainly what you could not establish because of it, and set "status":"partial".` : ''}
 Original request from ${E.name} (${TEAMS[E.team].name}): "${run.text}"
 Active scope: advisor ${run.advisor || 'none'} · unit ${run.unit || 'none'}
 
@@ -1934,10 +2400,11 @@ RULES
 - You work for ${E.name}. When you reuse a colleague's earlier notes or work (for example call notes another wholesaler recorded), credit them by name and team and say why it helps ${E.name.split(' ')[0]}.
 - When approved messaging (MSG- ids) is available, use it verbatim or lightly edited and cite the ids in "used"; make no new claims beyond it.${a.team === 'service' ? `
 - Diagnose from evidence: for each likely cause, say what you checked and which record (case, interaction, delivery log id) confirms or rules it out. Write case notes the way an experienced service rep would: plain sentences a colleague can follow, not system shorthand.` : ''}
+- Step contract: "as_of" lists the dates of the data you relied on; "status" is complete, partial (something material could not be established) or blocked; "open_questions" lists unresolved issues and conflicts.
 - "next_step": the one concrete action ${E.name} should take because of your work (who, what, by when if known), addressed to ${E.name.split(' ')[0]}. Use the same number rules. Leave it empty if there is nothing for them to do.
 
 Reply with only a JSON object:
-{"says":"one first-person sentence, at most 22 words: what you did and which team's work you built on (name teams, not agents)","output":{"kind":"brief|email|finding|answer|plan|content_pick|post|case_update|note","title":"...","body":"${a.team === 'service' ? 'under 180 words; short plain paragraphs: what happened, what you checked and found (with record ids), what you did and what happens next' : "under 150 words; '- ' bullets; blank line between paragraphs"}"},"used":["ids"],"knowledge":[{"label":"...","value":"...","evidence":["ids"]}],"memory":[{"attribute":"...","value":"...","scope":"BU-...|advisor","category":"content_pref|communication_pref|priority|relationship","basis":"advisor_statement|employee_request|task_requirement|inference","evidence":["ids"]}],"commitments":[{"title":"...","owner":"...","due":"..."}],"needs_approval":false,"open_questions":[],"next_step":"..."}
+{"says":"one first-person sentence, at most 22 words: what you did and which team's work you built on (name teams, not agents)","output":{"kind":"brief|email|finding|answer|plan|content_pick|post|case_update|note","title":"...","body":"${a.team === 'service' ? 'under 180 words; short plain paragraphs: what happened, what you checked and found (with record ids), what you did and what happens next' : "under 150 words; '- ' bullets; blank line between paragraphs"}"},"used":["ids"],"knowledge":[{"label":"...","value":"...","evidence":["ids"]}],"memory":[{"attribute":"...","value":"...","scope":"BU-...|advisor","category":"content_pref|communication_pref|priority|relationship","basis":"advisor_statement|employee_request|task_requirement|inference","evidence":["ids"]}],"commitments":[{"title":"...","owner":"...","due":"..."}],"needs_approval":false,"open_questions":[],"as_of":["dates of the data used"],"status":"complete|partial|blocked","next_step":"..."}
 Use empty arrays when nothing applies.`;
 }
 function toolDefs(task, onCall) {
@@ -2252,6 +2719,124 @@ RECORDED.push(
           next_step: 'Send the PDF to Jamie Cho from CASE-00517 today, and tell Priya that future sends to Morgan Stanley should go as attachments, not links.' } }
     } }
 );
+
+/* Saved runs for the Sales AI intelligence and orchestration layer (authored to the query catalogue,
+   replayed through the same foundation, tools and gatekeeper). Each starts with a structured
+   interpretation and plans in waves; steps in a wave run together. */
+const NOTES_DANIEL = { kind: 'note', title: 'What Daniel told us', body: '- Aug 26 (CALL-0826, Sam Lee’s call): Daniel moved two client models to a core-satellite structure with an index core, and reviews the satellite funds every quarter.\n- Sep 18 (CALL-0918, Priya’s call): “Clients keep asking about ETFs versus active funds.” He wants model portfolio options with a lower blended cost.\n\nStated priority (MEM-051): lower-cost model portfolios with a core-satellite structure.' };
+RECORDED.push(
+  { name: 'Why are Daniel’s overall sales down when his ETF sales are up?', requester: 'EMP-PRIYA', text: 'Why are Daniel’s overall sales down when his ETF sales are up?',
+    orch: [
+      D('requester', 'Priya Shah, Sales, covers Daniel', 'Wholesaler on Daniel Kim’s coverage; she owns the relationship.'),
+      D('intent', 'Diagnose a change, not find leads', 'She wants the reason total sales fell while ETF sales grew, not an ETF pitch or a lead list.', { intent: 'diagnose' }),
+      D('asks', '1 thing requested', 'Explain why sales are down while ETF sales are up.', { asks: ['Explain sales down, ETF sales up'] }),
+      D('interpretation', 'Explain why Daniel’s total CG sales fell while his ETF sales grew', 'Catalogue #10 with #11 and #16.', { subject: { kind: 'advisor', id: 'ADV-105', label: 'Daniel Kim · The Kim Group' }, intent: 'diagnose', scope: 'Kim Group team, Capital Group book, all vehicles (mutual funds, ETFs, SMAs) and both channels', time: 'Trailing twelve months to Aug 2026 against the twelve months before', constraints: ['Numbers only from the flows service', 'Separate percentage growth from dollar contribution'], output: 'comparison', missing: ['Fund-level transactions are not connected, so the explanation stops at vehicle and channel'], authority: 'read_only', patterns: [10, 11, 16] }),
+      D('entity', 'Daniel → Daniel Kim, Wells Fargo', 'One graph match; his only unit is the Kim Group model portfolios.', { advisor: 'ADV-105', unit: 'BU-105', confidence: 'high' }),
+      D('scope', 'Kim Group model portfolios (BU-105)', 'Team-level CG book; no other managers’ flows.'),
+      D('known', 'Daniel’s own words may explain it', 'CALL-0826: two models moved to an index core. CALL-0918: clients ask about ETFs versus active.', { uses: ['CALL-0826', 'CALL-0918', 'MEM-051', 'MEM-053'] }),
+      D('missing', 'Flows not computed yet', 'The flows service computes the contribution by vehicle and channel; the model only explains it.'),
+      D('memory', 'Read only', 'Nothing new about Daniel to store.', { class: 'read_only' }),
+      D('controls', 'Read-only; every number traced', 'No drafts or changes. Figures only from the flows service.'),
+      TK({ id: 'T1', route: 'Lead.Insights', title: 'Compute the contribution analysis', objective: 'Compare gross sales, redemptions and net flows by vehicle and channel for both periods, and attribute the change in total sales', services: ['flows'], tools: ['book.get_flows'], reads: ['knowledge'], returns: 'Contribution by vehicle and channel, with the periods and limits', why: 'Lead Me’s Insights Generator explains changes; the flows service on the data platform does the math.' }),
+      TK({ id: 'T2', route: 'Prep.Notes', title: 'Pull what Daniel told us', objective: 'Summarize Daniel’s dated statements about his models, ETFs and the index core', services: ['memory'], tools: ['crm.get_call_notes'], reads: ['memory'], returns: 'Attributed statements with dates', why: 'Notes Summarizer reads recorded calls in Salesforce; it runs alongside the flows analysis.' }),
+      TK({ id: 'T3', route: 'Prep.Fact Check', title: 'Check and explain the gap', objective: 'Verify every figure against the flows result, reconcile it with Daniel’s statements and state the limits', depends_on: ['T1', 'T2'], reads: ['memory', 'knowledge', 'policy'], tools: [], returns: 'A verified explanation with sources, as-of dates and limits', why: 'Fact Check makes sure the explanation uses the flows numbers, not narrative.' }),
+      D('success', 'Priya can explain the dip in one breath', 'Dollar contribution by vehicle and channel, tied to what Daniel said, with the limits stated.'),
+      L({ k: 'end' })
+    ].join('\n'),
+    agents: {
+      T1: { calls: [['book.get_flows', { advisor_id: 'ADV-105' }]],
+        json: { says: 'I ran the flows service for both periods: ETF sales more than doubled, but the mutual fund decline is nearly twice as large in dollars.',
+          output: { kind: 'finding', title: 'Contribution analysis: Kim Group sales', body: 'Total gross sales: $38.2M vs $44.9M, down $6.7M (−14.9%).\n\nBy vehicle (change in gross sales):\n- Mutual funds: $21.4M vs $33.1M, down $11.7M\n- ETFs: $11.6M vs $5.2M, up $6.4M (+123.1%)\n- SMAs: $5.2M vs $6.6M, down $1.4M\n\nBy channel: model portfolios $24.0M vs $33.5M (down $9.5M); advisor-directed accounts $14.2M vs $11.4M (up $2.8M).\n\nRedemptions rose to $23.0M from $15.8M, mostly mutual funds ($18.9M vs $12.4M), so net flows fell to $15.2M from $29.1M.' },
+          used: ['book.get_flows'], knowledge: [{ label: 'Kim Group sales: mutual fund decline outweighs ETF growth', value: 'Gross sales fell $6.7M (−14.9%): mutual fund sales fell $11.7M while ETF sales rose $6.4M; model-portfolio channel sales fell $9.5M.', evidence: ['book.get_flows'] }], memory: [], commitments: [], needs_approval: false,
+          open_questions: ['Fund-level transactions are not connected, so the decline can’t be traced to specific funds.'], as_of: ['Sep 2025 to Aug 2026'], status: 'complete', next_step: '' } },
+      T2: { calls: [['crm.get_call_notes', { advisor_id: 'ADV-105' }]],
+        json: { says: 'I pulled Daniel’s own words from Sam’s August call and Priya’s September call; both point at his models.',
+          output: NOTES_DANIEL, used: ['CALL-0826', 'CALL-0918', 'MEM-051', 'MEM-053'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], as_of: ['Sep 18, 2026'], status: 'complete', next_step: '' } },
+      T3: { calls: [],
+        json: { says: 'I checked every figure against the flows result and tied it to what Daniel told Sam and Priya; the explanation stops where the data stops.',
+          output: { kind: 'answer', title: 'Why sales are down while ETF sales are up', body: 'Short answer: ETF sales grew fast from a small base, while mutual fund sales fell by more.\n\n- ETFs: up $6.4M (+123.1%), the only vehicle that grew\n- Mutual funds: down $11.7M, which outweighs the ETF gain on its own\n- Net effect: total gross sales down $6.7M (−14.9%)\n\nWhere it happened: the model-portfolio channel fell $9.5M while advisor-directed accounts rose $2.8M. That matches what Daniel told us: two models moved to an index core (CALL-0826) and he wants a lower blended cost (CALL-0918).\n\nLimits: fund-level transactions are not connected, so this can’t say which funds the models replaced.' },
+          used: ['book.get_flows', 'CALL-0826', 'CALL-0918', 'MEM-051'], knowledge: [], memory: [], commitments: [], needs_approval: false,
+          open_questions: ['Which funds did the two index-core models replace? Needs fund-level transactions (not connected).'], as_of: ['Sep 2025 to Aug 2026', 'Sep 18, 2026'], status: 'complete',
+          next_step: 'Lead with the model-portfolio shift, not the ETF growth: ask Daniel which satellite funds he is reviewing this quarter, since that is where mutual fund sales fell.' } }
+    } },
+
+  { name: 'Which CG ETFs are available at Wells Fargo for Daniel?', requester: 'EMP-PRIYA', text: 'Which CG ETFs are available at Wells Fargo for Daniel?',
+    orch: [
+      D('requester', 'Priya Shah, Sales, covers Daniel', 'Wholesaler on Daniel Kim’s coverage.'),
+      D('intent', 'Verify availability on his platform', 'Not “find ETF leads” or “prepare an ETF discussion”: a scoped availability check.', { intent: 'verify' }),
+      D('asks', '1 thing requested', 'Which CG ETFs Daniel can use at Wells Fargo.', { asks: ['Which CG ETFs are available for Daniel'] }),
+      D('interpretation', 'Verify which CG ETFs Daniel can use on his own Wells Fargo programs, today', 'Catalogue #25 with #26 and #32.', { subject: { kind: 'advisor', id: 'ADV-105', label: 'Daniel Kim · Wells Fargo Advisors' }, intent: 'verify', scope: 'Wells Fargo Advisors; Daniel’s own programs, not dealer-wide; vehicle: ETF', time: 'Current, with effective dates from the dealer feed', constraints: ['Platform availability is not suitability', '“CG ETFs” resolved by the taxonomy, not keyword matching'], output: 'answer', missing: [], authority: 'read_only', patterns: [25, 26, 32] }),
+      D('entity', 'Daniel → Daniel Kim, Wells Fargo', 'One graph match.', { advisor: 'ADV-105', unit: 'BU-105', confidence: 'high' }),
+      D('scope', 'His programs, ETF vehicle only', 'Dealer-wide availability, his programs and client suitability are kept separate.'),
+      D('known', 'Firm known; programs not yet', 'The graph says Wells Fargo; which programs he uses comes from CRM.', { uses: ['ADV-105'] }),
+      D('missing', 'Which programs Daniel uses', 'Prep.Profile reads it from CRM first, so the platform check is scoped to his programs.'),
+      D('memory', 'Read only', 'Nothing new to store.', { class: 'read_only' }),
+      D('controls', 'Read-only; no suitability claims', 'Availability only, with effective dates and source.'),
+      TK({ id: 'T1', route: 'Prep.Profile', title: 'Confirm Daniel’s programs', objective: 'Read Daniel’s firm and the platform programs he uses from CRM', tools: ['crm.get_contact'], reads: ['memory'], returns: 'Firm and programs', why: 'Profile reads the advisor’s account context from Salesforce.' }),
+      TK({ id: 'T2', route: 'Product.Research Planner', title: 'Pull the Wells Fargo ETF shelf', objective: 'Resolve “CG ETFs” to tickers and pull program-level availability with effective dates for Daniel’s programs', depends_on: ['T1'], services: ['platform eligibility', 'taxonomy'], tools: ['platform.get_availability', 'taxonomy.resolve'], reads: ['knowledge'], returns: 'Program-level availability for every CG ETF, with effective dates', why: 'Research Planner decides the evidence; the taxonomy and platform eligibility services supply it.' }),
+      TK({ id: 'T3', route: 'Product.QAR', title: 'Verify his scoped availability', objective: 'Combine his programs with the shelf into a verified, scoped answer with sources', depends_on: ['T1', 'T2'], reads: ['knowledge', 'policy'], tools: [], returns: 'Scoped list with status, effective dates and source', why: 'QAR publishes verified answers only.' }),
+      D('success', 'One scoped answer, no overreach', 'What he can use in each of his programs, as of the feed date, with what is pending.'),
+      L({ k: 'end' })
+    ].join('\n'),
+    agents: {
+      T1: { calls: [['crm.get_contact', { advisor_id: 'ADV-105' }]],
+        json: { says: 'I read Daniel’s account context from CRM: he runs his models in Personalized UMA and also uses Brokerage.',
+          output: { kind: 'note', title: 'Daniel’s programs', body: 'Daniel Kim, Managing Director, Wells Fargo Advisors (Century City).\n\nPrograms he uses: Personalized UMA (his model portfolios) and Brokerage.' }, used: ['ADV-105'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], as_of: [], status: 'complete', next_step: '' } },
+      T2: { calls: [['taxonomy.resolve', { term: 'etfs' }], ['platform.get_availability', { advisor_id: 'ADV-105' }]],
+        json: { says: 'With Profile’s programs in hand, I resolved “CG ETFs” through the taxonomy and pulled each one’s status by program from the dealer feed.',
+          output: { kind: 'finding', title: 'Wells Fargo shelf: Capital Group ETFs', body: 'Taxonomy “ETFs”: CGGR, CGDV, CGCP, CGUI, CGXU.\n\nWells Fargo Advisors, as of Sep 28, 2026 (dealer intelligence feed):\n- CGGR: Brokerage available; Personalized UMA available from Sep 22, 2026\n- CGDV: Brokerage and Personalized UMA available\n- CGCP: Brokerage available; Personalized UMA under review\n- CGUI: Brokerage available; not available in Personalized UMA\n- CGXU: Brokerage available; not available in Personalized UMA' },
+          used: ['taxonomy.resolve', 'platform.get_availability'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], as_of: ['Sep 28, 2026'], status: 'complete', next_step: '' } },
+      T3: { calls: [],
+        json: { says: 'I combined Daniel’s programs with the shelf: two ETFs fit his UMA models today, one is under review.',
+          output: { kind: 'answer', title: 'CG ETFs Daniel can use at Wells Fargo', body: 'For his Personalized UMA models:\n- Available: CGDV, and CGGR (added Sep 22, 2026, after your last call on Sep 18)\n- Under review: CGCP\n- Not available: CGUI, CGXU\n\nIn Brokerage accounts: all five are available.\n\nScope: platform availability for Daniel’s programs, not a suitability conclusion for any client. Expense ratios for these ETFs are not in the reference data, so none are quoted.' },
+          used: ['platform.get_availability', 'taxonomy.resolve', 'ADV-105', 'CALL-0918'], knowledge: [], memory: [], commitments: [], needs_approval: false,
+          open_questions: ['When will Wells Fargo finish reviewing CGCP for Personalized UMA?'], as_of: ['Sep 28, 2026'], status: 'complete',
+          next_step: 'Tell Daniel that CGGR is newly available in his Personalized UMA models, and check the CGCP review before suggesting it there.' } }
+    } },
+
+  { name: 'Prepare me for tomorrow’s meeting with Daniel’s team', requester: 'EMP-PRIYA', text: 'Prepare me for tomorrow’s meeting with Daniel’s team',
+    orch: [
+      D('requester', 'Priya Shah, Sales, covers Daniel', 'Wholesaler on Daniel Kim’s coverage.'),
+      D('intent', 'Prepare a meeting: a brief, not actions', '“Prepare me” means the brief and agenda. It does not book, send or update anything.', { intent: 'prepare' }),
+      D('asks', '1 thing requested', 'Prepare the meeting with Daniel’s team.', { asks: ['Prepare the meeting with Daniel’s team'] }),
+      D('interpretation', 'Build a meeting-specific brief and agenda for tomorrow with the Kim Group', 'Catalogue #1 with #3 and #33.', { subject: { kind: 'buying_unit', id: 'BU-105', label: 'Daniel Kim · Kim Group model portfolios' }, intent: 'prepare', scope: 'Wealth: Kim Group model portfolios at Wells Fargo Advisors', time: 'Meeting tomorrow (Wed Sep 30); changes since the last meeting on Sep 18', constraints: ['Return the agenda, not an email or CRM update', 'Approved content only'], output: 'agenda', missing: ['Meeting length and purpose are not on the calendar; assuming 30 minutes on the model refresh'], authority: 'read_only', patterns: [1, 3, 33] }),
+      D('entity', 'Daniel → Daniel Kim, Kim Group', 'One graph match; the model-portfolio unit is the only unit.', { advisor: 'ADV-105', unit: 'BU-105', confidence: 'high' }),
+      D('scope', 'Model portfolios unit (BU-105)', 'Everything in the brief is about this unit.'),
+      D('known', 'Recent calls, priorities, open opportunity', 'Two recorded calls, a stated priority and OPP-504 in Discovery.', { uses: ['CALL-0918', 'CALL-0826', 'MEM-051', 'MEM-053', 'OPP-504'] }),
+      D('missing', 'Assets and flows not in hand', 'Read in parallel from the assets and flows services, alongside the notes.'),
+      D('memory', 'Read only', 'Nothing new about Daniel to store.', { class: 'read_only' }),
+      D('controls', 'Brief only; nothing sent or booked', 'Read-only: no calendar, email or CRM writes. Follow-ups are proposed, not created.'),
+      TK({ id: 'T1', route: 'Prep.Profile', title: 'Profile, book and pipeline', objective: 'Read Daniel’s profile, his CG assets by vehicle and his open opportunity', services: ['assets', 'pipeline'], tools: ['crm.get_contact', 'book.get_assets', 'pipeline.get'], reads: ['memory'], returns: 'Profile, CG assets by vehicle with the prior year, open opportunity', why: 'Profile reads CRM, the assets service and the pipeline together.' }),
+      TK({ id: 'T2', route: 'Prep.Notes', title: 'What Daniel told us', objective: 'Summarize Daniel’s dated statements from recorded calls', services: ['memory'], tools: ['crm.get_call_notes'], reads: ['memory'], returns: 'Attributed statements with dates', why: 'Notes Summarizer reads recorded calls in Salesforce.' }),
+      TK({ id: 'T3', route: 'Lead.Insights', title: 'What changed in his flows', objective: 'Summarize the year-over-year change in sales and flows by vehicle and channel', services: ['flows'], tools: ['book.get_flows'], reads: ['knowledge'], returns: 'Dated changes, not a full profile repeat', why: 'Insights Generator explains changes from the flows service.' }),
+      TK({ id: 'T4', route: 'Prep.Content', title: 'Pick approved content', objective: 'Choose two or three approved pieces that fit what Daniel said and what changed', depends_on: ['T1', 'T2', 'T3'], services: ['approved search'], tools: ['seismic.search_content'], reads: ['knowledge', 'policy'], returns: 'Approved pieces with an advisor-specific reason each', why: 'Content searches approved material only, after the reads tell it what matters.' }),
+      TK({ id: 'T5', route: 'Prep.Agenda', title: 'Build the meeting agenda', objective: 'Turn the verified reads and chosen content into a timed agenda for Priya', depends_on: ['T1', 'T2', 'T3', 'T4'], reads: ['memory', 'knowledge', 'policy'], tools: [], returns: 'A timed agenda with what to avoid repeating', why: 'Agenda builds only from verified topics.' }),
+      D('success', 'Priya walks in with a timed agenda', 'What changed, what Daniel asked, which approved pieces to bring, and nothing booked or sent.'),
+      L({ k: 'end' })
+    ].join('\n'),
+    agents: {
+      T1: { calls: [['crm.get_contact', { advisor_id: 'ADV-105' }], ['book.get_assets', { advisor_id: 'ADV-105' }], ['pipeline.get', { advisor_id: 'ADV-105' }]],
+        json: { says: 'I read Daniel’s profile, his CG book by vehicle with last year’s snapshot, and his open opportunity in one pass.',
+          output: { kind: 'note', title: 'Profile and CG book: Kim Group', body: 'Daniel Kim, Managing Director, Wells Fargo Advisors; programs: Personalized UMA and Brokerage.\n\nCG assets: $232.0M as of Aug 31, 2026\n- Mutual funds $148.2M (63.9%), ETFs $41.2M (17.8%), SMAs $42.6M (18.4%)\n- A year earlier ETFs were 9.3% of the book and mutual funds 72.2%\n- Largest holdings: GFA F-2 $54.0M, AMBAL F-2 $31.3M\n\nOpen opportunity: OPP-504 Kim Group model refresh, Discovery since Sep 18.' },
+          used: ['ADV-105', 'book.get_assets', 'OPP-504'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], as_of: ['Aug 31, 2026'], status: 'complete', next_step: '' } },
+      T2: { calls: [['crm.get_call_notes', { advisor_id: 'ADV-105' }]],
+        json: { says: 'I pulled Daniel’s own words from Sam’s August call and Priya’s September call.', output: NOTES_DANIEL, used: ['CALL-0826', 'CALL-0918', 'MEM-051', 'MEM-053'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], as_of: ['Sep 18, 2026'], status: 'complete', next_step: '' } },
+      T3: { calls: [['book.get_flows', { advisor_id: 'ADV-105' }]],
+        json: { says: 'I summarized what changed in his flows year over year; the model channel is where sales fell.',
+          output: { kind: 'finding', title: 'Flows: what changed', body: 'Trailing twelve months to Aug 2026 against the year before:\n- Gross sales $38.2M vs $44.9M (−14.9%)\n- ETF sales up $6.4M; mutual fund sales down $11.7M\n- Model-portfolio channel down $9.5M\n- Net flows $15.2M vs $29.1M as mutual fund redemptions rose' },
+          used: ['book.get_flows'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], as_of: ['Sep 2025 to Aug 2026'], status: 'complete', next_step: '' } },
+      T4: { calls: [['seismic.search_content', { query: 'core satellite etf active index model portfolios' }]],
+        json: { says: 'I chose two approved pieces that answer what Daniel has actually raised, each with its reason.',
+          output: { kind: 'content_pick', title: 'Approved content for the Kim Group meeting', body: '- SEIS-117 Core-satellite: where active management fits. Why: Daniel moved two models to an index core and reviews the satellites each quarter (CALL-0826, MEM-053)\n- SEIS-120 Capital Group ETF lineup overview. Why: ETFs versus active funds keeps coming up for him (CALL-0918)\n\nBackup: SEIS-114 The Capital System explainer, if he asks how the satellites are managed.' },
+          used: ['SEIS-117', 'SEIS-120', 'SEIS-114', 'CALL-0826', 'CALL-0918', 'MEM-053'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], as_of: [], status: 'complete', next_step: '' } },
+      T5: { calls: [],
+        json: { says: 'I turned the verified reads and the chosen content into a timed agenda for Priya; nothing was booked or sent.',
+          output: { kind: 'brief', title: 'Agenda: Kim Group, Wed Sep 30', body: 'Goal: help Daniel decide what belongs in the satellites of his refreshed models (OPP-504).\n\n1. What changed: ETFs are now 17.8% of his CG book, up from 9.3%; model-portfolio sales fell $9.5M as two models moved to an index core\n2. His question: where active managers still add value in core-satellite (SEIS-117)\n3. ETF options: what keeps coming up for him, with the ETF lineup (SEIS-120)\n4. Next step: agree which satellite funds he reviews this quarter\n\nAvoid repeating: his priority on a lower blended cost is already recorded (MEM-051).' },
+          used: ['OPP-504', 'SEIS-117', 'SEIS-120', 'MEM-051', 'CALL-0826'], knowledge: [], memory: [], commitments: [{ title: 'Send Daniel the two approved pieces as PDFs after the meeting', owner: 'Priya Shah', due: 'Oct 2' }], needs_approval: false,
+          open_questions: ['How long is tomorrow’s meeting, and who from the Kim Group attends?'], as_of: ['Aug 31, 2026', 'Sep 18, 2026'], status: 'complete',
+          next_step: 'Open with the model refresh (OPP-504) and ask which satellite funds Daniel is reviewing this quarter; bring SEIS-117 and SEIS-120.' } }
+    } }
+);
 </script>
 <script>/* ===== Advisor knowledge graph ===== */
 const KG_CLUSTERS = {
@@ -2493,7 +3078,7 @@ function patchList(box, items) {
 }
 
 /* ---------- orchestration: nine precise steps ---------- */
-const OSTEPS = [['understand', 'Understand', ['requester', 'intent', 'asks']], ['resolve', 'Resolve', ['lookup', 'entity']], ['scope', 'Scope', ['scope']], ['reuse', 'Reuse', ['known']], ['gaps', 'Gaps', ['missing']], ['memory', 'Memory rule', ['memory']], ['controls', 'Controls', ['controls', 'registry']], ['plan', 'Plan', ['planfix', 'success']], ['execute', 'Execute', []]];
+const OSTEPS = [['understand', 'Understand', ['requester', 'intent', 'asks', 'interpretation']], ['resolve', 'Resolve', ['lookup', 'entity']], ['scope', 'Scope', ['scope']], ['reuse', 'Reuse', ['known']], ['gaps', 'Gaps', ['missing']], ['memory', 'Memory rule', ['memory']], ['controls', 'Controls', ['controls', 'registry', 'authority']], ['plan', 'Plan', ['planfix', 'success']], ['execute', 'Execute', []]];
 function stepStates(r) {
   const s = OSTEPS.map(([id, name, types]) => ({ id, name, items: r ? r.decisions.filter(d => types.includes(d.type)) : [], state: 'pending' }));
   if (!r) return s;
@@ -2501,7 +3086,7 @@ function stepStates(r) {
   s[7].state = r.tasks.length ? (r.status === 'thinking' ? 'active' : 'done') : 'pending';
   s[8].state = r.status === 'running' ? 'active' : r.status === 'done' ? 'done' : 'pending';
   if (r.status === 'thinking') { const f = s.find(x => x.state === 'pending'); if (f) f.state = 'active'; }
-  if (['running', 'done'].includes(r.status)) s.slice(0, 7).forEach(x => { if (x.state === 'pending') x.state = 'skipped'; });
+  if (['running', 'done', 'planned'].includes(r.status)) s.slice(0, 7).forEach(x => { if (x.state === 'pending') x.state = 'skipped'; });
   if (r.status === 'clarify') s[4].state = 'active';
   if (r.status === 'failed') { const f = s.find(x => x.state === 'pending' || x.state === 'active'); if (f) f.state = 'failed'; }
   return s;
@@ -2517,10 +3102,11 @@ function renderOrch() {
     if (r.status === 'thinking') think = `<span class="spin"></span><b>${act ? act.name : 'Thinking'}</b>${last ? ' · ' + esc(last.title) : ''}`;
     else if (r.status === 'running') { const run = [...new Set(r.tasks.filter(t => t.state === 'running').map(t => ROLES[t.role].name))]; think = `<span class="spin"></span><b>Workbench</b> · ${run.length ? esc(run.join(' and ')) + ' working' : 'assigning'} · ${r.tasks.filter(t => t.state === 'done').length} of ${r.tasks.length} tasks done`; }
     else if (r.status === 'clarify') think = '<b>Gaps</b> · waiting for your answer';
+    else if (r.status === 'planned') think = `<b>Plan ready</b> · ${r.tasks.length} steps in ${new Set(r.tasks.map(t => t.wave)).size} waves · nothing has run yet`;
     else if (r.status === 'done') think = `<b>Complete</b> · ${r.tasks.length} tasks across ${new Set(r.tasks.map(t => ROLES[t.role].team)).size} teams in ${Math.round((r.t1 - r.t0) / 1000)} s`;
     else if (r.status === 'failed') think = `<b>Stopped</b> · ${esc(r.error || '')}`;
   }
-  if (r && r.presentationPause) { const t = r.tasks.find(t => t.id === r.presentationPause.task); think = `<b>Step ${t?.step || ''} output ready</b> · Next step in ${r.presentationPause.seconds}s · Review the output below`; }
+  if (r && r.presentationPause) { const P = r.presentationPause; think = `<b>Wave ${P.wave} output ready</b> · ${P.wave < P.of ? 'Next wave' : 'Closing'} in ${P.seconds}s · Review the output below`; }
   setHTML($('othink'), think);
   patchList($('tchips'), r ? r.tasks.map(t => ({ key: t.id, cls: 'tchip ' + (t.state || ''), html: `<i style="--c:${TC[ROLES[t.role].team]}"></i>${esc(ROLES[t.role].name)}: ${esc(t.title)}` })) : []);
   $('orch').classList.toggle('active', !!r && ['thinking', 'running'].includes(r.status));
@@ -2647,9 +3233,9 @@ async function runRequestInner(text, replay, opts = {}) {
   if (!replay && AI.mode !== 'live') { toast(AI.mode === 'checking' ? 'Connecting to the AI… try again in a moment.' : 'Live AI isn’t available here. Run it on claude.ai or with the deployment package.'); return; }
   const requester = replay ? replay.requester : UI.requester;
   if (replay) { UI.requester = requester; buildStaticWho(); }
-  const run = { id: 'RUN-' + (++RUNSEQ), requester, text, clarified: opts.clarified || null, territory: null, t0: Date.now(), decisions: [], tasks: [], status: 'thinking', advisor: null, unit: null, stats: { reused: 0, reads: 0, calls: 0, mcp: 0, committed: 0, pending: 0, blocked: 0, rejected: 0, task: 0, ai: 0 }, orchText: '', record: { name: text.slice(0, 60), requester, text, orch: '', agents: {} }, replay };
+  const run = { id: 'RUN-' + (++RUNSEQ), requester, text, planOnly: !!opts.planOnly, clarified: opts.clarified || null, territory: null, t0: Date.now(), decisions: [], tasks: [], status: 'thinking', advisor: null, unit: null, stats: { reused: 0, reads: 0, calls: 0, mcp: 0, committed: 0, pending: 0, blocked: 0, rejected: 0, task: 0, ai: 0 }, orchText: '', record: { name: text.slice(0, 60), requester, text, orch: '', agents: {} }, replay };
   UI.run = run; UI.ctl = new AbortController(); F.runs.push(run); UI.totals.runs++;
-  $('runBtn').disabled = true; $('stopBtn').hidden = false; $('cmdIn').value = ''; $('cmdIn').blur();
+  $('runBtn').disabled = true; $('planBtn').disabled = true; $('stopBtn').hidden = false; $('cmdIn').value = ''; $('cmdIn').blur();
   setTab('updates');
   logEvent('request.received', `${EMPLOYEES[requester].name}: ${text}`, requester);
   addOp({ kind: 'request', dur: 900 });
@@ -2702,25 +3288,36 @@ async function runRequestInner(text, replay, opts = {}) {
   }
   if (run.tasks.length) finalizePlan(run);
   run.record.orch = run.orchText.split('\n').filter(s => s.trim().startsWith('{')).join('\n');
-  if (run.clarify) { run.status = 'clarify'; renderAll(); $('runBtn').disabled = false; $('stopBtn').hidden = true; return; }
+  if (run.clarify) { run.status = 'clarify'; renderAll(); $('runBtn').disabled = false; $('planBtn').disabled = false; $('stopBtn').hidden = true; return; }
   if (!run.tasks.length) return finishRun(run, 'Orchestration produced no tasks.');
-  /* registry governance on the plan */
+  if (run.planOnly) { run.status = 'planned'; run.t1 = Date.now(); logEvent('plan.ready', `${run.tasks.length} steps in ${new Set(run.tasks.map(t => t.wave)).size} waves (not run)`, 'orch', run.advisor); $('runBtn').disabled = false; $('planBtn').disabled = false; $('stopBtn').hidden = true; renderAll(); return; }
+  await executePlan(run);
+}
+/* Orchestration: run the plan wave by wave. Steps in a wave run together; each wave waits for the one before. */
+async function executePlan(run) {
   if (run.advisor) { F.session.advisor = run.advisor; F.session.unit = run.unit || null; }
-  F.session.requests.push({ text, adv: run.advisor });
-  run.status = 'running'; renderAll();
-  /* Execute one step at a time, allowing the completed output to be read. */
-  const done = new Set();
-  while (run.tasks.some(t => !t.state || t.state === 'queued')) {
+  F.session.requests.push({ text: run.text, adv: run.advisor });
+  if (run.status === 'planned') run.t0 = Date.now();
+  run.status = 'running'; $('runBtn').disabled = true; $('planBtn').disabled = true; $('stopBtn').hidden = false; renderAll();
+  const waves = [...new Set(run.tasks.map(t => t.wave))].sort((a, b) => a - b);
+  for (const w of waves) {
     if (UI.ctl.signal.aborted) return finishRun(run, 'Stopped.');
-    const ready = run.tasks.filter(t => (!t.state || t.state === 'queued') && t.depends_on.every(d => done.has(d)));
-    if (!ready.length) { run.tasks.filter(t => t.state === 'queued').forEach(t => t.depends_on = []); continue; }
-    for (const t of ready) {
-      await runTask(run, t).catch(e => { t.state = 'failed'; t.error = errText(e); renderAll(); });
-      done.add(t.id);
-      if (UI.ctl.signal.aborted) return finishRun(run, 'Stopped.');
-    }
+    const ws = run.tasks.filter(t => t.wave === w && (!t.state || t.state === 'queued'));
+    await Promise.all(ws.map(t => runTask(run, t).catch(e => { t.state = 'failed'; t.error = errText(e); renderAll(); })));
+    if (UI.ctl.signal.aborted) return finishRun(run, 'Stopped.');
+    await holdForReading(run, w, waves.length);
   }
   finishRun(run);
+}
+/* Each wave's finished output stays on screen for READ_PAUSE_S before the next wave starts. */
+async function holdForReading(run, wave, of) {
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  run.presentationPause = { wave, of, seconds: READ_PAUSE_S };
+  for (let left = READ_PAUSE_S; left > 0 && !UI.ctl.signal.aborted; left--) {
+    run.presentationPause.seconds = left; renderAll();
+    for (let k = 0; k < 10 && !UI.ctl.signal.aborted; k++) await sleep(100);
+  }
+  run.presentationPause = null; renderAll();
 }
 /* Tie every task to what was asked, and put the tasks in a clear order. */
 function splitAsks(text) {
@@ -2739,6 +3336,23 @@ function finalizePlan(run) {
     run.asks[t.ask - 1].tasks.push(t.id);
   }
   run.asks.forEach((a, k) => { if (!a.tasks.length) run.decisions.push({ type: 'registry', src: 'code', title: `Not covered: “${a.text}”`, detail: 'No task serves this part of the request. Flagged so nothing is silently dropped.' }); });
+  /* intelligence: there is always an interpretation; authority is settled by rule from the request's own words */
+  if (!run.interp) { const d = run.decisions.find(x => x.type === 'intent'), LEGACY = { meeting_prep: 'prepare', research: 'retrieve', content: 'draft', campaign: 'draft', service: 'diagnose', profile_update: 'remember', question: 'retrieve' }; run.interp = ruleInterpretation(run, d ? (INTENTS[d.intent] ? d.intent : LEGACY[d.intent] || null) : null); run.decisions.push({ type: 'interpretation', src: 'code', title: 'Interpretation built from rules', detail: 'Orchestration didn’t state one, so it comes from the graph lookup and the request’s wording.' }); }
+  const rule = authorityFromText(run.text, EMPLOYEES[run.requester].team), asked = run.interp.authority;
+  run.authority = asked && authN(asked) < authN(rule.authority) ? asked : rule.authority;
+  run.authorityNote = asked && authN(asked) > authN(rule.authority) ? `Orchestration asked for ${AUTHORITY[asked].label.toLowerCase()}; capped by rule.` : '';
+  run.decisions.push({ type: 'authority', src: 'code', title: `Action authority: ${AUTHORITY[run.authority].label}`, detail: `${run.authorityNote} ${rule.why}`.trim() });
+  for (const t of run.tasks) {
+    const over = t.tools.filter(n => toolAct(n) > authN(run.authority));
+    if (over.length) { t.tools = t.tools.filter(n => !over.includes(n)); run.decisions.push({ type: 'registry', src: 'code', title: `${taskLabel(t)}: ${over.join(', ')} removed`, detail: `${AUTHORITY[run.authority].label}: the request didn’t ask for ${over.some(n => toolAct(n) === 1) ? 'drafts' : 'changes'}.` }); }
+    t.gaps = (t.services || []).filter(k => serviceStatus(k) === 'not connected');
+  }
+  const gaps = [...new Set(run.tasks.flatMap(t => t.gaps))];
+  if (gaps.length) run.decisions.push({ type: 'registry', src: 'code', title: `Not connected here: ${gaps.map(g => '[' + g + ']').join(', ')}`, detail: 'Planned for, but unavailable in this demo; the steps that need it will report partial results.' });
+  /* waves: a step runs one wave after the latest step it depends on */
+  run.tasks.forEach(t => { t.wave = 0; });
+  const waveOf = t => t.wave || (t.wave = 1 + Math.max(0, ...t.depends_on.map(d => run.tasks.find(x => x.id === d)).filter(Boolean).map(waveOf)));
+  run.tasks.forEach(waveOf);
   /* sequential order: dependencies first, then plan order */
   const order = [], seen = new Set();
   const visit = t => { if (seen.has(t.id)) return; seen.add(t.id); t.depends_on.forEach(d => { const x = run.tasks.find(y => y.id === d); if (x) visit(x); }); order.push(t); };
@@ -2751,25 +3365,30 @@ function handleOrch(run, o) {
     run.decisions.push(Object.assign({ src: 'ai' }, o));
     if (o.type === 'entity') { if (o.advisor && ADVISORS[o.advisor]) run.advisor = o.advisor; if (o.unit && run.advisor && ADVISORS[run.advisor].units[o.unit]) run.unit = o.unit; if (o.territory && TERRITORIES[o.territory]) run.territory = o.territory; else if (!run.advisor && run.resolution.territories[0]) run.territory = run.resolution.territories[0].id; UI.memAdv = run.advisor || UI.memAdv; flashTile('graph', 'read'); }
     if (o.type === 'known') flashTile('memory', 'read');
+    if (o.type === 'interpretation') run.interp = normInterp(o);
     if (o.type === 'asks' && Array.isArray(o.asks)) run.asks = o.asks.map(String).filter(Boolean).slice(0, 5).map(text => ({ text, tasks: [] }));
   } else if (o.k === 'task') {
-    if (run.tasks.length >= 5) return;
+    if (run.tasks.length >= 6) return;
     const arr = x => Array.isArray(x) ? x : x ? [x] : [];
     let id = String(o.id || 'T' + (run.tasks.length + 1)); if (run.tasks.some(x => x.id === id)) id = 'T' + (run.tasks.length + 1);
-    const t = { id, agent: resolveAgentId(o.agent) || String(o.agent || ''), objective: String(o.objective || o.task || '').slice(0, 300), depends_on: arr(o.depends_on || o.dependsOn).map(String), reads: arr(o.reads).map(String), tools: arr(o.tools).map(resolveToolName).filter(Boolean), why: String(o.why || '').slice(0, 200) };
+    const ri = routeInfo(o.route);
+    const t = { id, route: ri ? ri.route : null, sub: ri && !Array.isArray(SUBAGENTS[ri.family].subs[ri.sub]) ? ri.sub : null, services: [...new Set(arr(o.services).flatMap(x => serviceKeys(String(x))))], returns: String(o.returns || '').slice(0, 200), agent: ri ? ri.agent : resolveAgentId(o.agent) || String(o.agent || ''), objective: String(o.objective || o.task || '').slice(0, 300), depends_on: arr(o.depends_on || o.dependsOn).map(String), reads: arr(o.reads).map(String), tools: arr(o.tools).map(resolveToolName).filter(Boolean), why: String(o.why || '').slice(0, 200) };
     const rr = ROLES[o.role] ? o.role : null;
     if (!AGENTS[t.agent] && rr) t.agent = ROLE_DEFAULT_AGENT[rr];
     if (!t.objective) t.objective = AGENTS[t.agent] ? AGENTS[t.agent].does : 'Contribute to the request';
     t.role = rr && roleOf(t.agent) && ROLES[rr].team === AGENTS[t.agent]?.team ? rr : roleOf(t.agent);
     t.title = String(o.title || '').trim().slice(0, 60) || t.objective.split(/[,.;]/)[0].split(' ').slice(0, 6).join(' ');
     t.ask = Number(o.ask) || null;
-    /* business assignment rules for Sales work */
-    if (AGENTS[t.agent] && AGENTS[t.agent].team === 'sales') {
+    /* business assignment rules for Sales work that orchestration didn't route to a sub-agent */
+    if (!t.route && AGENTS[t.agent] && AGENTS[t.agent].team === 'sales') {
       const txt = t.title + ' ' + t.objective, rule = ROLE_RULES.find(x => x.test.test(txt));
       if (rule && t.role !== rule.role) { const from = ROLES[t.role] ? ROLES[t.role].name : '—'; t.role = rule.role; t.agent = rule.agent(txt); run.decisions.push({ type: 'registry', src: 'code', title: `“${t.title}” → ${ROLES[rule.role].name}`, detail: `${rule.why}. Moved from ${from}.` }); }
     }
     t.person = ROLES[t.role] ? (t.role === 'sales.wholesalers' && run.advisor && EMPLOYEES[run.requester].team === 'sales' && ADVISORS[run.advisor].coverage.includes(run.requester) ? EMPLOYEES[run.requester].name : ROLES[t.role].person) : '';
     if (!AGENTS[t.agent]) { run.decisions.push({ type: 'registry', src: 'code', title: `Unknown agent “${t.agent}” dropped`, detail: 'Orchestration can only route to registered specialists.' }); return; }
+    if (!t.route) t.route = routeOfTask(t.agent, t.sub);
+    /* a shared service a step reads brings its tools, when the step's agent may use them */
+    t.services.forEach(k => (SERVICES[k] ? SERVICES[k].tools : []).forEach(n => { if (toolAllowed(t.agent, n) && !t.tools.includes(n)) t.tools.push(n); }));
     const bad = t.tools.filter(x => !toolAllowed(t.agent, x));
     if (bad.length) { t.tools = t.tools.filter(x => toolAllowed(t.agent, x)); run.decisions.push({ type: 'registry', src: 'code', title: `${AGENTS[t.agent].name}: ${bad.length} tool${bad.length > 1 ? 's' : ''} removed`, detail: `${bad.join(', ')} ${bad.length > 1 ? 'are' : 'is'} not on this agent’s allow-list at the gateway.` }); UI.totals.blocked++; }
     t.depends_on = t.depends_on.filter(d => run.tasks.some(x => x.id === d));
@@ -2778,6 +3397,35 @@ function handleOrch(run, o) {
     if (run.clarified) run.decisions.push({ type: 'missing', src: 'code', title: 'Proceeding on your earlier answer', detail: `Orchestration wanted to ask “${o.question}” again; the app lets it ask only once, so it continues with stated assumptions.` });
     else run.clarify = String(o.question || 'Which advisor do you mean?');
   }
+}
+const taskLabel = t => t.route || (AGENTS[t.agent] ? AGENTS[t.agent].name : t.agent);
+function normInterp(o) {
+  const arr = x => Array.isArray(x) ? x.map(v => String(v)).filter(Boolean).slice(0, 5) : x ? [String(x)] : [];
+  const sub = o.subject && typeof o.subject === 'object' ? { kind: String(o.subject.kind || 'none'), id: o.subject.id ? String(o.subject.id) : null, label: String(o.subject.label || o.subject.id || '') } : { kind: 'none', id: null, label: String(o.subject || '') };
+  return { title: String(o.title || ''), subject: sub, intent: INTENTS[o.intent] ? o.intent : null, scope: String(o.scope || ''), time: String(o.time || ''), constraints: arr(o.constraints), output: String(o.output || ''), missing: arr(o.missing), authority: AUTHORITY[o.authority] ? o.authority : null, patterns: (Array.isArray(o.patterns) ? o.patterns : []).map(Number).filter(n => CATALOGUE.some(c => c.n === n)).slice(0, 3), src: o.src === 'code' ? 'code' : 'ai' };
+}
+/* A catalogue route, turned into the same orchestration stream the AI produces (no AI call) */
+function catalogueReplay(entry, requester) {
+  const p = parseRoute(entry.exec), E = EMPLOYEES[requester], L2 = o => JSON.stringify(o.k === 'decision' ? Object.assign({ src: 'code' }, o) : o), lines = [], tasks = []; /* built by rule from the route, so tagged RULE */
+  const gaps = [...new Set(p.stages.flat().filter(i => i.kind === 'service').flatMap(i => i.keys).filter(k => serviceStatus(k) === 'not connected'))];
+  lines.push(L2({ k: 'decision', type: 'requester', title: `${E.name}, ${TEAMS[E.team].name}`, detail: E.role }));
+  lines.push(L2({ k: 'decision', type: 'intent', title: `${entry.intent[0].toUpperCase() + entry.intent.slice(1)}: ${INTENTS[entry.intent]}`, detail: `Catalogue #${entry.n}, group ${entry.group}: ${CATALOGUE_GROUPS[entry.group].title}.`, intent: entry.intent }));
+  lines.push(L2({ k: 'decision', type: 'asks', title: '1 thing requested', detail: entry.ask, asks: [entry.ask.replace(/[.?]$/, '')] }));
+  lines.push(L2({ k: 'decision', type: 'interpretation', title: entry.decomp, detail: `Catalogue #${entry.n}`, subject: null, intent: entry.intent, output: p.output, constraints: [], missing: gaps.map(g => `[${g}] is not connected in this demo`), authority: entry.auth, patterns: [entry.n] }));
+  let prev = [], pending = [];
+  p.stages.forEach((st, k) => {
+    const agents = st.filter(i => i.kind === 'agent'), svc = [...pending, ...st.filter(i => i.kind === 'service').flatMap(i => i.keys)], checks = st.filter(i => i.kind === 'check');
+    checks.forEach(c => lines.push(L2({ k: 'decision', type: 'controls', title: `Checkpoint: ${c.raw}`, detail: 'A person reviews before the next step.' })));
+    if (!agents.length) { if (prev.length) prev.forEach(t => t.services.push(...svc)); else pending = svc; return; } /* a service on its own serves the step before it */
+    pending = [];
+    const ids = agents.map((a, j) => { const t = { k: 'task', id: 'T' + (tasks.length + 1), ask: 1, route: a.route, title: a.sub, objective: `${a.does}, for: ${entry.ask}`, depends_on: prev.map(x => x.id), services: j === 0 ? [...svc] : [], /* a read listed with parallel steps goes to the first of them */ tools: [], reads: ['memory', 'knowledge', 'policy'], returns: k === p.stages.length - 1 ? p.output : 'its output, sources and as-of dates to the next wave', why: `Catalogue #${entry.n} route` }; tasks.push(t); return t; });
+    prev = ids;
+  });
+  if (pending.length && prev.length) prev.forEach(t => t.services.push(...pending));
+  tasks.forEach(t => lines.push(L2(t)));
+  lines.push(L2({ k: 'decision', type: 'success', title: p.output.charAt(0).toUpperCase() + p.output.slice(1), detail: `The output catalogue #${entry.n} calls for.` }));
+  lines.push(L2({ k: 'end' }));
+  return { name: `Catalogue #${entry.n}`, requester, text: entry.ask, orch: lines.join('\n'), agents: {}, orchOnly: true };
 }
 /* How long each step's finished output stays on screen before the next step starts */
 const READ_PAUSE_S = 5;
@@ -2802,6 +3450,7 @@ async function runTask(run, t) {
     if (sig.aborted) throw new Error('stopped');
     const T = TOOLS[name];
     if (!T || !toolAllowed(t.agent, name)) { t.calls.push({ name, input, error: 'Not permitted for this agent' }); UI.totals.blocked++; renderAll(); throw new Error(`${name} is not permitted for ${a.name}`); }
+    if (toolAct(name) > authN(run.authority)) { t.calls.push({ name, input, error: `Not permitted at ${AUTHORITY[run.authority].label.toLowerCase()} authority` }); UI.totals.blocked++; renderAll(); throw new Error(`${name} is not permitted: the request is ${AUTHORITY[run.authority].label.toLowerCase()}`); }
     addOp({ kind: 'call', agent: t.agent, task: t.id, sys: T.sys, via: T.via, dur: 1500 });
     let out; try { out = capResult(T.run(input && typeof input === 'object' ? input : {})); } catch (e) { t.calls.push({ name, input, error: e.message }); renderAll(); throw e; }
     t.calls.push({ name, input, sys: T.sys, via: T.via, rw: T.rw, out }); t.toolResults.push({ name, out });
@@ -2811,12 +3460,13 @@ async function runTask(run, t) {
     return out;
   };
   let res;
-  if (run.replay) {
+  if (run.replay && !run.replay.orchOnly) {
     const rec = run.replay.agents[t.id] || { calls: [], json: { says: 'No recording for this task.', output: null } };
     await sleep(700);
     for (const [n, inp] of rec.calls) await onCall(n, inp);
     await sleep(900); res = clone(rec.json);
   } else {
+    if (AI.mode !== 'live') throw new Error('live AI is needed to run this step');
     const useTools = AI.tools && t.tools.length;
     if (!useTools && t.tools.length) { /* fetch the planned tools for the agent */
       t.prefetched = {};
@@ -2843,6 +3493,11 @@ async function runTask(run, t) {
   const ctx = { run, packet: t.packet, toolIds: t.calls.flatMap(c => [c.name, ...JSON.stringify(c.out || '').match(/[A-Z]+-[A-Z0-9-]+/g) || []]), toolResults: t.toolResults, upstream, upstreamIds: upstream.flatMap(u => u.ids.concat([u.task])) };
   t.verdicts = gatekeep(t, res, ctx);
   if (res.next_step && traceable(res.next_step, corpusOf(ctx)).length) res.next_step = '';
+  /* the step contract: output, sources, as-of dates, unresolved issues, status */
+  const asof = new Set(res.as_of || []);
+  t.toolResults.forEach(r => JSON.stringify(r.out).replace(/"(as_of|numerator_as_of|denominator_as_of|er_as_of|asOf)":"([^"]+)"/g, (m, k, v) => { asof.add(v); return m; }));
+  const outBlocked = t.verdicts.some(v => v.kind === 'output' && v.status === 'blocked');
+  t.contract = { status: outBlocked ? 'blocked' : res.status === 'complete' && ((t.gaps || []).length || t.calls.some(c => c.error)) ? 'partial' : res.status, sources: [...new Set([...(res.used || []), ...t.calls.filter(c => !c.error).map(c => c.name)])], as_of: [...asof].slice(0, 4), unresolved: res.open_questions || [] };
   /* count reuse the foundation made possible */
   const usedIds = new Set(res.used || []);
   const reused = reusedItems.filter(i => usedIds.has(i.id)).length + (upstream.length ? 1 : 0) * upstream.length;
@@ -2866,16 +3521,6 @@ async function runTask(run, t) {
   if (t.verdicts.some(v => v.kind === 'output')) badge('updates', true);
   setTab('updates');
   renderAll();
-  // Start the reading interval only after the completed result has painted.
-  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-  const seconds = READ_PAUSE_S;
-  run.presentationPause = { task: t.id, seconds };
-  renderAll();
-  for (let remaining = seconds; remaining > 0 && !UI.ctl.signal.aborted; remaining--) {
-    run.presentationPause.seconds = remaining; renderAll();
-    for (let k = 0; k < 10 && !UI.ctl.signal.aborted; k++) await sleep(100);
-  }
-  run.presentationPause = null; renderAll();
 }
 function defaultArgs(n, run, t) {
   const tick = mentionsFunds(run.text + ' ' + t.objective), people = (run.resolution.people || []).map(p => p.name);
@@ -2889,7 +3534,7 @@ function errText(e) {
 }
 function finishRun(run, error) {
   run.status = error ? 'failed' : 'done'; run.error = error; run.t1 = Date.now();
-  $('runBtn').disabled = false; $('stopBtn').hidden = true;
+  $('runBtn').disabled = false; $('planBtn').disabled = false; $('stopBtn').hidden = true;
 
   if (!error) logEvent('plan.completed', `${run.tasks.length} tasks · ${run.stats.reused} reused · ${run.stats.committed} stored`, 'orch', run.advisor);
   renderAll();
@@ -2901,7 +3546,7 @@ const SI = { done: '✓', active: '', pending: '', skipped: '–', failed: '!' }
 function stepBody(r, s) {
   if (s.id === 'plan') {
     const succ = s.items.filter(d => d.type === 'success'), fixes = s.items.filter(d => d.type === 'planfix');
-    return `${fixes.map(d => `<div class="dl"><span class="tag2 code">RULE</span><span><b>${esc(d.title)}</b> ${esc(d.detail || '')}</span></div>`).join('')}${r.tasks.map(t => `<div class="dl"><span class="tid" style="background:${TC[ROLES[t.role].team]}">${t.id}</span><span><b>${esc(t.title)}</b> → ${esc(TEAMS[ROLES[t.role].team].name)} · ${esc(ROLES[t.role].name)}<small>${esc(t.objective)}${t.depends_on.length ? ' · after ' + t.depends_on.join(', ') : ''}</small></span></div>`).join('')}${succ.map(d => `<div class="dl"><span class="tag2 ai">DONE WHEN</span><span>${esc(d.title)}</span></div>`).join('')}`;
+    return `${fixes.map(d => `<div class="dl"><span class="tag2 code">RULE</span><span><b>${esc(d.title)}</b> ${esc(d.detail || '')}</span></div>`).join('')}${r.tasks.map(t => `<div class="dl"><span class="tid" style="background:${TC[ROLES[t.role].team]}">${t.id}</span><span><b>W${t.wave} · ${esc(taskLabel(t))}: ${esc(t.title)}</b> → ${esc(TEAMS[ROLES[t.role].team].name)} · ${esc(ROLES[t.role].name)}<small>${esc(t.objective)}${t.depends_on.length ? ' · after ' + t.depends_on.join(', ') : ' · no dependencies, runs in wave 1'}${(t.services || []).length ? ' · reads ' + t.services.map(k => '[' + k + ']').join(' ') : ''}</small></span></div>`).join('')}${succ.map(d => `<div class="dl"><span class="tag2 ai">DONE WHEN</span><span>${esc(d.title)}</span></div>`).join('')}`;
   }
   if (s.id === 'execute') {
     return r.tasks.map(t => { const up = t.depends_on.map(d => r.tasks.find(x => x.id === d)).filter(Boolean);
@@ -2982,8 +3627,8 @@ function verdictLines(t) {
   return (t.verdicts || []).filter(v => v.kind !== 'output' || v.status === 'blocked').map(v => {
     const txt = v.kind === 'knowledge' ? (v.status === 'published' ? `Shared with all teams: ${v.title}` : `Not shared: ${v.title} (${v.reason})`)
       : v.kind === 'memory' ? ({ committed: `Remembered: ${v.title}`, pending: `Needs the advisor’s confirmation: ${v.title}`, task: `Kept with this task only: ${v.title}`, rejected: `Not remembered: ${v.title} (a guess, not stated)`, read: `Already known: ${v.title}`, blocked: `Not allowed: ${v.title}` }[v.status] || v.title)
-      : v.kind === 'commitment' ? `New follow-up task: ${v.title}` : `Blocked: ${v.reason}`;
-    return `<div class="uv ${v.status}">${esc(txt)}</div>`;
+      : v.kind === 'commitment' ? (v.status === 'proposed' ? `Proposed follow-up, not created: ${v.title}` : `New follow-up task: ${v.title}`) : `Blocked: ${v.reason}`;
+    return `<div class="uv ${v.status}">${esc(txt)}${v.status === 'proposed' ? ` <button class="lbtn mini" data-commit="${t.id}|${t.verdicts.indexOf(v)}">Create task</button>` : ''}</div>`;
   }).join('');
 }
 function outputHTML(o) {
@@ -3010,8 +3655,53 @@ function sourcesHTML(r, t) {
   return `<div class="srcs"><div class="srch">${icon('network')} Where this came from</div>
     <div class="srcl"><span class="vbadge Internal">FDN</span><span><b>Shared foundation</b> · sent ${p.items.length} records (${counts.map(([l, n]) => `${esc(LAYERS[l].short)} ${n}`).join(' · ')})${p.withheld.length ? ` · withheld ${p.withheld.length}` : ''}<small>Why: only what this role is permitted to see for ${esc(r.advisor ? ADVISORS[r.advisor].short : r.territory ? TERRITORIES[r.territory].name : 'this request')}</small>${cited.length ? `<small>Cited: ${cited.map(i => `${esc(i.id)} ${esc(i.label)}`).join(' · ')}</small>` : ''}</span></div>
     ${ups.map(x => `<div class="srcl"><span class="vbadge Event">STEP ${x.step}</span><span><b>${esc(ROLES[x.role].name)}</b> · ${esc((x.result.output && x.result.output.title) || x.title)}<small>Why: this step builds on that verified work instead of redoing it</small></span></div>`).join('')}
+    ${(t.gaps || []).map(k => `<div class="srcl"><span class="vbadge Gap">GAP</span><span><b>[${esc(k)}]</b> · not connected in this demo<small>Needed for: ${esc(SERVICES[k] ? SERVICES[k].does : k)}. The step reports what it could not establish.</small></span></div>`).join('')}
     ${calls || (t.state === 'running' ? '' : '<div class="srcl"><span class="vbadge Internal">—</span><span><small>No enterprise system calls: worked from the foundation alone</small></span></div>')}</div>`;
 }
+/* ---------- intelligence and orchestration views ---------- */
+const routeChip = t => t.route ? `<span class="rc ag" style="--c:${TC[AGENTS[t.agent].team]}">${esc(t.route)}</span>` : '';
+const svcChip = k => `<span class="rc sv ${serviceStatus(k).replace(' ', '-')}" title="${esc((SERVICES[k] ? SERVICES[k].does : k) + ' · ' + serviceStatus(k))}">[${esc(k)}]</span>`;
+function interpHTML(r) {
+  const I = r.interp, first = EMPLOYEES[r.requester].name.split(' ')[0], list = (a, none) => a && a.length ? a.map(esc).join('<br>') : `<span class="mute">${none}</span>`;
+  const subj = I.subject && (I.subject.label || I.subject.id) ? `${esc(I.subject.label || I.subject.id)}${I.subject.kind && I.subject.kind !== 'none' ? ` <small>${esc(I.subject.kind.replace('_', ' '))}${I.subject.id && I.subject.label ? ' · ' + esc(I.subject.id) : ''}</small>` : ''}` : r.advisor ? `${esc(ADVISORS[r.advisor].name)} <small>advisor · from the graph</small>` : '<span class="mute">Not resolved</span>';
+  const au = r.authority || I.authority, val = {
+    subject: subj, intent: I.intent ? `<b class="ib">${esc(I.intent)}</b> <small>${esc(INTENTS[I.intent])}</small>` : '<span class="mute">Not stated</span>',
+    scope: I.scope ? esc(I.scope) : '<span class="mute">Not stated</span>', time: I.time ? esc(I.time) : '<span class="mute">Current</span>',
+    constraints: list(I.constraints, 'None stated'), output: I.output ? esc(I.output) : '<span class="mute">Not stated</span>', missing: list(I.missing, 'Nothing material'),
+    authority: au ? `<b>${esc(AUTHORITY[au].label)}</b> <small>${esc(AUTHORITY[au].does)}${r.authority ? ' · settled by rule' : ' · pending rule check'}</small>${r.authorityNote ? `<small class="warn">${esc(r.authorityNote)}</small>` : ''}` : '<span class="mute">Pending</span>' };
+  return `<div class="dt">INTELLIGENCE · WHAT ${esc(first.toUpperCase())} ACTUALLY WANTS <span class="tag2 ${I.src === 'code' ? 'code' : 'ai'}">${I.src === 'code' ? 'RULE' : 'AI'}</span></div>${I.title ? `<p class="ihead">${esc(I.title)}</p>` : ''}<dl class="interp">${INTERP_FIELDS.map(([k, l]) => `<dt>${l}</dt><dd>${val[k]}</dd>`).join('')}</dl>${I.patterns && I.patterns.length ? `<p class="hint" style="margin:6px 0 0">Closest catalogue pattern${I.patterns.length > 1 ? 's' : ''}: ${I.patterns.map(n => `<button class="linkbtn" data-cat-open="${n}">#${n}</button>`).join(', ')}</p>` : ''}`;
+}
+function planHTML(r) {
+  const waves = [...new Set(r.tasks.map(t => t.wave))].sort((a, b) => a - b), uncovered = (r.asks || []).filter(a => !a.tasks.length), succ = r.decisions.find(d => d.type === 'success');
+  return `<div class="dt">ORCHESTRATION · ${r.tasks.length} ${r.tasks.length === 1 ? 'STEP' : 'STEPS'} IN ${waves.length} ${waves.length === 1 ? 'WAVE' : 'WAVES'}</div>${waves.map(w => { const ts = r.tasks.filter(t => t.wave === w);
+    return `<div class="wave"><div class="waveh"><span class="wn">Wave ${w}</span><small>${ts.length > 1 ? `${ts.length} steps run together` : w > 1 ? 'waits for the wave before' : 'starts immediately'}</small></div>${ts.map(t => { const [cls, label] = taskStatus(t), R = ROLES[t.role], tools = [...new Set((t.calls || []).map(c => c.name))];
+      return `<button class="steprow" data-task="${t.id}"><span class="stepn" style="background:${TC[R.team]}">${t.step}</span><span class="stepb"><b>${routeChip(t)} ${esc(t.title)}</b><small>${esc(R.name)}${t.person ? ' · ' + esc(t.person) : ''}${t.depends_on.length ? ' · uses step ' + t.depends_on.map(d => (r.tasks.find(x => x.id === d) || {}).step).filter(Boolean).join(', ') : ''}${(r.asks || []).length > 1 ? ' · ask ' + t.ask : ''}</small>${(t.services || []).length ? `<small class="svcl">${t.services.map(svcChip).join(' ')}</small>` : ''}<small class="agentline">${tools.length ? 'called: ' + esc(tools.join(', ')) : t.tools.length ? 'may call: ' + esc(t.tools.join(', ')) : 'works from the foundation and upstream steps'}</small></span><em class="bst ${cls}">${label}</em></button>`; }).join('')}</div>`; }).join('')}
+    <div class="wave ret"><span class="wn">Returns</span> ${esc((r.interp && r.interp.output) || (succ && succ.title) || 'The requested output')}</div>
+    ${uncovered.map(a => `<div class="uv blocked">Not covered: “${esc(a.text)}”</div>`).join('')}
+    ${r.status === 'planned' ? `<div style="display:flex;gap:6px;margin-top:8px"><button class="lbtn primary" data-act="run-plan">Run this plan</button><span class="hint" style="align-self:center">Nothing has run yet.</span></div>` : '<p class="hint" style="margin:6px 0 0">Click any step to see exactly what it produced.</p>'}`;
+}
+function contractHTML(t) {
+  const c = t.contract; if (!c) return '';
+  return `<div class="contract"><span class="cs ${c.status}">${esc(c.status)}</span><span><b>${c.sources.length}</b> sources</span><span>As of: ${c.as_of.length ? esc(c.as_of.join(', ')) : '<span class="mute">not stated</span>'}</span><span><b>${c.unresolved.length}</b> unresolved</span></div>${c.unresolved.length ? `<div class="unres">${c.unresolved.map(u => `<div>• ${esc(u)}</div>`).join('')}</div>` : ''}`;
+}
+/* ---------- the query catalogue: what users ask, how it is decomposed, which sub-agents run ---------- */
+function routeHTML(route) {
+  const p = parseRoute(route), chip = i => i.kind === 'agent' ? `<span class="rc ag" style="--c:${TC[AGENTS[i.agent].team]}" title="${esc(i.label + ': ' + i.does)}">${esc(i.route)}</span>` : i.kind === 'service' ? i.keys.map(svcChip).join('') : `<span class="rc ck">${esc(i.raw)}</span>`;
+  return `<div class="rt">${p.stages.map(st => `<span class="rts${st.length > 1 ? ' par' : ''}">${st.map(chip).join('')}</span>`).join('<span class="rta">→</span>')}<span class="rta">→</span><span class="rto">${esc(p.output)}</span></div>`;
+}
+function renderCatalogue() {
+  const pane = $('pane-catalogue'); if (pane._built) return; pane._built = true;
+  const intentBadge = k => `<span class="ib" title="${esc(INTENTS[k])}">${esc(k)}</span>`;
+  pane.innerHTML = `<div class="dcard catintro"><div class="dt">SALES AI QUERY CATALOGUE</div><p class="lead2">What users ask, how the intelligence layer decomposes it, and which sub-agents run. These are requirements and example prompts, not claims that every integration exists.</p>
+    <div class="legend2"><span class="rc ag" style="--c:${TC.sales}">Prep.Notes</span> sub-agent route <span class="rc sv simulated">[assets]</span> simulated here <span class="rc sv foundation">[memory]</span> built into the foundation <span class="rc sv not-connected">[peer analytics]</span> not connected <span class="rts par" style="display:inline-flex"><span class="rc ag" style="--c:${TC.sales}">A</span><span class="rc ag" style="--c:${TC.sales}">B</span></span> run together</div>
+    <p class="hint" style="margin:6px 0 0"><b>Decompose</b> turns a route into a plan without an AI call. <b>Ask</b> puts the request in the command bar; <b>Plan only</b> shows the live AI’s own decomposition.</p></div>
+    <div class="dcard"><div class="dt">SAME WORD, DIFFERENT INTENT</div><p class="hint" style="margin:0 0 6px">Organize by business intent, not keywords. Each of these mentions ETFs and needs a different plan, data and controls.</p>${ETF_CONTRAST.map(e => `<div class="catq"><div class="catqh"><b>${esc(e.ask)}</b>${intentBadge(e.intent)}</div>${routeHTML(e.route)}<small class="mute">${esc(e.control)}</small></div>`).join('')}</div>
+    <details class="dcard catsec"><summary><b>What the intelligence layer establishes</b><small>Eight fields, then eleven intents</small></summary><dl class="interp">${INTERP_FIELDS.map(([, l, d]) => `<dt>${l}</dt><dd>${esc(d)}</dd>`).join('')}</dl><div class="intents">${INTENT_ORDER.map(k => `<div>${intentBadge(k)} ${esc(INTENTS[k])}</div>`).join('')}</div><p class="hint">“Help me prepare” should not silently mean “book a meeting and send an email.” Action authority is settled by rule from the request’s own words, and write tools above it are removed at the gateway.</p></details>
+    <details class="dcard catsec"><summary><b>Sub-agents and shared services</b><small>Route notation: Prep.Notes = Prep Me → Notes Summarizer</small></summary>${Object.entries(SUBAGENTS).map(([fam, A]) => `<div class="fam"><b>${esc(fam)}</b> <small>${esc(A.name)}</small><div>${Object.keys(A.subs).map(sub => { const ri = routeInfo(fam + '.' + sub); return `<span class="rc ag" style="--c:${TC[AGENTS[ri.agent].team]}" title="${esc(ri.does)}">${esc(sub)}</span>`; }).join('')}</div></div>`).join('')}<div class="fam"><b>Shared services</b> <small>[brackets]: tools, not autonomous agents</small><div>${Object.keys(SERVICES).map(svcChip).join('')}</div></div></details>
+    ${Object.entries(CATALOGUE_GROUPS).map(([g, G], gi) => `<details class="dcard catsec" ${gi === 0 ? 'open' : ''}><summary><b>${g}. ${esc(G.title)}</b><small>${CATALOGUE.filter(c => c.group === g).length} queries</small></summary>${G.note ? `<p class="catnote">${esc(G.note)}</p>` : ''}${CATALOGUE.filter(c => c.group === g).map(c => `<div class="catq" id="cat-${c.n}"><div class="catqh"><span class="catn">${c.n}</span><b>“${esc(c.ask)}”</b>${intentBadge(c.intent)}</div><small class="mute">${esc(c.decomp)}</small>${routeHTML(c.route)}<div class="catbtns"><button class="lbtn mini" data-cat-plan="${c.n}">Decompose</button><button class="lbtn mini" data-cat-use="${c.n}">Ask</button>${c.auth ? `<small class="mute">${esc(AUTHORITY[c.auth].label)}</small>` : ''}</div></div>`).join('')}</details>`).join('')}`;
+}
+function openCatalogueEntry(n) { setTab('catalogue'); const el = $('cat-' + n); if (!el) return; const d = el.closest('details'); if (d) d.open = true; el.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' }); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+function salesRequester() { return EMPLOYEES[UI.requester].team === 'sales' ? UI.requester : 'EMP-PRIYA'; }
 /* ---------- closing card: what the requester should do next ---------- */
 function nextActions(r) {
   const out = [], seen = new Set(), add = (tag, text, step) => { const k = text.toLowerCase(); if (text && !seen.has(k)) { seen.add(k); out.push({ tag, text, step }); } };
@@ -3021,6 +3711,7 @@ function nextActions(r) {
     if (o && o.status === 'Waiting for approval') add('Approve', `Review “${o.title}”, edit if needed, and approve it. Nothing is sent until you do.`, t.step);
     for (const v of t.verdicts || []) {
       if (v.kind === 'commitment' && v.status === 'committed') { const c = F.commitments.find(x => x.id === v.id); add('Follow up', `${v.title}${c ? ` (${c.owner}, due ${c.due})` : ''}`, t.step); }
+      if (v.kind === 'commitment' && v.status === 'proposed') add('Proposed', `${v.title} (${v.proposal.owner}, due ${v.proposal.due}). Not created: use Create task on step ${t.step} if you want it.`, t.step);
       if (v.kind === 'memory' && v.status === 'pending') add('Confirm', `Confirm with ${r.advisor ? ADVISORS[r.advisor].short : 'the advisor'} before it becomes a lasting preference: ${v.title}`, t.step);
     }
     (t.result && t.result.open_questions || []).forEach(q => add('Resolve', q, t.step));
@@ -3056,23 +3747,19 @@ function renderUpdates() {
   const items = [{ key: 'req-' + r.id, cls: 'dcard', html: `<div class="dt">REQUEST · ${esc(EMPLOYEES[r.requester].name)}, ${esc(TEAMS[EMPLOYEES[r.requester].team].name)}</div><b class="tt2">“${esc(r.text)}”</b>` }];
   if (r.status === 'thinking') { const act = stepStates(r).find(x => x.state === 'active'); items.push({ key: 'plan-wait', cls: 'dcard ustat', html: `<span class="spin"></span> Orchestration is planning${act ? ' · ' + esc(act.name) : ''}` }); }
   if (r.status === 'clarify') items.push({ key: 'clar-' + r.id, cls: 'clar', html: `<b>One question before planning</b><p style="margin:4px 0 0">${esc(r.clarify)}</p><input id="clarIn" placeholder="Your answer"><div style="display:flex;gap:6px;margin-top:6px"><button class="lbtn primary" data-act="answer">Continue</button><button class="lbtn" data-act="assume">Let it assume</button></div>` });
-  if (r.tasks.length) {
-    const asks = r.asks && r.asks.length ? r.asks : [{ text: r.text, tasks: r.tasks.map(t => t.id) }];
-    items.push({ key: 'plan-' + r.id, cls: 'dcard plancard', html: `<div class="dt">YOUR REQUEST, BROKEN INTO ${r.tasks.length} ${r.tasks.length === 1 ? 'STEP' : 'STEPS'}</div>${asks.map((a, k) => `<div class="ask"><div class="askh"><span class="askn">${k + 1}</span><b>${esc(a.text)}</b>${a.tasks.length ? '' : '<em class="bst blocked">Not covered</em>'}</div>${a.tasks.map(id => r.tasks.find(t => t.id === id)).filter(Boolean).sort((x, y) => x.step - y.step).map(t => { const [cls, label] = taskStatus(t), R = ROLES[t.role], A = AGENTS[t.agent];
-      const tools = [...new Set((t.calls || []).map(c => c.name))];
-      return `<button class="steprow" data-task="${t.id}"><span class="stepn" style="background:${TC[R.team]}">${t.step}</span><span class="stepb"><b>${esc(t.title)}</b><small>${esc(TEAMS[R.team].name)} · ${esc(R.name)}${t.person ? ' · ' + esc(t.person) : ''}${t.depends_on.length ? ' · after step ' + t.depends_on.map(d => (r.tasks.find(x => x.id === d) || {}).step).filter(Boolean).join(', ') : ''}</small><small class="agentline">Agent: ${esc(A.name)}${tools.length ? ' · tools: ' + esc(tools.join(', ')) : t.tools.length ? ' · can use: ' + esc(t.tools.join(', ')) : ''}</small></span><em class="bst ${cls}">${label}</em></button>`; }).join('')}</div>`).join('')}<p class="hint" style="margin:6px 0 0">Click any step to see exactly what it produced.</p>` });
-  }
+  if (r.interp) items.push({ key: 'interp-' + r.id, cls: 'dcard interpcard', html: interpHTML(r) });
+  if (r.tasks.length && r.tasks[0].wave) items.push({ key: 'plan-' + r.id, cls: 'dcard plancard', html: planHTML(r) });
   const done = r.tasks.filter(t => ['done', 'failed'].includes(t.state)).sort((a, b) => (a.t1 || 0) - (b.t1 || 0));
   for (const t of done) {
     const R = ROLES[t.role], o = outOf(t), [cls, label] = taskStatus(t);
-    items.push({ key: 'out-' + r.id + t.id, cls: 'dcard uout ' + cls, html: `<div class="uh"><i style="background:${TC[R.team]}"></i><span><b>Step ${t.step || '?'} · ${esc(R.name)}</b> · ${esc(TEAMS[R.team].name)}${t.person ? ' · ' + esc(t.person) : ''}<small>${esc(t.title)}</small></span><em class="bst ${cls}">${label}</em></div>
-      ${t.state === 'failed' ? `<div class="blocked">This task didn’t finish: ${esc(t.error)}</div>` : ''}${t.result && t.result.says ? `<p class="says">${esc(t.result.says)}</p>` : ''}${outputHTML(o)}${verdictLines(t)}${sourcesHTML(r, t)}
+    items.push({ key: 'out-' + r.id + t.id, cls: 'dcard uout ' + cls, html: `<div class="uh"><i style="background:${TC[R.team]}"></i><span><b>Step ${t.step || '?'} · ${esc(R.name)}</b> · ${esc(TEAMS[R.team].name)}${t.person ? ' · ' + esc(t.person) : ''}<small>${routeChip(t)} ${esc(t.title)} · wave ${t.wave}</small></span><em class="bst ${cls}">${label}</em></div>
+      ${t.state === 'failed' ? `<div class="blocked">This task didn’t finish: ${esc(t.error)}</div>` : ''}${t.result && t.result.says ? `<p class="says">${esc(t.result.says)}</p>` : ''}${outputHTML(o)}${verdictLines(t)}${contractHTML(t)}${sourcesHTML(r, t)}
       <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">${o && o.status === 'Waiting for approval' ? `<button class="lbtn primary" data-approve="${o.id}">${icon('check')} Approve</button><button class="lbtn" data-edit="${o.id}">Edit</button>` : ''}<button class="lbtn" data-task="${t.id}">Open full output</button></div>` });
   }
   /* the step that is working right now, with each system call as it happens */
   for (const t of r.tasks.filter(t => t.state === 'running')) {
     const R = ROLES[t.role];
-    items.push({ key: 'run-' + r.id + t.id, cls: 'dcard uout running', html: `<div class="uh"><i style="background:${TC[R.team]}"></i><span><b>Step ${t.step || '?'} · ${esc(R.name)}</b> · ${esc(TEAMS[R.team].name)}${t.person ? ' · ' + esc(t.person) : ''}<small>${esc(t.title)}</small></span><em class="bst running">In progress</em></div>${t.packet ? sourcesHTML(r, t) : ''}<p class="hint" style="margin:6px 0 0"><span class="spin"></span> ${!t.packet ? 'The foundation is assembling what this role may see…' : t.calls && t.calls.length ? 'Working from these sources…' : 'Reading the foundation; calling systems if anything is missing…'}</p>` });
+    items.push({ key: 'run-' + r.id + t.id, cls: 'dcard uout running', html: `<div class="uh"><i style="background:${TC[R.team]}"></i><span><b>Step ${t.step || '?'} · ${esc(R.name)}</b> · ${esc(TEAMS[R.team].name)}${t.person ? ' · ' + esc(t.person) : ''}<small>${routeChip(t)} ${esc(t.title)} · wave ${t.wave}</small></span><em class="bst running">In progress</em></div>${t.packet ? sourcesHTML(r, t) : ''}<p class="hint" style="margin:6px 0 0"><span class="spin"></span> ${!t.packet ? 'The foundation is assembling what this role may see…' : t.calls && t.calls.length ? 'Working from these sources…' : 'Reading the foundation; calling systems if anything is missing…'}</p>` });
   }
   if (r.status === 'done') items.push({ key: 'final-' + r.id, cls: 'dcard finalcard', html: `<div class="dt">WHAT WAS PRODUCED FOR YOUR REQUEST</div>${r.tasks.map(t => { const o = outOf(t), R = ROLES[t.role]; return `<button class="steprow" data-task="${t.id}"><span class="stepn" style="background:${TC[R.team]}">${t.step}</span><span class="stepb"><b>${esc(o ? o.title : t.title)}</b><small>${esc(R.name)} · ${esc(o ? o.status : t.state === 'failed' ? 'Did not finish' : 'No document; see details')}</small></span><em class="openlink">Open</em></button>`; }).join('')}` });
   if (r.status === 'done') items.push({ key: 'sum-' + r.id, cls: 'summary', html: `<h3>All ${r.tasks.length} tasks done · ${Math.round((r.t1 - r.t0) / 1000)} s</h3><div class="sgrid"><div><b>${r.stats.reused}</b>facts reused</div><div><b>${r.stats.committed}</b>stored</div><div><b>${r.stats.calls}</b>system calls</div></div>` });
@@ -3100,7 +3787,7 @@ function openTask(id) {
     <details class="tcard" style="margin-top:8px"><summary style="padding:8px 10px"><span><b>Full trace</b><small>What the foundation sent, every system call and result, and each gatekeeper decision</small></span></summary>${taskHTML(r, t).replace(/^<summary>[\s\S]*?<\/summary>/, '')}</details>
     <div style="display:flex;justify-content:space-between;margin-top:14px">${prev ? `<button class="lbtn" data-task="${prev.id}">← Step ${prev.step}</button>` : '<span></span>'}${next ? `<button class="lbtn" data-task="${next.id}">Step ${next.step} →</button>` : ''}</div>`);
 }
-const PANES = { updates: renderUpdates, decisions: renderDecisions, packets: renderPackets, memory: renderMemory, events: renderEvents };
+const PANES = { updates: renderUpdates, decisions: renderDecisions, packets: renderPackets, catalogue: renderCatalogue, memory: renderMemory, events: renderEvents };
 let RQ = 0;
 function renderAll() { if (RQ) return; RQ = requestAnimationFrame(() => { RQ = 0; renderOrch(); renderDiagram(); renderStats(); (PANES[UI.tab] || renderUpdates)(); autoScroll(); if (KG.open) renderKG(); }); }
 /* Follow the work while agents run; pause for 5 s whenever the person scrolls. */
@@ -3145,7 +3832,7 @@ function openHelp() {
 
 /* ---------- events ---------- */
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-task],[data-who],[data-sug],[data-replay],[data-tab],[data-view],[data-act],[data-approve],[data-edit],[data-madv],[data-agent],[data-layer],[data-sys]'); if (!el) return;
+  const el = e.target.closest('[data-task],[data-who],[data-sug],[data-replay],[data-tab],[data-view],[data-act],[data-approve],[data-edit],[data-commit],[data-cat-plan],[data-cat-use],[data-cat-open],[data-madv],[data-agent],[data-layer],[data-sys]'); if (!el) return;
   const d = el.dataset;
   if (d.who) { UI.requester = d.who; buildStaticWho(); return; }
   if (d.sug) { $('cmdIn').value = d.sug; $('cmdIn').focus(); return; }
@@ -3155,6 +3842,11 @@ document.addEventListener('click', e => {
   if (d.madv) { UI.memAdv = d.madv; renderMemory(); return; }
   if (d.approve) { const o = F.outputs.find(x => x.id === d.approve); if (o) { o.status = 'Approved · ready to send'; logEvent('approval.granted', o.title, UI.requester, o.adv); toast('Approved by ' + EMPLOYEES[UI.requester].name + (o.rev > 1 ? ` (edited version, rev ${o.rev})` : '') + '. Queued for the approved channel.'); renderAll(); } return; }
   if (d.edit) { openEdit(d.edit); return; }
+  if (d.commit) { const [tid, k] = d.commit.split('|'), t = UI.run && UI.run.tasks.find(x => x.id === tid), v = t && t.verdicts[+k]; if (v && v.status === 'proposed') { const id = 'TASK-' + (400 + (++F.seq)), P = v.proposal; F.commitments.push({ id, adv: UI.run.advisor, scope: UI.run.unit || 'advisor', title: P.title, owner: P.owner, due: P.due, status: 'Open', run: UI.run.id }); v.status = 'committed'; v.id = id; v.reason = `Created by ${EMPLOYEES[UI.requester].name}`; logEvent('commitment.created', P.title, UI.requester, UI.run.advisor); toast('Task created: ' + P.title); renderAll(); } return; }
+  if (d.catPlan) { const c = CATALOGUE.find(x => x.n === +d.catPlan); if (c && !(UI.run && ['thinking', 'running'].includes(UI.run.status))) { const who = salesRequester(); UI.requester = who; buildStaticWho(); runRequest(c.ask, catalogueReplay(c, who), { planOnly: true }); } return; }
+  if (d.catUse) { const c = CATALOGUE.find(x => x.n === +d.catUse); if (c) { UI.requester = salesRequester(); buildStaticWho(); $('cmdIn').value = c.ask; $('cmdIn').focus(); toast('In the command bar. Run it, or use Plan only to see the decomposition first.'); } return; }
+  if (d.catOpen) { openCatalogueEntry(+d.catOpen); return; }
+  if (d.act === 'run-plan') { const r = UI.run; if (r && r.status === 'planned') { if (AI.mode !== 'live' && !(r.replay && !r.replay.orchOnly)) { toast('Running the steps needs live AI. The plan above is the decomposition.'); return; } UI.ctl = new AbortController(); executePlan(r).catch(e => finishRun(r, 'Unexpected problem: ' + errText(e))); } return; }
   if (d.act === 'save-edit') { saveEdit(d.out); return; }
   if (d.act === 'cancel-edit') { closeDrawer(); return; }
   if (d.act === 'kg') { openKG(d.adv); return; }
@@ -3169,6 +3861,8 @@ document.addEventListener('click', e => {
   if (d.sys) { const k = d.sys, tools = Object.entries(TOOLS).filter(([, t]) => t.sys === k); openDrawer(esc(SYSTEMS[k].name), `<p class="hint">${esc(SYSTEMS[k].sub)}</p>${tools.map(([n, t]) => `<div class="pk"><span class="vbadge ${t.via}">${t.via}</span><span><code style="font:12px var(--code)">${esc(n)}</code> · ${t.rw}<small>${esc(t.desc)}</small></span></div>`).join('')}`); return; }
 });
 $('runBtn').onclick = () => runRequest($('cmdIn').value);
+/* Plan only: show the interpretation and the waves without running any step */
+$('planBtn').onclick = () => { const v = $('cmdIn').value.trim(); if (!v) return; const c = catalogueExact(v); if (AI.mode !== 'live' && c) { const who = salesRequester(); UI.requester = who; buildStaticWho(); runRequest(c.ask, catalogueReplay(c, who), { planOnly: true }); } else runRequest(v, null, { planOnly: true }); };
 $('stopBtn').onclick = () => UI.ctl && UI.ctl.abort();
 $('cmdIn').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); runRequest($('cmdIn').value); } });
 $('sessionBtn').onclick = () => { F.session = { advisor: null, unit: null, requests: [], requirements: [] }; toast('New session. The conversation is closed; lasting memory, findings and commitments remain.'); renderAll(); };

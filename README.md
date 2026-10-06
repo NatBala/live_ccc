@@ -42,6 +42,20 @@ Around it sit **37 named specialists** (Sales 7, Product 9, Marketing 11, Servic
 
 ---
 
+## Sales AI: intelligence and orchestration
+
+This branch puts the intelligence and orchestration layer at the center. Every request is first **interpreted** (subject, business intent, scope, time, constraints, requested output, missing information, action authority), then **orchestrated** as sub-agent routes in waves: independent reads run together, checks wait for what they check, and the requested output comes last. Each step returns its output, sources, as-of dates, unresolved issues and status.
+
+- **Business intents, not keywords:** retrieve, summarize, compare, diagnose, prioritize, prepare, verify, draft, execute, remember, monitor.
+- **Action authority by rule:** “help me prepare” is read-only, so it never books, sends or updates anything; tools above the authority are removed at the gateway and follow-ups are proposed, not created.
+- **Catalogue tab:** 58 catalogued requests with their decomposition and route (`Prep.Notes` = Prep Me → Notes Summarizer). **Decompose** turns a route into a plan without an AI call; **Plan only** in the command bar shows the live AI’s own decomposition without running it.
+- **Shared services** in `[brackets]` are marked simulated, built into the foundation, or not connected; a step that needs a missing one says what it could not establish.
+- Try (as Priya): `Why are Daniel’s overall sales down when his ETF sales are up?`, `Which CG ETFs are available at Wells Fargo for Daniel?`, `Prepare me for tomorrow’s meeting with Daniel’s team`. Each has a saved run (▶).
+
+Details: [docs/sales-ai-query-catalogue.md](docs/sales-ai-query-catalogue.md).
+
+---
+
 ## What you’ll see
 
 - **Command bar:** pick who you are, type an outcome, press Enter.
@@ -164,6 +178,7 @@ live_ccc/
 ├─ src/                   app source
 │  ├─ index.tpl.html      page shell
 │  ├─ data.js             reference data: advisors, memory, episodes, funds, content, policies, 37-agent registry
+│  ├─ catalogue.js        Sales AI: intents, sub-agent routes, shared services, the query catalogue
 │  ├─ engine.js           foundation: tools, context packets, gatekeeper, AI connectors (Claude and OpenAI)
 │  ├─ graph.js            advisor knowledge graph
 │  ├─ ui.js               orchestration runtime and rendering

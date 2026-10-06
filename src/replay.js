@@ -302,3 +302,121 @@ RECORDED.push(
           next_step: 'Send the PDF to Jamie Cho from CASE-00517 today, and tell Priya that future sends to Morgan Stanley should go as attachments, not links.' } }
     } }
 );
+
+/* Saved runs for the Sales AI intelligence and orchestration layer (authored to the query catalogue,
+   replayed through the same foundation, tools and gatekeeper). Each starts with a structured
+   interpretation and plans in waves; steps in a wave run together. */
+const NOTES_DANIEL = { kind: 'note', title: 'What Daniel told us', body: '- Aug 26 (CALL-0826, Sam Lee’s call): Daniel moved two client models to a core-satellite structure with an index core, and reviews the satellite funds every quarter.\n- Sep 18 (CALL-0918, Priya’s call): “Clients keep asking about ETFs versus active funds.” He wants model portfolio options with a lower blended cost.\n\nStated priority (MEM-051): lower-cost model portfolios with a core-satellite structure.' };
+RECORDED.push(
+  { name: 'Why are Daniel’s overall sales down when his ETF sales are up?', requester: 'EMP-PRIYA', text: 'Why are Daniel’s overall sales down when his ETF sales are up?',
+    orch: [
+      D('requester', 'Priya Shah, Sales, covers Daniel', 'Wholesaler on Daniel Kim’s coverage; she owns the relationship.'),
+      D('intent', 'Diagnose a change, not find leads', 'She wants the reason total sales fell while ETF sales grew, not an ETF pitch or a lead list.', { intent: 'diagnose' }),
+      D('asks', '1 thing requested', 'Explain why sales are down while ETF sales are up.', { asks: ['Explain sales down, ETF sales up'] }),
+      D('interpretation', 'Explain why Daniel’s total CG sales fell while his ETF sales grew', 'Catalogue #10 with #11 and #16.', { subject: { kind: 'advisor', id: 'ADV-105', label: 'Daniel Kim · The Kim Group' }, intent: 'diagnose', scope: 'Kim Group team, Capital Group book, all vehicles (mutual funds, ETFs, SMAs) and both channels', time: 'Trailing twelve months to Aug 2026 against the twelve months before', constraints: ['Numbers only from the flows service', 'Separate percentage growth from dollar contribution'], output: 'comparison', missing: ['Fund-level transactions are not connected, so the explanation stops at vehicle and channel'], authority: 'read_only', patterns: [10, 11, 16] }),
+      D('entity', 'Daniel → Daniel Kim, Wells Fargo', 'One graph match; his only unit is the Kim Group model portfolios.', { advisor: 'ADV-105', unit: 'BU-105', confidence: 'high' }),
+      D('scope', 'Kim Group model portfolios (BU-105)', 'Team-level CG book; no other managers’ flows.'),
+      D('known', 'Daniel’s own words may explain it', 'CALL-0826: two models moved to an index core. CALL-0918: clients ask about ETFs versus active.', { uses: ['CALL-0826', 'CALL-0918', 'MEM-051', 'MEM-053'] }),
+      D('missing', 'Flows not computed yet', 'The flows service computes the contribution by vehicle and channel; the model only explains it.'),
+      D('memory', 'Read only', 'Nothing new about Daniel to store.', { class: 'read_only' }),
+      D('controls', 'Read-only; every number traced', 'No drafts or changes. Figures only from the flows service.'),
+      TK({ id: 'T1', route: 'Lead.Insights', title: 'Compute the contribution analysis', objective: 'Compare gross sales, redemptions and net flows by vehicle and channel for both periods, and attribute the change in total sales', services: ['flows'], tools: ['book.get_flows'], reads: ['knowledge'], returns: 'Contribution by vehicle and channel, with the periods and limits', why: 'Lead Me’s Insights Generator explains changes; the flows service on the data platform does the math.' }),
+      TK({ id: 'T2', route: 'Prep.Notes', title: 'Pull what Daniel told us', objective: 'Summarize Daniel’s dated statements about his models, ETFs and the index core', services: ['memory'], tools: ['crm.get_call_notes'], reads: ['memory'], returns: 'Attributed statements with dates', why: 'Notes Summarizer reads recorded calls in Salesforce; it runs alongside the flows analysis.' }),
+      TK({ id: 'T3', route: 'Prep.Fact Check', title: 'Check and explain the gap', objective: 'Verify every figure against the flows result, reconcile it with Daniel’s statements and state the limits', depends_on: ['T1', 'T2'], reads: ['memory', 'knowledge', 'policy'], tools: [], returns: 'A verified explanation with sources, as-of dates and limits', why: 'Fact Check makes sure the explanation uses the flows numbers, not narrative.' }),
+      D('success', 'Priya can explain the dip in one breath', 'Dollar contribution by vehicle and channel, tied to what Daniel said, with the limits stated.'),
+      L({ k: 'end' })
+    ].join('\n'),
+    agents: {
+      T1: { calls: [['book.get_flows', { advisor_id: 'ADV-105' }]],
+        json: { says: 'I ran the flows service for both periods: ETF sales more than doubled, but the mutual fund decline is nearly twice as large in dollars.',
+          output: { kind: 'finding', title: 'Contribution analysis: Kim Group sales', body: 'Total gross sales: $38.2M vs $44.9M, down $6.7M (−14.9%).\n\nBy vehicle (change in gross sales):\n- Mutual funds: $21.4M vs $33.1M, down $11.7M\n- ETFs: $11.6M vs $5.2M, up $6.4M (+123.1%)\n- SMAs: $5.2M vs $6.6M, down $1.4M\n\nBy channel: model portfolios $24.0M vs $33.5M (down $9.5M); advisor-directed accounts $14.2M vs $11.4M (up $2.8M).\n\nRedemptions rose to $23.0M from $15.8M, mostly mutual funds ($18.9M vs $12.4M), so net flows fell to $15.2M from $29.1M.' },
+          used: ['book.get_flows'], knowledge: [{ label: 'Kim Group sales: mutual fund decline outweighs ETF growth', value: 'Gross sales fell $6.7M (−14.9%): mutual fund sales fell $11.7M while ETF sales rose $6.4M; model-portfolio channel sales fell $9.5M.', evidence: ['book.get_flows'] }], memory: [], commitments: [], needs_approval: false,
+          open_questions: ['Fund-level transactions are not connected, so the decline can’t be traced to specific funds.'], as_of: ['Sep 2025 to Aug 2026'], status: 'complete', next_step: '' } },
+      T2: { calls: [['crm.get_call_notes', { advisor_id: 'ADV-105' }]],
+        json: { says: 'I pulled Daniel’s own words from Sam’s August call and Priya’s September call; both point at his models.',
+          output: NOTES_DANIEL, used: ['CALL-0826', 'CALL-0918', 'MEM-051', 'MEM-053'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], as_of: ['Sep 18, 2026'], status: 'complete', next_step: '' } },
+      T3: { calls: [],
+        json: { says: 'I checked every figure against the flows result and tied it to what Daniel told Sam and Priya; the explanation stops where the data stops.',
+          output: { kind: 'answer', title: 'Why sales are down while ETF sales are up', body: 'Short answer: ETF sales grew fast from a small base, while mutual fund sales fell by more.\n\n- ETFs: up $6.4M (+123.1%), the only vehicle that grew\n- Mutual funds: down $11.7M, which outweighs the ETF gain on its own\n- Net effect: total gross sales down $6.7M (−14.9%)\n\nWhere it happened: the model-portfolio channel fell $9.5M while advisor-directed accounts rose $2.8M. That matches what Daniel told us: two models moved to an index core (CALL-0826) and he wants a lower blended cost (CALL-0918).\n\nLimits: fund-level transactions are not connected, so this can’t say which funds the models replaced.' },
+          used: ['book.get_flows', 'CALL-0826', 'CALL-0918', 'MEM-051'], knowledge: [], memory: [], commitments: [], needs_approval: false,
+          open_questions: ['Which funds did the two index-core models replace? Needs fund-level transactions (not connected).'], as_of: ['Sep 2025 to Aug 2026', 'Sep 18, 2026'], status: 'complete',
+          next_step: 'Lead with the model-portfolio shift, not the ETF growth: ask Daniel which satellite funds he is reviewing this quarter, since that is where mutual fund sales fell.' } }
+    } },
+
+  { name: 'Which CG ETFs are available at Wells Fargo for Daniel?', requester: 'EMP-PRIYA', text: 'Which CG ETFs are available at Wells Fargo for Daniel?',
+    orch: [
+      D('requester', 'Priya Shah, Sales, covers Daniel', 'Wholesaler on Daniel Kim’s coverage.'),
+      D('intent', 'Verify availability on his platform', 'Not “find ETF leads” or “prepare an ETF discussion”: a scoped availability check.', { intent: 'verify' }),
+      D('asks', '1 thing requested', 'Which CG ETFs Daniel can use at Wells Fargo.', { asks: ['Which CG ETFs are available for Daniel'] }),
+      D('interpretation', 'Verify which CG ETFs Daniel can use on his own Wells Fargo programs, today', 'Catalogue #25 with #26 and #32.', { subject: { kind: 'advisor', id: 'ADV-105', label: 'Daniel Kim · Wells Fargo Advisors' }, intent: 'verify', scope: 'Wells Fargo Advisors; Daniel’s own programs, not dealer-wide; vehicle: ETF', time: 'Current, with effective dates from the dealer feed', constraints: ['Platform availability is not suitability', '“CG ETFs” resolved by the taxonomy, not keyword matching'], output: 'answer', missing: [], authority: 'read_only', patterns: [25, 26, 32] }),
+      D('entity', 'Daniel → Daniel Kim, Wells Fargo', 'One graph match.', { advisor: 'ADV-105', unit: 'BU-105', confidence: 'high' }),
+      D('scope', 'His programs, ETF vehicle only', 'Dealer-wide availability, his programs and client suitability are kept separate.'),
+      D('known', 'Firm known; programs not yet', 'The graph says Wells Fargo; which programs he uses comes from CRM.', { uses: ['ADV-105'] }),
+      D('missing', 'Which programs Daniel uses', 'Prep.Profile reads it from CRM first, so the platform check is scoped to his programs.'),
+      D('memory', 'Read only', 'Nothing new to store.', { class: 'read_only' }),
+      D('controls', 'Read-only; no suitability claims', 'Availability only, with effective dates and source.'),
+      TK({ id: 'T1', route: 'Prep.Profile', title: 'Confirm Daniel’s programs', objective: 'Read Daniel’s firm and the platform programs he uses from CRM', tools: ['crm.get_contact'], reads: ['memory'], returns: 'Firm and programs', why: 'Profile reads the advisor’s account context from Salesforce.' }),
+      TK({ id: 'T2', route: 'Product.Research Planner', title: 'Pull the Wells Fargo ETF shelf', objective: 'Resolve “CG ETFs” to tickers and pull program-level availability with effective dates for Daniel’s programs', depends_on: ['T1'], services: ['platform eligibility', 'taxonomy'], tools: ['platform.get_availability', 'taxonomy.resolve'], reads: ['knowledge'], returns: 'Program-level availability for every CG ETF, with effective dates', why: 'Research Planner decides the evidence; the taxonomy and platform eligibility services supply it.' }),
+      TK({ id: 'T3', route: 'Product.QAR', title: 'Verify his scoped availability', objective: 'Combine his programs with the shelf into a verified, scoped answer with sources', depends_on: ['T1', 'T2'], reads: ['knowledge', 'policy'], tools: [], returns: 'Scoped list with status, effective dates and source', why: 'QAR publishes verified answers only.' }),
+      D('success', 'One scoped answer, no overreach', 'What he can use in each of his programs, as of the feed date, with what is pending.'),
+      L({ k: 'end' })
+    ].join('\n'),
+    agents: {
+      T1: { calls: [['crm.get_contact', { advisor_id: 'ADV-105' }]],
+        json: { says: 'I read Daniel’s account context from CRM: he runs his models in Personalized UMA and also uses Brokerage.',
+          output: { kind: 'note', title: 'Daniel’s programs', body: 'Daniel Kim, Managing Director, Wells Fargo Advisors (Century City).\n\nPrograms he uses: Personalized UMA (his model portfolios) and Brokerage.' }, used: ['ADV-105'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], as_of: [], status: 'complete', next_step: '' } },
+      T2: { calls: [['taxonomy.resolve', { term: 'etfs' }], ['platform.get_availability', { advisor_id: 'ADV-105' }]],
+        json: { says: 'With Profile’s programs in hand, I resolved “CG ETFs” through the taxonomy and pulled each one’s status by program from the dealer feed.',
+          output: { kind: 'finding', title: 'Wells Fargo shelf: Capital Group ETFs', body: 'Taxonomy “ETFs”: CGGR, CGDV, CGCP, CGUI, CGXU.\n\nWells Fargo Advisors, as of Sep 28, 2026 (dealer intelligence feed):\n- CGGR: Brokerage available; Personalized UMA available from Sep 22, 2026\n- CGDV: Brokerage and Personalized UMA available\n- CGCP: Brokerage available; Personalized UMA under review\n- CGUI: Brokerage available; not available in Personalized UMA\n- CGXU: Brokerage available; not available in Personalized UMA' },
+          used: ['taxonomy.resolve', 'platform.get_availability'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], as_of: ['Sep 28, 2026'], status: 'complete', next_step: '' } },
+      T3: { calls: [],
+        json: { says: 'I combined Daniel’s programs with the shelf: two ETFs fit his UMA models today, one is under review.',
+          output: { kind: 'answer', title: 'CG ETFs Daniel can use at Wells Fargo', body: 'For his Personalized UMA models:\n- Available: CGDV, and CGGR (added Sep 22, 2026, after your last call on Sep 18)\n- Under review: CGCP\n- Not available: CGUI, CGXU\n\nIn Brokerage accounts: all five are available.\n\nScope: platform availability for Daniel’s programs, not a suitability conclusion for any client. Expense ratios for these ETFs are not in the reference data, so none are quoted.' },
+          used: ['platform.get_availability', 'taxonomy.resolve', 'ADV-105', 'CALL-0918'], knowledge: [], memory: [], commitments: [], needs_approval: false,
+          open_questions: ['When will Wells Fargo finish reviewing CGCP for Personalized UMA?'], as_of: ['Sep 28, 2026'], status: 'complete',
+          next_step: 'Tell Daniel that CGGR is newly available in his Personalized UMA models, and check the CGCP review before suggesting it there.' } }
+    } },
+
+  { name: 'Prepare me for tomorrow’s meeting with Daniel’s team', requester: 'EMP-PRIYA', text: 'Prepare me for tomorrow’s meeting with Daniel’s team',
+    orch: [
+      D('requester', 'Priya Shah, Sales, covers Daniel', 'Wholesaler on Daniel Kim’s coverage.'),
+      D('intent', 'Prepare a meeting: a brief, not actions', '“Prepare me” means the brief and agenda. It does not book, send or update anything.', { intent: 'prepare' }),
+      D('asks', '1 thing requested', 'Prepare the meeting with Daniel’s team.', { asks: ['Prepare the meeting with Daniel’s team'] }),
+      D('interpretation', 'Build a meeting-specific brief and agenda for tomorrow with the Kim Group', 'Catalogue #1 with #3 and #33.', { subject: { kind: 'buying_unit', id: 'BU-105', label: 'Daniel Kim · Kim Group model portfolios' }, intent: 'prepare', scope: 'Wealth: Kim Group model portfolios at Wells Fargo Advisors', time: 'Meeting tomorrow (Wed Sep 30); changes since the last meeting on Sep 18', constraints: ['Return the agenda, not an email or CRM update', 'Approved content only'], output: 'agenda', missing: ['Meeting length and purpose are not on the calendar; assuming 30 minutes on the model refresh'], authority: 'read_only', patterns: [1, 3, 33] }),
+      D('entity', 'Daniel → Daniel Kim, Kim Group', 'One graph match; the model-portfolio unit is the only unit.', { advisor: 'ADV-105', unit: 'BU-105', confidence: 'high' }),
+      D('scope', 'Model portfolios unit (BU-105)', 'Everything in the brief is about this unit.'),
+      D('known', 'Recent calls, priorities, open opportunity', 'Two recorded calls, a stated priority and OPP-504 in Discovery.', { uses: ['CALL-0918', 'CALL-0826', 'MEM-051', 'MEM-053', 'OPP-504'] }),
+      D('missing', 'Assets and flows not in hand', 'Read in parallel from the assets and flows services, alongside the notes.'),
+      D('memory', 'Read only', 'Nothing new about Daniel to store.', { class: 'read_only' }),
+      D('controls', 'Brief only; nothing sent or booked', 'Read-only: no calendar, email or CRM writes. Follow-ups are proposed, not created.'),
+      TK({ id: 'T1', route: 'Prep.Profile', title: 'Profile, book and pipeline', objective: 'Read Daniel’s profile, his CG assets by vehicle and his open opportunity', services: ['assets', 'pipeline'], tools: ['crm.get_contact', 'book.get_assets', 'pipeline.get'], reads: ['memory'], returns: 'Profile, CG assets by vehicle with the prior year, open opportunity', why: 'Profile reads CRM, the assets service and the pipeline together.' }),
+      TK({ id: 'T2', route: 'Prep.Notes', title: 'What Daniel told us', objective: 'Summarize Daniel’s dated statements from recorded calls', services: ['memory'], tools: ['crm.get_call_notes'], reads: ['memory'], returns: 'Attributed statements with dates', why: 'Notes Summarizer reads recorded calls in Salesforce.' }),
+      TK({ id: 'T3', route: 'Lead.Insights', title: 'What changed in his flows', objective: 'Summarize the year-over-year change in sales and flows by vehicle and channel', services: ['flows'], tools: ['book.get_flows'], reads: ['knowledge'], returns: 'Dated changes, not a full profile repeat', why: 'Insights Generator explains changes from the flows service.' }),
+      TK({ id: 'T4', route: 'Prep.Content', title: 'Pick approved content', objective: 'Choose two or three approved pieces that fit what Daniel said and what changed', depends_on: ['T1', 'T2', 'T3'], services: ['approved search'], tools: ['seismic.search_content'], reads: ['knowledge', 'policy'], returns: 'Approved pieces with an advisor-specific reason each', why: 'Content searches approved material only, after the reads tell it what matters.' }),
+      TK({ id: 'T5', route: 'Prep.Agenda', title: 'Build the meeting agenda', objective: 'Turn the verified reads and chosen content into a timed agenda for Priya', depends_on: ['T1', 'T2', 'T3', 'T4'], reads: ['memory', 'knowledge', 'policy'], tools: [], returns: 'A timed agenda with what to avoid repeating', why: 'Agenda builds only from verified topics.' }),
+      D('success', 'Priya walks in with a timed agenda', 'What changed, what Daniel asked, which approved pieces to bring, and nothing booked or sent.'),
+      L({ k: 'end' })
+    ].join('\n'),
+    agents: {
+      T1: { calls: [['crm.get_contact', { advisor_id: 'ADV-105' }], ['book.get_assets', { advisor_id: 'ADV-105' }], ['pipeline.get', { advisor_id: 'ADV-105' }]],
+        json: { says: 'I read Daniel’s profile, his CG book by vehicle with last year’s snapshot, and his open opportunity in one pass.',
+          output: { kind: 'note', title: 'Profile and CG book: Kim Group', body: 'Daniel Kim, Managing Director, Wells Fargo Advisors; programs: Personalized UMA and Brokerage.\n\nCG assets: $232.0M as of Aug 31, 2026\n- Mutual funds $148.2M (63.9%), ETFs $41.2M (17.8%), SMAs $42.6M (18.4%)\n- A year earlier ETFs were 9.3% of the book and mutual funds 72.2%\n- Largest holdings: GFA F-2 $54.0M, AMBAL F-2 $31.3M\n\nOpen opportunity: OPP-504 Kim Group model refresh, Discovery since Sep 18.' },
+          used: ['ADV-105', 'book.get_assets', 'OPP-504'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], as_of: ['Aug 31, 2026'], status: 'complete', next_step: '' } },
+      T2: { calls: [['crm.get_call_notes', { advisor_id: 'ADV-105' }]],
+        json: { says: 'I pulled Daniel’s own words from Sam’s August call and Priya’s September call.', output: NOTES_DANIEL, used: ['CALL-0826', 'CALL-0918', 'MEM-051', 'MEM-053'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], as_of: ['Sep 18, 2026'], status: 'complete', next_step: '' } },
+      T3: { calls: [['book.get_flows', { advisor_id: 'ADV-105' }]],
+        json: { says: 'I summarized what changed in his flows year over year; the model channel is where sales fell.',
+          output: { kind: 'finding', title: 'Flows: what changed', body: 'Trailing twelve months to Aug 2026 against the year before:\n- Gross sales $38.2M vs $44.9M (−14.9%)\n- ETF sales up $6.4M; mutual fund sales down $11.7M\n- Model-portfolio channel down $9.5M\n- Net flows $15.2M vs $29.1M as mutual fund redemptions rose' },
+          used: ['book.get_flows'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], as_of: ['Sep 2025 to Aug 2026'], status: 'complete', next_step: '' } },
+      T4: { calls: [['seismic.search_content', { query: 'core satellite etf active index model portfolios' }]],
+        json: { says: 'I chose two approved pieces that answer what Daniel has actually raised, each with its reason.',
+          output: { kind: 'content_pick', title: 'Approved content for the Kim Group meeting', body: '- SEIS-117 Core-satellite: where active management fits. Why: Daniel moved two models to an index core and reviews the satellites each quarter (CALL-0826, MEM-053)\n- SEIS-120 Capital Group ETF lineup overview. Why: ETFs versus active funds keeps coming up for him (CALL-0918)\n\nBackup: SEIS-114 The Capital System explainer, if he asks how the satellites are managed.' },
+          used: ['SEIS-117', 'SEIS-120', 'SEIS-114', 'CALL-0826', 'CALL-0918', 'MEM-053'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], as_of: [], status: 'complete', next_step: '' } },
+      T5: { calls: [],
+        json: { says: 'I turned the verified reads and the chosen content into a timed agenda for Priya; nothing was booked or sent.',
+          output: { kind: 'brief', title: 'Agenda: Kim Group, Wed Sep 30', body: 'Goal: help Daniel decide what belongs in the satellites of his refreshed models (OPP-504).\n\n1. What changed: ETFs are now 17.8% of his CG book, up from 9.3%; model-portfolio sales fell $9.5M as two models moved to an index core\n2. His question: where active managers still add value in core-satellite (SEIS-117)\n3. ETF options: what keeps coming up for him, with the ETF lineup (SEIS-120)\n4. Next step: agree which satellite funds he reviews this quarter\n\nAvoid repeating: his priority on a lower blended cost is already recorded (MEM-051).' },
+          used: ['OPP-504', 'SEIS-117', 'SEIS-120', 'MEM-051', 'CALL-0826'], knowledge: [], memory: [], commitments: [{ title: 'Send Daniel the two approved pieces as PDFs after the meeting', owner: 'Priya Shah', due: 'Oct 2' }], needs_approval: false,
+          open_questions: ['How long is tomorrow’s meeting, and who from the Kim Group attends?'], as_of: ['Aug 31, 2026', 'Sep 18, 2026'], status: 'complete',
+          next_step: 'Open with the model refresh (OPP-504) and ask which satellite funds Daniel is reviewing this quarter; bring SEIS-117 and SEIS-120.' } }
+    } }
+);

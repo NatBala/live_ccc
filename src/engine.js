@@ -70,11 +70,12 @@ const tickerOf = x => { const s = String(x || '').trim(), u = s.toUpperCase(); r
 
 /* ---------- Enterprise tools (reached through the MCP or API gateway) ---------- */
 const S = v => String(v ?? '').trim();
+const M1 = x => Math.round(x * 10) / 10, pct1 = (c, p) => p ? Math.round((c - p) / p * 1000) / 10 : null;
 const adv = id => { const a = ADVISORS[S(id)] || Object.entries(ADVISORS).find(([k, x]) => x.short.toLowerCase() === S(id).toLowerCase() || x.name.toLowerCase().includes(S(id).toLowerCase()))?.[1]; if (!a) throw new Error('Unknown advisor id. Use ids like ADV-101.'); return a; };
 const advId = id => ADVISORS[S(id)] ? S(id) : Object.keys(ADVISORS).find(k => ADVISORS[k].short.toLowerCase() === S(id).toLowerCase() || ADVISORS[k].name.toLowerCase().includes(S(id).toLowerCase()));
 const TOOLS = {
   'crm.get_contact': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce: advisor contact, firm, team, buying units and coverage.', props: { advisor_id: 'string' },
-    run: a => { const x = adv(a.advisor_id); return { name: x.name, title: x.title, firm: FIRMS[x.firm].name, office: x.office, team: x.team, units: x.units, coverage: x.coverage.map(c => EMPLOYEES[c].name) }; } },
+    run: a => { const x = adv(a.advisor_id), id = advId(a.advisor_id), sh = SHELF[x.firm]; return { name: x.name, title: x.title, firm: FIRMS[x.firm].name, office: x.office, team: x.team, units: x.units, coverage: x.coverage.map(c => EMPLOYEES[c].name), platform_programs: sh && sh.advisor_programs[id] ? sh.advisor_programs[id] : 'not in reference data' }; } },
   'crm.get_call_notes': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce: recorded call transcripts and emails for an advisor, newest first (ids like CALL-0922).', props: { advisor_id: 'string' },
     run: a => { const id = advId(a.advisor_id); return F.episodes.filter(e => e.adv === id).slice(0, 3).map(e => ({ id: e.id, date: e.date, kind: e.kind, scope: e.scope, text: e.text })); } },
   'crm.get_opportunities': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce: open opportunities for an advisor.', props: { advisor_id: 'string' },
@@ -139,6 +140,46 @@ const TOOLS = {
       const covered = options.reduce((t, o) => t + o.assets_usd, 0), cost = options.reduce((t, o) => t + o.annual_cost_usd, 0);
       const same = [...new Set(P.lineup.map(o => o.category))].map(cat => options.filter(o => o.category === cat)).filter(g => g.length > 1).map(g => { const base = Math.max(...g.map(o => o.assets_usd)); return { category: g[0].category, on_assets_usd: base, costs: g.map(o => ({ fund: o.fund, option: o.option, annual_cost_usd: Math.round(base * o.expense_ratio_pct / 100) })) }; });
       return { plan_id: id, plan: P.name, options, covered_assets_usd: covered, covered_annual_cost_usd: cost, covered_weighted_expense_ratio_pct: r2(cost / covered * 100), same_category_on_equal_assets: same, not_covered: P.other, sources: 'Expense ratios: fund data platform (as of dates shown). Category medians: Morningstar (' + [...new Set(P.lineup.map(o => PEERS[o.category].note))].join('; ') + ').' }; } },
+  /* ---- Sales AI shared services: amounts in $ millions so every figure an agent quotes traces to the tool ---- */
+  'book.get_assets': { sys: 'fund', via: 'API', rw: 'read', desc: 'Assets service: Capital Group assets for an advisor’s team by vehicle and fund as of a date, with the prior-year snapshot and mix change. Amounts in $ millions.', props: { advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id), B = BOOK[id]; if (!B) return { advisor: id ? ADVISORS[id].name : S(a.advisor_id), note: 'No book data for this advisor in the assets service.' };
+      const veh = {}; B.funds.forEach(([, v, x]) => { veh[v] = M1((veh[v] || 0) + x); });
+      const total = M1(Object.values(veh).reduce((t, x) => t + x, 0)), ptotal = M1(Object.values(B.prior_by_vehicle).reduce((t, x) => t + x, 0));
+      return { advisor: ADVISORS[id].name, entity: B.entity, as_of: B.as_of, total_usd_m: total, prior_as_of: B.prior_as_of, prior_total_usd_m: ptotal,
+        by_vehicle: Object.entries(veh).map(([v, x]) => { const p = B.prior_by_vehicle[v] || 0; return { vehicle: v, assets_usd_m: x, share_pct: M1(x / total * 100), prior_assets_usd_m: p, prior_share_pct: M1(p / ptotal * 100), change_usd_m: M1(x - p), share_change_pp: M1(x / total * 100 - p / ptotal * 100) }; }),
+        by_fund: B.funds.map(([f, v, x]) => ({ fund: f, name: FUNDS[f] ? FUNDS[f].name : 'Capital Group ' + f, vehicle: v, assets_usd_m: x })) }; } },
+  'book.get_flows': { sys: 'fund', via: 'API', rw: 'read', desc: 'Flows service: gross sales, redemptions and net flows by vehicle and channel, trailing twelve months against the prior twelve, with each vehicle’s contribution to the change in sales. Amounts in $ millions.', props: { advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id), X = FLOWS[id]; if (!X) return { advisor: id ? ADVISORS[id].name : S(a.advisor_id), note: 'No flow data for this advisor in the flows service.' };
+      const row = o => Object.entries(o).map(([k, [c, p]]) => ({ name: k, current_usd_m: c, prior_usd_m: p, change_usd_m: M1(c - p), change_pct: pct1(c, p) }));
+      const sum = (o, i) => M1(Object.values(o).reduce((t, x) => t + x[i], 0)), tS = [sum(X.sales, 0), sum(X.sales, 1)], tR = [sum(X.redemptions, 0), sum(X.redemptions, 1)], dS = M1(tS[0] - tS[1]);
+      return { advisor: ADVISORS[id].name, current_period: X.current, prior_period: X.prior,
+        totals: { gross_sales: { current_usd_m: tS[0], prior_usd_m: tS[1], change_usd_m: dS, change_pct: pct1(tS[0], tS[1]) }, redemptions: { current_usd_m: tR[0], prior_usd_m: tR[1], change_usd_m: M1(tR[0] - tR[1]), change_pct: pct1(tR[0], tR[1]) }, net_flows: { current_usd_m: M1(tS[0] - tR[0]), prior_usd_m: M1(tS[1] - tR[1]) } },
+        gross_sales_by_vehicle: row(X.sales), redemptions_by_vehicle: row(X.redemptions),
+        net_flows_by_vehicle: Object.keys(X.sales).map(v => ({ vehicle: v, current_usd_m: M1(X.sales[v][0] - X.redemptions[v][0]), prior_usd_m: M1(X.sales[v][1] - X.redemptions[v][1]) })),
+        contribution_to_sales_change: Object.entries(X.sales).map(([v, [c, p]]) => ({ vehicle: v, change_usd_m: M1(c - p), share_of_total_change_pct: dS ? M1((c - p) / dS * 100) : null })),
+        gross_sales_by_channel: row(X.channels), limitations: X.limitations }; } },
+  'book.get_market_share': { sys: 'fund', via: 'API', rw: 'read', desc: 'Market share service: the metric definition, numerator and denominator by category, their as-of dates, and any discrepancy. Amounts in $ millions.', props: { advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id), X = MARKET_SHARE[id], B = BOOK[id]; if (!X || !B) return { advisor: id ? ADVISORS[id].name : S(a.advisor_id), note: 'No market-share data for this advisor.' };
+      const amt = f => (B.funds.find(x => x[0] === f) || [0, 0, 0])[2];
+      return { advisor: ADVISORS[id].name, definition: X.definition, numerator_as_of: X.numerator_as_of, denominator_as_of: X.denominator_as_of, denominator_source: X.denominator_source,
+        categories: X.categories.map(([c, fs, ind]) => { const cg = M1(fs.reduce((t, f) => t + amt(f), 0)); return { category: c, cg_funds: fs, cg_assets_usd_m: cg, industry_assets_usd_m: ind, share_pct: M1(cg / ind * 100) }; }),
+        excluded_usd_m: M1(B.funds.filter(f => f[1] === 'SMA').reduce((t, f) => t + f[2], 0)), excluded_note: 'SMA assets are excluded by the definition',
+        discrepancy: X.numerator_as_of !== X.denominator_as_of ? `Numerator (${X.numerator_as_of}) and denominator (${X.denominator_as_of}) dates differ; shares can be off until the industry book refreshes.` : null }; } },
+  'platform.get_availability': { sys: 'fund', via: 'API', rw: 'read', desc: 'Platform eligibility: dealer platform and program availability for Capital Group funds and ETFs with effective dates. Pass advisor_id (uses their firm and programs), optionally ticker, program, or since (a date) to list changes after it.', props: { advisor_id: 'string', ticker: 'string', program: 'string', since: 'string' },
+    run: a => { const id = advId(a.advisor_id), firm = id ? ADVISORS[id].firm : null, X = SHELF[firm]; if (!X) return { firm: firm ? FIRMS[firm].name : null, note: 'No platform data for this firm in the eligibility service.' };
+      const tk = tickerOf(a.ticker), prog = S(a.program).toLowerCase(), since = Date.parse(S(a.since));
+      const items = X.items.filter(([t, p]) => (!tk || t === tk) && (!prog || p.toLowerCase().includes(prog))).map(([t, p, st, eff]) => ({ ticker: t, name: FUNDS[t] ? FUNDS[t].name : t, program: p, status: st, effective: eff }));
+      return { firm: X.firm, as_of: X.as_of, source: X.source, advisor_programs: X.advisor_programs[id] || [], items, changes_since: isNaN(since) ? undefined : items.filter(i => i.effective && Date.parse(i.effective) > since), note: 'Availability on a platform is not a suitability conclusion for any client.' }; } },
+  'taxonomy.resolve': { sys: 'fund', via: 'API', rw: 'read', desc: 'Taxonomy: which actual funds a category includes (equity funds, fixed income, ETFs, multi-asset, large growth), with exclusions and unmapped holdings.', props: { term: 'string' },
+    run: a => { const t = S(a.term).toLowerCase(), k = Object.keys(TAXONOMY).find(x => t.includes(x) || x.includes(t.replace(/s$/, ''))); if (!k) return { term: t, note: 'No mapping. Known categories: ' + Object.keys(TAXONOMY).join(', ') };
+      const X = TAXONOMY[k]; return { category: k, includes: X.include.map(f => ({ ticker: f, name: FUNDS[f].name })), excludes: X.exclude.map(([f, why]) => ({ ticker: f, name: FUNDS[f].name, why })), unmapped: X.unmapped }; } },
+  'pipeline.get': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce pipeline: an advisor’s opportunities with current stage, plan type and full status history.', props: { advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id); return { as_of: 'Sep 29, 2026', opportunities: OPPORTUNITIES.filter(o => o.adv === id).map(o => ({ id: o.id, name: o.name, unit: o.scope, plan_type: o.type || null, stage: o.stage, open: !/closed/i.test(o.stage), history: (PIPELINE_HISTORY[o.id] || []).map(([d, st]) => ({ date: d, stage: st })) })) }; } },
+  'engage.get_history': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce engagements: last completed interaction and completed interactions in the last 90 days, for one advisor or a territory (LA, OC, SD).', props: { advisor_id: 'string', territory: 'string' },
+    run: a => { const T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === S(a.territory).toLowerCase()), one = advId(a.advisor_id), ids = one ? [one] : T ? TERRITORIES[T].advisors : Object.keys(ADVISORS), now = Date.parse('Sep 29, 2026');
+      return { as_of: 'Sep 29, 2026', definition: 'Meaningful contact = a completed call, meeting or two-way email recorded in Salesforce; scheduled meetings do not count.',
+        advisors: ids.map(id => { const eps = F.episodes.filter(e => e.adv === id).sort((x, y) => Date.parse(y.date) - Date.parse(x.date)), last = eps[0];
+          return { advisor: ADVISORS[id].name, last_completed: last ? { id: last.id, date: last.date, kind: last.kind, with: last.with } : null, days_since: last ? Math.round((now - Date.parse(last.date)) / 864e5) : null, completed_last_90_days: eps.filter(e => now - Date.parse(e.date) <= 90 * 864e5).length }; }) }; } },
   'models.portfolio_construction': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model platform: blended expense ratio for a mix, e.g. {"VIGAX":70,"GFFFX":30}.', props: { weights: 'object' },
     run: a => { const w = a.weights && typeof a.weights === 'object' ? a.weights : {}; let tot = 0, er = 0; const miss = [];
       for (const [k, v] of Object.entries(w)) { const f = FUNDS[tickerOf(k)]; if (!f || f.er == null) { miss.push(k); continue; } er += f.er * Number(v); tot += Number(v); }
@@ -166,6 +207,25 @@ const TOOLS = {
       return { category: cat, peers: PEERS[cat].peers, median_expense_ratio_pct: PEERS[cat].medianEr, note: PEERS[cat].note, categories_available: Object.keys(PEERS) }; } }
 };
 const toolAllowed = (agent, tool) => (AGENTS[agent]?.tools || []).includes(tool);
+
+/* ---------- Action authority: decided by rule from the request's own words ---------- */
+function authorityFromText(text, team) {
+  const t = ' ' + String(text).toLowerCase().replace(/[’']/g, "'") + ' ';
+  let a = 'read_only', why = 'Nothing in the request asks to draft, change or send anything.';
+  if (/\b(send|publish|distribute)\b/.test(t)) { a = 'external_action'; why = 'The request explicitly asks to send or publish; a person still approves the exact payload.'; }
+  else if (/\bbook (a|an|the|time|it|me|us|him|her|them|meeting|call)\b|\b(schedule|invite|move|reschedul\w*|log|update|set up (a )?(call|meeting)|create (a )?task|add (a )?task|fix|resolve)\b|won't open|can't open|not working/.test(t)) { a = 'proposed_change'; why = 'The request asks for a change (a booking, an update, a fix).'; }
+  else if (/\b(draft|write|compose|create|campaign|outreach|email|post|letter|report)\b/.test(t)) { a = 'draft_only'; why = 'The request asks for something written; drafts only, nothing sent.'; }
+  if (team === 'service' && AUTHORITY[a].n < 2) { a = 'proposed_change'; why = 'Service requests are handled as cases, which may be updated.'; }
+  return { authority: a, why };
+}
+const authN = a => (AUTHORITY[a] || AUTHORITY.read_only).n;
+/* Interpretation built from rules when orchestration didn't state one (saved runs, fallbacks, catalogue routes) */
+function ruleInterpretation(run, intent) {
+  const R = run.resolution || {}, A = run.advisor && ADVISORS[run.advisor], au = authorityFromText(run.text, EMPLOYEES[run.requester].team);
+  const subj = A ? { kind: run.unit ? 'buying_unit' : 'advisor', id: run.unit || run.advisor, label: A.name + (run.unit ? ' · ' + A.units[run.unit] : '') } : run.territory ? { kind: 'territory', id: run.territory, label: TERRITORIES[run.territory].name } : R.funds && R.funds.length ? { kind: 'fund', id: R.funds[0].ticker, label: R.funds.map(f => f.ticker).join(', ') } : { kind: 'none', id: null, label: 'Not resolved from the request' };
+  const time = /tomorrow|today|next week|next month|this week|90 days|since|last (meeting|visit)/i.exec(run.text);
+  return { subject: subj, intent: intent || null, scope: A ? `${FIRMS[A.firm].name}${run.unit ? ' · ' + run.unit : ''}` : run.territory ? 'Territory' : 'Product level', time: time ? time[0] : `Current, as of ${TODAY}`, constraints: [], output: null, missing: [], authority: au.authority, src: 'code' };
+}
 
 /* ---------- Context packets: what the foundation sends each agent ---------- */
 function mentionsFunds(text) {
@@ -196,7 +256,7 @@ function buildPacket(task, run) {
     }
     if (reads.has('events')) F.events.filter(e => e.adv === advId).slice(-3).forEach(e => push('events', e.id, e.type, e.detail, AGENTS[e.by]?.name || e.by, 'advisor'));
     if (reads.has('feedback')) F.feedback.filter(f => f.adv === advId).slice(-3).forEach(f => push('feedback', f.id, 'Feedback', f.text, AGENTS[f.by]?.name || f.by, f.scope));
-    if ((team === 'sales' || team === 'marketing') && (reads.has('models') || task.agent === 'sales.lead')) push('models', 'MOD-ALPHA', 'Sales Alpha signal', `${ALPHA[advId].score}/100: ${ALPHA[advId].note}. A signal, not intent.`, 'Model platform', 'advisor');
+    if ((team === 'sales' || team === 'marketing') && (reads.has('models') || task.agent === 'sales.lead') && ALPHA[advId]) push('models', 'MOD-ALPHA', 'Sales Alpha signal', `${ALPHA[advId].score}/100: ${ALPHA[advId].note}. A signal, not intent.`, 'Model platform', 'advisor');
   } else if (run.territory && TERRITORIES[run.territory]) {
     const T = TERRITORIES[run.territory];
     push('graph', run.territory, 'Territory', `${T.name}: ${T.advisors.map(a => ADVISORS[a].name + ' (' + FIRMS[ADVISORS[a].firm].name + ')').join('; ')}. Wholesaler ${T.wholesaler}.`, 'Graph', 'territory');
@@ -306,6 +366,7 @@ function gatekeep(task, res, ctx) {
   }
   /* commitments */
   for (const c of (res.commitments || []).slice(0, 2)) {
+    if (authN(run.authority) < 2) { V('commitment', 'proposed', S(c.title), `Proposed, not created: the request is ${AUTHORITY[run.authority].label.toLowerCase()}, so tasks wait for ${EMPLOYEES[run.requester].name.split(' ')[0]} to create them`, { proposal: { title: S(c.title), owner: S(c.owner) || EMPLOYEES[run.requester].name, due: S(c.due) || 'TBD' } }); continue; }
     const id = 'TASK-' + (400 + (++F.seq));
     F.commitments.push({ id, adv: run.advisor, scope: run.unit || 'advisor', title: S(c.title), owner: S(c.owner) || EMPLOYEES[run.requester].name, due: S(c.due) || 'TBD', status: 'Open', run: run.id });
     F.graph.edges.push({ from: run.advisor || run.requester, to: id, label: 'owed', run: run.id }); F.graph.nodes.push({ id, label: S(c.title), type: 'task', run: run.id });
@@ -355,7 +416,7 @@ function sanitizeResult(r) {
     knowledge: arr(r.knowledge).filter(k => k && k.label && k.value).map(k => ({ label: str(k.label, 160), value: str(k.value, 600), evidence: arr(k.evidence).map(x => str(x, 60)) })),
     memory: arr(r.memory).filter(m => m && m.attribute && m.value).map(m => ({ attribute: str(m.attribute, 80), value: str(m.value, 300), scope: str(m.scope || '', 20), category: str(m.category || 'content_pref', 30), basis: str(m.basis || 'inference', 30), evidence: arr(m.evidence).map(x => str(x, 40)) })),
     commitments: arr(r.commitments).filter(c => c && c.title).map(c => ({ title: str(c.title, 160), owner: str(c.owner, 60), due: str(c.due, 40) })),
-    needs_approval: !!r.needs_approval, open_questions: arr(r.open_questions).map(x => str(x, 240)), next_step: str(typeof r.next_step === 'string' ? r.next_step.replace(/^[\s.…]+$/, '') : '', 240)
+    needs_approval: !!r.needs_approval, open_questions: arr(r.open_questions || r.unresolved).map(x => str(x, 240)), as_of: arr(r.as_of).map(x => str(x, 60)).slice(0, 4), status: /^(complete|partial|blocked)$/.test(r.status) ? r.status : 'complete', next_step: str(typeof r.next_step === 'string' ? r.next_step.replace(/^[\s.…]+$/, '') : '', 240)
   };
 }
 function capResult(out) {
@@ -460,8 +521,13 @@ function foundationHeadlines() {
     return `${id} ${a.name}, ${a.title}, ${FIRMS[a.firm].name}. Units: ${Object.entries(a.units).map(([k, v]) => k + ' ' + v).join('; ')}. Coverage: ${a.coverage.map(c => EMPLOYEES[c].name).join(', ')}.${ho ? ' Coverage handover: ' + ho + '.' : ''}${plans ? ' Plans: ' + plans + '.' : ''}\n  Memory: ${mem || 'none'}\n  Unknown: ${(UNKNOWNS[id] || []).join('; ') || 'nothing flagged'}\n  Open commitments: ${com || 'none'}\n  Episodes: ${ep}`;
   }).join('\n');
 }
+function subagentText() {
+  return Object.entries(SUBAGENTS).flatMap(([fam, A]) => Object.keys(A.subs).map(sub => { const r = routeInfo(fam + '.' + sub); return `${r.route} | ${r.label} | agent ${r.agent} | ${r.does} | tools: ${(AGENTS[r.agent].tools || []).join(', ') || 'none'}`; })).join('\n');
+}
+function serviceText() { return Object.entries(SERVICES).map(([k, v]) => `${k} [${v.status}]${v.tools.length ? ' tools: ' + v.tools.join(', ') : ''} | ${v.does}`).join('\n'); }
 function orchestratorPrompt(run) {
-  const E = EMPLOYEES[run.requester];
+  const E = EMPLOYEES[run.requester], first = E.name.split(' ')[0];
+  const pats = cataloguePatterns(run.text);
   return `You are the Intelligence & Orchestration layer of Capital Group's Connected Client Experience: an AI workbench where named specialist agents in Sales, Product, Marketing and Service share one governed AI foundation (memory, knowledge, verification, models, feedback, events, graph) connected to Salesforce, Microsoft 365, Seismic and the fund data platform. Today is ${TODAY}.
 
 REQUEST
@@ -491,27 +557,48 @@ Routing rules: meeting preparation goes to sales.wholesalers; scheduling and any
 AGENT REGISTRY (choose only these ids)
 ${registryText()}
 
+SUB-AGENT ROUTES (a task runs exactly one route; route notation Prep.Notes = Prep Me → Notes Summarizer)
+${subagentText()}
+
+SHARED SERVICES (tools a step uses; not autonomous agents). simulated = available here with demo data; foundation = built in; not connected = plan for it, and the step will report what it could not establish.
+${serviceText()}
+
+BUSINESS INTENTS (pick exactly one; organize by intent, not keywords)
+${INTENT_ORDER.map(k => k + ': ' + INTENTS[k]).join('\n')}
+The word "ETF" can carry five intents: "Find ETF leads" is prioritize, "Explain this advisor's ETF sales" is diagnose, "Check whether this ETF is available on the advisor's platform" is verify, "Prepare an ETF discussion" is prepare, "Send the approved ETF material" is execute. Each needs a different plan, different data and different controls.
+
+ACTION AUTHORITY (lowest that satisfies the request)
+${Object.entries(AUTHORITY).map(([k, v]) => k + ': ' + v.does).join('\n')}
+"Help me prepare" is read_only: it never books a meeting, sends an email or updates CRM unless ${first} explicitly asked. A rule also checks the request's own words and caps the authority you state.
+
+CATALOGUE PATTERNS closest to this request (reference decompositions from the Sales AI query catalogue; adapt them, do not copy blindly)
+${pats.map(c => `#${c.n} ${c.intent} · "${c.ask}" · decomposition: ${c.decomp} · route: ${c.exec}`).join('\n') || 'None close.'}
+
 RULES
 ${POLICIES.map(p => p.id + ' ' + p.text).join('\n')}
 
+Work in two layers. INTELLIGENCE first: establish what ${first} actually wants as a structured interpretation. ORCHESTRATION second: turn that interpretation into an executable plan of routes in waves.
 Output ONLY newline-delimited JSON, one object per line, no prose and no code fences, in this order:
 {"k":"decision","type":"requester","title":"...","detail":"..."}
-{"k":"decision","type":"intent","title":"...","detail":"...","intent":"meeting_prep|research|content|campaign|service|profile_update|question"}
+{"k":"decision","type":"intent","title":"...","detail":"...","intent":"${INTENT_ORDER.join('|')}"}
 {"k":"decision","type":"asks","title":"N things requested","detail":"...","asks":["each distinct thing the person asked for, in their words, 2 to 8 words each"]}
+{"k":"decision","type":"interpretation","title":"one line: what ${first} actually wants","detail":"...","subject":{"kind":"advisor|buying_unit|firm|territory|plan|opportunity|fund|document|internal|none","id":"ADV-...|BU-...|PLAN-...|OPP-...|ticker|null","label":"..."},"intent":"one business intent","scope":"wealth or retirement, territory, dealer or platform, vehicle, audience","time":"as-of date, comparison period or last meeting","constraints":["..."],"output":"answer|ranked_list|comparison|agenda|brief|draft|task|alert","missing":["only what materially changes the answer or action"],"authority":"read_only|draft_only|proposed_change|external_action","patterns":[catalogue numbers you followed]}
 {"k":"decision","type":"entity","title":"...","detail":"...","advisor":"ADV-...|null","unit":"BU-...|null","territory":"LA|OC|SD|null","confidence":"high|medium|low"}
 {"k":"decision","type":"scope","title":"...","detail":"..."}
 {"k":"decision","type":"known","title":"...","detail":"...","uses":["ids you will reuse"]}
 {"k":"decision","type":"missing","title":"...","detail":"..."}
 {"k":"decision","type":"memory","title":"...","detail":"...","class":"read_only|task_requirement|lasting_preference_candidate|none"}
 {"k":"decision","type":"controls","title":"...","detail":"..."}
-then 2 to 5 lines {"k":"task","id":"T1","ask":1,"title":"3 to 6 words, as it appears on the team's workbench","role":"workbench role id","agent":"registry id from that role","objective":"one sentence","depends_on":[],"reads":["memory","knowledge","policy","models","events","feedback"],"tools":["tool names from that agent's list"],"why":"why this specialist"}
+then 2 to 6 lines {"k":"task","id":"T1","ask":1,"route":"Prep.Notes (a sub-agent route; use agent only for non-Sales work without a route)","title":"3 to 6 words, as it appears on the team's workbench","objective":"one sentence","depends_on":[],"services":["shared service names this step reads"],"tools":["tool names from the route's agent list, within the action authority"],"reads":["memory","knowledge","policy","models","events","feedback"],"returns":"what this step hands on","why":"why this sub-agent, which system it queries and for what"}
 {"k":"decision","type":"success","title":"...","detail":"..."}
 {"k":"end"}
 Requests can be about one advisor, a territory, a product, or internal work with colleagues. Not every request needs an advisor: for a territory set advisor null and territory; for product-only or internal work set both null.
 Ask for clarification only if acting would be unsafe or impossible: emit {"k":"clarify","question":"..."} after the entity decision, then {"k":"end"}. Otherwise make a sensible assumption and state it in the "missing" decision.
 ${run.clarified ? `You already asked: "${run.clarified.question}". The user answered: "${run.clarified.answer}". Do NOT ask again. Proceed, interpreting the answer as best you can, and state your assumption.` : ''}
 Be precise: titles of 3 to 6 words, details of at most 16 words, no filler. Reuse foundation records instead of redoing work.
-Tell the story a real team would. ${E.name} is the primary actor: the plan ends with a result delivered to them, and other teams appear as contributors whose work they build on. Choose only the specialists the request needs (often 2 to 4); bring in another team only when it owns part of the work or holds evidence ${E.name.split(' ')[0]} lacks, and say so in "why", including which system it will query and for what. Every task must produce a different kind of output (for example a computation, a verified answer, a draft, a compliance review, a case update, a calendar hold); never add a task that only reformats, summarizes or packages an earlier task's output. Chain tasks with depends_on so later specialists build on what earlier ones publish to the foundation. Tasks that don't depend on each other run in parallel.
+Plan in waves. Independent reads go first with empty depends_on so they run together (for example Prep.Profile, Prep.Notes and data-service reads). Checks (Prep.Fact Check, Product.QAR) depend on the reads they check. Building steps (Prep.Agenda, drafts) come last. A step depends only on steps whose output it actually needs. Numbers come from data services (assets, flows, market share, platform eligibility), never from narrative notes.
+Every step returns its output, source references, as-of dates, unresolved issues and completion status.
+Tell the story a real team would. ${E.name} is the primary actor: the plan ends with a result delivered to them, and other teams appear as contributors whose work they build on. Choose only the steps the request needs (often 2 to 5); bring in another team only when it owns part of the work or holds evidence ${E.name.split(' ')[0]} lacks, and say so in "why", including which system it will query and for what. Every task must produce a different kind of output (for example a computation, a verified answer, a draft, a compliance review, a case update, a calendar hold); never add a task that only reformats, summarizes or packages an earlier task's output. Chain tasks with depends_on so later specialists build on what earlier ones publish to the foundation. Tasks that don't depend on each other run in parallel.
 Every ask must be covered by at least one task, and every task must serve one ask ("ask" is its 1-based number). Do not add work the person did not ask for.
 Classify new information about the advisor strictly: an employee's request is not an advisor preference.`;
 }
@@ -520,8 +607,11 @@ function agentPrompt(task, run, packet, upstream, withTools) {
   const lines = packet.items.map(i => `[${i.id}] (${i.layer}, from ${i.from}, scope ${i.scope}) ${i.label}: ${i.value}`).join('\n');
   const up = upstream.length ? upstream.map(u => { const R = ROLES[roleOf(u.agent)]; return `${u.task} by ${R ? R.name + ' (' + TEAMS[R.team].name + ')' : AGENTS[u.agent].name}: ${u.title}\n${u.body}\nPublished: ${u.ids.join(', ') || 'nothing'}`; }).join('\n\n') : 'None.';
   const tl = withTools ? `\nYou can call your enterprise tools (Salesforce and Microsoft 365 through the MCP gateway; the data and model platform, Seismic exports and Morningstar through APIs). Call a tool only when the packet lacks what you need.` : `\nTool results fetched for you:\n${JSON.stringify(task.prefetched || {})}`;
-  return `You are ${a.name}, a ${TEAMS[a.team].name} specialist agent working for the ${ROLES[task.role] ? ROLES[task.role].name : TEAMS[a.team].name} team in Capital Group's Connected Client Experience. Your job: ${a.does}. Today is ${TODAY}.
-Task from orchestration (${task.id}): ${task.objective}
+  const ri = task.route && routeInfo(task.route), gaps = (task.services || []).filter(k => serviceStatus(k) === 'not connected');
+  return `You are ${ri ? `${ri.label} (route ${ri.route}), a skill of ${a.name},` : a.name + ','} a ${TEAMS[a.team].name} specialist agent working for the ${ROLES[task.role] ? ROLES[task.role].name : TEAMS[a.team].name} team in Capital Group's Connected Client Experience. Your job: ${ri ? ri.does : a.does}. Today is ${TODAY}.
+Task from orchestration (${task.id}): ${task.objective}${task.returns ? `\nHand on: ${task.returns}` : ''}
+How the request was interpreted: ${JSON.stringify(run.interp ? { intent: run.interp.intent, scope: run.interp.scope, time: run.interp.time, constraints: run.interp.constraints, output: run.interp.output } : {})}. Action authority: ${run.authority || 'read_only'} (${AUTHORITY[run.authority || 'read_only'].does})
+Shared services for this step: ${(task.services || []).map(k => `${k} (${serviceStatus(k)})`).join(', ') || 'none'}.${gaps.length ? ` NOT CONNECTED: ${gaps.join(', ')}. Say plainly what you could not establish because of it, and set "status":"partial".` : ''}
 Original request from ${E.name} (${TEAMS[E.team].name}): "${run.text}"
 Active scope: advisor ${run.advisor || 'none'} · unit ${run.unit || 'none'}
 
@@ -543,10 +633,11 @@ RULES
 - You work for ${E.name}. When you reuse a colleague's earlier notes or work (for example call notes another wholesaler recorded), credit them by name and team and say why it helps ${E.name.split(' ')[0]}.
 - When approved messaging (MSG- ids) is available, use it verbatim or lightly edited and cite the ids in "used"; make no new claims beyond it.${a.team === 'service' ? `
 - Diagnose from evidence: for each likely cause, say what you checked and which record (case, interaction, delivery log id) confirms or rules it out. Write case notes the way an experienced service rep would: plain sentences a colleague can follow, not system shorthand.` : ''}
+- Step contract: "as_of" lists the dates of the data you relied on; "status" is complete, partial (something material could not be established) or blocked; "open_questions" lists unresolved issues and conflicts.
 - "next_step": the one concrete action ${E.name} should take because of your work (who, what, by when if known), addressed to ${E.name.split(' ')[0]}. Use the same number rules. Leave it empty if there is nothing for them to do.
 
 Reply with only a JSON object:
-{"says":"one first-person sentence, at most 22 words: what you did and which team's work you built on (name teams, not agents)","output":{"kind":"brief|email|finding|answer|plan|content_pick|post|case_update|note","title":"...","body":"${a.team === 'service' ? 'under 180 words; short plain paragraphs: what happened, what you checked and found (with record ids), what you did and what happens next' : "under 150 words; '- ' bullets; blank line between paragraphs"}"},"used":["ids"],"knowledge":[{"label":"...","value":"...","evidence":["ids"]}],"memory":[{"attribute":"...","value":"...","scope":"BU-...|advisor","category":"content_pref|communication_pref|priority|relationship","basis":"advisor_statement|employee_request|task_requirement|inference","evidence":["ids"]}],"commitments":[{"title":"...","owner":"...","due":"..."}],"needs_approval":false,"open_questions":[],"next_step":"..."}
+{"says":"one first-person sentence, at most 22 words: what you did and which team's work you built on (name teams, not agents)","output":{"kind":"brief|email|finding|answer|plan|content_pick|post|case_update|note","title":"...","body":"${a.team === 'service' ? 'under 180 words; short plain paragraphs: what happened, what you checked and found (with record ids), what you did and what happens next' : "under 150 words; '- ' bullets; blank line between paragraphs"}"},"used":["ids"],"knowledge":[{"label":"...","value":"...","evidence":["ids"]}],"memory":[{"attribute":"...","value":"...","scope":"BU-...|advisor","category":"content_pref|communication_pref|priority|relationship","basis":"advisor_statement|employee_request|task_requirement|inference","evidence":["ids"]}],"commitments":[{"title":"...","owner":"...","due":"..."}],"needs_approval":false,"open_questions":[],"as_of":["dates of the data used"],"status":"complete|partial|blocked","next_step":"..."}
 Use empty arrays when nothing applies.`;
 }
 function toolDefs(task, onCall) {
