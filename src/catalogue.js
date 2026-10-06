@@ -134,7 +134,8 @@ const SERVICES = {
   policy: { name: 'Policy', status: 'foundation', tools: [], does: 'Rules applied to every packet and contribution' },
   'task state': { name: 'Task state', status: 'foundation', tools: ['crm.get_tasks'], does: 'Open commitments, owners and due dates' },
   'approved search': { name: 'Approved search', status: 'foundation', tools: ['seismic.search_content'], does: 'Search over approved content only' },
-  'change history': { name: 'Change history', status: 'foundation', tools: [], does: 'Memory revisions and events since a date' },
+  'change history': { name: 'Change history', status: 'simulated', tools: ['insights.changes_since'], does: 'Everything that changed since the last completed meeting (or a date): assets, flows, transactions, pipeline, platform, engagement, events' },
+  activity: { name: 'Activity feed', status: 'simulated', tools: ['book.get_activity'], does: 'Daily purchases and redemptions for any advisor and period, generated from the advisor’s own book and trend' },
   'relationship graph': { name: 'Relationship graph', status: 'foundation', tools: ['crm.get_team'], does: 'The advisor’s team, Capital Group’s coverage team, firms and units' },
   'action review': { name: 'Action review', status: 'foundation', tools: [], does: 'Human review of any change before it is made' }
 };
@@ -147,9 +148,9 @@ function serviceKeys(raw) {
 const serviceStatus = k => SERVICES[k] ? SERVICES[k].status : 'not connected';
 /* The data each sub-agent reads by default. A planned step that names no services gets these. */
 const SUB_USES = {
-  'Prep.Profile': ['relationship graph', 'assets', 'plans', 'platform eligibility'], 'Prep.Notes': ['call notes', 'memory'], 'Prep.Content': ['approved search', 'recommendation trace'],
+  'Prep.Profile': ['relationship graph', 'assets', 'plans', 'platform eligibility'], 'Prep.Notes': ['call notes', 'memory', 'change history'], 'Prep.Content': ['approved search', 'recommendation trace'],
   'Prep.Fact Check': ['evidence resolver', 'fund facts'], 'Prep.Agenda': ['task state'], 'Prep.Themes': ['themes'], 'Prep.News': ['news'],
-  'Lead.Discover': ['lead discovery', 'engagement graph', 'transactions'], 'Lead.Insights': ['assets', 'flows', 'transactions', 'pipeline', 'change events', 'ranking trace'], 'Lead.Products': ['platform eligibility', 'taxonomy'],
+  'Lead.Discover': ['lead discovery', 'engagement graph', 'transactions'], 'Lead.Insights': ['change history', 'assets', 'flows', 'transactions', 'pipeline', 'change events', 'ranking trace'], 'Lead.Products': ['platform eligibility', 'taxonomy'],
   'Territory.Health Check': ['coverage analytics', 'engagements'], 'Territory.Calibration': ['peer analytics'], 'Territory.Teaming': ['relationship graph'], 'Territory.Reviews': ['coverage analytics'],
   'Territory.Strategy': ['pipeline scoring', 'plan inputs'], 'Territory.Business Planning': ['plan inputs', 'pipeline scoring'],
   'Schedule.Calendar': ['calendar'], 'Schedule.Email': [], 'Schedule.Compliance': ['meeting rules'], 'Schedule.Zoning': ['zoning'],

@@ -120,6 +120,53 @@ function zoneVisits(a) {
   const days = ['Tue Oct 6', 'Wed Oct 14', 'Thu Oct 22', 'Tue Oct 27'];
   return { month: S(a.month) || 'October 2026', base: 'Irvine', zones: Object.values(zones).sort((x, y) => y.drive_minutes_from_irvine - x.drive_minutes_from_irvine).map((z, k) => Object.assign(z, { proposed_day: days[k % days.length] })), note: 'Proposed days only; nothing is booked.' };
 }
+/* ---------- Activity generated on the fly for any advisor and period (deterministic: same inputs, same numbers) ---------- */
+function seededRandom(key) {
+  let h = 1779033703 ^ key.length;
+  for (let i = 0; i < key.length; i++) { h = Math.imul(h ^ key.charCodeAt(i), 3432918353); h = h << 13 | h >>> 19; }
+  return () => { h = Math.imul(h ^ h >>> 16, 2246822507); h = Math.imul(h ^ h >>> 13, 3266489909); return ((h ^= h >>> 16) >>> 0) / 4294967296; };
+}
+const fmtDay = ms => new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+const dayMs = s => Date.parse(S(s) + ' UTC');
+/* Purchases and redemptions between two dates: recorded transactions first, then generated ones shaped by the advisor's own book and flow trend */
+function activityFeed(id, since, until) {
+  const B = BOOK[id], X = FLOWS[id], t0 = dayMs(since), t1 = dayMs(until), days = Math.max(1, Math.round((t1 - t0) / 864e5));
+  const recorded = FUND_TRANSACTIONS.filter(t => t[0] === id && dayMs(t[1]) > t0 && dayMs(t[1]) <= t1).map(([, d, f, ty, amt]) => ({ date: fmtDay(dayMs(d)), fund: f, vehicle: (B.funds.find(x => x[0] === f) || [0, FUNDS[f] && FUNDS[f].vehicle === 'ETF' ? 'ETF' : MF])[1], type: ty, amount_usd_m: amt }));
+  const rnd = seededRandom(id + '|' + since + '|' + until), funds = B.funds.filter(f => f[1] !== 'SMA'), total = funds.reduce((t, f) => t + f[2], 0);
+  const trend = v => X && X.sales[v] ? (X.sales[v][0] - X.sales[v][1]) - ((X.redemptions[v] || [0, 0])[0] - (X.redemptions[v] || [0, 0])[1]) : 0;
+  const n = Math.max(0, Math.min(8, Math.max(2, Math.round(days / 2.5))) - recorded.length), scale = Math.max(0.2, total / 60), generated = [];
+  for (let k = 0; k < n; k++) {
+    let r = rnd() * total, f = funds[0]; for (const x of funds) { if ((r -= x[2]) <= 0) { f = x; break; } }
+    const buy = rnd() < (trend(f[1]) >= 0 ? 0.72 : 0.35), amt = M1(Math.max(0.1, (0.15 + rnd() * 0.85) * scale));
+    generated.push({ date: fmtDay(t0 + (1 + Math.floor(rnd() * days)) * 864e5), fund: f[0], vehicle: f[1], type: buy ? 'Purchase' : 'Redemption', amount_usd_m: amt });
+  }
+  return [...recorded, ...generated].filter(t => dayMs(t.date) <= t1).sort((a, b) => dayMs(a.date) - dayMs(b.date));
+}
+/* Everything that changed for an advisor since a date (by default, the last completed meeting) */
+function changesSince(a) {
+  const id = advId(a.advisor_id); if (!id || !BOOK[id]) return { note: 'Name an advisor to compare against their last meeting.' };
+  const eps = F.episodes.filter(e => e.adv === id).sort((x, y) => dayMs(y.date) - dayMs(x.date)), last = eps.find(e => /call|meeting/i.test(e.kind)) || eps[0]; /* the last call or meeting; an email only if there was none */
+  const since = S(a.since) && !isNaN(dayMs(a.since)) ? fmtDay(dayMs(a.since)) : last ? last.date : 'Sep 1, 2026', until = 'Sep 29, 2026', t0 = dayMs(since), inWin = d => dayMs(d) > t0 && dayMs(d) <= dayMs(until);
+  const rnd = seededRandom('assets|' + id + '|' + since), base = BOOK[id].funds.reduce((t, f) => t + f[2], 0), tx = activityFeed(id, since, until);
+  const byVeh = {}; tx.forEach(t => { const v = byVeh[t.vehicle] = byVeh[t.vehicle] || { vehicle: t.vehicle, purchases_usd_m: 0, redemptions_usd_m: 0 }; if (t.type === 'Purchase') v.purchases_usd_m = M1(v.purchases_usd_m + t.amount_usd_m); else v.redemptions_usd_m = M1(v.redemptions_usd_m + t.amount_usd_m); });
+  Object.values(byVeh).forEach(v => { v.net_usd_m = M1(v.purchases_usd_m - v.redemptions_usd_m); });
+  const net = M1(Object.values(byVeh).reduce((t, v) => t + v.net_usd_m, 0)), start = M1(base * (1 + (rnd() - 0.4) * 0.02)), market = M1(start * (rnd() - 0.45) * 0.012), end = M1(start + net + market);
+  const firm = ADVISORS[id].firm, shelf = SHELF[firm] ? SHELF[firm].items.filter(i => i[3] && !isNaN(dayMs(i[3])) && inWin(i[3])).map(([t, p, st, d]) => ({ date: d, change: `${t} ${st.toLowerCase()} in ${p}` })) : [];
+  const pipe = OPPORTUNITIES.filter(o => o.adv === id).flatMap(o => (PIPELINE_HISTORY[o.id] || []).filter(([d]) => inWin(d)).map(([d, st]) => ({ date: d, opportunity: `${o.id} ${o.name}`, stage: st })));
+  const digital = DIGITAL.filter(d => d[0] === id && inWin(d[1])).map(([, d, k, item]) => ({ date: d, kind: k, item })), events = CHANGE_EVENTS.filter(e => e[0] === id && inWin(e[1])).map(([, d, what, src]) => ({ date: d, event: what, source: src }));
+  const contacts = eps.filter(e => inWin(e.date)).map(e => ({ date: e.date, id: e.id, kind: e.kind, with: e.with })), cases = F.cases.filter(c => c.adv === id && c.opened && inWin(c.opened)).map(c => ({ id: c.id, opened: c.opened, status: c.status }));
+  const biggest = [...tx].sort((x, y) => y.amount_usd_m - x.amount_usd_m)[0], topVeh = Object.values(byVeh).sort((x, y) => Math.abs(y.net_usd_m) - Math.abs(x.net_usd_m))[0];
+  const highlights = [
+    topVeh && `${topVeh.vehicle} net ${topVeh.net_usd_m >= 0 ? 'inflow' : 'outflow'} of $${Math.abs(topVeh.net_usd_m)}M since ${since}`,
+    biggest && `Largest transaction: ${biggest.type.toLowerCase()} of $${biggest.amount_usd_m}M in ${biggest.fund} on ${biggest.date}`,
+    ...pipe.map(p => `${p.opportunity} moved to ${p.stage} on ${p.date}`), ...shelf.map(s => `${s.change} (${s.date})`),
+    digital.length && `${digital.length} attributable digital ${digital.length === 1 ? 'event' : 'events'}, latest: ${digital[digital.length - 1].item}`, ...events.map(e => `${e.event} (${e.date})`)
+  ].filter(Boolean).slice(0, 6);
+  return { advisor: ADVISORS[id].name, last_meeting: last ? { id: last.id, date: last.date, kind: last.kind, with: last.with } : null, period: `${since} to ${until}`, days: Math.round((dayMs(until) - t0) / 864e5),
+    assets: { start_usd_m: start, net_flows_usd_m: net, market_and_other_usd_m: market, end_usd_m: end, note: 'Market and other changes are the residual after net flows; not fund performance.' },
+    flows_by_vehicle: Object.values(byVeh), transactions: tx, pipeline_changes: pipe, platform_changes: shelf, digital_engagement: digital, business_events: events, other_contacts: contacts, service_cases: cases, highlights,
+    source: 'Change history service: recorded activity plus a generated activity feed for the period (simulated)' };
+}
 const TOOLS = {
   'crm.get_contact': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce: advisor contact, firm, team, buying units and coverage.', props: { advisor_id: 'string' },
     run: a => { const x = adv(a.advisor_id), id = advId(a.advisor_id), sh = SHELF[x.firm]; return { name: x.name, title: x.title, firm: FIRMS[x.firm].name, office: x.office, team: x.team, units: x.units, coverage: x.coverage.map(c => EMPLOYEES[c].name), platform_programs: sh && sh.advisor_programs[id] ? sh.advisor_programs[id] : 'not in reference data' }; } },
@@ -227,6 +274,11 @@ const TOOLS = {
       return { as_of: 'Sep 29, 2026', definition: 'Meaningful contact = a completed call, meeting or two-way email recorded in Salesforce; scheduled meetings do not count.',
         advisors: ids.map(id => { const eps = F.episodes.filter(e => e.adv === id).sort((x, y) => Date.parse(y.date) - Date.parse(x.date)), last = eps[0];
           return { advisor: ADVISORS[id].name, last_completed: last ? { id: last.id, date: last.date, kind: last.kind, with: last.with } : null, days_since: last ? Math.round((now - Date.parse(last.date)) / 864e5) : null, completed_last_90_days: eps.filter(e => now - Date.parse(e.date) <= 90 * 864e5).length }; }) }; } },
+  'insights.changes_since': { sys: 'fund', via: 'API', rw: 'read', desc: 'Change history: everything that changed for an advisor since their last completed meeting (or a given date): assets at start and end of the period split into net flows and market movement, flows by vehicle, transactions, pipeline moves, platform changes, digital engagement, business events and other contacts, with ranked highlights. Amounts in $ millions.', props: { advisor_id: 'string', since: 'string' },
+    run: a => changesSince(a) },
+  'book.get_activity': { sys: 'fund', via: 'API', rw: 'read', desc: 'Activity feed: daily purchases and redemptions for an advisor between two dates (default: the last 30 days), with net flows by vehicle. Amounts in $ millions.', props: { advisor_id: 'string', since: 'string', until: 'string' },
+    run: a => { const id = advId(a.advisor_id); if (!id || !BOOK[id]) return { note: 'Name an advisor.' }; const until = S(a.until) && !isNaN(dayMs(a.until)) ? fmtDay(dayMs(a.until)) : 'Sep 29, 2026', since = S(a.since) && !isNaN(dayMs(a.since)) ? fmtDay(dayMs(a.since)) : fmtDay(dayMs(until) - 30 * 864e5), tx = activityFeed(id, since, until), net = {};
+      tx.forEach(t => { net[t.vehicle] = M1((net[t.vehicle] || 0) + (t.type === 'Purchase' ? t.amount_usd_m : -t.amount_usd_m)); }); return { advisor: ADVISORS[id].name, period: `${since} to ${until}`, transactions: tx, net_by_vehicle_usd_m: net }; } },
   /* ---- data behind the remaining Sales AI sub-agents (simulated, fictional) ---- */
   'book.get_fund_transactions': { sys: 'fund', via: 'API', rw: 'read', desc: 'Transactions service: fund-level purchases and redemptions for an advisor, Jul to Sep 2026. Amounts in $ millions.', props: { advisor_id: 'string', fund: 'string' },
     run: a => { const id = advId(a.advisor_id), tk = tickerOf(a.fund); return { window: 'Jul 1 to Sep 28, 2026', transactions: FUND_TRANSACTIONS.filter(t => (!id || t[0] === id) && (!tk || t[2] === tk)).map(([adv, date, fund, type, amt]) => ({ advisor: ADVISORS[adv].name, date, fund, type, amount_usd_m: amt })) }; } },
@@ -732,6 +784,7 @@ RULES
 - You work for ${E.name}. When you reuse a colleague's earlier notes or work (for example call notes another wholesaler recorded), credit them by name and team and say why it helps ${E.name.split(' ')[0]}.
 - When approved messaging (MSG- ids) is available, use it verbatim or lightly edited and cite the ids in "used"; make no new claims beyond it.${a.team === 'service' ? `
 - Diagnose from evidence: for each likely cause, say what you checked and which record (case, interaction, delivery log id) confirms or rules it out. Write case notes the way an experienced service rep would: plain sentences a colleague can follow, not system shorthand.` : ''}
+- When your step reads data, write the output body the way an analyst would, in three short parts: "What I checked:" the sources you used and the period you compared; "What changed:" the specific changes with numbers from the tool results, each against its prior period or starting point; "What it means:" one to three insights for ${E.name.split(' ')[0]}, each tied to a change above. If one source shows no change, say so in a single line and move on to the sources that did change. Never conclude that nothing changed while any tool result shows activity. (Emails, posts and case notes keep their own format.)
 - Step contract: "as_of" lists the dates of the data you relied on; "status" is complete, partial (something material could not be established) or blocked; "open_questions" lists unresolved issues and conflicts.
 - "next_step": the one concrete action ${E.name} should take because of your work (who, what, by when if known), addressed to ${E.name.split(' ')[0]}. Use the same number rules. Leave it empty if there is nothing for them to do.
 

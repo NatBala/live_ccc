@@ -21,7 +21,7 @@ const EMPLOYEES = {
 };
 
 const SUGGESTIONS = {
-  sales: ['Identify the growing trends in LA territory', 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month', 'Prep me for my call with Alex tomorrow', 'Prepare Maya’s retirement committee fee comparison review', 'Sofia mentioned ETFs. What should I bring to our next meeting?', 'Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.', 'Why are Daniel’s overall sales down when his ETF sales are up?', 'Which CG ETFs are available at Wells Fargo for Daniel?', 'Prepare me for tomorrow’s meeting with Daniel’s team'],
+  sales: ['Identify the growing trends in LA territory', 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month', 'Prep me for my call with Alex tomorrow', 'Prepare Maya’s retirement committee fee comparison review', 'Sofia mentioned ETFs. What should I bring to our next meeting?', 'Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.', 'Why are Daniel’s overall sales down when his ETF sales are up?', 'Which CG ETFs are available at Wells Fargo for Daniel?', 'Prepare me for tomorrow’s meeting with Daniel’s team', 'What has changed since my last meeting with Rachel?'],
   product: ['Compare BFA and AMBAL: costs, approach and who each suits', 'Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.', 'Compare GFA F-2 costs with VWUAX and VIGAX on $38M', 'Check whether our fee comparison for Maya is still current'],
   marketing: ['Draft the follow-up email to Alex using Product’s verified comparison', 'Create an ETF email campaign for Sofia', 'Write a LinkedIn post on fee transparency for advisors'],
   service: ['Alex says the link in Priya’s email won’t open', 'Maya says the benchmark explanation is still unclear']
@@ -29,16 +29,16 @@ const SUGGESTIONS = {
 
 /* The full registry of 37 specialists. tools = what each may call through the MCP or API gateway. */
 const AGENTS = {
-  'sales.lead': { name: 'Lead Me', team: 'sales', does: 'Prioritizes advisors and opportunities using model signals', tools: ['models.sales_alpha', 'models.territory_trends', 'crm.get_opportunities', 'book.get_assets', 'book.get_flows', 'book.get_market_share', 'taxonomy.resolve', 'pipeline.get', 'engage.get_history', 'platform.get_availability', 'lead.discover', 'lead.get_ranking_trace', 'engage.get_digital', 'book.get_fund_transactions', 'events.get_changes'] },
+  'sales.lead': { name: 'Lead Me', team: 'sales', does: 'Prioritizes advisors and opportunities using model signals', tools: ['models.sales_alpha', 'models.territory_trends', 'crm.get_opportunities', 'book.get_assets', 'book.get_flows', 'book.get_market_share', 'taxonomy.resolve', 'pipeline.get', 'engage.get_history', 'platform.get_availability', 'lead.discover', 'lead.get_ranking_trace', 'engage.get_digital', 'book.get_fund_transactions', 'events.get_changes', 'insights.changes_since', 'book.get_activity'] },
   'sales.schedule': { name: 'Schedule Me', team: 'sales', does: 'Finds meeting times for advisors or colleagues and places calendar holds', tools: ['calendar.find_times', 'calendar.create_event', 'crm.get_contact', 'schedule.check_rules', 'schedule.zone_visits', 'crm.get_team'] },
-  'sales.prep': { name: 'Prep Me', team: 'sales', does: 'Builds meeting briefs and agendas from what is known about the advisor', tools: ['crm.get_call_notes', 'crm.get_opportunities', 'crm.get_contact', 'crm.get_plan', 'book.get_assets', 'pipeline.get', 'engage.get_history', 'seismic.search_content', 'crm.get_team', 'platform.get_availability', 'seismic.get_recommendations', 'seismic.resolve_evidence', 'content.get_themes', 'news.get_items', 'crm.get_tasks', 'fund.get_facts', 'fund.lookup'] },
+  'sales.prep': { name: 'Prep Me', team: 'sales', does: 'Builds meeting briefs and agendas from what is known about the advisor', tools: ['crm.get_call_notes', 'crm.get_opportunities', 'crm.get_contact', 'crm.get_plan', 'book.get_assets', 'pipeline.get', 'engage.get_history', 'seismic.search_content', 'crm.get_team', 'platform.get_availability', 'seismic.get_recommendations', 'seismic.resolve_evidence', 'content.get_themes', 'news.get_items', 'crm.get_tasks', 'fund.get_facts', 'fund.lookup', 'insights.changes_since', 'book.get_activity'] },
   'sales.engage': { name: 'Engage Me', team: 'sales', does: 'Captures what advisors say in meetings and answers live questions', tools: ['crm.get_call_notes', 'crm.log_activity', 'fund.get_facts', 'seismic.search_content', 'seismic.get_recommendations', 'models.cost_on_assets', 'models.portfolio_construction', 'fund.lookup'] },
   'sales.follow': { name: 'Follow Me', team: 'sales', does: 'Logs outcomes, creates tasks and tracks commitments', tools: ['crm.log_activity', 'crm.create_task', 'crm.get_opportunities', 'pipeline.get', 'crm.get_tasks', 'expense.get_receipts', 'crm.get_call_notes'] },
   'sales.coach': { name: 'Coach Me', team: 'sales', does: 'Private coaching for the wholesaler, never shared', tools: ['coach.get_playbook', 'fund.get_facts', 'crm.get_call_notes', 'fund.lookup'] },
-  'sales.territory': { name: 'Territory Planning', team: 'sales', does: 'Territory reviews: trends, coverage and business planning across advisors', tools: ['models.territory_trends', 'models.sales_alpha', 'crm.get_opportunities', 'crm.get_call_notes', 'engage.get_history', 'taxonomy.resolve', 'book.get_market_share', 'pipeline.get', 'territory.coverage', 'peer.compare', 'crm.get_team', 'pipeline.score', 'territory.get_plan_inputs'] },
+  'sales.territory': { name: 'Territory Planning', team: 'sales', does: 'Territory reviews: trends, coverage and business planning across advisors', tools: ['models.territory_trends', 'models.sales_alpha', 'crm.get_opportunities', 'crm.get_call_notes', 'engage.get_history', 'taxonomy.resolve', 'book.get_market_share', 'pipeline.get', 'territory.coverage', 'peer.compare', 'crm.get_team', 'pipeline.score', 'territory.get_plan_inputs', 'insights.changes_since'] },
   'product.clarify': { name: 'Query Clarifier', team: 'product', does: 'Turns loose questions into precise, answerable ones (funds, share classes, periods)', tools: ['fund.get_facts', 'fund.lookup'] },
   'product.planner': { name: 'Research Planner', team: 'product', does: 'Decides what evidence is needed and where it comes from', tools: ['mstar.get_peers', 'platform.get_availability', 'taxonomy.resolve', 'fund.lookup', 'models.get_allocations', 'platform.get_program_rules'] },
-  'product.tools': { name: 'Tool Selection', team: 'product', does: 'Runs analytics: fee math, peer data, portfolio construction', tools: ['fund.get_facts', 'fund.lookup', 'models.cost_on_assets', 'models.portfolio_construction', 'models.plan_fee_comparison', 'mstar.get_peers', 'taxonomy.resolve', 'book.get_assets', 'fund.compare'] },
+  'product.tools': { name: 'Tool Selection', team: 'product', does: 'Runs analytics: fee math, peer data, portfolio construction', tools: ['fund.get_facts', 'fund.lookup', 'models.cost_on_assets', 'models.portfolio_construction', 'models.plan_fee_comparison', 'mstar.get_peers', 'taxonomy.resolve', 'book.get_assets', 'fund.compare', 'book.get_activity'] },
   'product.summary': { name: 'Contact Summarizer', team: 'product', does: 'Summarizes the advisor context Product needs for a question', tools: [] },
   'product.tone': { name: 'Tone/Style Alignment', team: 'product', does: 'Turns verified product answers into advisor-ready language using approved messaging', tools: ['seismic.get_approved_language'] },
   'product.format': { name: 'Response Formatter', team: 'product', does: 'Formats product answers for the channel', tools: ['taxonomy.resolve', 'fund.compare'] },
@@ -387,7 +387,7 @@ const FUND_TRANSACTIONS = [
   ['ADV-103', 'Jul 30, 2026', 'AMECX', 'Purchase', 0.9],
   ['ADV-104', 'Aug 14, 2026', 'GFFFX', 'Redemption', 3.2], ['ADV-104', 'Aug 15, 2026', 'CGGR', 'Purchase', 2.9],
   ['ADV-105', 'Jul 9, 2026', 'GFFFX', 'Redemption', 4.1], ['ADV-105', 'Jul 10, 2026', 'CGGR', 'Purchase', 3.6], ['ADV-105', 'Aug 2, 2026', 'AMBFX', 'Purchase', 1.2],
-  ['ADV-106', 'Sep 8, 2026', 'ABNFX', 'Purchase', 1.5], ['ADV-107', 'Aug 27, 2026', 'CGCP', 'Purchase', 0.7]
+  ['ADV-106', 'Sep 8, 2026', 'ABNFX', 'Purchase', 1.5], ['ADV-106', 'Sep 24, 2026', 'AMBFX', 'Purchase', 1.6], ['ADV-106', 'Sep 28, 2026', 'ABNFX', 'Purchase', 0.9], ['ADV-107', 'Aug 27, 2026', 'CGCP', 'Purchase', 0.7]
 ];
 /* [market share] the advisor's assets in each category across all managers (industry book, as of Jun 30, 2026) */
 const FUND_CATEGORY = { GFFFX: 'Large Growth', AGTHX: 'Large Growth', CGGR: 'Large Growth', AWSHX: 'Large Value and Blend', CGDV: 'Large Value and Blend', AMBFX: 'Moderate Allocation', AMECX: 'Moderate Allocation', ABNFX: 'Intermediate Core Bond', CGCP: 'Intermediate Core Bond' };
@@ -469,6 +469,7 @@ const CHANGE_EVENTS = [
   ['ADV-102', 'Sep 19, 2026', 'Committee set Nov 12 for the documented fee review', 'Salesforce'],
   ['ADV-105', 'Aug 1, 2026', 'Aaron Tran joined the Kim Group as a junior advisor', 'Salesforce'],
   ['ADV-105', 'Sep 22, 2026', 'CGGR added to Wells Fargo Personalized UMA', 'Dealer intelligence feed'],
+  ['ADV-106', 'Sep 26, 2026', 'Okafor Wealth Group took on two retiree households from a retiring colleague’s book', 'Salesforce'],
   ['ADV-107', 'Sep 24, 2026', 'Forsyth Components named a new CFO, who ran a recordkeeper search at her previous company', 'News feed'],
   ['ADV-107', 'Sep 28, 2026', 'Forsyth’s incumbent recordkeeper announced a fee increase for 2027', 'News feed']
 ];
@@ -478,7 +479,7 @@ const DIGITAL = [
   ['ADV-102', 'Sep 20, 2026', 'Article open', 'Understanding fund expenses (AEM-FEES)'],
   ['ADV-104', 'Sep 9, 2026', 'Page visit', 'GFA fund page'], ['ADV-104', 'Sep 21, 2026', 'Page visit', 'GFA fund page'], ['ADV-104', 'Sep 22, 2026', 'Article open', 'Core-satellite: where active management fits (SEIS-117)'],
   ['ADV-105', 'Sep 23, 2026', 'Page visit', 'CGGR ETF page'],
-  ['ADV-106', 'Sep 16, 2026', 'Webinar', 'Retirement income in a higher-rate world']
+  ['ADV-106', 'Sep 16, 2026', 'Webinar', 'Retirement income in a higher-rate world'], ['ADV-106', 'Sep 25, 2026', 'Article open', 'Balanced vs. bond funds in a retirement income plan (SEIS-123)'], ['ADV-106', 'Sep 27, 2026', 'Page visit', 'American Balanced Fund page']
 ];
 /* [relationship graph] the advisor's own team, and Capital Group's coverage team */
 const ADVISOR_TEAMS = {

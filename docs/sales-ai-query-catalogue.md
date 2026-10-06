@@ -130,7 +130,7 @@ All of it is fictional and lives in `src/data.js`; amounts are in $ millions so 
 | Prep.Fact Check | Fund facts and the evidence resolver (page, passage and version in approved documents) |
 | Prep.Themes, Prep.News | This week’s approved themes ranked for the advisor; authorized news from the last two weeks |
 | Lead.Discover | Ranks advisors by headroom (industry book minus CG assets) against explicit criteria; saves the trace with exclusions; engagement graph and fund-level transactions |
-| Lead.Insights | Assets and flows for all seven advisors, transactions, pipeline with history, change events, the ranking trace |
+| Lead.Insights | Change history since the last meeting, assets and flows for all seven advisors, transactions, pipeline with history, change events, the ranking trace |
 | Lead.Products, Product.Research Planner | Dealer shelves for every firm (custodian platforms for the RIAs), program rules, dated model allocations, taxonomy |
 | Territory.Health Check, Reviews | Coverage tiers and completed contacts in the last 90 days |
 | Territory.Calibration | Permitted peer cohorts and medians |
@@ -140,3 +140,11 @@ All of it is fictional and lives in `src/data.js`; amounts are in $ millions so 
 | Follow.Expenses | September receipts matched to visits, with policy checks |
 | Coach.Guide | Objection playbooks built on approved messaging |
 | Product.Tool Selection, QAR | Like-for-like fund comparison with basis flags; fee and cost models |
+
+### Change history and generated activity
+
+“What has changed since my last meeting?” is answered by the change history service (`insights.changes_since`). It finds the last completed call or meeting (an email only when there was none) and compares everything after it: assets at the start and end of the period, split into net flows and market and other changes (not fund performance); flows by vehicle; fund transactions; pipeline moves; platform changes; digital engagement; business events; other contacts; and ranked highlights.
+
+For a demo, activity is generated on the fly for any advisor and period (`book.get_activity`), shaped by the advisor’s own holdings and flow trend (more ETF buying where ETF sales are growing). Recorded transactions come first. It is deterministic: the same advisor and dates always give the same numbers, so every figure an agent quotes still traces to a tool result.
+
+Every step that reads data writes its output in three parts: **What I checked** (sources and period), **What changed** (numbers against the prior period or start), and **What it means** (insights for the requester). A step may not conclude that nothing changed while any tool shows activity.

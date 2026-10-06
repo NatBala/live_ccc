@@ -420,3 +420,40 @@ RECORDED.push(
           next_step: 'Open with the model refresh (OPP-504) and ask which satellite funds Daniel is reviewing this quarter; bring SEIS-117 and SEIS-120.' } }
     } }
 );
+
+/* “What has changed since my last meeting?”: the change history service, written up the way an analyst would */
+RECORDED.push(
+  { name: 'What has changed since my last meeting with Rachel?', requester: 'EMP-PRIYA', text: 'What has changed since my last meeting with Rachel?',
+    orch: [
+      D('requester', 'Priya Shah, Sales, covers Rachel', 'Wholesaler on Rachel Okafor’s coverage; she held the last meeting.'),
+      D('intent', 'Compare: then versus now', 'Dated changes since the last meeting, not a full profile repeat.', { intent: 'compare' }),
+      D('asks', '1 thing requested', 'What changed since the last meeting with Rachel.', { asks: ['What changed since the last Rachel meeting'] }),
+      D('interpretation', 'Show what has changed for Rachel since Priya’s last meeting, and what it means', 'Catalogue #3 with #46 and #16.', { subject: { kind: 'advisor', id: 'ADV-106', label: 'Rachel Okafor · retirement income portfolios' }, intent: 'compare', scope: 'Okafor Wealth Group, retirement income portfolios (BU-106)', time: 'Since the last completed meeting (CALL-0923, Sep 23, 2026) to today', constraints: ['Dated changes only, not a full profile repeat', 'Numbers only from the change history service'], output: 'comparison', missing: [], authority: 'read_only', patterns: [3, 46, 16] }),
+      D('entity', 'Rachel → Rachel Okafor, UBS', 'One graph match; her only unit is the retirement income portfolios.', { advisor: 'ADV-106', unit: 'BU-106', confidence: 'high' }),
+      D('scope', 'Retirement income portfolios (BU-106)', 'Everything after the Sep 23 call.'),
+      D('known', 'The baseline is on file', 'CALL-0923 records what Rachel asked; MEM-061 her priority; OPP-505 the open opportunity.', { uses: ['CALL-0923', 'CALL-0624', 'MEM-061', 'OPP-505'] }),
+      D('missing', 'What happened after Sep 23', 'The change history service compares the period since the meeting.'),
+      D('memory', 'Read only', 'Nothing new about Rachel to store.', { class: 'read_only' }),
+      D('controls', 'Read-only; every number traced', 'No drafts or changes. Figures only from the change history service.'),
+      TK({ id: 'T1', route: 'Prep.Notes', title: 'Set the baseline', objective: 'Summarize what Rachel said at the last meeting, so changes can be read against it', services: ['call notes', 'memory'], tools: ['crm.get_call_notes'], reads: ['memory'], returns: 'What she asked and cared about on Sep 23', why: 'Notes Summarizer reads recorded calls in Salesforce; it runs alongside the change analysis.' }),
+      TK({ id: 'T2', route: 'Lead.Insights', title: 'Find what changed since Sep 23', objective: 'Compare assets, transactions, pipeline, platform, engagement and events since the last meeting', services: ['change history'], tools: ['insights.changes_since'], reads: ['knowledge'], returns: 'Dated changes with numbers, against the start of the period', why: 'Insights Generator explains change; the change history service on the data platform supplies it.' }),
+      TK({ id: 'T3', route: 'Prep.Fact Check', title: 'Check and explain the changes', objective: 'Verify each change against the service and read it against the baseline: what it means for Priya', depends_on: ['T1', 'T2'], reads: ['memory', 'knowledge', 'policy'], tools: [], returns: 'A verified answer with what it means and what to do next', why: 'Fact Check makes sure every figure traces before Priya uses it.' }),
+      D('success', 'Priya knows what moved and why it matters', 'Dated changes against her last meeting, read as insight, with a next step.'),
+      L({ k: 'end' })
+    ].join('\n'),
+    agents: {
+      T1: { calls: [['crm.get_call_notes', { advisor_id: 'ADV-106' }]],
+        json: { says: 'I set the baseline from Priya’s Sep 23 call with Rachel and the earlier June call, so each change can be read against what she asked.',
+          output: { kind: 'note', title: 'Baseline: what Rachel told us on Sep 23', body: 'What I checked: Rachel’s recorded calls in Salesforce, latest first.\n\nWhat she said (CALL-0923, Sep 23, with Priya): “My retirees want reliable income, and I am reviewing balanced and bond funds for them.” She asked how American Balanced and The Bond Fund of America fit an income plan.\n\nEarlier context (CALL-0624, Jun 24): clients want “a paycheck they can plan around”; Diane Hughes asked for client-friendly material on how income is paid out.\n\nWhat it means: read every change since Sep 23 against one question: is she acting on AMBAL and BFA for retiree income?' },
+          used: ['CALL-0923', 'CALL-0624', 'MEM-061'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], as_of: ['Sep 23, 2026'], status: 'complete', next_step: '' } },
+      T2: { calls: [['insights.changes_since', { advisor_id: 'ADV-106' }]],
+        json: { says: 'I compared everything since the Sep 23 meeting: Rachel bought both funds she asked about and her book grew.',
+          output: { kind: 'finding', title: 'Changes since the Sep 23 meeting', body: 'What I checked: the change history service for Sep 23 to Sep 29, 2026 (assets, transactions, pipeline, platform, digital engagement, business events).\n\nWhat changed:\n- Assets: $44.9M to $47.5M; $2.5M from net flows, $0.1M from market and other changes\n- Sep 24: bought $1.6M of AMBAL (AMBFX), the day after the meeting\n- Sep 25: opened “Balanced vs. bond funds in a retirement income plan” (SEIS-123); Sep 27: visited the American Balanced Fund page\n- Sep 26: took on two retiree households from a retiring colleague’s book\n- Sep 28: bought $0.9M of BFA (ABNFX)\n- No change: pipeline stage (OPP-505 still Discovery), platform, service cases\n\nWhat it means: she is acting on exactly what she asked about, and the new retiree households add demand for income.' },
+          used: ['insights.changes_since', 'OPP-505'], knowledge: [{ label: 'Rachel Okafor acted on balanced and bond funds after the Sep 23 meeting', value: 'Bought $1.6M of AMBFX on Sep 24 and $0.9M of ABNFX on Sep 28, read SEIS-123, visited the American Balanced page, and took on two retiree households.', evidence: ['insights.changes_since'] }], memory: [], commitments: [], needs_approval: false, open_questions: [], as_of: ['Sep 29, 2026'], status: 'complete', next_step: '' } },
+      T3: { calls: [],
+        json: { says: 'I checked every change against the service and read it against Rachel’s own words from Sep 23.',
+          output: { kind: 'answer', title: 'What changed since your Sep 23 meeting with Rachel', body: 'Short answer: Rachel has started acting on the income plan you discussed.\n\n- She put $2.5M into the two funds she asked about: $1.6M in AMBAL on Sep 24 and $0.9M in BFA on Sep 28\n- She read our balanced-versus-bond comparison (SEIS-123) and looked at the American Balanced page\n- Her book grew: two retiree households joined from a retiring colleague, which adds income demand\n- Not changed: the opportunity (OPP-505) is still in Discovery\n\nWhy it matters: the $2.5M looks like a first allocation, not the full income sleeve, and the new households are the natural next conversation.\n\nEvery figure traces to the change history service.' },
+          used: ['insights.changes_since', 'CALL-0923', 'OPP-505', 'SEIS-123'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: ['Is the $2.5M a first allocation or the full income sleeve?'], as_of: ['Sep 29, 2026'], status: 'complete',
+          next_step: 'Call Rachel this week: ask whether the $2.5M is the start of the income sleeve, offer the client-friendly income piece Diane asked for, and update OPP-505 if she confirms.' } }
+    } }
+);
