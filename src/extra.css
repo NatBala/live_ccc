@@ -447,7 +447,7 @@
 :root[data-skin="porcelain"] .sugrep{color:#1f6b48;border-color:#7fbf9f}
 
 /* eight enterprise systems in two rows */
-@media (min-width:861px){.systems{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (min-width:861px){.systems{grid-template-columns:repeat(5,minmax(0,1fr))}}
 
 /* ===== Sales AI: intelligence, orchestration and the query catalogue ===== */
 .planbtn{border:1px solid var(--gold);border-radius:10px;background:none;color:var(--gold);font-weight:700;padding:0 12px;white-space:nowrap}
@@ -519,3 +519,8 @@ dl.interp dd small{color:var(--mute)}
 .fam small{color:var(--mute)}
 .intents{display:grid;gap:3px;font-size:12px;margin-top:8px}
 @media (prefers-color-scheme:dark){:root:not([data-skin="porcelain"]) .ib{background:#2c2550;color:#cfc3ff}:root:not([data-skin="porcelain"]) .rc.sv.simulated,:root:not([data-skin="porcelain"]) .cs.complete{background:#143a2a;color:#9fe3c2;border-color:#2f6b4f}:root:not([data-skin="porcelain"]) .rc.sv.foundation{background:#16304d;color:#a9cdf5;border-color:#2c527c}}
+
+/* sub-agents and their data, in the catalogue */
+.subrow{display:grid;grid-template-columns:auto 1fr;gap:1px 8px;align-items:baseline;padding:3px 0;border-top:1px dotted var(--rule)}
+.subrow small{color:var(--mute);font-size:11.5px}
+.subdata{grid-column:2;display:flex;flex-wrap:wrap;gap:2px}

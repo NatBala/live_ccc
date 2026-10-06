@@ -112,9 +112,31 @@ Queries 59 to 80 and the detailed walkthroughs of compound requests were not par
 | Eleven business intents | `INTENTS` in `src/catalogue.js`; the orchestrator must pick one. |
 | Action authority | Settled by rule from the request’s own words (`authorityFromText`), capped below whatever the AI asks for. Tools above it are removed at the gateway (`TOOL_ACT`). Under read-only authority, follow-ups are proposed, not created; the person can create them. |
 | Sub-agent routes | `SUBAGENTS`; each task runs one route such as `Prep.Notes`. |
-| Shared services | `SERVICES`, each marked **simulated** (demo data here), **foundation** (built in) or **not connected**. A step that needs a not-connected service reports partial results instead of inventing them. |
+| Shared services | `SERVICES`, each marked **simulated** (demo data here), **foundation** (built in) or **not connected**. Every service in the catalogue now has simulated data; a service marked not connected would make its step report partial results instead of inventing them. |
+| Data per sub-agent | `SUB_USES` lists the services each sub-agent reads by default (for example Lead.Insights reads assets, flows, transactions, pipeline, change events and the ranking trace). A planned step that names no data gets these. Shown in the Catalogue tab and in each agent’s details. |
 | Parallel waves | A step’s wave is one after the latest step it depends on. Steps in a wave run concurrently; each wave’s output stays on screen for 5 seconds before the next wave. |
 | Step contract | Every step shows status, sources, as-of dates and unresolved issues. |
 | Catalogue-guided planning | The live planner sees the three closest catalogue entries as reference patterns. **Decompose** in the Catalogue tab turns a route into a plan without an AI call; **Plan only** shows the live AI’s decomposition without running it. |
 
-Simulated data for the services (Daniel Kim’s book, flows, market share and Wells Fargo shelf; pipeline history including the Forsyth opportunity) is fictional and lives in `src/data.js`.
+## 5. The data behind each sub-agent
+
+All of it is fictional and lives in `src/data.js`; amounts are in $ millions so every figure an agent quotes traces to a tool result.
+
+| Sub-agent | What it reads |
+|---|---|
+| Prep.Profile | Advisor and coverage teams with roles, CG book by vehicle and fund, retirement plans (Maya’s PLAN-102, Alex’s PLAN-101), dealer programs |
+| Prep.Notes, Follow.Dictation, Coach.Simulation | Dated calls, meeting notes and emails (including older notes on how each team invests) |
+| Prep.Content, Engage.Recommendations | Approved content plus the recommendation trace: stated need (with the call that shows it) or popularity |
+| Prep.Fact Check | Fund facts and the evidence resolver (page, passage and version in approved documents) |
+| Prep.Themes, Prep.News | This week’s approved themes ranked for the advisor; authorized news from the last two weeks |
+| Lead.Discover | Ranks advisors by headroom (industry book minus CG assets) against explicit criteria; saves the trace with exclusions; engagement graph and fund-level transactions |
+| Lead.Insights | Assets and flows for all seven advisors, transactions, pipeline with history, change events, the ranking trace |
+| Lead.Products, Product.Research Planner | Dealer shelves for every firm (custodian platforms for the RIAs), program rules, dated model allocations, taxonomy |
+| Territory.Health Check, Reviews | Coverage tiers and completed contacts in the last 90 days |
+| Territory.Calibration | Permitted peer cohorts and medians |
+| Territory.Strategy, Business Planning | Pipeline scoring with its basis; sales goals, year-to-date sales, capacity and priorities |
+| Schedule.Calendar, Zoning, Compliance | Open slots; visits grouped by zone with drive times; firm meeting rules plus Capital Group policy |
+| Follow.Tasks | Open commitments with owners and due dates |
+| Follow.Expenses | September receipts matched to visits, with policy checks |
+| Coach.Guide | Objection playbooks built on approved messaging |
+| Product.Tool Selection, QAR | Like-for-like fund comparison with basis flags; fee and cost models |

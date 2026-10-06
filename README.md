@@ -49,7 +49,7 @@ This branch puts the intelligence and orchestration layer at the center. Every r
 - **Business intents, not keywords:** retrieve, summarize, compare, diagnose, prioritize, prepare, verify, draft, execute, remember, monitor.
 - **Action authority by rule:** “help me prepare” is read-only, so it never books, sends or updates anything; tools above the authority are removed at the gateway and follow-ups are proposed, not created.
 - **Catalogue tab:** 58 catalogued requests with their decomposition and route (`Prep.Notes` = Prep Me → Notes Summarizer). **Decompose** turns a route into a plan without an AI call; **Plan only** in the command bar shows the live AI’s own decomposition without running it.
-- **Shared services** in `[brackets]` are marked simulated, built into the foundation, or not connected; a step that needs a missing one says what it could not establish.
+- **Shared services** in `[brackets]` are marked simulated, built into the foundation, or not connected; a step that needs a missing one says what it could not establish. Every catalogue service has simulated data, and each sub-agent lists the data it reads (Catalogue tab, and each agent’s details).
 - Try (as Priya): `Why are Daniel’s overall sales down when his ETF sales are up?`, `Which CG ETFs are available at Wells Fargo for Daniel?`, `Prepare me for tomorrow’s meeting with Daniel’s team`. Each has a saved run (▶).
 
 Details: [docs/sales-ai-query-catalogue.md](docs/sales-ai-query-catalogue.md).
@@ -199,6 +199,6 @@ live_ccc/
 ---
 
 ## Data notice
-- People, firms’ teams, conversations, holdings, the retirement plan (PLAN-102), service contacts, delivery logs, campaign results and approved messaging in the reference data are **fictional**. Firm names are real only for context.
+- People, firms’ teams, conversations, holdings, retirement plans, books and flows, dealer shelves, pipeline, coverage, goals, expenses, news and themes, service contacts, delivery logs, campaign results and approved messaging in the reference data are **fictional**. Firm names are real only for context.
 - Fund expense ratios for GFA (F-2 0.40%), BFA (F-2 0.34%), AMBAL (F-2 0.35%), VWUAX (0.25%) and VIGAX (0.05%) come from public sources as of the dates shown in the app; other funds’ numbers are intentionally left out, and performance is never generated.
 - Get compliance and security approval before connecting real client data or sending it to any AI provider.

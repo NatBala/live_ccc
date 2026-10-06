@@ -97,43 +97,68 @@ const routeOfTask = (agent, sub) => { for (const [fam, A] of Object.entries(SUBA
 
 /* Shared tools and services: [name] in a route. Not autonomous agents. */
 const SERVICES = {
-  assets: { name: 'Assets', status: 'simulated', tools: ['book.get_assets'], does: 'CG assets by vehicle and fund, as of a date' },
-  flows: { name: 'Flows', status: 'simulated', tools: ['book.get_flows'], does: 'Gross sales, redemptions and net flows by vehicle and channel, period over period' },
+  assets: { name: 'Assets', status: 'simulated', tools: ['book.get_assets'], does: 'CG assets by vehicle and fund for each advisor’s team, as of a date, with the prior year' },
+  flows: { name: 'Flows', status: 'simulated', tools: ['book.get_flows'], does: 'Gross sales, redemptions and net flows by vehicle and channel, twelve months over twelve' },
+  transactions: { name: 'Transactions', status: 'simulated', tools: ['book.get_fund_transactions'], does: 'Fund-level purchases and redemptions, Jul to Sep 2026' },
   'market share': { name: 'Market share', status: 'simulated', tools: ['book.get_market_share'], does: 'Metric definition, numerator, denominator and share by category' },
   taxonomy: { name: 'Taxonomy', status: 'simulated', tools: ['taxonomy.resolve'], does: 'Maps a category (equity funds, ETFs) to the actual funds, with exclusions' },
-  'platform eligibility': { name: 'Platform eligibility', status: 'simulated', tools: ['platform.get_availability'], does: 'Dealer platform and program availability with effective dates' },
+  positions: { name: 'Positions', status: 'simulated', tools: ['book.get_assets'], does: 'Holdings at fund level (security-level positions are not modeled)' },
+  'platform eligibility': { name: 'Platform eligibility', status: 'simulated', tools: ['platform.get_availability'], does: 'Dealer platform and program availability with effective dates, for every advisor’s firm' },
+  'program rules': { name: 'Program rules', status: 'simulated', tools: ['platform.get_program_rules'], does: 'Account and program minimums and rules' },
+  'allocation versions': { name: 'Allocation versions', status: 'simulated', tools: ['models.get_allocations'], does: 'Dated model allocations by dealer version' },
+  'approved comparison tool': { name: 'Approved comparison tool', status: 'simulated', tools: ['fund.compare'], does: 'Like-for-like fund comparisons with basis flags' },
+  'fund facts': { name: 'Fund facts', status: 'simulated', tools: ['fund.get_facts', 'fund.lookup'], does: 'Verified fund facts from the data platform' },
   pipeline: { name: 'Pipeline', status: 'simulated', tools: ['pipeline.get'], does: 'Opportunities with current status and status history' },
+  'pipeline scoring': { name: 'Pipeline scoring', status: 'simulated', tools: ['pipeline.score'], does: 'Scores open opportunities by stage, size and recency, basis shown' },
+  'change events': { name: 'Change events', status: 'simulated', tools: ['events.get_changes'], does: 'Business events after a date: hires, launches, sponsor and platform changes' },
   plans: { name: 'Plans', status: 'simulated', tools: ['crm.get_plan'], does: 'Retirement plan records and lineups' },
-  engagements: { name: 'Engagements', status: 'simulated', tools: ['engage.get_history'], does: 'Completed and scheduled interactions per advisor' },
+  'call notes': { name: 'Call notes', status: 'simulated', tools: ['crm.get_call_notes'], does: 'Recorded calls, meeting notes and emails, dated and attributed' },
+  engagements: { name: 'Engagements', status: 'simulated', tools: ['engage.get_history'], does: 'Completed interactions per advisor' },
+  'engagement graph': { name: 'Engagement graph', status: 'simulated', tools: ['engage.get_digital'], does: 'Attributable page visits, article opens and webinars (observed events, not intent)' },
+  'lead discovery': { name: 'Lead discovery', status: 'simulated', tools: ['lead.discover'], does: 'Ranks advisors against explicit criteria and saves the trace' },
+  'ranking trace': { name: 'Ranking trace', status: 'simulated', tools: ['lead.get_ranking_trace'], does: 'Why a ranked list came out the way it did, and who was excluded' },
+  'peer analytics': { name: 'Peer analytics', status: 'simulated', tools: ['peer.compare'], does: 'Permitted peer cohorts and medians' },
+  'coverage analytics': { name: 'Coverage analytics', status: 'simulated', tools: ['territory.coverage'], does: 'Completed contacts against coverage-tier targets' },
+  'plan inputs': { name: 'Plan inputs', status: 'simulated', tools: ['territory.get_plan_inputs'], does: 'Sales goals, year-to-date sales, capacity and priorities' },
+  calendar: { name: 'Calendar', status: 'simulated', tools: ['calendar.find_times'], does: 'Open slots for advisors and colleagues' },
+  zoning: { name: 'Zoning', status: 'simulated', tools: ['schedule.zone_visits'], does: 'Visit grouping by geography and drive time' },
+  'meeting rules': { name: 'Meeting rules', status: 'simulated', tools: ['schedule.check_rules'], does: 'Firm meeting rules plus Capital Group policy' },
+  themes: { name: 'Themes', status: 'simulated', tools: ['content.get_themes'], does: 'This week’s approved themes, ranked for the advisor' },
+  news: { name: 'News', status: 'simulated', tools: ['news.get_items'], does: 'Authorized news and commentary, last two weeks' },
+  'recommendation trace': { name: 'Recommendation trace', status: 'simulated', tools: ['seismic.get_recommendations'], does: 'Why each piece was recommended: stated need or popularity' },
+  'evidence resolver': { name: 'Evidence resolver', status: 'simulated', tools: ['seismic.resolve_evidence'], does: 'Resolves a claim to the source page and version' },
+  'objection playbook': { name: 'Objection playbook', status: 'simulated', tools: ['coach.get_playbook'], does: 'Coaching steps and approved language for objections' },
+  'expense system': { name: 'Expense system', status: 'simulated', tools: ['expense.get_receipts'], does: 'Receipts matched to visits, with travel policy checks' },
+  'service state': { name: 'Service state', status: 'simulated', tools: ['service.get_cases'], does: 'Open and resolved service cases' },
   memory: { name: 'Memory', status: 'foundation', tools: [], does: 'Scoped, sourced advisor memory in the shared foundation' },
   policy: { name: 'Policy', status: 'foundation', tools: [], does: 'Rules applied to every packet and contribution' },
-  'task state': { name: 'Task state', status: 'foundation', tools: [], does: 'Open commitments, owners and due dates' },
+  'task state': { name: 'Task state', status: 'foundation', tools: ['crm.get_tasks'], does: 'Open commitments, owners and due dates' },
   'approved search': { name: 'Approved search', status: 'foundation', tools: ['seismic.search_content'], does: 'Search over approved content only' },
   'change history': { name: 'Change history', status: 'foundation', tools: [], does: 'Memory revisions and events since a date' },
-  'relationship graph': { name: 'Relationship graph', status: 'foundation', tools: [], does: 'People, firms, units and coverage' },
-  'action review': { name: 'Action review', status: 'foundation', tools: [], does: 'Human review of any change before it is made' },
-  'service state': { name: 'Service state', status: 'simulated', tools: ['service.get_cases'], does: 'Open and resolved service cases' },
-  'peer analytics': { name: 'Peer analytics', status: 'not connected', tools: [], does: 'Permitted peer cohorts and comparisons' },
-  'engagement graph': { name: 'Engagement graph', status: 'not connected', tools: [], does: 'Web and content engagement attributable to advisors' },
-  'ranking trace': { name: 'Ranking trace', status: 'not connected', tools: [], does: 'Why a ranked list came out the way it did' },
-  'recommendation trace': { name: 'Recommendation trace', status: 'not connected', tools: [], does: 'Why a content item was recommended' },
-  'evidence resolver': { name: 'Evidence resolver', status: 'not connected', tools: [], does: 'Resolves a claim to the source page and version' },
-  positions: { name: 'Positions', status: 'not connected', tools: [], does: 'Position-level holdings' },
-  'program rules': { name: 'Program rules', status: 'not connected', tools: [], does: 'Account and program minimums and rules' },
-  'allocation versions': { name: 'Allocation versions', status: 'not connected', tools: [], does: 'Dated model allocations by dealer version' },
-  'approved comparison tool': { name: 'Approved comparison tool', status: 'not connected', tools: [], does: 'Like-for-like fund comparisons' },
-  'coverage analytics': { name: 'Coverage analytics', status: 'not connected', tools: [], does: 'Coverage frequency against priorities' },
-  'pipeline scoring': { name: 'Pipeline scoring', status: 'not connected', tools: [], does: 'Scores opportunities for attention' },
-  'change events': { name: 'Change events', status: 'not connected', tools: [], does: 'Business events after a date' },
-  'expense system': { name: 'Expense system', status: 'not connected', tools: [], does: 'Receipts, policies and allocations' }
+  'relationship graph': { name: 'Relationship graph', status: 'foundation', tools: ['crm.get_team'], does: 'The advisor’s team, Capital Group’s coverage team, firms and units' },
+  'action review': { name: 'Action review', status: 'foundation', tools: [], does: 'Human review of any change before it is made' }
 };
-const SERVICE_ALIASES = { 'flows calculations': 'flows', transactions: 'flows', 'assets history': 'assets', 'metric definitions': 'market share', 'dealer changes': 'platform eligibility', 'pipeline history': 'pipeline', tasks: 'task state', 'plan master': 'plans', 'plans pagination': 'plans', service: 'service state', 'task state': 'task state' };
+const SERVICE_ALIASES = { 'flows calculations': 'flows', 'assets history': 'assets', 'metric definitions': 'market share', 'dealer changes': 'platform eligibility', 'pipeline history': 'pipeline', tasks: 'task state', 'plan master': 'plans', 'plans pagination': 'plans', service: 'service state', 'task state': 'task state' };
 /* "[assets/pipeline]" → ['assets', 'pipeline'] (known keys, or the raw name when unknown) */
 function serviceKeys(raw) {
   const inner = String(raw).replace(/^\[|\]$/g, '').trim();
   return inner.split(/\s*(?:\/|\+)\s*/).map(s => s.trim().toLowerCase()).filter(Boolean).map(s => SERVICES[s] ? s : SERVICE_ALIASES[s] || s);
 }
 const serviceStatus = k => SERVICES[k] ? SERVICES[k].status : 'not connected';
+/* The data each sub-agent reads by default. A planned step that names no services gets these. */
+const SUB_USES = {
+  'Prep.Profile': ['relationship graph', 'assets', 'plans', 'platform eligibility'], 'Prep.Notes': ['call notes', 'memory'], 'Prep.Content': ['approved search', 'recommendation trace'],
+  'Prep.Fact Check': ['evidence resolver', 'fund facts'], 'Prep.Agenda': ['task state'], 'Prep.Themes': ['themes'], 'Prep.News': ['news'],
+  'Lead.Discover': ['lead discovery', 'engagement graph', 'transactions'], 'Lead.Insights': ['assets', 'flows', 'transactions', 'pipeline', 'change events', 'ranking trace'], 'Lead.Products': ['platform eligibility', 'taxonomy'],
+  'Territory.Health Check': ['coverage analytics', 'engagements'], 'Territory.Calibration': ['peer analytics'], 'Territory.Teaming': ['relationship graph'], 'Territory.Reviews': ['coverage analytics'],
+  'Territory.Strategy': ['pipeline scoring', 'plan inputs'], 'Territory.Business Planning': ['plan inputs', 'pipeline scoring'],
+  'Schedule.Calendar': ['calendar'], 'Schedule.Email': [], 'Schedule.Compliance': ['meeting rules'], 'Schedule.Zoning': ['zoning'],
+  'Engage.Q&A': ['fund facts'], 'Engage.Recommendations': ['recommendation trace'], 'Engage.Capture': ['call notes'], 'Engage.Scenario': ['fund facts'],
+  'Follow.Dictation': ['call notes'], 'Follow.Tasks': ['task state'], 'Follow.Expenses': ['expense system'],
+  'Coach.Simulation': ['call notes', 'memory'], 'Coach.Guide': ['objection playbook', 'fund facts'],
+  'Product.Research Planner': ['platform eligibility', 'taxonomy', 'allocation versions', 'program rules'], 'Product.Tool Selection': ['approved comparison tool', 'assets'], 'Product.Response Formatter': ['taxonomy'], 'Product.QAR': ['fund facts', 'approved comparison tool'],
+  'Marketing.Resource Gatherer': ['approved search'], 'Marketing.Document Analyzer': ['evidence resolver'], 'Marketing.Editor': [], 'Marketing.Audience Builder': ['engagements'], 'Marketing.Distribution': []
+};
 
 /* Parse a catalogue route into stages. Items in one stage run together; stages run in order.
    The last stage is the output. Brackets may contain "+" or "/", so split only outside them. */

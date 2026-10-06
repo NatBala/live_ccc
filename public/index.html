@@ -935,7 +935,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 :root[data-skin="porcelain"] .sugrep{color:#1f6b48;border-color:#7fbf9f}
 
 /* eight enterprise systems in two rows */
-@media (min-width:861px){.systems{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (min-width:861px){.systems{grid-template-columns:repeat(5,minmax(0,1fr))}}
 
 /* ===== Sales AI: intelligence, orchestration and the query catalogue ===== */
 .planbtn{border:1px solid var(--gold);border-radius:10px;background:none;color:var(--gold);font-weight:700;padding:0 12px;white-space:nowrap}
@@ -1007,6 +1007,11 @@ dl.interp dd small{color:var(--mute)}
 .fam small{color:var(--mute)}
 .intents{display:grid;gap:3px;font-size:12px;margin-top:8px}
 @media (prefers-color-scheme:dark){:root:not([data-skin="porcelain"]) .ib{background:#2c2550;color:#cfc3ff}:root:not([data-skin="porcelain"]) .rc.sv.simulated,:root:not([data-skin="porcelain"]) .cs.complete{background:#143a2a;color:#9fe3c2;border-color:#2f6b4f}:root:not([data-skin="porcelain"]) .rc.sv.foundation{background:#16304d;color:#a9cdf5;border-color:#2c527c}}
+
+/* sub-agents and their data, in the catalogue */
+.subrow{display:grid;grid-template-columns:auto 1fr;gap:1px 8px;align-items:baseline;padding:3px 0;border-top:1px dotted var(--rule)}
+.subrow small{color:var(--mute);font-size:11.5px}
+.subdata{grid-column:2;display:flex;flex-wrap:wrap;gap:2px}
 </style>
 </head>
 <body>
@@ -1103,29 +1108,29 @@ const SUGGESTIONS = {
 
 /* The full registry of 37 specialists. tools = what each may call through the MCP or API gateway. */
 const AGENTS = {
-  'sales.lead': { name: 'Lead Me', team: 'sales', does: 'Prioritizes advisors and opportunities using model signals', tools: ['models.sales_alpha', 'models.territory_trends', 'crm.get_opportunities', 'book.get_assets', 'book.get_flows', 'book.get_market_share', 'taxonomy.resolve', 'pipeline.get', 'engage.get_history', 'platform.get_availability'] },
-  'sales.schedule': { name: 'Schedule Me', team: 'sales', does: 'Finds meeting times for advisors or colleagues and places calendar holds', tools: ['calendar.find_times', 'calendar.create_event', 'crm.get_contact'] },
-  'sales.prep': { name: 'Prep Me', team: 'sales', does: 'Builds meeting briefs and agendas from what is known about the advisor', tools: ['crm.get_call_notes', 'crm.get_opportunities', 'crm.get_contact', 'crm.get_plan', 'book.get_assets', 'pipeline.get', 'engage.get_history', 'seismic.search_content'] },
-  'sales.engage': { name: 'Engage Me', team: 'sales', does: 'Captures what advisors say in meetings and answers live questions', tools: ['crm.get_call_notes', 'crm.log_activity', 'fund.get_facts', 'seismic.search_content'] },
-  'sales.follow': { name: 'Follow Me', team: 'sales', does: 'Logs outcomes, creates tasks and tracks commitments', tools: ['crm.log_activity', 'crm.create_task', 'crm.get_opportunities', 'pipeline.get'] },
-  'sales.coach': { name: 'Coach Me', team: 'sales', does: 'Private coaching for the wholesaler, never shared', tools: [] },
-  'sales.territory': { name: 'Territory Planning', team: 'sales', does: 'Territory reviews: trends, coverage and business planning across advisors', tools: ['models.territory_trends', 'models.sales_alpha', 'crm.get_opportunities', 'crm.get_call_notes', 'engage.get_history', 'taxonomy.resolve', 'book.get_market_share', 'pipeline.get'] },
+  'sales.lead': { name: 'Lead Me', team: 'sales', does: 'Prioritizes advisors and opportunities using model signals', tools: ['models.sales_alpha', 'models.territory_trends', 'crm.get_opportunities', 'book.get_assets', 'book.get_flows', 'book.get_market_share', 'taxonomy.resolve', 'pipeline.get', 'engage.get_history', 'platform.get_availability', 'lead.discover', 'lead.get_ranking_trace', 'engage.get_digital', 'book.get_fund_transactions', 'events.get_changes'] },
+  'sales.schedule': { name: 'Schedule Me', team: 'sales', does: 'Finds meeting times for advisors or colleagues and places calendar holds', tools: ['calendar.find_times', 'calendar.create_event', 'crm.get_contact', 'schedule.check_rules', 'schedule.zone_visits', 'crm.get_team'] },
+  'sales.prep': { name: 'Prep Me', team: 'sales', does: 'Builds meeting briefs and agendas from what is known about the advisor', tools: ['crm.get_call_notes', 'crm.get_opportunities', 'crm.get_contact', 'crm.get_plan', 'book.get_assets', 'pipeline.get', 'engage.get_history', 'seismic.search_content', 'crm.get_team', 'platform.get_availability', 'seismic.get_recommendations', 'seismic.resolve_evidence', 'content.get_themes', 'news.get_items', 'crm.get_tasks', 'fund.get_facts', 'fund.lookup'] },
+  'sales.engage': { name: 'Engage Me', team: 'sales', does: 'Captures what advisors say in meetings and answers live questions', tools: ['crm.get_call_notes', 'crm.log_activity', 'fund.get_facts', 'seismic.search_content', 'seismic.get_recommendations', 'models.cost_on_assets', 'models.portfolio_construction', 'fund.lookup'] },
+  'sales.follow': { name: 'Follow Me', team: 'sales', does: 'Logs outcomes, creates tasks and tracks commitments', tools: ['crm.log_activity', 'crm.create_task', 'crm.get_opportunities', 'pipeline.get', 'crm.get_tasks', 'expense.get_receipts', 'crm.get_call_notes'] },
+  'sales.coach': { name: 'Coach Me', team: 'sales', does: 'Private coaching for the wholesaler, never shared', tools: ['coach.get_playbook', 'fund.get_facts', 'crm.get_call_notes', 'fund.lookup'] },
+  'sales.territory': { name: 'Territory Planning', team: 'sales', does: 'Territory reviews: trends, coverage and business planning across advisors', tools: ['models.territory_trends', 'models.sales_alpha', 'crm.get_opportunities', 'crm.get_call_notes', 'engage.get_history', 'taxonomy.resolve', 'book.get_market_share', 'pipeline.get', 'territory.coverage', 'peer.compare', 'crm.get_team', 'pipeline.score', 'territory.get_plan_inputs'] },
   'product.clarify': { name: 'Query Clarifier', team: 'product', does: 'Turns loose questions into precise, answerable ones (funds, share classes, periods)', tools: ['fund.get_facts', 'fund.lookup'] },
-  'product.planner': { name: 'Research Planner', team: 'product', does: 'Decides what evidence is needed and where it comes from', tools: ['mstar.get_peers', 'platform.get_availability', 'taxonomy.resolve', 'fund.lookup'] },
-  'product.tools': { name: 'Tool Selection', team: 'product', does: 'Runs analytics: fee math, peer data, portfolio construction', tools: ['fund.get_facts', 'fund.lookup', 'models.cost_on_assets', 'models.portfolio_construction', 'models.plan_fee_comparison', 'mstar.get_peers', 'taxonomy.resolve', 'book.get_assets'] },
+  'product.planner': { name: 'Research Planner', team: 'product', does: 'Decides what evidence is needed and where it comes from', tools: ['mstar.get_peers', 'platform.get_availability', 'taxonomy.resolve', 'fund.lookup', 'models.get_allocations', 'platform.get_program_rules'] },
+  'product.tools': { name: 'Tool Selection', team: 'product', does: 'Runs analytics: fee math, peer data, portfolio construction', tools: ['fund.get_facts', 'fund.lookup', 'models.cost_on_assets', 'models.portfolio_construction', 'models.plan_fee_comparison', 'mstar.get_peers', 'taxonomy.resolve', 'book.get_assets', 'fund.compare'] },
   'product.summary': { name: 'Contact Summarizer', team: 'product', does: 'Summarizes the advisor context Product needs for a question', tools: [] },
   'product.tone': { name: 'Tone/Style Alignment', team: 'product', does: 'Turns verified product answers into advisor-ready language using approved messaging', tools: ['seismic.get_approved_language'] },
-  'product.format': { name: 'Response Formatter', team: 'product', does: 'Formats product answers for the channel', tools: ['taxonomy.resolve'] },
-  'product.qar': { name: 'QAR', team: 'product', does: 'Produces verified answers; every number traced to a system of record', tools: ['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.cost_on_assets', 'models.plan_fee_comparison', 'seismic.search_content', 'platform.get_availability', 'taxonomy.resolve'] },
+  'product.format': { name: 'Response Formatter', team: 'product', does: 'Formats product answers for the channel', tools: ['taxonomy.resolve', 'fund.compare'] },
+  'product.qar': { name: 'QAR', team: 'product', does: 'Produces verified answers; every number traced to a system of record', tools: ['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.cost_on_assets', 'models.plan_fee_comparison', 'seismic.search_content', 'platform.get_availability', 'taxonomy.resolve', 'fund.compare', 'models.get_allocations', 'platform.get_program_rules'] },
   'product.institutional': { name: 'Institutional Pitch Books', team: 'product', does: 'Institutional product materials', tools: ['seismic.search_content'] },
   'product.srg': { name: 'SRG Product Pitch Books', team: 'product', does: 'Product pitch books for the retail advisor channel', tools: ['seismic.search_content'] },
   'marketing.gather': { name: 'Resource Gatherer', team: 'marketing', does: 'Finds approved content, templates, messaging and landing pages', tools: ['seismic.search_content', 'seismic.get_approved_language', 'aem.get_page', 'mcloud.get_engagement'] },
-  'marketing.analyze': { name: 'Document Analyzer', team: 'marketing', does: 'Extracts key points from approved documents', tools: ['seismic.search_content', 'service.get_insights'] },
+  'marketing.analyze': { name: 'Document Analyzer', team: 'marketing', does: 'Extracts key points from approved documents', tools: ['seismic.search_content', 'service.get_insights', 'seismic.resolve_evidence'] },
   'marketing.copy': { name: 'Copywriter / Editor', team: 'marketing', does: 'Writes drafts in the audience’s preferred format from verified findings', tools: ['seismic.get_approved_language'] },
   'marketing.audit': { name: 'Audit Support', team: 'marketing', does: 'Keeps the audit trail for published material', tools: [] },
   'marketing.legal': { name: 'Legal & Compliance', team: 'marketing', does: 'Reviews claims, performance presentation and disclosures', tools: ['sharepoint.get_disclosures', 'seismic.get_approved_language'] },
   'marketing.image': { name: 'Image Analyzer', team: 'marketing', does: 'Checks charts and images in materials', tools: [] },
-  'marketing.audience': { name: 'Audience Builder', team: 'marketing', does: 'Builds permitted audiences for campaigns', tools: ['models.sales_alpha', 'models.territory_trends', 'crm.get_contact', 'mcloud.get_engagement'] },
+  'marketing.audience': { name: 'Audience Builder', team: 'marketing', does: 'Builds permitted audiences for campaigns', tools: ['models.sales_alpha', 'models.territory_trends', 'crm.get_contact', 'mcloud.get_engagement', 'engage.get_history', 'engage.get_digital'] },
   'marketing.dist': { name: 'Distribution', team: 'marketing', does: 'Prepares sends; nothing goes out without human approval', tools: ['mail.draft'] },
   'marketing.voc': { name: 'Voice of Client', team: 'marketing', does: 'Captures explicit advisor statements and feedback, including what advisors ask Service', tools: ['crm.get_call_notes', 'service.get_insights'] },
   'marketing.linkedin': { name: 'LinkedIn Post', team: 'marketing', does: 'Drafts approved public posts with no client identifiers', tools: ['seismic.search_content', 'seismic.get_approved_language', 'mcloud.get_engagement', 'aem.get_page', 'service.get_insights'] },
@@ -1186,13 +1191,15 @@ const SYSTEMS = {
   sf: { name: 'Salesforce', sub: 'CRM · Service Cloud cases · plans', icon: 'users' },
   m365: { name: 'Microsoft 365', sub: 'Outlook · Calendar · SharePoint', icon: 'mail' },
   seismic: { name: 'Seismic', sub: 'Approved content', icon: 'book' },
-  fund: { name: 'Data & model platform', sub: 'Fund facts · models', icon: 'chart' },
+  fund: { name: 'Data & model platform', sub: 'Fund facts · book & flows · dealer shelf · models', icon: 'chart' },
   mstar: { name: 'Morningstar', sub: 'Licensed peer data', icon: 'globe' },
   gen: { name: 'Genesys Cloud', sub: 'Contact center · service insights', icon: 'bell' },
   mcloud: { name: 'Marketing Cloud', sub: 'Campaign engagement', icon: 'mail' },
-  aem: { name: 'Adobe Experience Manager', sub: 'Published web pages', icon: 'file' }
+  aem: { name: 'Adobe Experience Manager', sub: 'Published web pages', icon: 'file' },
+  news: { name: 'News & research feed', sub: 'Licensed news · approved commentary', icon: 'globe' },
+  exp: { name: 'Expense system', sub: 'Receipts · travel policy', icon: 'check' }
 };
-const SYS_ORDER = ['sf', 'm365', 'seismic', 'fund', 'mstar', 'gen', 'mcloud', 'aem'];
+const SYS_ORDER = ['sf', 'm365', 'seismic', 'fund', 'mstar', 'gen', 'mcloud', 'aem', 'news', 'exp'];
 
 /* ---------------- Enterprise reference records ---------------- */
 const FIRMS = {
@@ -1264,7 +1271,7 @@ const MEMORY = [
 ];
 /* Products each advisor holds, uses or is weighing (from Salesforce holdings and recorded calls) */
 const ADVISOR_PRODUCTS = {
-  'ADV-101': [{ fund: 'GFFFX', rel: 'Holds ~$38M in legacy accounts', src: 'Salesforce holdings' }, { fund: 'VIGAX', rel: 'Weighing as an index core', src: 'CALL-0922' }, { fund: 'VWUAX', rel: 'Comparing against GFA', src: 'CALL-0922' }],
+  'ADV-101': [{ fund: 'AMBFX', rel: 'Balanced option, PLAN-101 (Newport Tech 401(k))', src: 'Salesforce plan record' }, { fund: 'GFFFX', rel: 'Holds ~$38M in legacy accounts', src: 'Salesforce holdings' }, { fund: 'VIGAX', rel: 'Weighing as an index core', src: 'CALL-0922' }, { fund: 'VWUAX', rel: 'Comparing against GFA', src: 'CALL-0922' }],
   'ADV-102': [{ fund: 'GFFFX', rel: 'Large-cap growth (active) option, PLAN-102', src: 'Salesforce plan record' }, { fund: 'VIGAX', rel: 'Large-cap growth (index) option, PLAN-102', src: 'Salesforce plan record' }, { fund: 'AMBFX', rel: 'Balanced option, PLAN-102', src: 'Salesforce plan record' }, { fund: 'ABNFX', rel: 'Core bond option, PLAN-102', src: 'Salesforce plan record' }],
   'ADV-103': [{ fund: 'AMECX', rel: 'Core income holding for retirees', src: 'Salesforce holdings' }, { fund: 'AWSHX', rel: 'Holds for dividend growth', src: 'Salesforce holdings' }],
   'ADV-104': [{ fund: 'GFFFX', rel: 'Satellite in two model portfolios', src: 'Salesforce holdings' }],
@@ -1307,7 +1314,15 @@ const EPISODES = [
   { id: 'EMAIL-0902', adv: 'ADV-107', scope: 'BU-107R', date: 'Sep 2, 2026', kind: 'Email', with: 'Sam Lee',
     text: 'Luis: "The Forsyth paperwork is with the sponsor now; it should be signed in a week or two."' },
   { id: 'CALL-0826', adv: 'ADV-105', scope: 'BU-105', date: 'Aug 26, 2026', kind: 'Call transcript', with: 'Sam Lee',
-    text: 'Daniel moved two client models to a core-satellite structure with an index core. Wants to review the satellite funds each quarter.' }
+    text: 'Daniel moved two client models to a core-satellite structure with an index core. Wants to review the satellite funds each quarter.' },
+  { id: 'MTG-0605', adv: 'ADV-105', scope: 'BU-105', date: 'Jun 5, 2026', kind: 'Meeting notes', with: 'Priya Shah',
+    text: 'Kim Group model committee (Daniel, Hannah Lee). US large-cap core moving to index; active satellites kept for international equity and large-cap value. Hannah runs the quarterly satellite review; Daniel signs off. They avoid repeating the same manager across satellites.' },
+  { id: 'CALL-0612', adv: 'ADV-103', scope: 'BU-103', date: 'Jun 12, 2026', kind: 'Call transcript', with: 'Sam Lee',
+    text: 'Jordan: "My retirees care about dividends they can count on." Asked for the dividend history of Washington Mutual and The Income Fund of America.' },
+  { id: 'CALL-0618', adv: 'ADV-104', scope: 'BU-104', date: 'Jun 18, 2026', kind: 'Call transcript', with: 'Priya Shah',
+    text: 'Sofia and Kevin Brooks reviewed the core models. Kevin trades the models; Sofia approves changes. She wants one-page summaries she can forward to Kevin.' },
+  { id: 'CALL-0624', adv: 'ADV-106', scope: 'BU-106', date: 'Jun 24, 2026', kind: 'Call transcript', with: 'Priya Shah',
+    text: 'Rachel: "Clients want a paycheck they can plan around." Diane Hughes asked for client-friendly material on how income is paid out.' }
 ];
 
 /* Durable commitments (workflow state, not memory) */
@@ -1330,6 +1345,7 @@ const OPPORTUNITIES = [
   { id: 'OPP-501', adv: 'ADV-101', scope: 'BU-101A', name: 'Rivera growth model', stage: 'Proposal', note: 'Deciding whether GFA stays in the growth sleeve' },
   { id: 'OPP-502', adv: 'ADV-102', scope: 'BU-102R', name: 'Northstar retirement menu review', stage: 'Discovery', note: 'Committee reviewing fee comparisons for PLAN-102 before the Nov 12 meeting' },
   { id: 'OPP-503', adv: 'ADV-104', scope: 'BU-104', name: 'Martinez core allocation', stage: 'Discovery', note: 'Moving core to ETFs' },
+  { id: 'OPP-507', adv: 'ADV-103', scope: 'BU-103', name: 'Patel income refresh', stage: 'Discovery', note: 'Reviewing dividend payers for retirees' },
   { id: 'OPP-512', adv: 'ADV-107', scope: 'BU-107R', name: 'Forsyth Components 401(k)', stage: 'Closed lost', type: '401(k)', note: 'Small-business plan; sponsor decision Sep 10' },
   { id: 'OPP-513', adv: 'ADV-107', scope: 'BU-107R', name: 'Long Beach Marine SIMPLE IRA', stage: 'Discovery', type: 'SIMPLE IRA', note: 'Owner asked about a plan for twelve employees' }
 ];
@@ -1343,7 +1359,14 @@ const PLANS = {
       { option: 'Large-cap growth (index)', fund: 'VIGAX', assets_usd: 9000000, category: 'Large Growth' },
       { option: 'Balanced', fund: 'AMBFX', assets_usd: 14200000, category: 'Moderate Allocation' },
       { option: 'Core bond', fund: 'ABNFX', assets_usd: 6800000, category: 'Intermediate Core Bond' }],
-    other: { label: 'Target-date series and stable value', assets_usd: 13500000, note: 'Expense data not in reference data' } }
+    other: { label: 'Target-date series and stable value', assets_usd: 13500000, note: 'Expense data not in reference data' } },
+  'PLAN-101': { adv: 'ADV-101', unit: 'BU-101B', name: 'Newport Tech 401(k) Plan', assets_usd: 90000000, participants: 760,
+    committee: 'Newport Tech investment committee; Alex Rivera advises; Tara Nguyen is the plan consultant', next_meeting: 'Jan 20, 2027', materials_due: 'Jan 13, 2027',
+    lineup: [
+      { option: 'Large-cap growth (index)', fund: 'VIGAX', assets_usd: 21000000, category: 'Large Growth' },
+      { option: 'Balanced', fund: 'AMBFX', assets_usd: 8000000, category: 'Moderate Allocation' },
+      { option: 'Core bond', fund: 'ABNFX', assets_usd: 6500000, category: 'Intermediate Core Bond' }],
+    other: { label: 'Target-date series and stable value', assets_usd: 54500000, note: 'Expense data not in reference data' } }
 };
 /* Coverage changes between wholesalers (Salesforce) */
 const HANDOVERS = [
@@ -1353,12 +1376,17 @@ const HANDOVERS = [
 
 /* Genesys Cloud: advisor contacts with the service center */
 const INTERACTIONS = [
+  { id: 'INT-7702', adv: 'ADV-102', when: 'Sep 21, 2026, 2:40 p.m. PT', channel: 'Email to the advisor service inbox', caller: 'Elena Park, for Maya Chen', handled_by: 'Kim Nguyen', case: 'CASE-00502',
+    summary: 'Maya says the benchmark explanation in the committee packet is still unclear: she wants to know what the S&P 500 comparison represents for the active growth option.', sentiment: 'Patient; committee meets Nov 12' },
   { id: 'INT-7731', adv: 'ADV-101', when: 'Sep 29, 2026, 8:14 a.m. PT', channel: 'Phone, advisor service line', caller: 'Jamie Cho, for Alex Rivera', handled_by: 'Kim Nguyen', case: 'CASE-00517',
     summary: 'Alex tried the link in Priya’s Sep 28 email three times from the office and got a grey page: “This site is blocked by your organization’s security policy.” It opened on his personal phone, but he can’t forward from there.',
     sentiment: 'Mildly frustrated; his committee meets Thursday' }
 ];
 /* Seismic LiveSend: delivery and link activity for content sent to advisors */
 const DELIVERIES = [
+  { id: 'LS-0902', adv: 'ADV-102', sent: 'Sep 2, 2026, 9:05 a.m. PT', from: 'Priya Shah', to: 'Maya Chen (cc Elena Park)', asset: 'SEIS-116', title: 'Retirement committee pack template',
+    email: 'Delivered; opened 5 times', link_status: 'Active', link_expires: 'Oct 2, 2026', recipient_access: 'Permitted: Maya Chen and Elena Park are on the recipient list',
+    link_events: ['Sep 2, 9:41 a.m.: opened from the Northstar network', 'Sep 3 to Sep 20: opened 4 more times'], content_views: 5 },
   { id: 'LS-0928', adv: 'ADV-101', sent: 'Sep 28, 2026, 4:12 p.m. PT', from: 'Priya Shah', to: 'Alex Rivera (cc Jamie Cho)', asset: 'SEIS-110', title: 'Fund comparison one-pager',
     email: 'Delivered; opened 3 times', link_status: 'Active', link_expires: 'Oct 28, 2026', recipient_access: 'Permitted: Alex Rivera and Jamie Cho are on the recipient list',
     link_events: ['Sep 28, 4:31 p.m.: click from the Morgan Stanley network, stopped at the firm’s web gateway (category: file sharing)', 'Sep 29, 8:02 a.m.: same', 'Sep 29, 8:05 a.m.: same', 'Sep 29, 7:48 p.m.: opened from a mobile carrier network'],
@@ -1400,28 +1428,62 @@ const DISCLOSURES = {
 };
 
 /* ---------- Sales AI shared services (all values fictional; amounts in $ millions) ---------- */
-/* [assets] CG assets for an advisor's team, two snapshots */
+const MF = 'Mutual fund';
+/* [assets] CG assets for each advisor's team, two snapshots */
 const BOOK = {
+  'ADV-101': { entity: 'The Rivera Group (team level), Capital Group assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
+    funds: [['GFFFX', MF, 38.0], ['AWSHX', MF, 14.2], ['ABNFX', MF, 9.6], ['AMBFX', MF, 8.0], ['CGDV', 'ETF', 6.1], ['Global Equity SMA', 'SMA', 11.3]], prior_by_vehicle: { [MF]: 73.6, ETF: 2.0, SMA: 10.4 } },
+  'ADV-102': { entity: 'Northstar Advisory (firm level, plan and wealth assets), Capital Group assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
+    funds: [['GFFFX', MF, 18.5], ['AMBFX', MF, 22.6], ['ABNFX', MF, 6.8], ['CGCP', 'ETF', 5.0]], prior_by_vehicle: { [MF]: 44.0, ETF: 1.5 } },
+  'ADV-103': { entity: 'Patel Retirement Group (team level), Capital Group assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
+    funds: [['AMECX', MF, 24.5], ['AWSHX', MF, 17.8], ['ABNFX', MF, 6.2], ['CGDV', 'ETF', 3.4]], prior_by_vehicle: { [MF]: 50.2, ETF: 1.1 } },
+  'ADV-104': { entity: 'Martinez Wealth Partners (team level), Capital Group assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
+    funds: [['GFFFX', MF, 9.8], ['AWSHX', MF, 5.1], ['CGGR', 'ETF', 6.4], ['CGDV', 'ETF', 4.8], ['CGCP', 'ETF', 3.2]], prior_by_vehicle: { [MF]: 19.6, ETF: 6.1 } },
   'ADV-105': { entity: 'The Kim Group (team level), Capital Group assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
-    funds: [['GFFFX', 'Mutual fund', 54.0], ['AMBFX', 'Mutual fund', 31.3], ['ABNFX', 'Mutual fund', 22.8], ['AWSHX', 'Mutual fund', 20.5], ['AMECX', 'Mutual fund', 19.6],
+    funds: [['GFFFX', MF, 54.0], ['AMBFX', MF, 31.3], ['ABNFX', MF, 22.8], ['AWSHX', MF, 20.5], ['AMECX', MF, 19.6],
       ['CGGR', 'ETF', 18.4], ['CGDV', 'ETF', 12.6], ['CGCP', 'ETF', 10.2], ['Global Equity SMA', 'SMA', 26.1], ['Municipal SMA', 'SMA', 16.5]],
-    prior_by_vehicle: { 'Mutual fund': 171.5, ETF: 22.0, SMA: 44.0 } }
+    prior_by_vehicle: { [MF]: 171.5, ETF: 22.0, SMA: 44.0 } },
+  'ADV-106': { entity: 'Okafor Wealth Group (team level), Capital Group assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
+    funds: [['AMBFX', MF, 21.0], ['ABNFX', MF, 12.4], ['AMECX', MF, 9.7], ['CGCP', 'ETF', 2.1]], prior_by_vehicle: { [MF]: 41.8, ETF: 0 } },
+  'ADV-107': { entity: 'Harbor Point Wealth (firm level), Capital Group assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
+    funds: [['AMBFX', MF, 3.0], ['ABNFX', MF, 4.2], ['CGCP', 'ETF', 3.9], ['CGDV', 'ETF', 2.6]], prior_by_vehicle: { [MF]: 7.5, ETF: 3.1 } }
 };
-/* [flows] gross sales and redemptions by vehicle and channel, trailing twelve months vs the twelve before */
+/* [flows] gross sales and redemptions by vehicle and channel: [trailing twelve months, the twelve before] */
+const FLOW_LIMITS = ['Twelve-month flows are by vehicle and channel; fund-level transactions are only available for Jul to Sep 2026 (transactions service).', 'Flows exclude in-kind transfers between share classes.'];
 const FLOWS = {
-  'ADV-105': { current: 'Sep 2025 to Aug 2026', prior: 'Sep 2024 to Aug 2025',
-    sales: { 'Mutual fund': [21.4, 33.1], ETF: [11.6, 5.2], SMA: [5.2, 6.6] },
-    redemptions: { 'Mutual fund': [18.9, 12.4], ETF: [1.1, 0.6], SMA: [3.0, 2.8] },
-    channels: { 'Kim Group model portfolios': [24.0, 33.5], 'Advisor-directed accounts': [14.2, 11.4] },
-    limitations: ['Fund-level transactions are not connected, so sales are explained by vehicle and channel only.', 'Flows exclude in-kind transfers between share classes.'] }
+  'ADV-101': { sales: { [MF]: [6.2, 9.8], ETF: [4.1, 1.6], SMA: [1.5, 1.2] }, redemptions: { [MF]: [11.4, 5.3], ETF: [0.2, 0.1], SMA: [0.9, 0.8] }, channels: { 'Discretionary growth model (BU-101A)': [7.9, 8.4], '401(k) plan (BU-101B)': [3.9, 4.2] } },
+  'ADV-102': { sales: { [MF]: [5.6, 4.9], ETF: [3.4, 1.4] }, redemptions: { [MF]: [2.1, 2.6], ETF: [0.1, 0.0] }, channels: { 'Retirement plan (BU-102R)': [5.8, 5.1], 'Wealth team (BU-102W)': [3.2, 1.2] } },
+  'ADV-103': { sales: { [MF]: [4.8, 5.5], ETF: [1.9, 0.6] }, redemptions: { [MF]: [3.9, 3.1], ETF: [0.1, 0.0] }, channels: { 'Income portfolios (BU-103)': [6.7, 6.1] } },
+  'ADV-104': { sales: { [MF]: [2.1, 6.3], ETF: [7.9, 3.0] }, redemptions: { [MF]: [5.4, 1.2], ETF: [0.6, 0.3] }, channels: { 'Core model portfolios (BU-104)': [8.3, 7.6], 'Advisor-directed accounts': [1.7, 1.7] } },
+  'ADV-105': { sales: { [MF]: [21.4, 33.1], ETF: [11.6, 5.2], SMA: [5.2, 6.6] }, redemptions: { [MF]: [18.9, 12.4], ETF: [1.1, 0.6], SMA: [3.0, 2.8] }, channels: { 'Kim Group model portfolios': [24.0, 33.5], 'Advisor-directed accounts': [14.2, 11.4] } },
+  'ADV-106': { sales: { [MF]: [7.4, 6.0], ETF: [2.0, 0.0] }, redemptions: { [MF]: [3.6, 4.0], ETF: [0.0, 0.0] }, channels: { 'Retirement income portfolios (BU-106)': [9.4, 6.0] } },
+  'ADV-107': { sales: { [MF]: [1.1, 1.6], ETF: [3.2, 1.9] }, redemptions: { [MF]: [1.4, 0.9], ETF: [0.3, 0.2] }, channels: { 'Core portfolios (BU-107)': [4.3, 3.5] } }
 };
-/* [market share] definition and inputs; numerator and denominator dates differ on purpose */
-const MARKET_SHARE = {
-  'ADV-105': { definition: 'CG share = CG mutual fund and ETF assets in a Morningstar category ÷ the advisor’s assets in that category across all managers (industry book). Excludes SMAs, cash and money market.',
-    numerator_as_of: 'Aug 31, 2026', denominator_as_of: 'Jun 30, 2026', denominator_source: 'Dealer industry-book feed',
-    categories: [['Large Growth', ['GFFFX', 'CGGR'], 310.0], ['Large Value and Blend', ['AWSHX', 'CGDV'], 185.0], ['Moderate Allocation', ['AMBFX', 'AMECX'], 120.0], ['Intermediate Core Bond', ['ABNFX', 'CGCP'], 140.0]] }
+Object.values(FLOWS).forEach(f => Object.assign(f, { current: 'Sep 2025 to Aug 2026', prior: 'Sep 2024 to Aug 2025', limitations: FLOW_LIMITS }));
+/* [transactions] fund-level purchases and redemptions, Jul to Sep 2026 */
+const FUND_TRANSACTIONS = [
+  ['ADV-101', 'Jul 21, 2026', 'GFFFX', 'Redemption', 3.0], ['ADV-101', 'Aug 4, 2026', 'CGDV', 'Purchase', 1.8], ['ADV-101', 'Aug 18, 2026', 'GFFFX', 'Redemption', 2.0],
+  ['ADV-103', 'Jul 30, 2026', 'AMECX', 'Purchase', 0.9],
+  ['ADV-104', 'Aug 14, 2026', 'GFFFX', 'Redemption', 3.2], ['ADV-104', 'Aug 15, 2026', 'CGGR', 'Purchase', 2.9],
+  ['ADV-105', 'Jul 9, 2026', 'GFFFX', 'Redemption', 4.1], ['ADV-105', 'Jul 10, 2026', 'CGGR', 'Purchase', 3.6], ['ADV-105', 'Aug 2, 2026', 'AMBFX', 'Purchase', 1.2],
+  ['ADV-106', 'Sep 8, 2026', 'ABNFX', 'Purchase', 1.5], ['ADV-107', 'Aug 27, 2026', 'CGCP', 'Purchase', 0.7]
+];
+/* [market share] the advisor's assets in each category across all managers (industry book, as of Jun 30, 2026) */
+const FUND_CATEGORY = { GFFFX: 'Large Growth', AGTHX: 'Large Growth', CGGR: 'Large Growth', AWSHX: 'Large Value and Blend', CGDV: 'Large Value and Blend', AMBFX: 'Moderate Allocation', AMECX: 'Moderate Allocation', ABNFX: 'Intermediate Core Bond', CGCP: 'Intermediate Core Bond' };
+const INDUSTRY_BOOK = {
+  'ADV-101': { 'Large Growth': 96.0, 'Large Value and Blend': 70.0, 'Intermediate Core Bond': 55.0 },
+  'ADV-102': { 'Large Growth': 64.0, 'Moderate Allocation': 48.0, 'Intermediate Core Bond': 40.0 },
+  'ADV-103': { 'Moderate Allocation': 60.0, 'Large Value and Blend': 52.0, 'Intermediate Core Bond': 35.0 },
+  'ADV-104': { 'Large Growth': 58.0, 'Large Value and Blend': 40.0, 'Intermediate Core Bond': 30.0 },
+  'ADV-105': { 'Large Growth': 310.0, 'Large Value and Blend': 185.0, 'Moderate Allocation': 120.0, 'Intermediate Core Bond': 140.0 },
+  'ADV-106': { 'Moderate Allocation': 72.0, 'Intermediate Core Bond': 64.0 },
+  'ADV-107': { 'Moderate Allocation': 18.0, 'Intermediate Core Bond': 26.0, 'Large Value and Blend': 15.0 }
 };
-/* [platform eligibility] dealer shelf by program, with effective dates */
+const MARKET_SHARE = Object.fromEntries(Object.entries(INDUSTRY_BOOK).map(([adv, cats]) => [adv, {
+  definition: 'CG share = CG mutual fund and ETF assets in a Morningstar category ÷ the advisor’s assets in that category across all managers (industry book). Excludes SMAs, cash and money market.',
+  numerator_as_of: 'Aug 31, 2026', denominator_as_of: 'Jun 30, 2026', denominator_source: 'Dealer industry-book feed',
+  categories: Object.entries(cats).map(([c, ind]) => [c, BOOK[adv].funds.filter(f => FUND_CATEGORY[f[0]] === c).map(f => f[0]), ind]) }]));
+/* [platform eligibility] dealer shelf by program, with effective dates. RIAs use a custodian, not a dealer shelf. */
 const SHELF = {
   'FIRM-WF': { firm: 'Wells Fargo Advisors', as_of: 'Sep 28, 2026', source: 'Dealer intelligence feed', advisor_programs: { 'ADV-105': ['Personalized UMA', 'Brokerage'] },
     items: [
@@ -1430,7 +1492,32 @@ const SHELF = {
       ['CGCP', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGCP', 'Personalized UMA', 'Under review', 'Aug 15, 2026'],
       ['CGUI', 'Brokerage', 'Available', 'Nov 1, 2025'], ['CGUI', 'Personalized UMA', 'Not available', null],
       ['CGXU', 'Brokerage', 'Available', 'Jan 15, 2026'], ['CGXU', 'Personalized UMA', 'Not available', null],
-      ['GFFFX', 'Personalized UMA', 'Available', 'Feb 1, 2019']] }
+      ['GFFFX', 'Personalized UMA', 'Available', 'Feb 1, 2019']] },
+  'FIRM-MS': { firm: 'Morgan Stanley Wealth Management', as_of: 'Sep 28, 2026', source: 'Dealer intelligence feed', advisor_programs: { 'ADV-101': ['Portfolio Management', 'Brokerage'], 'ADV-104': ['Portfolio Management', 'Brokerage'] },
+    items: [
+      ['CGGR', 'Portfolio Management', 'Available', 'Jan 15, 2025'], ['CGDV', 'Portfolio Management', 'Available', 'Jan 15, 2025'], ['CGCP', 'Portfolio Management', 'Available', 'Jan 15, 2025'],
+      ['CGUI', 'Portfolio Management', 'Available', 'Jul 1, 2026'], ['CGXU', 'Portfolio Management', 'Available', 'Jul 1, 2026'], ['GFFFX', 'Portfolio Management', 'Available', 'Mar 1, 2018'],
+      ['CGGR', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGDV', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGCP', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGUI', 'Brokerage', 'Available', 'Nov 1, 2025'], ['CGXU', 'Brokerage', 'Available', 'Jan 15, 2026']] },
+  'FIRM-ML': { firm: 'Merrill', as_of: 'Sep 28, 2026', source: 'Dealer intelligence feed', advisor_programs: { 'ADV-103': ['Advisory program', 'Brokerage'] },
+    items: [['CGDV', 'Advisory program', 'Available', 'Apr 1, 2025'], ['CGCP', 'Advisory program', 'Available', 'Apr 1, 2025'], ['CGGR', 'Advisory program', 'Under review', 'Sep 1, 2026'], ['AMECX', 'Advisory program', 'Available', 'Jan 1, 2016'], ['CGDV', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGCP', 'Brokerage', 'Available', 'Mar 1, 2024']] },
+  'FIRM-UBS': { firm: 'UBS Wealth Management', as_of: 'Sep 28, 2026', source: 'Dealer intelligence feed', advisor_programs: { 'ADV-106': ['Advisory program', 'Brokerage'] },
+    items: [['AMBFX', 'Advisory program', 'Available', 'Jan 1, 2017'], ['ABNFX', 'Advisory program', 'Available', 'Jan 1, 2017'], ['CGCP', 'Advisory program', 'Available', 'May 1, 2026'], ['CGUI', 'Advisory program', 'Not available', null], ['CGCP', 'Brokerage', 'Available', 'Mar 1, 2024']] },
+  'FIRM-NS': { firm: 'Northstar Advisory (RIA)', as_of: 'Sep 28, 2026', source: 'Custodian platform; no dealer shelf', advisor_programs: { 'ADV-102': ['Custodian platform'] },
+    items: ['CGGR', 'CGDV', 'CGCP', 'CGUI', 'CGXU'].map(t => [t, 'Custodian platform', 'Available', 'Open architecture'] ) },
+  'FIRM-HP': { firm: 'Harbor Point Wealth (RIA)', as_of: 'Sep 28, 2026', source: 'Custodian platform; no dealer shelf', advisor_programs: { 'ADV-107': ['Custodian platform'] },
+    items: ['CGGR', 'CGDV', 'CGCP', 'CGUI', 'CGXU'].map(t => [t, 'Custodian platform', 'Available', 'Open architecture']) }
+};
+/* [program rules] account and program rules on dealer platforms */
+const PROGRAM_RULES = {
+  'FIRM-WF': { 'Personalized UMA': ['Account minimum $50,000', 'ETF model sleeve minimum $10,000', 'Rebalanced quarterly by the advisor team'], Brokerage: ['No program minimum; ETF trades in whole shares'] },
+  'FIRM-MS': { 'Portfolio Management': ['Account minimum $100,000', 'Discretion requires the advisor’s Portfolio Management designation'], Brokerage: ['No program minimum'] },
+  'FIRM-ML': { 'Advisory program': ['Account minimum $25,000', 'New ETFs need home-office approval before use in advisory models'], Brokerage: ['No program minimum'] },
+  'FIRM-UBS': { 'Advisory program': ['Account minimum $50,000'], Brokerage: ['No program minimum'] }
+};
+/* [allocation versions] dated model allocations (percent of model), by firm */
+const MODEL_ALLOCATIONS = {
+  'Moderate Growth model (ETF)': { firm: 'FIRM-MS', program: 'Portfolio Management', versions: [['Mar 31, 2026', { CGGR: 22, CGDV: 18, CGXU: 15, CGCP: 30, CGUI: 15 }], ['Sep 15, 2026', { CGGR: 20, CGDV: 20, CGXU: 15, CGCP: 28, CGUI: 17 }]] },
+  'Growth model (ETF)': { firm: 'FIRM-MS', program: 'Portfolio Management', versions: [['Mar 31, 2026', { CGGR: 35, CGDV: 30, CGXU: 25, CGCP: 10 }], ['Sep 15, 2026', { CGGR: 33, CGDV: 30, CGXU: 27, CGCP: 10 }]] }
 };
 /* [taxonomy] what a category actually includes */
 const TAXONOMY = {
@@ -1440,13 +1527,111 @@ const TAXONOMY = {
   'multi-asset': { include: ['AMBFX', 'ABALX', 'AMECX'], exclude: [], unmapped: [] },
   'large growth': { include: ['GFFFX', 'AGTHX', 'CGGR'], exclude: [], unmapped: [] }
 };
-/* [pipeline] status history behind each opportunity */
+const CATEGORY_GROUPS = { equity: ['Large Growth', 'Large Value and Blend'], 'fixed income': ['Intermediate Core Bond'], 'multi-asset': ['Moderate Allocation'], 'large growth': ['Large Growth'], 'large value': ['Large Value and Blend'] };
+/* [pipeline] status history, estimated size and last activity behind each opportunity */
 const PIPELINE_HISTORY = {
   'OPP-501': [['Aug 14, 2026', 'Discovery'], ['Sep 22, 2026', 'Proposal']],
   'OPP-502': [['Sep 1, 2026', 'Discovery']],
   'OPP-504': [['Sep 18, 2026', 'Discovery']], 'OPP-505': [['Sep 23, 2026', 'Discovery']], 'OPP-506': [['Sep 25, 2026', 'Qualified']], 'OPP-503': [['Sep 15, 2026', 'Discovery']],
   'OPP-512': [['Aug 12, 2026', 'Proposal'], ['Sep 2, 2026', 'Paperwork'], ['Sep 10, 2026', 'Closed lost: sponsor stayed with its incumbent recordkeeper']],
-  'OPP-513': [['Sep 25, 2026', 'Discovery']]
+  'OPP-513': [['Sep 25, 2026', 'Discovery']], 'OPP-507': [['Sep 10, 2026', 'Discovery']]
+};
+const PIPELINE_DETAIL = {
+  'OPP-501': { est_usd_m: 12.0, next: 'Committee decision Oct 1', last_activity: 'Sep 22, 2026' }, 'OPP-502': { est_usd_m: 6.0, next: 'Fee review draft to Maya by Nov 5', last_activity: 'Sep 28, 2026' },
+  'OPP-503': { est_usd_m: 5.0, next: 'Core-satellite follow-up (TASK-303)', last_activity: 'Sep 15, 2026' }, 'OPP-504': { est_usd_m: 15.0, next: 'Model refresh meeting', last_activity: 'Sep 18, 2026' },
+  'OPP-505': { est_usd_m: 8.0, next: 'Income comparison and meeting', last_activity: 'Sep 23, 2026' }, 'OPP-506': { est_usd_m: 4.0, next: 'Send core bond story', last_activity: 'Sep 25, 2026' },
+  'OPP-512': { est_usd_m: 3.5, next: 'None: closed', last_activity: 'Sep 10, 2026' }, 'OPP-513': { est_usd_m: 0.8, next: 'Plan design call with the owner', last_activity: 'Sep 25, 2026' }, 'OPP-507': { est_usd_m: 3.0, next: 'Send dividend history (asked on CALL-0612)', last_activity: 'Sep 10, 2026' }
+};
+/* [change events] business events attributable to an advisor or their clients' plans */
+const CHANGE_EVENTS = [
+  ['ADV-101', 'Sep 1, 2026', 'Rivera Group launched its new discretionary growth model', 'Salesforce'],
+  ['ADV-102', 'Sep 19, 2026', 'Committee set Nov 12 for the documented fee review', 'Salesforce'],
+  ['ADV-105', 'Aug 1, 2026', 'Aaron Tran joined the Kim Group as a junior advisor', 'Salesforce'],
+  ['ADV-105', 'Sep 22, 2026', 'CGGR added to Wells Fargo Personalized UMA', 'Dealer intelligence feed'],
+  ['ADV-107', 'Sep 24, 2026', 'Forsyth Components named a new CFO, who ran a recordkeeper search at her previous company', 'News feed'],
+  ['ADV-107', 'Sep 28, 2026', 'Forsyth’s incumbent recordkeeper announced a fee increase for 2027', 'News feed']
+];
+/* [engagement graph] attributable digital activity (logged-in advisors only), Marketing Cloud */
+const DIGITAL = [
+  ['ADV-101', 'Sep 24, 2026', 'Page visit', 'GFA quarterly attribution page'], ['ADV-101', 'Sep 25, 2026', 'Page visit', 'GFA fund page'],
+  ['ADV-102', 'Sep 20, 2026', 'Article open', 'Understanding fund expenses (AEM-FEES)'],
+  ['ADV-104', 'Sep 9, 2026', 'Page visit', 'GFA fund page'], ['ADV-104', 'Sep 21, 2026', 'Page visit', 'GFA fund page'], ['ADV-104', 'Sep 22, 2026', 'Article open', 'Core-satellite: where active management fits (SEIS-117)'],
+  ['ADV-105', 'Sep 23, 2026', 'Page visit', 'CGGR ETF page'],
+  ['ADV-106', 'Sep 16, 2026', 'Webinar', 'Retirement income in a higher-rate world']
+];
+/* [relationship graph] the advisor's own team, and Capital Group's coverage team */
+const ADVISOR_TEAMS = {
+  'ADV-101': [['Alex Rivera, CFP®', 'Lead advisor; decides on the growth model'], ['Jamie Cho', 'Client service associate; books all meetings'], ['Mark Ellis, CFA', 'Portfolio analyst; builds the discretionary growth model'], ['Tara Nguyen', '401(k) plan consultant for BU-101B']],
+  'ADV-102': [['Maya Chen', 'Principal; leads committee advice'], ['Elena Park', 'Primary contact; coordinates committee materials'], ['Ben Ortiz', 'Wealth team lead (BU-102W)']],
+  'ADV-103': [['Jordan Patel', 'Lead advisor'], ['Lisa Moreno', 'Registered associate; handles paperwork']],
+  'ADV-104': [['Sofia Martinez', 'Lead advisor'], ['Kevin Brooks', 'Associate advisor; trades the core models']],
+  'ADV-105': [['Daniel Kim', 'Managing Director; chairs the model committee'], ['Hannah Lee', 'Portfolio manager; runs the quarterly satellite review'], ['Aaron Tran', 'Junior advisor; joined Aug 2026']],
+  'ADV-106': [['Rachel Okafor', 'Lead advisor'], ['Diane Hughes', 'Client service manager']],
+  'ADV-107': [['Luis Herrera', 'Principal'], ['Paula Reyes', 'Operations; owns retirement plan paperwork']]
+};
+const COVERAGE_TEAM = [['Priya Shah', 'External wholesaler, Southern California'], ['Sam Lee', 'Internal partner, Southern California'], ['Nina Alvarez', 'SSC: scheduling and follow-up'], ['Dana Ortiz', 'Investment product specialist'], ['Ravi Menon', 'Retirement plan specialist (joins plan and committee meetings)']];
+/* [coverage analytics] coverage tier and target completed contacts per 90 days */
+const COVERAGE_TIERS = { 'ADV-101': ['A', 4], 'ADV-102': ['A', 4], 'ADV-104': ['A', 4], 'ADV-105': ['A', 4], 'ADV-103': ['B', 2], 'ADV-106': ['B', 2], 'ADV-107': ['C', 1] };
+/* [peer analytics] permitted cohorts: internal coverage data only, no client data */
+const PEER_COHORTS = { 'Model-portfolio practices': ['ADV-101', 'ADV-104', 'ADV-105', 'ADV-107'], 'Retirement and income practices': ['ADV-102', 'ADV-103', 'ADV-106'] };
+/* [plan inputs] goals and capacity for territory and business planning */
+const PLAN_INPUTS = {
+  'EMP-PRIYA': { year: 2026, sales_goal_usd_m: 120.0, ytd_sales_usd_m: 78.4, ytd_through: 'Aug 31, 2026', meetings_per_week: 10, q4_priorities: ['Grow ETF use inside advisor models', 'Retirement plan fee reviews', 'Keep GFA in growth sleeves where it fits'] },
+  'EMP-SAM': { year: 2026, sales_goal_usd_m: 60.0, ytd_sales_usd_m: 41.0, ytd_through: 'Aug 31, 2026', meetings_per_week: 25, q4_priorities: ['Cover tier B and C advisors by phone', 'Take over Alex Rivera from Priya (HO-101)'] }
+};
+/* [zoning] office zones and drive time from the wholesaler's base in Irvine */
+const ZONES = { 'ADV-101': ['Coastal OC', 15], 'ADV-102': ['Central OC', 5], 'ADV-103': ['Central OC', 6], 'ADV-104': ['San Diego', 85], 'ADV-105': ['Westside LA', 60], 'ADV-106': ['San Gabriel Valley', 55], 'ADV-107': ['Long Beach', 30] };
+/* [meeting rules] firm rules a meeting must follow, plus Capital Group's own */
+const MEETING_RULES = {
+  'FIRM-MS': ['Meals up to $100 per person', 'Entertainment needs branch manager pre-approval', 'Plan committee meetings follow the plan’s own vendor rules'],
+  'FIRM-WF': ['Gifts up to $100 per advisor per year', 'Meals reasonable and infrequent', 'No entertainment attached to model reviews'],
+  'FIRM-ML': ['Meals up to $100 per person', 'Home-office approval for seminars'], 'FIRM-UBS': ['Meals up to $100 per person', 'Log attendees for every meal'],
+  'FIRM-NS': ['RIA: follow Capital Group policy only'], 'FIRM-HP': ['RIA: follow Capital Group policy only'],
+  CG: ['Log every advisor meeting in Salesforce within 48 hours', 'Internal-only meetings need no compliance review', 'Advisor invites go out only after a person approves them']
+};
+/* [themes] and [news]: this week's approved commentary and authorized news */
+const THEMES = [
+  ['TH-1', 'Mega-cap concentration in growth indexes', 'growth index gfa concentration active', 'SEIS-113'],
+  ['TH-2', 'Core bonds as rates settle', 'bond fixed income rates income core', 'SEIS-121'],
+  ['TH-3', 'ETFs inside model portfolios', 'etf model core-satellite index', 'SEIS-117'],
+  ['TH-4', 'Fee conversations clients understand', 'fee cost expense dollars', 'AEM-FEES'],
+  ['TH-5', 'Documenting retirement plan fee reviews', 'retirement committee plan fee', 'SEIS-116']
+];
+const NEWS = [
+  ['N-301', 'Sep 22, 2026', 'Wells Fargo adds CGGR to Personalized UMA', 'Dealer bulletin', 'wells fargo cggr etf uma'],
+  ['N-302', 'Sep 18, 2026', 'Annual fund fee study: average expense ratios fell again', 'Morningstar (licensed)', 'fee cost expense'],
+  ['N-303', 'Sep 24, 2026', 'Rates on hold; core bond yields steady', 'Capital Group Insights', 'rates bond fixed income'],
+  ['N-304', 'Sep 10, 2026', 'Plan sponsors put more weight on documenting fee reviews', 'Industry newsletter (licensed)', 'retirement committee plan fee'],
+  ['N-305', 'Sep 26, 2026', 'Growth index concentration stays near record levels', 'Capital Group Insights', 'growth index concentration']
+];
+/* [recommendation trace] why each piece was recommended: the advisor's stated need, or popularity */
+const CONTENT_RECS = {
+  'ADV-101': [['SEIS-113', 'stated_need', 'Alex asked why GFA has trailed', 'CALL-0922'], ['SEIS-110', 'stated_need', 'Alex asked for a fee comparison against the Vanguard growth funds', 'CALL-0922'], ['SEIS-124', 'popular', 'Opened by 41% of advisors with business-owner clients this month', null]],
+  'ADV-102': [['SEIS-116', 'stated_need', 'Committee wants a documented fee review', 'CALL-0919'], ['SEIS-124', 'popular', 'Opened by 41% of advisors with business-owner clients this month', null]],
+  'ADV-104': [['SEIS-117', 'stated_need', 'Sofia asked what active managers add in core-satellite', 'CALL-0915'], ['SEIS-120', 'popular', 'Most-opened ETF piece among model-portfolio advisors', null]],
+  'ADV-105': [['SEIS-117', 'stated_need', 'Two models moved to an index core; satellites reviewed quarterly', 'CALL-0826'], ['SEIS-120', 'stated_need', 'Clients ask about ETFs versus active funds', 'CALL-0918'], ['SEIS-126', 'popular', 'Popular with teams that recently added an advisor', null]],
+  'ADV-106': [['SEIS-123', 'stated_need', 'Rachel asked how balanced and bond funds fit an income plan', 'CALL-0923'], ['SEIS-124', 'popular', 'Opened by 41% of advisors with business-owner clients this month', null]],
+  'ADV-103': [['SEIS-119', 'stated_need', 'Jordan focuses on income and dividends for retirees', 'CALL-0910']],
+  'ADV-107': [['SEIS-121', 'stated_need', 'Luis asked for the core bond story', 'EMAIL-0925']]
+};
+/* [evidence resolver] passages in approved documents, by version and page (fictional excerpts) */
+const DOC_PASSAGES = {
+  'SEIS-117': { version: 'v3, Aug 2026', pages: [[2, 'In a core-satellite model, the core tracks a broad index at low cost; satellites are where active managers aim to add return or manage risk.'], [3, 'A typical allocation keeps 60% to 80% in the core and the rest in satellites.']] },
+  'SEIS-116': { version: 'v2, Jun 2026', pages: [[1, 'Show each option against its category median and document the committee’s rationale in the minutes.']] },
+  'SEIS-122': { version: 'v4, Apr 2026', pages: [[1, 'American Balanced Fund invests at least 50% in stocks and at least 25% in bonds.']] },
+  'SEIS-120': { version: 'v2, Sep 2026', pages: [[1, 'Capital Group ETFs are actively managed and built on The Capital System.']] }
+};
+/* [objection playbook] coaching guides grounded in approved messaging */
+const PLAYBOOK = {
+  fee: { steps: ['Acknowledge the question; do not defend before you know the comparison', 'Clarify: which share class, which comparison fund, and over what period?', 'Answer with facts from the data platform: the fund’s expense ratio and its Morningstar category median', 'Use approved language: MSG-202 and MSG-201', 'Offer the fee comparison one-pager (SEIS-110)'], avoid: ['Quoting returns that are not inserted from the system of record', 'Disparaging the comparison fund'], questions: ['Which share class are your clients in?', 'Is the comparison an index fund or another active fund?'] },
+  'active vs index': { steps: ['Separate the jobs: index funds aim to match a benchmark, active funds aim to do something different (MSG-211)', 'Point to the benchmark the fund is managed to (MSG-213)', 'Explain the multi-manager approach (MSG-212)'], avoid: ['Predicting when active will outperform'], questions: ['What role does this fund play in the model: core or satellite?'] }
+};
+/* [expense system] receipts and policy for wholesaler travel */
+const EXPENSES = {
+  'EMP-PRIYA': { month: 'Sep 2026', policy: ['Meals up to $100 per person, attendees required', 'Mileage at $0.70 per mile', 'Parking with a receipt'],
+    receipts: [['Sep 15, 2026', 'Meal', 142.50, 'Harbor Grill, San Diego', ['Sofia Martinez', 'Kevin Brooks', 'Priya Shah'], 'ADV-104'], ['Sep 18, 2026', 'Parking', 24.00, 'Century City garage', [], 'ADV-105'],
+      ['Sep 22, 2026', 'Meal', 86.40, 'Lido Bistro, Newport Beach', ['Alex Rivera', 'Jamie Cho', 'Priya Shah'], 'ADV-101'], ['Sep 23, 2026', 'Mileage', 37.80, '54 miles Irvine to Pasadena and back', [], 'ADV-106'],
+      ['Sep 26, 2026', 'Meal', 210.00, 'Water Grill, Irvine', [], null]] }
 };
 
 /* Fund facts: the only source of fund numbers. null = not in reference data. */
@@ -1491,7 +1676,10 @@ const CONTENT = [
   { id: 'SEIS-120', title: 'Capital Group ETF lineup overview', audience: 'Financial professional', format: '2 pages', status: 'Approved', tags: 'etf lineup capital group etfs' },
   { id: 'SEIS-121', title: 'The Bond Fund of America: core bond story', audience: 'Financial professional', format: '2 pages', status: 'Approved', tags: 'bfa bond fund core fixed income rates' },
   { id: 'SEIS-122', title: 'American Balanced Fund overview', audience: 'Financial professional', format: '2 pages', status: 'Approved', tags: 'ambal balanced fund income retirees 60/40' },
-  { id: 'SEIS-123', title: 'Balanced vs. bond funds in a retirement income plan', audience: 'Financial professional', format: '1 page', status: 'Approved', tags: 'comparison balanced bond income retirement bfa ambal' }
+  { id: 'SEIS-123', title: 'Balanced vs. bond funds in a retirement income plan', audience: 'Financial professional', format: '1 page', status: 'Approved', tags: 'comparison balanced bond income retirement bfa ambal' },
+  { id: 'SEIS-124', title: 'Estate planning conversations with business owners', audience: 'Financial professional', format: '3 pages', status: 'Approved', tags: 'estate planning business owners succession' },
+  { id: 'SEIS-125', title: 'Practice management: pricing and packaging advice', audience: 'Financial professional', format: '4 pages', status: 'Approved', tags: 'practice management pricing packaging' },
+  { id: 'SEIS-126', title: 'Practice management: growing a team with next-gen advisors', audience: 'Financial professional', format: '3 pages', status: 'Approved', tags: 'practice management team next-gen succession' }
 ];
 
 /* Verified findings already in the foundation (reusable) */
@@ -1620,43 +1808,68 @@ const routeOfTask = (agent, sub) => { for (const [fam, A] of Object.entries(SUBA
 
 /* Shared tools and services: [name] in a route. Not autonomous agents. */
 const SERVICES = {
-  assets: { name: 'Assets', status: 'simulated', tools: ['book.get_assets'], does: 'CG assets by vehicle and fund, as of a date' },
-  flows: { name: 'Flows', status: 'simulated', tools: ['book.get_flows'], does: 'Gross sales, redemptions and net flows by vehicle and channel, period over period' },
+  assets: { name: 'Assets', status: 'simulated', tools: ['book.get_assets'], does: 'CG assets by vehicle and fund for each advisor’s team, as of a date, with the prior year' },
+  flows: { name: 'Flows', status: 'simulated', tools: ['book.get_flows'], does: 'Gross sales, redemptions and net flows by vehicle and channel, twelve months over twelve' },
+  transactions: { name: 'Transactions', status: 'simulated', tools: ['book.get_fund_transactions'], does: 'Fund-level purchases and redemptions, Jul to Sep 2026' },
   'market share': { name: 'Market share', status: 'simulated', tools: ['book.get_market_share'], does: 'Metric definition, numerator, denominator and share by category' },
   taxonomy: { name: 'Taxonomy', status: 'simulated', tools: ['taxonomy.resolve'], does: 'Maps a category (equity funds, ETFs) to the actual funds, with exclusions' },
-  'platform eligibility': { name: 'Platform eligibility', status: 'simulated', tools: ['platform.get_availability'], does: 'Dealer platform and program availability with effective dates' },
+  positions: { name: 'Positions', status: 'simulated', tools: ['book.get_assets'], does: 'Holdings at fund level (security-level positions are not modeled)' },
+  'platform eligibility': { name: 'Platform eligibility', status: 'simulated', tools: ['platform.get_availability'], does: 'Dealer platform and program availability with effective dates, for every advisor’s firm' },
+  'program rules': { name: 'Program rules', status: 'simulated', tools: ['platform.get_program_rules'], does: 'Account and program minimums and rules' },
+  'allocation versions': { name: 'Allocation versions', status: 'simulated', tools: ['models.get_allocations'], does: 'Dated model allocations by dealer version' },
+  'approved comparison tool': { name: 'Approved comparison tool', status: 'simulated', tools: ['fund.compare'], does: 'Like-for-like fund comparisons with basis flags' },
+  'fund facts': { name: 'Fund facts', status: 'simulated', tools: ['fund.get_facts', 'fund.lookup'], does: 'Verified fund facts from the data platform' },
   pipeline: { name: 'Pipeline', status: 'simulated', tools: ['pipeline.get'], does: 'Opportunities with current status and status history' },
+  'pipeline scoring': { name: 'Pipeline scoring', status: 'simulated', tools: ['pipeline.score'], does: 'Scores open opportunities by stage, size and recency, basis shown' },
+  'change events': { name: 'Change events', status: 'simulated', tools: ['events.get_changes'], does: 'Business events after a date: hires, launches, sponsor and platform changes' },
   plans: { name: 'Plans', status: 'simulated', tools: ['crm.get_plan'], does: 'Retirement plan records and lineups' },
-  engagements: { name: 'Engagements', status: 'simulated', tools: ['engage.get_history'], does: 'Completed and scheduled interactions per advisor' },
+  'call notes': { name: 'Call notes', status: 'simulated', tools: ['crm.get_call_notes'], does: 'Recorded calls, meeting notes and emails, dated and attributed' },
+  engagements: { name: 'Engagements', status: 'simulated', tools: ['engage.get_history'], does: 'Completed interactions per advisor' },
+  'engagement graph': { name: 'Engagement graph', status: 'simulated', tools: ['engage.get_digital'], does: 'Attributable page visits, article opens and webinars (observed events, not intent)' },
+  'lead discovery': { name: 'Lead discovery', status: 'simulated', tools: ['lead.discover'], does: 'Ranks advisors against explicit criteria and saves the trace' },
+  'ranking trace': { name: 'Ranking trace', status: 'simulated', tools: ['lead.get_ranking_trace'], does: 'Why a ranked list came out the way it did, and who was excluded' },
+  'peer analytics': { name: 'Peer analytics', status: 'simulated', tools: ['peer.compare'], does: 'Permitted peer cohorts and medians' },
+  'coverage analytics': { name: 'Coverage analytics', status: 'simulated', tools: ['territory.coverage'], does: 'Completed contacts against coverage-tier targets' },
+  'plan inputs': { name: 'Plan inputs', status: 'simulated', tools: ['territory.get_plan_inputs'], does: 'Sales goals, year-to-date sales, capacity and priorities' },
+  calendar: { name: 'Calendar', status: 'simulated', tools: ['calendar.find_times'], does: 'Open slots for advisors and colleagues' },
+  zoning: { name: 'Zoning', status: 'simulated', tools: ['schedule.zone_visits'], does: 'Visit grouping by geography and drive time' },
+  'meeting rules': { name: 'Meeting rules', status: 'simulated', tools: ['schedule.check_rules'], does: 'Firm meeting rules plus Capital Group policy' },
+  themes: { name: 'Themes', status: 'simulated', tools: ['content.get_themes'], does: 'This week’s approved themes, ranked for the advisor' },
+  news: { name: 'News', status: 'simulated', tools: ['news.get_items'], does: 'Authorized news and commentary, last two weeks' },
+  'recommendation trace': { name: 'Recommendation trace', status: 'simulated', tools: ['seismic.get_recommendations'], does: 'Why each piece was recommended: stated need or popularity' },
+  'evidence resolver': { name: 'Evidence resolver', status: 'simulated', tools: ['seismic.resolve_evidence'], does: 'Resolves a claim to the source page and version' },
+  'objection playbook': { name: 'Objection playbook', status: 'simulated', tools: ['coach.get_playbook'], does: 'Coaching steps and approved language for objections' },
+  'expense system': { name: 'Expense system', status: 'simulated', tools: ['expense.get_receipts'], does: 'Receipts matched to visits, with travel policy checks' },
+  'service state': { name: 'Service state', status: 'simulated', tools: ['service.get_cases'], does: 'Open and resolved service cases' },
   memory: { name: 'Memory', status: 'foundation', tools: [], does: 'Scoped, sourced advisor memory in the shared foundation' },
   policy: { name: 'Policy', status: 'foundation', tools: [], does: 'Rules applied to every packet and contribution' },
-  'task state': { name: 'Task state', status: 'foundation', tools: [], does: 'Open commitments, owners and due dates' },
+  'task state': { name: 'Task state', status: 'foundation', tools: ['crm.get_tasks'], does: 'Open commitments, owners and due dates' },
   'approved search': { name: 'Approved search', status: 'foundation', tools: ['seismic.search_content'], does: 'Search over approved content only' },
   'change history': { name: 'Change history', status: 'foundation', tools: [], does: 'Memory revisions and events since a date' },
-  'relationship graph': { name: 'Relationship graph', status: 'foundation', tools: [], does: 'People, firms, units and coverage' },
-  'action review': { name: 'Action review', status: 'foundation', tools: [], does: 'Human review of any change before it is made' },
-  'service state': { name: 'Service state', status: 'simulated', tools: ['service.get_cases'], does: 'Open and resolved service cases' },
-  'peer analytics': { name: 'Peer analytics', status: 'not connected', tools: [], does: 'Permitted peer cohorts and comparisons' },
-  'engagement graph': { name: 'Engagement graph', status: 'not connected', tools: [], does: 'Web and content engagement attributable to advisors' },
-  'ranking trace': { name: 'Ranking trace', status: 'not connected', tools: [], does: 'Why a ranked list came out the way it did' },
-  'recommendation trace': { name: 'Recommendation trace', status: 'not connected', tools: [], does: 'Why a content item was recommended' },
-  'evidence resolver': { name: 'Evidence resolver', status: 'not connected', tools: [], does: 'Resolves a claim to the source page and version' },
-  positions: { name: 'Positions', status: 'not connected', tools: [], does: 'Position-level holdings' },
-  'program rules': { name: 'Program rules', status: 'not connected', tools: [], does: 'Account and program minimums and rules' },
-  'allocation versions': { name: 'Allocation versions', status: 'not connected', tools: [], does: 'Dated model allocations by dealer version' },
-  'approved comparison tool': { name: 'Approved comparison tool', status: 'not connected', tools: [], does: 'Like-for-like fund comparisons' },
-  'coverage analytics': { name: 'Coverage analytics', status: 'not connected', tools: [], does: 'Coverage frequency against priorities' },
-  'pipeline scoring': { name: 'Pipeline scoring', status: 'not connected', tools: [], does: 'Scores opportunities for attention' },
-  'change events': { name: 'Change events', status: 'not connected', tools: [], does: 'Business events after a date' },
-  'expense system': { name: 'Expense system', status: 'not connected', tools: [], does: 'Receipts, policies and allocations' }
+  'relationship graph': { name: 'Relationship graph', status: 'foundation', tools: ['crm.get_team'], does: 'The advisor’s team, Capital Group’s coverage team, firms and units' },
+  'action review': { name: 'Action review', status: 'foundation', tools: [], does: 'Human review of any change before it is made' }
 };
-const SERVICE_ALIASES = { 'flows calculations': 'flows', transactions: 'flows', 'assets history': 'assets', 'metric definitions': 'market share', 'dealer changes': 'platform eligibility', 'pipeline history': 'pipeline', tasks: 'task state', 'plan master': 'plans', 'plans pagination': 'plans', service: 'service state', 'task state': 'task state' };
+const SERVICE_ALIASES = { 'flows calculations': 'flows', 'assets history': 'assets', 'metric definitions': 'market share', 'dealer changes': 'platform eligibility', 'pipeline history': 'pipeline', tasks: 'task state', 'plan master': 'plans', 'plans pagination': 'plans', service: 'service state', 'task state': 'task state' };
 /* "[assets/pipeline]" → ['assets', 'pipeline'] (known keys, or the raw name when unknown) */
 function serviceKeys(raw) {
   const inner = String(raw).replace(/^\[|\]$/g, '').trim();
   return inner.split(/\s*(?:\/|\+)\s*/).map(s => s.trim().toLowerCase()).filter(Boolean).map(s => SERVICES[s] ? s : SERVICE_ALIASES[s] || s);
 }
 const serviceStatus = k => SERVICES[k] ? SERVICES[k].status : 'not connected';
+/* The data each sub-agent reads by default. A planned step that names no services gets these. */
+const SUB_USES = {
+  'Prep.Profile': ['relationship graph', 'assets', 'plans', 'platform eligibility'], 'Prep.Notes': ['call notes', 'memory'], 'Prep.Content': ['approved search', 'recommendation trace'],
+  'Prep.Fact Check': ['evidence resolver', 'fund facts'], 'Prep.Agenda': ['task state'], 'Prep.Themes': ['themes'], 'Prep.News': ['news'],
+  'Lead.Discover': ['lead discovery', 'engagement graph', 'transactions'], 'Lead.Insights': ['assets', 'flows', 'transactions', 'pipeline', 'change events', 'ranking trace'], 'Lead.Products': ['platform eligibility', 'taxonomy'],
+  'Territory.Health Check': ['coverage analytics', 'engagements'], 'Territory.Calibration': ['peer analytics'], 'Territory.Teaming': ['relationship graph'], 'Territory.Reviews': ['coverage analytics'],
+  'Territory.Strategy': ['pipeline scoring', 'plan inputs'], 'Territory.Business Planning': ['plan inputs', 'pipeline scoring'],
+  'Schedule.Calendar': ['calendar'], 'Schedule.Email': [], 'Schedule.Compliance': ['meeting rules'], 'Schedule.Zoning': ['zoning'],
+  'Engage.Q&A': ['fund facts'], 'Engage.Recommendations': ['recommendation trace'], 'Engage.Capture': ['call notes'], 'Engage.Scenario': ['fund facts'],
+  'Follow.Dictation': ['call notes'], 'Follow.Tasks': ['task state'], 'Follow.Expenses': ['expense system'],
+  'Coach.Simulation': ['call notes', 'memory'], 'Coach.Guide': ['objection playbook', 'fund facts'],
+  'Product.Research Planner': ['platform eligibility', 'taxonomy', 'allocation versions', 'program rules'], 'Product.Tool Selection': ['approved comparison tool', 'assets'], 'Product.Response Formatter': ['taxonomy'], 'Product.QAR': ['fund facts', 'approved comparison tool'],
+  'Marketing.Resource Gatherer': ['approved search'], 'Marketing.Document Analyzer': ['evidence resolver'], 'Marketing.Editor': [], 'Marketing.Audience Builder': ['engagements'], 'Marketing.Distribution': []
+};
 
 /* Parse a catalogue route into stages. Items in one stage run together; stages run in order.
    The last stage is the output. Brackets may contain "+" or "/", so split only outside them. */
@@ -1838,8 +2051,55 @@ const tickerOf = x => { const s = String(x || '').trim(), u = s.toUpperCase(); r
 /* ---------- Enterprise tools (reached through the MCP or API gateway) ---------- */
 const S = v => String(v ?? '').trim();
 const M1 = x => Math.round(x * 10) / 10, pct1 = (c, p) => p ? Math.round((c - p) / p * 1000) / 10 : null;
-const adv = id => { const a = ADVISORS[S(id)] || Object.entries(ADVISORS).find(([k, x]) => x.short.toLowerCase() === S(id).toLowerCase() || x.name.toLowerCase().includes(S(id).toLowerCase()))?.[1]; if (!a) throw new Error('Unknown advisor id. Use ids like ADV-101.'); return a; };
-const advId = id => ADVISORS[S(id)] ? S(id) : Object.keys(ADVISORS).find(k => ADVISORS[k].short.toLowerCase() === S(id).toLowerCase() || ADVISORS[k].name.toLowerCase().includes(S(id).toLowerCase()));
+const adv = id => { const a = !S(id) ? null : ADVISORS[S(id)] || Object.entries(ADVISORS).find(([k, x]) => x.short.toLowerCase() === S(id).toLowerCase() || x.name.toLowerCase().includes(S(id).toLowerCase()))?.[1]; if (!a) throw new Error('Unknown advisor id. Use ids like ADV-101.'); return a; };
+const advId = id => !S(id) ? undefined : ADVISORS[S(id)] ? S(id) : Object.keys(ADVISORS).find(k => ADVISORS[k].short.toLowerCase() === S(id).toLowerCase() || ADVISORS[k].name.toLowerCase().includes(S(id).toLowerCase())); /* an empty id matches nobody */
+/* ---------- computations behind Lead Me, Territory Planning and Schedule Me (deterministic, on simulated data) ---------- */
+const lastContact = id => { const d = EPISODES.filter(e => e.adv === id).map(e => Date.parse(e.date)).sort((x, y) => y - x)[0]; return d ? Math.round((Date.parse('Sep 29, 2026') - d) / 864e5) : null; };
+function leadDiscover(a, save = true) {
+  const cat = S(a.category).toLowerCase() || 'equity', group = CATEGORY_GROUPS[Object.keys(CATEGORY_GROUPS).find(k => cat.includes(k)) || 'equity'];
+  const minA = Number(a.min_category_assets_usd_m) || 0, maxS = Number(a.max_share_pct) || 100, days = Number(a.not_contacted_days) || 0;
+  const T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === S(a.territory).toLowerCase()), pool = T ? TERRITORIES[T].advisors : Object.keys(ADVISORS);
+  const ranked = [], excluded = [];
+  for (const id of pool) {
+    const ind = group.reduce((t, c) => t + ((INDUSTRY_BOOK[id] || {})[c] || 0), 0), cg = M1(BOOK[id].funds.filter(f => group.includes(FUND_CATEGORY[f[0]])).reduce((t, f) => t + f[2], 0)), share = ind ? M1(cg / ind * 100) : null, lc = lastContact(id);
+    const why = !ind ? 'No industry-book assets in ' + group.join(' or ') : ind < minA ? `Category assets $${ind}M below the $${minA}M minimum` : share > maxS ? `CG share ${share}% above the ${maxS}% limit` : days && lc != null && lc < days ? `Contacted ${lc} days ago, inside the ${days}-day window` : null;
+    if (why) { excluded.push({ advisor: ADVISORS[id].name, reason: why }); continue; }
+    ranked.push({ advisor: ADVISORS[id].name, advisor_id: id, category_assets_usd_m: ind, cg_assets_usd_m: cg, cg_share_pct: share, headroom_usd_m: M1(ind - cg), days_since_contact: lc, signal: ALPHA[id] ? `Sales Alpha ${ALPHA[id].score} (a signal, not intent)` : 'No Sales Alpha score' });
+  }
+  ranked.sort((x, y) => y.headroom_usd_m - x.headroom_usd_m).forEach((r, k) => { r.rank = k + 1; });
+  const out = { ranking_id: 'RANK-' + (save && typeof F !== 'undefined' ? 900 + (++F.seq) : 928), produced: TODAY, criteria: { categories: group, min_category_assets_usd_m: minA, max_share_pct: maxS, territory: T ? TERRITORIES[T].name : 'All covered advisors', not_contacted_days: days || null },
+    basis: 'Ranked by headroom: the advisor’s category assets with other managers (industry book, Jun 30, 2026) minus CG assets (Aug 31, 2026).', ranked, excluded };
+  if (save && typeof F !== 'undefined') F.lastRanking = out;
+  return out;
+}
+const LEAD_RANKING_SAMPLE = Object.assign(leadDiscover({ category: 'equity', min_category_assets_usd_m: 50 }, false), { note: 'Saved ranking from Sep 28, 2026 (equity-fund leads, minimum $50M in equity categories). No ranking has been produced in this session yet.' });
+function peerCompare(id) {
+  if (!id) return { note: 'Name an advisor.' };
+  const cohort = Object.entries(PEER_COHORTS).find(([, ids]) => ids.includes(id)), stats = x => { const B = BOOK[x], tot = M1(B.funds.reduce((t, f) => t + f[2], 0)), etf = M1(B.funds.filter(f => f[1] === 'ETF').reduce((t, f) => t + f[2], 0)), Fl = FLOWS[x], net = M1(Object.keys(Fl.sales).reduce((t, v) => t + Fl.sales[v][0] - Fl.redemptions[v][0], 0)); return { cg_assets_usd_m: tot, etf_share_pct: M1(etf / tot * 100), net_flows_12m_usd_m: net }; };
+  const med = arr => { const s = [...arr].sort((a, b) => a - b), m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : M1((s[m - 1] + s[m]) / 2); };
+  const peers = cohort[1].filter(x => x !== id).map(stats), me = stats(id);
+  return { advisor: ADVISORS[id].name, cohort: cohort[0], cohort_size: cohort[1].length, definition: 'Permitted cohort by practice type; internal coverage data only, no client data. Peers are not named.', advisor_values: me,
+    cohort_median: { cg_assets_usd_m: med(peers.map(p => p.cg_assets_usd_m)), etf_share_pct: med(peers.map(p => p.etf_share_pct)), net_flows_12m_usd_m: med(peers.map(p => p.net_flows_12m_usd_m)) }, caveat: 'Small cohort; treat as directional.' };
+}
+function pipelineScore(a) {
+  const id = advId(a.advisor_id), T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === S(a.territory).toLowerCase()), pool = id ? [id] : T ? TERRITORIES[T].advisors : Object.keys(ADVISORS), stageW = { Discovery: 10, Qualified: 20, Proposal: 30, Paperwork: 35 };
+  const rows = OPPORTUNITIES.filter(o => pool.includes(o.adv) && !/closed/i.test(o.stage)).map(o => { const D = PIPELINE_DETAIL[o.id] || {}, age = Math.round((Date.parse('Sep 29, 2026') - Date.parse(D.last_activity || 'Sep 29, 2026')) / 864e5), size = Math.min(40, Math.round((D.est_usd_m || 0) / 15 * 40)), fresh = age <= 14 ? 30 : age <= 30 ? 20 : 5, stage = stageW[o.stage] || 10;
+    return { id: o.id, name: o.name, advisor: ADVISORS[o.adv].name, stage: o.stage, est_usd_m: D.est_usd_m, days_since_activity: age, next_action: D.next, score: stage + size + fresh, basis: { stage, size, recency: fresh } }; }).sort((x, y) => y.score - x.score);
+  return { as_of: 'Sep 29, 2026', method: 'Score = stage (10 to 35) + size (up to 40, scaled to $15M) + recency (30 if active in 14 days, 20 within 30, else 5). Closed opportunities are excluded.', opportunities: rows };
+}
+function coverageReport(terr) {
+  const T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === terr.toLowerCase()), pool = T ? TERRITORIES[T].advisors : Object.keys(ADVISORS), now = Date.parse('Sep 29, 2026');
+  return { window: 'Last 90 days to Sep 29, 2026', definition: 'Completed contacts recorded in Salesforce, against the coverage tier target for 90 days.', advisors: pool.map(id => { const [tier, target] = COVERAGE_TIERS[id], n = F.episodes.filter(e => e.adv === id && now - Date.parse(e.date) <= 90 * 864e5).length;
+    return { advisor: ADVISORS[id].name, tier, target_contacts: target, completed_contacts: n, status: n > target ? 'Over-covered' : n < target / 2 ? 'Neglected' : n < target ? 'Under target' : 'On target', last_contact_days: lastContact(id) }; }) };
+}
+function zoneVisits(a) {
+  const ids = (Array.isArray(a.advisor_ids) ? a.advisor_ids : S(a.advisor_ids).split(/[ ,]+/)).map(advId).filter(Boolean), T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === S(a.territory).toLowerCase() || TERRITORIES[k].name.toLowerCase() === S(a.territory).toLowerCase());
+  const pool = ids.length ? ids : T ? TERRITORIES[T].advisors : [];
+  if (!pool.length) return { note: `No covered advisors in ${S(a.territory) || 'that area'}. Covered territories: Los Angeles, Orange County, San Diego.` };
+  const zones = {}; pool.forEach(id => { const [z, mins] = ZONES[id]; (zones[z] = zones[z] || { zone: z, drive_minutes_from_irvine: mins, advisors: [] }).advisors.push({ advisor: ADVISORS[id].name, office: ADVISORS[id].office }); });
+  const days = ['Tue Oct 6', 'Wed Oct 14', 'Thu Oct 22', 'Tue Oct 27'];
+  return { month: S(a.month) || 'October 2026', base: 'Irvine', zones: Object.values(zones).sort((x, y) => y.drive_minutes_from_irvine - x.drive_minutes_from_irvine).map((z, k) => Object.assign(z, { proposed_day: days[k % days.length] })), note: 'Proposed days only; nothing is booked.' };
+}
 const TOOLS = {
   'crm.get_contact': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce: advisor contact, firm, team, buying units and coverage.', props: { advisor_id: 'string' },
     run: a => { const x = adv(a.advisor_id), id = advId(a.advisor_id), sh = SHELF[x.firm]; return { name: x.name, title: x.title, firm: FIRMS[x.firm].name, office: x.office, team: x.team, units: x.units, coverage: x.coverage.map(c => EMPLOYEES[c].name), platform_programs: sh && sh.advisor_programs[id] ? sh.advisor_programs[id] : 'not in reference data' }; } },
@@ -1899,7 +2159,7 @@ const TOOLS = {
   'crm.get_plan': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce: retirement plan records an advisor’s committee oversees: plan, assets, participants, committee, meeting dates and lineup.', props: { advisor_id: 'string' },
     run: a => Object.entries(PLANS).filter(([, p]) => p.adv === advId(a.advisor_id)).map(([id, p]) => ({ plan_id: id, name: p.name, assets_usd: p.assets_usd, participants: p.participants, committee: p.committee, next_meeting: p.next_meeting, materials_due: p.materials_due, lineup: p.lineup.map(o => ({ option: o.option, fund: o.fund, fund_name: FUNDS[o.fund].name, assets_usd: o.assets_usd })), other: p.other })) },
   'models.plan_fee_comparison': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model platform: fee comparison for a retirement plan lineup: each option’s expense ratio against its Morningstar category median, in basis points and annual dollars on the option’s assets.', props: { plan_id: 'string' },
-    run: a => { const id = PLANS[S(a.plan_id)] ? S(a.plan_id) : Object.keys(PLANS).find(k => PLANS[k].adv === advId(a.plan_id)); if (!id) throw new Error('Unknown plan. Known: ' + Object.keys(PLANS).join(', '));
+    run: a => { const id = PLANS[S(a.plan_id)] ? S(a.plan_id) : Object.keys(PLANS).find(k => PLANS[k].adv === advId(a.plan_id)); if (!id) return { note: 'No retirement plan on file for this advisor. Plans on file: ' + Object.keys(PLANS).join(', ') };
       const P = PLANS[id], r2 = x => Math.round(x * 1000) / 1000;
       const options = P.lineup.map(o => { const f = FUNDS[o.fund], c = PEERS[o.category];
         return { option: o.option, fund: o.fund, share_class: f.name.split(', ')[1] || '', assets_usd: o.assets_usd, expense_ratio_pct: f.er, er_as_of: f.asOf, category: o.category, category_median_pct: c.medianEr,
@@ -1947,6 +2207,58 @@ const TOOLS = {
       return { as_of: 'Sep 29, 2026', definition: 'Meaningful contact = a completed call, meeting or two-way email recorded in Salesforce; scheduled meetings do not count.',
         advisors: ids.map(id => { const eps = F.episodes.filter(e => e.adv === id).sort((x, y) => Date.parse(y.date) - Date.parse(x.date)), last = eps[0];
           return { advisor: ADVISORS[id].name, last_completed: last ? { id: last.id, date: last.date, kind: last.kind, with: last.with } : null, days_since: last ? Math.round((now - Date.parse(last.date)) / 864e5) : null, completed_last_90_days: eps.filter(e => now - Date.parse(e.date) <= 90 * 864e5).length }; }) }; } },
+  /* ---- data behind the remaining Sales AI sub-agents (simulated, fictional) ---- */
+  'book.get_fund_transactions': { sys: 'fund', via: 'API', rw: 'read', desc: 'Transactions service: fund-level purchases and redemptions for an advisor, Jul to Sep 2026. Amounts in $ millions.', props: { advisor_id: 'string', fund: 'string' },
+    run: a => { const id = advId(a.advisor_id), tk = tickerOf(a.fund); return { window: 'Jul 1 to Sep 28, 2026', transactions: FUND_TRANSACTIONS.filter(t => (!id || t[0] === id) && (!tk || t[2] === tk)).map(([adv, date, fund, type, amt]) => ({ advisor: ADVISORS[adv].name, date, fund, type, amount_usd_m: amt })) }; } },
+  'engage.get_digital': { sys: 'mcloud', via: 'API', rw: 'read', desc: 'Marketing Cloud engagement graph: attributable page visits, article opens and webinars by logged-in advisors. An observed event, not intent.', props: { advisor_id: 'string', since: 'string' },
+    run: a => { const id = advId(a.advisor_id), since = Date.parse(S(a.since)); return { note: 'Observed events only; a visit is not intent to buy.', events: DIGITAL.filter(d => (!id || d[0] === id) && (isNaN(since) || Date.parse(d[1]) > since)).map(([adv, date, kind, item]) => ({ advisor: ADVISORS[adv].name, date, kind, item })) }; } },
+  'lead.discover': { sys: 'fund', via: 'API', rw: 'read', desc: 'Lead discovery: ranks covered advisors against explicit criteria (category: equity, fixed income, multi-asset, large growth; minimum category assets; maximum CG share; territory; days since contact). Returns the ranking, its basis and exclusions, and saves the trace.', props: { category: 'string', min_category_assets_usd_m: 'number', max_share_pct: 'number', territory: 'string', not_contacted_days: 'number' },
+    run: a => leadDiscover(a) },
+  'lead.get_ranking_trace': { sys: 'fund', via: 'API', rw: 'read', desc: 'Ranking trace: for the most recent lead ranking, the criteria, each advisor’s evidence and score, and who was excluded and why.', props: {},
+    run: () => F.lastRanking || LEAD_RANKING_SAMPLE },
+  'peer.compare': { sys: 'fund', via: 'API', rw: 'read', desc: 'Peer analytics: compares an advisor with a permitted peer cohort (internal coverage data only) on CG assets, ETF share and net flows. Amounts in $ millions.', props: { advisor_id: 'string' },
+    run: a => peerCompare(advId(a.advisor_id)) },
+  'pipeline.score': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Pipeline scoring: scores open opportunities by stage, estimated size and recency of activity, with the basis shown. Pass an advisor or a territory.', props: { advisor_id: 'string', territory: 'string' },
+    run: a => pipelineScore(a) },
+  'events.get_changes': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Change events: business events for an advisor or their clients’ plans after a date (new hires, model launches, plan sponsor changes, platform changes).', props: { advisor_id: 'string', since: 'string' },
+    run: a => { const id = advId(a.advisor_id), since = Date.parse(S(a.since)); return { events: CHANGE_EVENTS.filter(e => (!id || e[0] === id) && (isNaN(since) || Date.parse(e[1]) > since)).map(([adv, date, what, src]) => ({ advisor: ADVISORS[adv].name, date, event: what, source: src })) }; } },
+  'crm.get_team': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce relationship graph: the advisor’s own team with roles, and Capital Group’s coverage team.', props: { advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id), ho = HANDOVERS.find(h => h.adv === id); return { advisor_team: (ADVISOR_TEAMS[id] || []).map(([name, role]) => ({ name, role })), coverage_team: COVERAGE_TEAM.filter(([n]) => !id || ADVISORS[id].coverage.some(c => EMPLOYEES[c].name === n) || !Object.values(EMPLOYEES).some(e => e.name === n && e.team === 'sales')).map(([name, role]) => ({ name, role })), coverage_change: ho ? `${EMPLOYEES[ho.from].name} → ${EMPLOYEES[ho.to].name}, effective ${ho.effective}` : null }; } },
+  'crm.get_tasks': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce tasks: open and recent commitments for an advisor, with owner, due date and status.', props: { advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id); return { tasks: F.commitments.filter(c => !id || c.adv === id).map(c => ({ id: c.id, title: c.title, owner: c.owner, due: c.due, status: c.status, scope: c.scope })) }; } },
+  'territory.coverage': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Coverage analytics: completed contacts in the last 90 days against each advisor’s coverage tier target, for a territory (LA, OC, SD) or all.', props: { territory: 'string' },
+    run: a => coverageReport(S(a.territory)) },
+  'territory.get_plan_inputs': { sys: 'fund', via: 'API', rw: 'read', desc: 'Business planning inputs: a wholesaler’s sales goal, year-to-date sales, meeting capacity and quarter priorities. Amounts in $ millions.', props: { wholesaler: 'string' },
+    run: a => { const k = Object.keys(PLAN_INPUTS).find(e => e === S(a.wholesaler) || EMPLOYEES[e].name.toLowerCase().includes(S(a.wholesaler).toLowerCase())) || 'EMP-PRIYA', P = PLAN_INPUTS[k]; return Object.assign({ wholesaler: EMPLOYEES[k].name, remaining_to_goal_usd_m: M1(P.sales_goal_usd_m - P.ytd_sales_usd_m), pct_of_goal: M1(P.ytd_sales_usd_m / P.sales_goal_usd_m * 100) }, P); } },
+  'schedule.zone_visits': { sys: 'm365', via: 'MCP', rw: 'read', desc: 'Zoning: groups advisor visits by geography with drive time from Irvine, and proposes visit days. Pass advisor ids or a territory (LA, OC, SD).', props: { advisor_ids: 'array', territory: 'string', month: 'string' },
+    run: a => zoneVisits(a) },
+  'schedule.check_rules': { sys: 'm365', via: 'API', rw: 'read', desc: 'Meeting compliance: the advisor firm’s meeting rules plus Capital Group policy, for a meeting type.', props: { advisor_id: 'string', meeting_type: 'string' },
+    run: a => { const id = advId(a.advisor_id), firm = id ? ADVISORS[id].firm : null; return { firm: firm ? FIRMS[firm].name : 'Internal', meeting_type: S(a.meeting_type) || 'advisor meeting', firm_rules: firm ? MEETING_RULES[firm] : [], capital_group_rules: MEETING_RULES.CG }; } },
+  'content.get_themes': { sys: 'news', via: 'API', rw: 'read', desc: 'This week’s approved themes, ranked by relevance to an advisor’s recorded priorities and notes.', props: { advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id), txt = id ? [...F.memory.filter(m => m.adv === id && m.access === 'shared').map(m => m.value), ...F.episodes.filter(e => e.adv === id).map(e => e.text)].join(' ').toLowerCase() : ''; return { week_of: 'Sep 28, 2026', themes: THEMES.map(([tid, title, tags, src]) => { const hits = tags.split(' ').filter(w => txt.includes(w)); return { id: tid, title, source: src, relevance: hits.length, why: hits.length ? 'Matches recorded notes: ' + hits.join(', ') : 'General theme; nothing advisor-specific' }; }).sort((x, y) => y.relevance - x.relevance) }; } },
+  'news.get_items': { sys: 'news', via: 'API', rw: 'read', desc: 'Authorized news and approved commentary from the last two weeks, filtered by topic words or an advisor’s context.', props: { topics: 'string', advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id), q = (S(a.topics) + ' ' + (id ? [FIRMS[ADVISORS[id].firm].name, ...F.memory.filter(m => m.adv === id && m.access === 'shared').map(m => m.value)].join(' ') : '')).toLowerCase(); return { window: 'Sep 14 to Sep 28, 2026', items: NEWS.map(([nid, date, title, src, tags]) => ({ id: nid, date, title, source: src, matches: tags.split(' ').filter(w => q.includes(w)).length })).filter(n => n.matches || !q.trim()).sort((x, y) => y.matches - x.matches) }; } },
+  'seismic.get_recommendations': { sys: 'seismic', via: 'MCP', rw: 'read', desc: 'Seismic recommendations with their trace: whether each piece is recommended for the advisor’s stated need (with the evidence) or for popularity.', props: { advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id); return { advisor: id ? ADVISORS[id].name : null, recommendations: (CONTENT_RECS[id] || []).map(([cid, basis, reason, ev]) => ({ id: cid, title: CONTENT.find(c => c.id === cid).title, basis: basis === 'stated_need' ? 'Advisor’s stated need' : 'Popular with similar advisors', reason, evidence: ev })) }; } },
+  'seismic.resolve_evidence': { sys: 'seismic', via: 'API', rw: 'read', desc: 'Evidence resolver: finds the page and passage in an approved document (by id) that supports a claim, with the document version.', props: { asset_id: 'string', claim: 'string' },
+    run: a => { const D = DOC_PASSAGES[S(a.asset_id)], q = S(a.claim).toLowerCase().split(/\W+/).filter(w => w.length > 3); if (!D) return { asset: S(a.asset_id), found: false, note: 'No original document text on file for this asset; the claim cannot be traced to a page.' };
+      const best = D.pages.map(([pg, txt]) => ({ page: pg, passage: txt, score: q.filter(w => txt.toLowerCase().includes(w)).length })).sort((x, y) => y.score - x.score)[0]; return { asset: S(a.asset_id), version: D.version, found: best.score > 0, page: best.page, passage: best.passage }; } },
+  'platform.get_program_rules': { sys: 'fund', via: 'API', rw: 'read', desc: 'Program rules: account and program minimums and rules for the advisor’s dealer programs.', props: { advisor_id: 'string', program: 'string' },
+    run: a => { const id = advId(a.advisor_id), firm = id ? ADVISORS[id].firm : null, R = PROGRAM_RULES[firm]; if (!R) return { firm: firm ? FIRMS[firm].name : null, note: 'No dealer program rules: this firm uses a custodian platform.' }; const p = S(a.program).toLowerCase(); return { firm: FIRMS[firm].name, source: 'Dealer program guide (dealer feed)', programs: Object.entries(R).filter(([k]) => !p || k.toLowerCase().includes(p)).map(([k, rules]) => ({ program: k, rules })) }; } },
+  'models.get_allocations': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model allocations: dated versions of a Capital Group model on a dealer platform, with component weights (percent) and the change between versions.', props: { model: 'string', advisor_id: 'string' },
+    run: a => { const k = Object.keys(MODEL_ALLOCATIONS).find(m => m.toLowerCase().includes(S(a.model).toLowerCase().replace(/ model.*$/, ''))) || null; if (!k) return { note: 'Unknown model. Known: ' + Object.keys(MODEL_ALLOCATIONS).join(', ') };
+      const X = MODEL_ALLOCATIONS[k], [[d0, w0], [d1, w1]] = X.versions, id = advId(a.advisor_id); return { model: k, firm: FIRMS[X.firm].name, program: X.program, offered_to_advisor: id ? ADVISORS[id].firm === X.firm : null, from: d0, to: d1, components: [...new Set([...Object.keys(w0), ...Object.keys(w1)])].map(t => ({ ticker: t, name: FUNDS[t].name, from_pct: w0[t] || 0, to_pct: w1[t] || 0, change_pp: (w1[t] || 0) - (w0[t] || 0) })) }; } },
+  'fund.compare': { sys: 'fund', via: 'API', rw: 'read', desc: 'Approved comparison tool: compares funds like for like (share class, expense ratio with its as-of date, benchmark, category, approach) and flags anything not on the same basis.', props: { tickers: 'array' },
+    run: a => { const tk = (Array.isArray(a.tickers) ? a.tickers : S(a.tickers).split(/[ ,]+/)).map(tickerOf).filter(Boolean), rows = tk.map(t => { const f = FUNDS[t]; return { ticker: t, name: f.name, share_class: f.name.split(', ')[1] || 'n/a', expense_ratio_pct: f.er, er_as_of: f.asOf, benchmark: f.bench, category: f.category || FUND_CATEGORY[t] || null, approach: f.approach }; });
+      const flags = []; if (new Set(rows.map(r => r.er_as_of)).size > 1) flags.push('Expense ratios have different as-of dates'); if (new Set(rows.map(r => r.benchmark)).size > 1) flags.push('Funds are managed to different benchmarks'); rows.filter(r => r.expense_ratio_pct == null).forEach(r => flags.push(r.ticker + ': expense ratio not in reference data'));
+      return { funds: rows, basis_flags: flags, performance: 'Inserted from the system of record at approval; never generated' }; } },
+  'coach.get_playbook': { sys: 'seismic', via: 'MCP', rw: 'read', desc: 'Coaching playbook for an objection (fee, active vs index): steps, approved language to use, what to avoid and clarifying questions.', props: { topic: 'string' },
+    run: a => { const t = S(a.topic).toLowerCase(), k = /fee|cost|expens|price/.test(t) ? 'fee' : /active|index|passive/.test(t) ? 'active vs index' : null; return k ? Object.assign({ topic: k }, PLAYBOOK[k]) : { topic: t, note: 'No playbook for this topic. Known: fee, active vs index.' }; } },
+  'expense.get_receipts': { sys: 'exp', via: 'API', rw: 'read', desc: 'Expense system: a wholesaler’s receipts for a month, matched to advisor visits, with the travel policy and anything that breaks it.', props: { wholesaler: 'string', month: 'string' },
+    run: a => { const k = Object.keys(EXPENSES).find(e => e === S(a.wholesaler) || EMPLOYEES[e].name.toLowerCase().includes(S(a.wholesaler).toLowerCase())) || 'EMP-PRIYA', X = EXPENSES[k];
+      return { wholesaler: EMPLOYEES[k].name, month: X.month, policy: X.policy, receipts: X.receipts.map(([date, type, amt, where, att, adv]) => { const per = att.length ? Math.round(amt / att.length * 100) / 100 : null, issues = [];
+        if (type === 'Meal' && !att.length) issues.push('No attendees listed'); if (type === 'Meal' && per > 100) issues.push('Over $100 per person'); if (!adv) issues.push('No matching advisor visit');
+        return { date, type, amount_usd: amt, merchant: where, attendees: att, per_person_usd: per, visit: adv ? ADVISORS[adv].name : null, issues }; }), total_usd: Math.round(X.receipts.reduce((t, r) => t + r[2], 0) * 100) / 100 }; } },
   'models.portfolio_construction': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model platform: blended expense ratio for a mix, e.g. {"VIGAX":70,"GFFFX":30}.', props: { weights: 'object' },
     run: a => { const w = a.weights && typeof a.weights === 'object' ? a.weights : {}; let tot = 0, er = 0; const miss = [];
       for (const [k, v] of Object.entries(w)) { const f = FUNDS[tickerOf(k)]; if (!f || f.er == null) { miss.push(k); continue; } er += f.er * Number(v); tot += Number(v); }
@@ -2289,7 +2601,7 @@ function foundationHeadlines() {
   }).join('\n');
 }
 function subagentText() {
-  return Object.entries(SUBAGENTS).flatMap(([fam, A]) => Object.keys(A.subs).map(sub => { const r = routeInfo(fam + '.' + sub); return `${r.route} | ${r.label} | agent ${r.agent} | ${r.does} | tools: ${(AGENTS[r.agent].tools || []).join(', ') || 'none'}`; })).join('\n');
+  return Object.entries(SUBAGENTS).flatMap(([fam, A]) => Object.keys(A.subs).map(sub => { const r = routeInfo(fam + '.' + sub); return `${r.route} | ${r.label} | ${r.does} | usual data: ${(SUB_USES[r.route] || []).join(', ') || 'foundation and upstream steps'} | agent ${r.agent} tools: ${(AGENTS[r.agent].tools || []).join(', ') || 'none'}`; })).join('\n');
 }
 function serviceText() { return Object.entries(SERVICES).map(([k, v]) => `${k} [${v.status}]${v.tools.length ? ' tools: ' + v.tools.join(', ') : ''} | ${v.does}`).join('\n'); }
 function orchestratorPrompt(run) {
@@ -2730,33 +3042,33 @@ RECORDED.push(
       D('requester', 'Priya Shah, Sales, covers Daniel', 'Wholesaler on Daniel Kim’s coverage; she owns the relationship.'),
       D('intent', 'Diagnose a change, not find leads', 'She wants the reason total sales fell while ETF sales grew, not an ETF pitch or a lead list.', { intent: 'diagnose' }),
       D('asks', '1 thing requested', 'Explain why sales are down while ETF sales are up.', { asks: ['Explain sales down, ETF sales up'] }),
-      D('interpretation', 'Explain why Daniel’s total CG sales fell while his ETF sales grew', 'Catalogue #10 with #11 and #16.', { subject: { kind: 'advisor', id: 'ADV-105', label: 'Daniel Kim · The Kim Group' }, intent: 'diagnose', scope: 'Kim Group team, Capital Group book, all vehicles (mutual funds, ETFs, SMAs) and both channels', time: 'Trailing twelve months to Aug 2026 against the twelve months before', constraints: ['Numbers only from the flows service', 'Separate percentage growth from dollar contribution'], output: 'comparison', missing: ['Fund-level transactions are not connected, so the explanation stops at vehicle and channel'], authority: 'read_only', patterns: [10, 11, 16] }),
+      D('interpretation', 'Explain why Daniel’s total CG sales fell while his ETF sales grew', 'Catalogue #10 with #11 and #16.', { subject: { kind: 'advisor', id: 'ADV-105', label: 'Daniel Kim · The Kim Group' }, intent: 'diagnose', scope: 'Kim Group team, Capital Group book, all vehicles (mutual funds, ETFs, SMAs) and both channels', time: 'Trailing twelve months to Aug 2026 against the twelve months before', constraints: ['Numbers only from the flows service', 'Separate percentage growth from dollar contribution'], output: 'comparison', missing: ['Fund-level transactions cover only Jul to Sep 2026, so the twelve-month change is explained by vehicle and channel'], authority: 'read_only', patterns: [10, 11, 16] }),
       D('entity', 'Daniel → Daniel Kim, Wells Fargo', 'One graph match; his only unit is the Kim Group model portfolios.', { advisor: 'ADV-105', unit: 'BU-105', confidence: 'high' }),
       D('scope', 'Kim Group model portfolios (BU-105)', 'Team-level CG book; no other managers’ flows.'),
       D('known', 'Daniel’s own words may explain it', 'CALL-0826: two models moved to an index core. CALL-0918: clients ask about ETFs versus active.', { uses: ['CALL-0826', 'CALL-0918', 'MEM-051', 'MEM-053'] }),
       D('missing', 'Flows not computed yet', 'The flows service computes the contribution by vehicle and channel; the model only explains it.'),
       D('memory', 'Read only', 'Nothing new about Daniel to store.', { class: 'read_only' }),
       D('controls', 'Read-only; every number traced', 'No drafts or changes. Figures only from the flows service.'),
-      TK({ id: 'T1', route: 'Lead.Insights', title: 'Compute the contribution analysis', objective: 'Compare gross sales, redemptions and net flows by vehicle and channel for both periods, and attribute the change in total sales', services: ['flows'], tools: ['book.get_flows'], reads: ['knowledge'], returns: 'Contribution by vehicle and channel, with the periods and limits', why: 'Lead Me’s Insights Generator explains changes; the flows service on the data platform does the math.' }),
+      TK({ id: 'T1', route: 'Lead.Insights', title: 'Compute the contribution analysis', objective: 'Compare gross sales, redemptions and net flows by vehicle and channel for both periods, attribute the change in total sales, and check recent fund-level transactions', services: ['flows', 'transactions'], tools: ['book.get_flows', 'book.get_fund_transactions'], reads: ['knowledge'], returns: 'Contribution by vehicle and channel, with the periods and limits', why: 'Lead Me’s Insights Generator explains changes; the flows service on the data platform does the math.' }),
       TK({ id: 'T2', route: 'Prep.Notes', title: 'Pull what Daniel told us', objective: 'Summarize Daniel’s dated statements about his models, ETFs and the index core', services: ['memory'], tools: ['crm.get_call_notes'], reads: ['memory'], returns: 'Attributed statements with dates', why: 'Notes Summarizer reads recorded calls in Salesforce; it runs alongside the flows analysis.' }),
       TK({ id: 'T3', route: 'Prep.Fact Check', title: 'Check and explain the gap', objective: 'Verify every figure against the flows result, reconcile it with Daniel’s statements and state the limits', depends_on: ['T1', 'T2'], reads: ['memory', 'knowledge', 'policy'], tools: [], returns: 'A verified explanation with sources, as-of dates and limits', why: 'Fact Check makes sure the explanation uses the flows numbers, not narrative.' }),
       D('success', 'Priya can explain the dip in one breath', 'Dollar contribution by vehicle and channel, tied to what Daniel said, with the limits stated.'),
       L({ k: 'end' })
     ].join('\n'),
     agents: {
-      T1: { calls: [['book.get_flows', { advisor_id: 'ADV-105' }]],
-        json: { says: 'I ran the flows service for both periods: ETF sales more than doubled, but the mutual fund decline is nearly twice as large in dollars.',
-          output: { kind: 'finding', title: 'Contribution analysis: Kim Group sales', body: 'Total gross sales: $38.2M vs $44.9M, down $6.7M (−14.9%).\n\nBy vehicle (change in gross sales):\n- Mutual funds: $21.4M vs $33.1M, down $11.7M\n- ETFs: $11.6M vs $5.2M, up $6.4M (+123.1%)\n- SMAs: $5.2M vs $6.6M, down $1.4M\n\nBy channel: model portfolios $24.0M vs $33.5M (down $9.5M); advisor-directed accounts $14.2M vs $11.4M (up $2.8M).\n\nRedemptions rose to $23.0M from $15.8M, mostly mutual funds ($18.9M vs $12.4M), so net flows fell to $15.2M from $29.1M.' },
-          used: ['book.get_flows'], knowledge: [{ label: 'Kim Group sales: mutual fund decline outweighs ETF growth', value: 'Gross sales fell $6.7M (−14.9%): mutual fund sales fell $11.7M while ETF sales rose $6.4M; model-portfolio channel sales fell $9.5M.', evidence: ['book.get_flows'] }], memory: [], commitments: [], needs_approval: false,
-          open_questions: ['Fund-level transactions are not connected, so the decline can’t be traced to specific funds.'], as_of: ['Sep 2025 to Aug 2026'], status: 'complete', next_step: '' } },
+      T1: { calls: [['book.get_flows', { advisor_id: 'ADV-105' }], ['book.get_fund_transactions', { advisor_id: 'ADV-105' }]],
+        json: { says: 'I ran the flows service for both periods and checked recent transactions: ETF sales more than doubled, but the mutual fund decline is nearly twice as large in dollars.',
+          output: { kind: 'finding', title: 'Contribution analysis: Kim Group sales', body: 'Total gross sales: $38.2M vs $44.9M, down $6.7M (−14.9%).\n\nBy vehicle (change in gross sales):\n- Mutual funds: $21.4M vs $33.1M, down $11.7M\n- ETFs: $11.6M vs $5.2M, up $6.4M (+123.1%)\n- SMAs: $5.2M vs $6.6M, down $1.4M\n\nBy channel: model portfolios $24.0M vs $33.5M (down $9.5M); advisor-directed accounts $14.2M vs $11.4M (up $2.8M).\n\nRedemptions rose to $23.0M from $15.8M, mostly mutual funds ($18.9M vs $12.4M), so net flows fell to $15.2M from $29.1M.\n\nRecent transactions show the swap: a $4.1M GFA redemption on Jul 9, 2026, then a $3.6M CGGR purchase the next day.' },
+          used: ['book.get_flows', 'book.get_fund_transactions'], knowledge: [{ label: 'Kim Group sales: mutual fund decline outweighs ETF growth', value: 'Gross sales fell $6.7M (−14.9%): mutual fund sales fell $11.7M while ETF sales rose $6.4M; model-portfolio channel sales fell $9.5M.', evidence: ['book.get_flows'] }], memory: [], commitments: [], needs_approval: false,
+          open_questions: ['Fund-level detail exists only for Jul to Sep 2026, so earlier months can’t be traced fund by fund.'], as_of: ['Sep 2025 to Aug 2026', 'Jul to Sep 2026'], status: 'complete', next_step: '' } },
       T2: { calls: [['crm.get_call_notes', { advisor_id: 'ADV-105' }]],
         json: { says: 'I pulled Daniel’s own words from Sam’s August call and Priya’s September call; both point at his models.',
           output: NOTES_DANIEL, used: ['CALL-0826', 'CALL-0918', 'MEM-051', 'MEM-053'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], as_of: ['Sep 18, 2026'], status: 'complete', next_step: '' } },
       T3: { calls: [],
         json: { says: 'I checked every figure against the flows result and tied it to what Daniel told Sam and Priya; the explanation stops where the data stops.',
-          output: { kind: 'answer', title: 'Why sales are down while ETF sales are up', body: 'Short answer: ETF sales grew fast from a small base, while mutual fund sales fell by more.\n\n- ETFs: up $6.4M (+123.1%), the only vehicle that grew\n- Mutual funds: down $11.7M, which outweighs the ETF gain on its own\n- Net effect: total gross sales down $6.7M (−14.9%)\n\nWhere it happened: the model-portfolio channel fell $9.5M while advisor-directed accounts rose $2.8M. That matches what Daniel told us: two models moved to an index core (CALL-0826) and he wants a lower blended cost (CALL-0918).\n\nLimits: fund-level transactions are not connected, so this can’t say which funds the models replaced.' },
+          output: { kind: 'answer', title: 'Why sales are down while ETF sales are up', body: 'Short answer: ETF sales grew fast from a small base, while mutual fund sales fell by more.\n\n- ETFs: up $6.4M (+123.1%), the only vehicle that grew\n- Mutual funds: down $11.7M, which outweighs the ETF gain on its own\n- Net effect: total gross sales down $6.7M (−14.9%)\n\nWhere it happened: the model-portfolio channel fell $9.5M while advisor-directed accounts rose $2.8M. That matches what Daniel told us: two models moved to an index core (CALL-0826) and he wants a lower blended cost (CALL-0918). The transactions agree: $4.1M out of GFA on Jul 9, $3.6M into CGGR the next day.\n\nLimits: fund-level detail covers only Jul to Sep 2026, so earlier switches can’t be traced fund by fund.' },
           used: ['book.get_flows', 'CALL-0826', 'CALL-0918', 'MEM-051'], knowledge: [], memory: [], commitments: [], needs_approval: false,
-          open_questions: ['Which funds did the two index-core models replace? Needs fund-level transactions (not connected).'], as_of: ['Sep 2025 to Aug 2026', 'Sep 18, 2026'], status: 'complete',
+          open_questions: ['Which other funds did the two index-core models replace before July? Fund-level detail starts Jul 2026.'], as_of: ['Sep 2025 to Aug 2026', 'Sep 18, 2026'], status: 'complete',
           next_step: 'Lead with the model-portfolio shift, not the ETF growth: ask Daniel which satellite funds he is reviewing this quarter, since that is where mutual fund sales fell.' } }
     } },
 
@@ -3387,6 +3699,7 @@ function handleOrch(run, o) {
     t.person = ROLES[t.role] ? (t.role === 'sales.wholesalers' && run.advisor && EMPLOYEES[run.requester].team === 'sales' && ADVISORS[run.advisor].coverage.includes(run.requester) ? EMPLOYEES[run.requester].name : ROLES[t.role].person) : '';
     if (!AGENTS[t.agent]) { run.decisions.push({ type: 'registry', src: 'code', title: `Unknown agent “${t.agent}” dropped`, detail: 'Orchestration can only route to registered specialists.' }); return; }
     if (!t.route) t.route = routeOfTask(t.agent, t.sub);
+    if (t.route && !t.services.length && SUB_USES[t.route]) t.services = [...SUB_USES[t.route]]; /* the sub-agent's usual data when the plan names none */
     /* a shared service a step reads brings its tools, when the step's agent may use them */
     t.services.forEach(k => (SERVICES[k] ? SERVICES[k].tools : []).forEach(n => { if (toolAllowed(t.agent, n) && !t.tools.includes(n)) t.tools.push(n); }));
     const bad = t.tools.filter(x => !toolAllowed(t.agent, x));
@@ -3525,8 +3838,8 @@ async function runTask(run, t) {
 function defaultArgs(n, run, t) {
   const tick = mentionsFunds(run.text + ' ' + t.objective), people = (run.resolution.people || []).map(p => p.name);
   const when = /next month/i.test(run.text) ? 'next month' : /next week/i.test(run.text) ? 'next week' : /tomorrow/i.test(run.text) ? 'tomorrow' : 'soon';
-  const plan = Object.keys(PLANS).find(k => PLANS[k].adv === run.advisor) || '';
-  return { plan_id: plan, topic: /fee|cost|expense/i.test(run.text) ? 'fees' : /link|access|open/i.test(run.text) ? 'access' : t.objective, case_id: (F.cases.find(c => c.adv === run.advisor && c.status === 'Open') || {}).id || '', note: '', status: '', advisor_id: run.advisor || '', ticker: tick[0] || 'GFFFX', tickers: tick.length ? tick : ['GFFFX'], name: tick[0] || '', amount_usd: 1000000, query: t.objective, weights: tick.length > 1 ? { [tick[0]]: 50, [tick[1]]: 50 } : { VIGAX: 70, GFFFX: 30 }, category: tick[0] || 'Large Growth', territory: run.territory || 'LA', content_type: /linkedin|post/i.test(run.text) ? 'linkedin post' : /committee/i.test(run.text) ? 'committee pack' : 'advisor email', to: run.advisor ? ADVISORS[run.advisor].name : people[0] || '', subject: t.objective.slice(0, 60), attendees: [run.advisor, ...people].filter(Boolean), when, title: t.objective.slice(0, 60), time: '' };
+  const plan = Object.keys(PLANS).find(k => PLANS[k].adv === run.advisor) || '', lastEp = run.advisor && F.episodes.find(e => e.adv === run.advisor);
+  return { since: lastEp ? lastEp.date : '', category: /fixed income|bond/i.test(run.text) ? 'fixed income' : /growth/i.test(run.text) ? 'large growth' : 'equity', wholesaler: run.requester, month: 'October 2026', meeting_type: 'advisor meeting', model: /moderate/i.test(run.text) ? 'Moderate Growth' : 'Growth', asset_id: (run.text.match(/SEIS-\d+/) || ['SEIS-117'])[0], claim: run.text, program: '', term: /etf/i.test(run.text) ? 'etfs' : 'equity funds', topics: run.text, plan_id: plan, topic: /fee|cost|expense/i.test(run.text) ? 'fees' : /link|access|open/i.test(run.text) ? 'access' : t.objective, case_id: (F.cases.find(c => c.adv === run.advisor && c.status === 'Open') || {}).id || '', note: '', status: '', advisor_id: run.advisor || '', ticker: tick[0] || 'GFFFX', tickers: tick.length ? tick : ['GFFFX'], name: tick[0] || '', amount_usd: 1000000, query: t.objective, weights: tick.length > 1 ? { [tick[0]]: 50, [tick[1]]: 50 } : { VIGAX: 70, GFFFX: 30 }, category: tick[0] || 'Large Growth', territory: run.territory || 'LA', content_type: /linkedin|post/i.test(run.text) ? 'linkedin post' : /committee/i.test(run.text) ? 'committee pack' : 'advisor email', to: run.advisor ? ADVISORS[run.advisor].name : people[0] || '', subject: t.objective.slice(0, 60), attendees: [run.advisor, ...people].filter(Boolean), when, title: t.objective.slice(0, 60), time: '' };
 }
 function errText(e) {
   const map = { not_granted: 'Claude access wasn’t allowed in this view', rate_limited: 'too many requests right now; wait a moment and try again', invalid_json: 'the reply wasn’t valid JSON', empty_completion: 'Claude returned nothing', tools_unavailable: 'tool use isn’t available here', prompt_too_large: 'the request was too large', upstream_error: 'a temporary connection problem', refused: 'Claude declined this request', session_expired: 'your session expired; sign in again', auth_failed: 'the server’s AI key was rejected; check OPENAI_API_KEY', cancelled: 'stopped' };
@@ -3697,7 +4010,7 @@ function renderCatalogue() {
     <p class="hint" style="margin:6px 0 0"><b>Decompose</b> turns a route into a plan without an AI call. <b>Ask</b> puts the request in the command bar; <b>Plan only</b> shows the live AI’s own decomposition.</p></div>
     <div class="dcard"><div class="dt">SAME WORD, DIFFERENT INTENT</div><p class="hint" style="margin:0 0 6px">Organize by business intent, not keywords. Each of these mentions ETFs and needs a different plan, data and controls.</p>${ETF_CONTRAST.map(e => `<div class="catq"><div class="catqh"><b>${esc(e.ask)}</b>${intentBadge(e.intent)}</div>${routeHTML(e.route)}<small class="mute">${esc(e.control)}</small></div>`).join('')}</div>
     <details class="dcard catsec"><summary><b>What the intelligence layer establishes</b><small>Eight fields, then eleven intents</small></summary><dl class="interp">${INTERP_FIELDS.map(([, l, d]) => `<dt>${l}</dt><dd>${esc(d)}</dd>`).join('')}</dl><div class="intents">${INTENT_ORDER.map(k => `<div>${intentBadge(k)} ${esc(INTENTS[k])}</div>`).join('')}</div><p class="hint">“Help me prepare” should not silently mean “book a meeting and send an email.” Action authority is settled by rule from the request’s own words, and write tools above it are removed at the gateway.</p></details>
-    <details class="dcard catsec"><summary><b>Sub-agents and shared services</b><small>Route notation: Prep.Notes = Prep Me → Notes Summarizer</small></summary>${Object.entries(SUBAGENTS).map(([fam, A]) => `<div class="fam"><b>${esc(fam)}</b> <small>${esc(A.name)}</small><div>${Object.keys(A.subs).map(sub => { const ri = routeInfo(fam + '.' + sub); return `<span class="rc ag" style="--c:${TC[AGENTS[ri.agent].team]}" title="${esc(ri.does)}">${esc(sub)}</span>`; }).join('')}</div></div>`).join('')}<div class="fam"><b>Shared services</b> <small>[brackets]: tools, not autonomous agents</small><div>${Object.keys(SERVICES).map(svcChip).join('')}</div></div></details>
+    <details class="dcard catsec"><summary><b>Sub-agents and shared services</b><small>Route notation: Prep.Notes = Prep Me → Notes Summarizer</small></summary>${Object.entries(SUBAGENTS).map(([fam, A]) => `<div class="fam"><b>${esc(fam)}</b> <small>${esc(A.name)}</small>${Object.keys(A.subs).map(sub => { const ri = routeInfo(fam + '.' + sub), uses = SUB_USES[ri.route] || []; return `<div class="subrow"><span class="rc ag" style="--c:${TC[AGENTS[ri.agent].team]}" title="${esc(ri.does)}">${esc(sub)}</span><small>${esc(ri.does)}</small>${uses.length ? `<span class="subdata">${uses.map(svcChip).join('')}</span>` : ''}</div>`; }).join('')}</div>`).join('')}<div class="fam"><b>Shared services</b> <small>[brackets]: tools, not autonomous agents</small><div>${Object.keys(SERVICES).map(svcChip).join('')}</div></div></details>
     ${Object.entries(CATALOGUE_GROUPS).map(([g, G], gi) => `<details class="dcard catsec" ${gi === 0 ? 'open' : ''}><summary><b>${g}. ${esc(G.title)}</b><small>${CATALOGUE.filter(c => c.group === g).length} queries</small></summary>${G.note ? `<p class="catnote">${esc(G.note)}</p>` : ''}${CATALOGUE.filter(c => c.group === g).map(c => `<div class="catq" id="cat-${c.n}"><div class="catqh"><span class="catn">${c.n}</span><b>“${esc(c.ask)}”</b>${intentBadge(c.intent)}</div><small class="mute">${esc(c.decomp)}</small>${routeHTML(c.route)}<div class="catbtns"><button class="lbtn mini" data-cat-plan="${c.n}">Decompose</button><button class="lbtn mini" data-cat-use="${c.n}">Ask</button>${c.auth ? `<small class="mute">${esc(AUTHORITY[c.auth].label)}</small>` : ''}</div></div>`).join('')}</details>`).join('')}`;
 }
 function openCatalogueEntry(n) { setTab('catalogue'); const el = $('cat-' + n); if (!el) return; const d = el.closest('details'); if (d) d.open = true; el.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' }); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
@@ -3854,7 +4167,7 @@ document.addEventListener('click', e => {
   if (d.act === 'save-run') { saveRun(UI.run); return; }
   if (d.act === 'retry') { const t = UI.run.text; UI.run = null; runRequest(t); return; }
   if (d.task) { openTask(d.task); return; }
-  if (d.agent) { const a = AGENTS[d.agent]; openDrawer(esc(a.name), `<p class="hint">${esc(TEAMS[a.team].name)}</p><p class="lead">${esc(a.does)}</p><div class="h">Tools it may call</div>${a.tools.length ? a.tools.map(t => `<div class="pk"><span class="vbadge ${TOOLS[t].via}">${TOOLS[t].via}</span><span><code style="font:12px var(--code)">${esc(t)}</code><small>${esc(SYSTEMS[TOOLS[t].sys].name)} · ${esc(TOOLS[t].desc)}</small></span></div>`).join('') : '<p class="hint">None. It works only from the foundation.</p>'}<div class="h">Subscribed to</div><p class="hint">${Object.entries(SUBSCRIPTIONS).filter(([, v]) => v.includes(d.agent)).map(([k]) => k).join(', ') || 'No events'}</p>`); return; }
+  if (d.agent) { const a = AGENTS[d.agent]; openDrawer(esc(a.name), `<p class="hint">${esc(TEAMS[a.team].name)}</p><p class="lead">${esc(a.does)}</p>${(() => { const subs = Object.entries(SUBAGENTS).flatMap(([fam, A]) => Object.keys(A.subs).map(s => routeInfo(fam + '.' + s))).filter(r => r.agent === d.agent); return subs.length ? `<div class="h">Sub-agents and the data each reads</div>${subs.map(r => `<div class="pk"><span class="lid">${esc(r.route)}</span><span>${esc(r.does)}<small>${(SUB_USES[r.route] || []).map(k => '[' + k + '] ' + serviceStatus(k)).join(' · ') || 'Works from the foundation and upstream steps'}</small></span></div>`).join('')}` : ''; })()}<div class="h">Tools it may call</div>${a.tools.length ? a.tools.map(t => `<div class="pk"><span class="vbadge ${TOOLS[t].via}">${TOOLS[t].via}</span><span><code style="font:12px var(--code)">${esc(t)}</code><small>${esc(SYSTEMS[TOOLS[t].sys].name)} · ${esc(TOOLS[t].desc)}</small></span></div>`).join('') : '<p class="hint">None. It works only from the foundation.</p>'}<div class="h">Subscribed to</div><p class="hint">${Object.entries(SUBSCRIPTIONS).filter(([, v]) => v.includes(d.agent)).map(([k]) => k).join(', ') || 'No events'}</p>`); return; }
   if (d.layer === 'graph') { openKG(UI.memAdv || F.session.advisor); return; }
   if (d.act === 'kg') { openKG(d.adv); return; }
   if (d.layer) { const l = d.layer; openDrawer(esc(LAYERS[l].name), `<p class="lead">${esc({ memory: 'Scoped, sourced memory: current conversation, lasting preferences, pending validation, interaction history and commitments.', knowledge: 'Fund facts from the data platform, approved Seismic content, and verified findings agents have published.', policy: 'The rules every packet and contribution passes through.', models: 'Sales Alpha, peer match, cost on assets and portfolio construction.', feedback: 'Explicit reactions and outcomes.', events: 'Every committed change, and which specialists hear it.', graph: 'People, firms, buying units, memories, findings, outputs and their sources.' }[l])}</p>${l === 'policy' ? POLICIES.map(p => `<div class="pk"><span class="lid">${p.id}</span><span>${esc(p.text)}</span></div>`).join('') : l === 'knowledge' ? F.findings.map(k => `<div class="pk"><span class="lid">${esc(k.id)}</span><span><b>${esc(k.label)}</b>: ${esc(k.value)}<small>by ${esc(agentName(k.by))} · evidence ${esc(k.evidence.join(', '))}</small></span></div>`).join('') : `<p class="hint">${layerCount(l)} records right now. Open the Memory or Events tab for detail.</p>`}`); return; }

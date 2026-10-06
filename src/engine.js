@@ -71,8 +71,55 @@ const tickerOf = x => { const s = String(x || '').trim(), u = s.toUpperCase(); r
 /* ---------- Enterprise tools (reached through the MCP or API gateway) ---------- */
 const S = v => String(v ?? '').trim();
 const M1 = x => Math.round(x * 10) / 10, pct1 = (c, p) => p ? Math.round((c - p) / p * 1000) / 10 : null;
-const adv = id => { const a = ADVISORS[S(id)] || Object.entries(ADVISORS).find(([k, x]) => x.short.toLowerCase() === S(id).toLowerCase() || x.name.toLowerCase().includes(S(id).toLowerCase()))?.[1]; if (!a) throw new Error('Unknown advisor id. Use ids like ADV-101.'); return a; };
-const advId = id => ADVISORS[S(id)] ? S(id) : Object.keys(ADVISORS).find(k => ADVISORS[k].short.toLowerCase() === S(id).toLowerCase() || ADVISORS[k].name.toLowerCase().includes(S(id).toLowerCase()));
+const adv = id => { const a = !S(id) ? null : ADVISORS[S(id)] || Object.entries(ADVISORS).find(([k, x]) => x.short.toLowerCase() === S(id).toLowerCase() || x.name.toLowerCase().includes(S(id).toLowerCase()))?.[1]; if (!a) throw new Error('Unknown advisor id. Use ids like ADV-101.'); return a; };
+const advId = id => !S(id) ? undefined : ADVISORS[S(id)] ? S(id) : Object.keys(ADVISORS).find(k => ADVISORS[k].short.toLowerCase() === S(id).toLowerCase() || ADVISORS[k].name.toLowerCase().includes(S(id).toLowerCase())); /* an empty id matches nobody */
+/* ---------- computations behind Lead Me, Territory Planning and Schedule Me (deterministic, on simulated data) ---------- */
+const lastContact = id => { const d = EPISODES.filter(e => e.adv === id).map(e => Date.parse(e.date)).sort((x, y) => y - x)[0]; return d ? Math.round((Date.parse('Sep 29, 2026') - d) / 864e5) : null; };
+function leadDiscover(a, save = true) {
+  const cat = S(a.category).toLowerCase() || 'equity', group = CATEGORY_GROUPS[Object.keys(CATEGORY_GROUPS).find(k => cat.includes(k)) || 'equity'];
+  const minA = Number(a.min_category_assets_usd_m) || 0, maxS = Number(a.max_share_pct) || 100, days = Number(a.not_contacted_days) || 0;
+  const T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === S(a.territory).toLowerCase()), pool = T ? TERRITORIES[T].advisors : Object.keys(ADVISORS);
+  const ranked = [], excluded = [];
+  for (const id of pool) {
+    const ind = group.reduce((t, c) => t + ((INDUSTRY_BOOK[id] || {})[c] || 0), 0), cg = M1(BOOK[id].funds.filter(f => group.includes(FUND_CATEGORY[f[0]])).reduce((t, f) => t + f[2], 0)), share = ind ? M1(cg / ind * 100) : null, lc = lastContact(id);
+    const why = !ind ? 'No industry-book assets in ' + group.join(' or ') : ind < minA ? `Category assets $${ind}M below the $${minA}M minimum` : share > maxS ? `CG share ${share}% above the ${maxS}% limit` : days && lc != null && lc < days ? `Contacted ${lc} days ago, inside the ${days}-day window` : null;
+    if (why) { excluded.push({ advisor: ADVISORS[id].name, reason: why }); continue; }
+    ranked.push({ advisor: ADVISORS[id].name, advisor_id: id, category_assets_usd_m: ind, cg_assets_usd_m: cg, cg_share_pct: share, headroom_usd_m: M1(ind - cg), days_since_contact: lc, signal: ALPHA[id] ? `Sales Alpha ${ALPHA[id].score} (a signal, not intent)` : 'No Sales Alpha score' });
+  }
+  ranked.sort((x, y) => y.headroom_usd_m - x.headroom_usd_m).forEach((r, k) => { r.rank = k + 1; });
+  const out = { ranking_id: 'RANK-' + (save && typeof F !== 'undefined' ? 900 + (++F.seq) : 928), produced: TODAY, criteria: { categories: group, min_category_assets_usd_m: minA, max_share_pct: maxS, territory: T ? TERRITORIES[T].name : 'All covered advisors', not_contacted_days: days || null },
+    basis: 'Ranked by headroom: the advisor’s category assets with other managers (industry book, Jun 30, 2026) minus CG assets (Aug 31, 2026).', ranked, excluded };
+  if (save && typeof F !== 'undefined') F.lastRanking = out;
+  return out;
+}
+const LEAD_RANKING_SAMPLE = Object.assign(leadDiscover({ category: 'equity', min_category_assets_usd_m: 50 }, false), { note: 'Saved ranking from Sep 28, 2026 (equity-fund leads, minimum $50M in equity categories). No ranking has been produced in this session yet.' });
+function peerCompare(id) {
+  if (!id) return { note: 'Name an advisor.' };
+  const cohort = Object.entries(PEER_COHORTS).find(([, ids]) => ids.includes(id)), stats = x => { const B = BOOK[x], tot = M1(B.funds.reduce((t, f) => t + f[2], 0)), etf = M1(B.funds.filter(f => f[1] === 'ETF').reduce((t, f) => t + f[2], 0)), Fl = FLOWS[x], net = M1(Object.keys(Fl.sales).reduce((t, v) => t + Fl.sales[v][0] - Fl.redemptions[v][0], 0)); return { cg_assets_usd_m: tot, etf_share_pct: M1(etf / tot * 100), net_flows_12m_usd_m: net }; };
+  const med = arr => { const s = [...arr].sort((a, b) => a - b), m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : M1((s[m - 1] + s[m]) / 2); };
+  const peers = cohort[1].filter(x => x !== id).map(stats), me = stats(id);
+  return { advisor: ADVISORS[id].name, cohort: cohort[0], cohort_size: cohort[1].length, definition: 'Permitted cohort by practice type; internal coverage data only, no client data. Peers are not named.', advisor_values: me,
+    cohort_median: { cg_assets_usd_m: med(peers.map(p => p.cg_assets_usd_m)), etf_share_pct: med(peers.map(p => p.etf_share_pct)), net_flows_12m_usd_m: med(peers.map(p => p.net_flows_12m_usd_m)) }, caveat: 'Small cohort; treat as directional.' };
+}
+function pipelineScore(a) {
+  const id = advId(a.advisor_id), T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === S(a.territory).toLowerCase()), pool = id ? [id] : T ? TERRITORIES[T].advisors : Object.keys(ADVISORS), stageW = { Discovery: 10, Qualified: 20, Proposal: 30, Paperwork: 35 };
+  const rows = OPPORTUNITIES.filter(o => pool.includes(o.adv) && !/closed/i.test(o.stage)).map(o => { const D = PIPELINE_DETAIL[o.id] || {}, age = Math.round((Date.parse('Sep 29, 2026') - Date.parse(D.last_activity || 'Sep 29, 2026')) / 864e5), size = Math.min(40, Math.round((D.est_usd_m || 0) / 15 * 40)), fresh = age <= 14 ? 30 : age <= 30 ? 20 : 5, stage = stageW[o.stage] || 10;
+    return { id: o.id, name: o.name, advisor: ADVISORS[o.adv].name, stage: o.stage, est_usd_m: D.est_usd_m, days_since_activity: age, next_action: D.next, score: stage + size + fresh, basis: { stage, size, recency: fresh } }; }).sort((x, y) => y.score - x.score);
+  return { as_of: 'Sep 29, 2026', method: 'Score = stage (10 to 35) + size (up to 40, scaled to $15M) + recency (30 if active in 14 days, 20 within 30, else 5). Closed opportunities are excluded.', opportunities: rows };
+}
+function coverageReport(terr) {
+  const T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === terr.toLowerCase()), pool = T ? TERRITORIES[T].advisors : Object.keys(ADVISORS), now = Date.parse('Sep 29, 2026');
+  return { window: 'Last 90 days to Sep 29, 2026', definition: 'Completed contacts recorded in Salesforce, against the coverage tier target for 90 days.', advisors: pool.map(id => { const [tier, target] = COVERAGE_TIERS[id], n = F.episodes.filter(e => e.adv === id && now - Date.parse(e.date) <= 90 * 864e5).length;
+    return { advisor: ADVISORS[id].name, tier, target_contacts: target, completed_contacts: n, status: n > target ? 'Over-covered' : n < target / 2 ? 'Neglected' : n < target ? 'Under target' : 'On target', last_contact_days: lastContact(id) }; }) };
+}
+function zoneVisits(a) {
+  const ids = (Array.isArray(a.advisor_ids) ? a.advisor_ids : S(a.advisor_ids).split(/[ ,]+/)).map(advId).filter(Boolean), T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === S(a.territory).toLowerCase() || TERRITORIES[k].name.toLowerCase() === S(a.territory).toLowerCase());
+  const pool = ids.length ? ids : T ? TERRITORIES[T].advisors : [];
+  if (!pool.length) return { note: `No covered advisors in ${S(a.territory) || 'that area'}. Covered territories: Los Angeles, Orange County, San Diego.` };
+  const zones = {}; pool.forEach(id => { const [z, mins] = ZONES[id]; (zones[z] = zones[z] || { zone: z, drive_minutes_from_irvine: mins, advisors: [] }).advisors.push({ advisor: ADVISORS[id].name, office: ADVISORS[id].office }); });
+  const days = ['Tue Oct 6', 'Wed Oct 14', 'Thu Oct 22', 'Tue Oct 27'];
+  return { month: S(a.month) || 'October 2026', base: 'Irvine', zones: Object.values(zones).sort((x, y) => y.drive_minutes_from_irvine - x.drive_minutes_from_irvine).map((z, k) => Object.assign(z, { proposed_day: days[k % days.length] })), note: 'Proposed days only; nothing is booked.' };
+}
 const TOOLS = {
   'crm.get_contact': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce: advisor contact, firm, team, buying units and coverage.', props: { advisor_id: 'string' },
     run: a => { const x = adv(a.advisor_id), id = advId(a.advisor_id), sh = SHELF[x.firm]; return { name: x.name, title: x.title, firm: FIRMS[x.firm].name, office: x.office, team: x.team, units: x.units, coverage: x.coverage.map(c => EMPLOYEES[c].name), platform_programs: sh && sh.advisor_programs[id] ? sh.advisor_programs[id] : 'not in reference data' }; } },
@@ -132,7 +179,7 @@ const TOOLS = {
   'crm.get_plan': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce: retirement plan records an advisor’s committee oversees: plan, assets, participants, committee, meeting dates and lineup.', props: { advisor_id: 'string' },
     run: a => Object.entries(PLANS).filter(([, p]) => p.adv === advId(a.advisor_id)).map(([id, p]) => ({ plan_id: id, name: p.name, assets_usd: p.assets_usd, participants: p.participants, committee: p.committee, next_meeting: p.next_meeting, materials_due: p.materials_due, lineup: p.lineup.map(o => ({ option: o.option, fund: o.fund, fund_name: FUNDS[o.fund].name, assets_usd: o.assets_usd })), other: p.other })) },
   'models.plan_fee_comparison': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model platform: fee comparison for a retirement plan lineup: each option’s expense ratio against its Morningstar category median, in basis points and annual dollars on the option’s assets.', props: { plan_id: 'string' },
-    run: a => { const id = PLANS[S(a.plan_id)] ? S(a.plan_id) : Object.keys(PLANS).find(k => PLANS[k].adv === advId(a.plan_id)); if (!id) throw new Error('Unknown plan. Known: ' + Object.keys(PLANS).join(', '));
+    run: a => { const id = PLANS[S(a.plan_id)] ? S(a.plan_id) : Object.keys(PLANS).find(k => PLANS[k].adv === advId(a.plan_id)); if (!id) return { note: 'No retirement plan on file for this advisor. Plans on file: ' + Object.keys(PLANS).join(', ') };
       const P = PLANS[id], r2 = x => Math.round(x * 1000) / 1000;
       const options = P.lineup.map(o => { const f = FUNDS[o.fund], c = PEERS[o.category];
         return { option: o.option, fund: o.fund, share_class: f.name.split(', ')[1] || '', assets_usd: o.assets_usd, expense_ratio_pct: f.er, er_as_of: f.asOf, category: o.category, category_median_pct: c.medianEr,
@@ -180,6 +227,58 @@ const TOOLS = {
       return { as_of: 'Sep 29, 2026', definition: 'Meaningful contact = a completed call, meeting or two-way email recorded in Salesforce; scheduled meetings do not count.',
         advisors: ids.map(id => { const eps = F.episodes.filter(e => e.adv === id).sort((x, y) => Date.parse(y.date) - Date.parse(x.date)), last = eps[0];
           return { advisor: ADVISORS[id].name, last_completed: last ? { id: last.id, date: last.date, kind: last.kind, with: last.with } : null, days_since: last ? Math.round((now - Date.parse(last.date)) / 864e5) : null, completed_last_90_days: eps.filter(e => now - Date.parse(e.date) <= 90 * 864e5).length }; }) }; } },
+  /* ---- data behind the remaining Sales AI sub-agents (simulated, fictional) ---- */
+  'book.get_fund_transactions': { sys: 'fund', via: 'API', rw: 'read', desc: 'Transactions service: fund-level purchases and redemptions for an advisor, Jul to Sep 2026. Amounts in $ millions.', props: { advisor_id: 'string', fund: 'string' },
+    run: a => { const id = advId(a.advisor_id), tk = tickerOf(a.fund); return { window: 'Jul 1 to Sep 28, 2026', transactions: FUND_TRANSACTIONS.filter(t => (!id || t[0] === id) && (!tk || t[2] === tk)).map(([adv, date, fund, type, amt]) => ({ advisor: ADVISORS[adv].name, date, fund, type, amount_usd_m: amt })) }; } },
+  'engage.get_digital': { sys: 'mcloud', via: 'API', rw: 'read', desc: 'Marketing Cloud engagement graph: attributable page visits, article opens and webinars by logged-in advisors. An observed event, not intent.', props: { advisor_id: 'string', since: 'string' },
+    run: a => { const id = advId(a.advisor_id), since = Date.parse(S(a.since)); return { note: 'Observed events only; a visit is not intent to buy.', events: DIGITAL.filter(d => (!id || d[0] === id) && (isNaN(since) || Date.parse(d[1]) > since)).map(([adv, date, kind, item]) => ({ advisor: ADVISORS[adv].name, date, kind, item })) }; } },
+  'lead.discover': { sys: 'fund', via: 'API', rw: 'read', desc: 'Lead discovery: ranks covered advisors against explicit criteria (category: equity, fixed income, multi-asset, large growth; minimum category assets; maximum CG share; territory; days since contact). Returns the ranking, its basis and exclusions, and saves the trace.', props: { category: 'string', min_category_assets_usd_m: 'number', max_share_pct: 'number', territory: 'string', not_contacted_days: 'number' },
+    run: a => leadDiscover(a) },
+  'lead.get_ranking_trace': { sys: 'fund', via: 'API', rw: 'read', desc: 'Ranking trace: for the most recent lead ranking, the criteria, each advisor’s evidence and score, and who was excluded and why.', props: {},
+    run: () => F.lastRanking || LEAD_RANKING_SAMPLE },
+  'peer.compare': { sys: 'fund', via: 'API', rw: 'read', desc: 'Peer analytics: compares an advisor with a permitted peer cohort (internal coverage data only) on CG assets, ETF share and net flows. Amounts in $ millions.', props: { advisor_id: 'string' },
+    run: a => peerCompare(advId(a.advisor_id)) },
+  'pipeline.score': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Pipeline scoring: scores open opportunities by stage, estimated size and recency of activity, with the basis shown. Pass an advisor or a territory.', props: { advisor_id: 'string', territory: 'string' },
+    run: a => pipelineScore(a) },
+  'events.get_changes': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Change events: business events for an advisor or their clients’ plans after a date (new hires, model launches, plan sponsor changes, platform changes).', props: { advisor_id: 'string', since: 'string' },
+    run: a => { const id = advId(a.advisor_id), since = Date.parse(S(a.since)); return { events: CHANGE_EVENTS.filter(e => (!id || e[0] === id) && (isNaN(since) || Date.parse(e[1]) > since)).map(([adv, date, what, src]) => ({ advisor: ADVISORS[adv].name, date, event: what, source: src })) }; } },
+  'crm.get_team': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce relationship graph: the advisor’s own team with roles, and Capital Group’s coverage team.', props: { advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id), ho = HANDOVERS.find(h => h.adv === id); return { advisor_team: (ADVISOR_TEAMS[id] || []).map(([name, role]) => ({ name, role })), coverage_team: COVERAGE_TEAM.filter(([n]) => !id || ADVISORS[id].coverage.some(c => EMPLOYEES[c].name === n) || !Object.values(EMPLOYEES).some(e => e.name === n && e.team === 'sales')).map(([name, role]) => ({ name, role })), coverage_change: ho ? `${EMPLOYEES[ho.from].name} → ${EMPLOYEES[ho.to].name}, effective ${ho.effective}` : null }; } },
+  'crm.get_tasks': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce tasks: open and recent commitments for an advisor, with owner, due date and status.', props: { advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id); return { tasks: F.commitments.filter(c => !id || c.adv === id).map(c => ({ id: c.id, title: c.title, owner: c.owner, due: c.due, status: c.status, scope: c.scope })) }; } },
+  'territory.coverage': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Coverage analytics: completed contacts in the last 90 days against each advisor’s coverage tier target, for a territory (LA, OC, SD) or all.', props: { territory: 'string' },
+    run: a => coverageReport(S(a.territory)) },
+  'territory.get_plan_inputs': { sys: 'fund', via: 'API', rw: 'read', desc: 'Business planning inputs: a wholesaler’s sales goal, year-to-date sales, meeting capacity and quarter priorities. Amounts in $ millions.', props: { wholesaler: 'string' },
+    run: a => { const k = Object.keys(PLAN_INPUTS).find(e => e === S(a.wholesaler) || EMPLOYEES[e].name.toLowerCase().includes(S(a.wholesaler).toLowerCase())) || 'EMP-PRIYA', P = PLAN_INPUTS[k]; return Object.assign({ wholesaler: EMPLOYEES[k].name, remaining_to_goal_usd_m: M1(P.sales_goal_usd_m - P.ytd_sales_usd_m), pct_of_goal: M1(P.ytd_sales_usd_m / P.sales_goal_usd_m * 100) }, P); } },
+  'schedule.zone_visits': { sys: 'm365', via: 'MCP', rw: 'read', desc: 'Zoning: groups advisor visits by geography with drive time from Irvine, and proposes visit days. Pass advisor ids or a territory (LA, OC, SD).', props: { advisor_ids: 'array', territory: 'string', month: 'string' },
+    run: a => zoneVisits(a) },
+  'schedule.check_rules': { sys: 'm365', via: 'API', rw: 'read', desc: 'Meeting compliance: the advisor firm’s meeting rules plus Capital Group policy, for a meeting type.', props: { advisor_id: 'string', meeting_type: 'string' },
+    run: a => { const id = advId(a.advisor_id), firm = id ? ADVISORS[id].firm : null; return { firm: firm ? FIRMS[firm].name : 'Internal', meeting_type: S(a.meeting_type) || 'advisor meeting', firm_rules: firm ? MEETING_RULES[firm] : [], capital_group_rules: MEETING_RULES.CG }; } },
+  'content.get_themes': { sys: 'news', via: 'API', rw: 'read', desc: 'This week’s approved themes, ranked by relevance to an advisor’s recorded priorities and notes.', props: { advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id), txt = id ? [...F.memory.filter(m => m.adv === id && m.access === 'shared').map(m => m.value), ...F.episodes.filter(e => e.adv === id).map(e => e.text)].join(' ').toLowerCase() : ''; return { week_of: 'Sep 28, 2026', themes: THEMES.map(([tid, title, tags, src]) => { const hits = tags.split(' ').filter(w => txt.includes(w)); return { id: tid, title, source: src, relevance: hits.length, why: hits.length ? 'Matches recorded notes: ' + hits.join(', ') : 'General theme; nothing advisor-specific' }; }).sort((x, y) => y.relevance - x.relevance) }; } },
+  'news.get_items': { sys: 'news', via: 'API', rw: 'read', desc: 'Authorized news and approved commentary from the last two weeks, filtered by topic words or an advisor’s context.', props: { topics: 'string', advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id), q = (S(a.topics) + ' ' + (id ? [FIRMS[ADVISORS[id].firm].name, ...F.memory.filter(m => m.adv === id && m.access === 'shared').map(m => m.value)].join(' ') : '')).toLowerCase(); return { window: 'Sep 14 to Sep 28, 2026', items: NEWS.map(([nid, date, title, src, tags]) => ({ id: nid, date, title, source: src, matches: tags.split(' ').filter(w => q.includes(w)).length })).filter(n => n.matches || !q.trim()).sort((x, y) => y.matches - x.matches) }; } },
+  'seismic.get_recommendations': { sys: 'seismic', via: 'MCP', rw: 'read', desc: 'Seismic recommendations with their trace: whether each piece is recommended for the advisor’s stated need (with the evidence) or for popularity.', props: { advisor_id: 'string' },
+    run: a => { const id = advId(a.advisor_id); return { advisor: id ? ADVISORS[id].name : null, recommendations: (CONTENT_RECS[id] || []).map(([cid, basis, reason, ev]) => ({ id: cid, title: CONTENT.find(c => c.id === cid).title, basis: basis === 'stated_need' ? 'Advisor’s stated need' : 'Popular with similar advisors', reason, evidence: ev })) }; } },
+  'seismic.resolve_evidence': { sys: 'seismic', via: 'API', rw: 'read', desc: 'Evidence resolver: finds the page and passage in an approved document (by id) that supports a claim, with the document version.', props: { asset_id: 'string', claim: 'string' },
+    run: a => { const D = DOC_PASSAGES[S(a.asset_id)], q = S(a.claim).toLowerCase().split(/\W+/).filter(w => w.length > 3); if (!D) return { asset: S(a.asset_id), found: false, note: 'No original document text on file for this asset; the claim cannot be traced to a page.' };
+      const best = D.pages.map(([pg, txt]) => ({ page: pg, passage: txt, score: q.filter(w => txt.toLowerCase().includes(w)).length })).sort((x, y) => y.score - x.score)[0]; return { asset: S(a.asset_id), version: D.version, found: best.score > 0, page: best.page, passage: best.passage }; } },
+  'platform.get_program_rules': { sys: 'fund', via: 'API', rw: 'read', desc: 'Program rules: account and program minimums and rules for the advisor’s dealer programs.', props: { advisor_id: 'string', program: 'string' },
+    run: a => { const id = advId(a.advisor_id), firm = id ? ADVISORS[id].firm : null, R = PROGRAM_RULES[firm]; if (!R) return { firm: firm ? FIRMS[firm].name : null, note: 'No dealer program rules: this firm uses a custodian platform.' }; const p = S(a.program).toLowerCase(); return { firm: FIRMS[firm].name, source: 'Dealer program guide (dealer feed)', programs: Object.entries(R).filter(([k]) => !p || k.toLowerCase().includes(p)).map(([k, rules]) => ({ program: k, rules })) }; } },
+  'models.get_allocations': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model allocations: dated versions of a Capital Group model on a dealer platform, with component weights (percent) and the change between versions.', props: { model: 'string', advisor_id: 'string' },
+    run: a => { const k = Object.keys(MODEL_ALLOCATIONS).find(m => m.toLowerCase().includes(S(a.model).toLowerCase().replace(/ model.*$/, ''))) || null; if (!k) return { note: 'Unknown model. Known: ' + Object.keys(MODEL_ALLOCATIONS).join(', ') };
+      const X = MODEL_ALLOCATIONS[k], [[d0, w0], [d1, w1]] = X.versions, id = advId(a.advisor_id); return { model: k, firm: FIRMS[X.firm].name, program: X.program, offered_to_advisor: id ? ADVISORS[id].firm === X.firm : null, from: d0, to: d1, components: [...new Set([...Object.keys(w0), ...Object.keys(w1)])].map(t => ({ ticker: t, name: FUNDS[t].name, from_pct: w0[t] || 0, to_pct: w1[t] || 0, change_pp: (w1[t] || 0) - (w0[t] || 0) })) }; } },
+  'fund.compare': { sys: 'fund', via: 'API', rw: 'read', desc: 'Approved comparison tool: compares funds like for like (share class, expense ratio with its as-of date, benchmark, category, approach) and flags anything not on the same basis.', props: { tickers: 'array' },
+    run: a => { const tk = (Array.isArray(a.tickers) ? a.tickers : S(a.tickers).split(/[ ,]+/)).map(tickerOf).filter(Boolean), rows = tk.map(t => { const f = FUNDS[t]; return { ticker: t, name: f.name, share_class: f.name.split(', ')[1] || 'n/a', expense_ratio_pct: f.er, er_as_of: f.asOf, benchmark: f.bench, category: f.category || FUND_CATEGORY[t] || null, approach: f.approach }; });
+      const flags = []; if (new Set(rows.map(r => r.er_as_of)).size > 1) flags.push('Expense ratios have different as-of dates'); if (new Set(rows.map(r => r.benchmark)).size > 1) flags.push('Funds are managed to different benchmarks'); rows.filter(r => r.expense_ratio_pct == null).forEach(r => flags.push(r.ticker + ': expense ratio not in reference data'));
+      return { funds: rows, basis_flags: flags, performance: 'Inserted from the system of record at approval; never generated' }; } },
+  'coach.get_playbook': { sys: 'seismic', via: 'MCP', rw: 'read', desc: 'Coaching playbook for an objection (fee, active vs index): steps, approved language to use, what to avoid and clarifying questions.', props: { topic: 'string' },
+    run: a => { const t = S(a.topic).toLowerCase(), k = /fee|cost|expens|price/.test(t) ? 'fee' : /active|index|passive/.test(t) ? 'active vs index' : null; return k ? Object.assign({ topic: k }, PLAYBOOK[k]) : { topic: t, note: 'No playbook for this topic. Known: fee, active vs index.' }; } },
+  'expense.get_receipts': { sys: 'exp', via: 'API', rw: 'read', desc: 'Expense system: a wholesaler’s receipts for a month, matched to advisor visits, with the travel policy and anything that breaks it.', props: { wholesaler: 'string', month: 'string' },
+    run: a => { const k = Object.keys(EXPENSES).find(e => e === S(a.wholesaler) || EMPLOYEES[e].name.toLowerCase().includes(S(a.wholesaler).toLowerCase())) || 'EMP-PRIYA', X = EXPENSES[k];
+      return { wholesaler: EMPLOYEES[k].name, month: X.month, policy: X.policy, receipts: X.receipts.map(([date, type, amt, where, att, adv]) => { const per = att.length ? Math.round(amt / att.length * 100) / 100 : null, issues = [];
+        if (type === 'Meal' && !att.length) issues.push('No attendees listed'); if (type === 'Meal' && per > 100) issues.push('Over $100 per person'); if (!adv) issues.push('No matching advisor visit');
+        return { date, type, amount_usd: amt, merchant: where, attendees: att, per_person_usd: per, visit: adv ? ADVISORS[adv].name : null, issues }; }), total_usd: Math.round(X.receipts.reduce((t, r) => t + r[2], 0) * 100) / 100 }; } },
   'models.portfolio_construction': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model platform: blended expense ratio for a mix, e.g. {"VIGAX":70,"GFFFX":30}.', props: { weights: 'object' },
     run: a => { const w = a.weights && typeof a.weights === 'object' ? a.weights : {}; let tot = 0, er = 0; const miss = [];
       for (const [k, v] of Object.entries(w)) { const f = FUNDS[tickerOf(k)]; if (!f || f.er == null) { miss.push(k); continue; } er += f.er * Number(v); tot += Number(v); }
@@ -522,7 +621,7 @@ function foundationHeadlines() {
   }).join('\n');
 }
 function subagentText() {
-  return Object.entries(SUBAGENTS).flatMap(([fam, A]) => Object.keys(A.subs).map(sub => { const r = routeInfo(fam + '.' + sub); return `${r.route} | ${r.label} | agent ${r.agent} | ${r.does} | tools: ${(AGENTS[r.agent].tools || []).join(', ') || 'none'}`; })).join('\n');
+  return Object.entries(SUBAGENTS).flatMap(([fam, A]) => Object.keys(A.subs).map(sub => { const r = routeInfo(fam + '.' + sub); return `${r.route} | ${r.label} | ${r.does} | usual data: ${(SUB_USES[r.route] || []).join(', ') || 'foundation and upstream steps'} | agent ${r.agent} tools: ${(AGENTS[r.agent].tools || []).join(', ') || 'none'}`; })).join('\n');
 }
 function serviceText() { return Object.entries(SERVICES).map(([k, v]) => `${k} [${v.status}]${v.tools.length ? ' tools: ' + v.tools.join(', ') : ''} | ${v.does}`).join('\n'); }
 function orchestratorPrompt(run) {
