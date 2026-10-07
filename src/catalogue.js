@@ -73,17 +73,28 @@ const SUBAGENTS = {
     Dictation: 'Turns dictated notes into a structured record', Tasks: 'Commitments, owners and due dates', Expenses: 'Matches visits to receipts and policy' } },
   Coach: { agent: 'sales.coach', name: 'Coach Me', subs: {
     Simulation: 'Labeled role-play from sourced preferences', Guide: 'Supported responses to objections' } },
-  Product: { name: 'Product specialists', subs: {
+  Product: { name: 'Product Q&A', subs: {
     'Research Planner': ['product.planner', 'Decides what evidence is needed and where it comes from'],
     'Tool Selection': ['product.tools', 'Runs approved analytics tools'],
     'Response Formatter': ['product.format', 'Formats the verified answer for its audience'],
     QAR: ['product.qar', 'Verified answers; every number traced to a system of record'] } },
-  Marketing: { name: 'Marketing specialists', subs: {
+  Strategy: { name: 'Strategy Intel', subs: {
+    'ID Prep': ['product.idprep', 'Prepares an investment director for an advisor or client meeting'],
+    Positioning: ['product.positioning', 'How a strategy is positioned: allocation changes, drivers, peers'],
+    'Market Views': ['product.views', 'Approved house views and themes for the meeting'] } },
+  InvContent: { name: 'Investment content generation', subs: {
+    'Institutional Pitch Book': ['product.institutional', 'Institutional pitch books from approved strategy content'],
+    'SRG Pitch Book': ['product.srg', 'SRG pitch books for the retail advisor channel'] } },
+  Marketing: { name: 'Marketing content generation', subs: {
     'Resource Gatherer': ['marketing.gather', 'Finds approved content, messaging and pages'],
     'Document Analyzer': ['marketing.analyze', 'Extracts key points from approved documents'],
     Editor: ['marketing.copy', 'Edits and writes from verified findings'],
     'Audience Builder': ['marketing.audience', 'Builds permitted audiences'],
-    Distribution: ['marketing.dist', 'Prepares sends; nothing goes out without approval'] } }
+    Distribution: ['marketing.dist', 'Prepares sends; nothing goes out without approval'],
+    'BAU Refresh': ['marketing.bau', 'Refreshes standing material: quarterly data, expiries, re-approvals'],
+    Inventory: ['marketing.inventory', 'What is live, its owner, approval date and expiry'],
+    'Standard Pitch Book': ['marketing.pitch_std', 'Standardized pitch books from approved templates'],
+    'Custom Pitch Book': ['marketing.pitch_custom', 'Pitch books tailored to an advisor or firm'] } }
 };
 /* "Prep.Notes" → { route, agent, sub, label, does } */
 function routeInfo(route) {
@@ -159,7 +170,10 @@ const SUB_USES = {
   'Follow.Dictation': ['call notes'], 'Follow.Tasks': ['task state'], 'Follow.Expenses': ['expense system'],
   'Coach.Simulation': ['call notes', 'memory'], 'Coach.Guide': ['objection playbook', 'fund facts'],
   'Product.Research Planner': ['platform eligibility', 'taxonomy', 'allocation versions', 'program rules'], 'Product.Tool Selection': ['approved comparison tool', 'assets'], 'Product.Response Formatter': ['taxonomy'], 'Product.QAR': ['fund facts', 'approved comparison tool'],
-  'Marketing.Resource Gatherer': ['approved search'], 'Marketing.Document Analyzer': ['evidence resolver'], 'Marketing.Editor': [], 'Marketing.Audience Builder': ['engagements'], 'Marketing.Distribution': []
+  'Marketing.Resource Gatherer': ['approved search'], 'Marketing.Document Analyzer': ['evidence resolver'], 'Marketing.Editor': [], 'Marketing.Audience Builder': ['engagements'], 'Marketing.Distribution': [],
+  'Strategy.ID Prep': ['relationship graph', 'call notes', 'assets', 'fund facts', 'allocation versions', 'news'], 'Strategy.Positioning': ['fund facts', 'allocation versions', 'approved comparison tool', 'evidence resolver'], 'Strategy.Market Views': ['themes', 'news', 'approved search'],
+  'InvContent.Institutional Pitch Book': ['approved search', 'fund facts', 'allocation versions'], 'InvContent.SRG Pitch Book': ['approved search', 'fund facts'],
+  'Marketing.BAU Refresh': ['approved search', 'fund facts'], 'Marketing.Inventory': ['approved search', 'engagements'], 'Marketing.Standard Pitch Book': ['approved search', 'fund facts'], 'Marketing.Custom Pitch Book': ['approved search', 'assets', 'platform eligibility', 'call notes', 'approved comparison tool']
 };
 
 /* Parse a catalogue route into stages. Items in one stage run together; stages run in order.

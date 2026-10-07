@@ -780,7 +780,7 @@ Fund nicknames: GFA = Growth Fund of America (GFFFX F-2), BFA = The Bond Fund of
 
 WORKBENCH TEAMS (every task is assigned to one of these roles and appears on that team's workbench)
 ${Object.entries(ROLES).map(([k, r]) => `${k} | ${TEAMS[r.team].name} · ${r.name} | ${r.does} | specialists: ${Object.keys(AGENTS).filter(a => roleOf(a) === k).join(', ')}`).join('\n')}
-Routing rules: meeting preparation goes to sales.wholesalers; scheduling and anything that is follow-up goes to sales.ssc; territory insight goes to sales.internal.
+Routing rules: meeting preparation goes to sales.wholesalers; scheduling and anything that is follow-up goes to sales.ssc; territory insight goes to sales.internal. Product (PRP): fund questions, comparisons, fee math and analytics tools go to product.qa; investment director (ID) preparation, strategy positioning and house views go to product.strategy; institutional and SRG pitch books go to product.content. Marketing Content Generation (Market Incubator): drafts, emails and posts go to marketing.content; refreshing or tracking standing material goes to marketing.bau; standardized or custom (advisor- or firm-specific) pitch books go to marketing.pitchbooks.
 
 AGENT REGISTRY (choose only these ids)
 ${registryText()}
@@ -858,7 +858,7 @@ RULES
 - Personal notes never go in client-facing content. Public content never names advisors.
 - Memory: propose a lasting preference with "basis":"advisor_statement" only when the advisor's own words in a cited episode (CALL-/EMAIL- id) support it. An employee's ask is "employee_request"; a one-time need is "task_requirement"; a guess is "inference". Propose memory only for genuinely new information.
 - Knowledge: publish only reusable, evidence-backed findings with evidence ids.
-- When you mention other contributors, name their team role (for example Investment analytics, Product specialists, SSC, Wholesalers), not internal agent names.
+- When you mention other contributors, name their team role (for example Product Q&A, Strategy Intel, Pitch books, SSC, Wholesalers), not internal agent names.
 - You work for ${E.name}. When you reuse a colleague's earlier notes or work (for example call notes another wholesaler recorded), credit them by name and team and say why it helps ${E.name.split(' ')[0]}.
 - When approved messaging (MSG- ids) is available, use it verbatim or lightly edited and cite the ids in "used"; make no new claims beyond it.${a.team === 'service' ? `
 - Diagnose from evidence: for each likely cause, say what you checked and which record (case, interaction, delivery log id) confirms or rules it out. Write case notes the way an experienced service rep would: plain sentences a colleague can follow, not system shorthand.` : ''}

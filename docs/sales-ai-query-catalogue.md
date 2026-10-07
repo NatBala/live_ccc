@@ -82,8 +82,10 @@ Every step returns its output, source references, as-of dates, unresolved issues
 | Engage Me | Q&A, Recommendations, Capture, Scenario |
 | Follow Me | Dictation, Tasks, Expenses |
 | Coach Me | Simulation, Guide |
-| Product specialists | Research Planner, Tool Selection, Response Formatter, QAR |
-| Marketing specialists | Resource Gatherer, Document Analyzer, Editor, Audience Builder, Distribution |
+| Product Q&A (Product, PRP) | Research Planner, Tool Selection, Response Formatter, QAR |
+| Strategy Intel (Product, PRP) | ID Prep, Positioning, Market Views |
+| Investment content generation (Product, PRP) | Institutional Pitch Book, SRG Pitch Book |
+| Marketing content generation (Market Incubator) | Resource Gatherer, Document Analyzer, Editor, Audience Builder, Distribution, BAU Refresh, Inventory, Standard Pitch Book, Custom Pitch Book |
 
 Names in `[brackets]` are shared tools or services, such as `[flows]`, `[platform eligibility]` or `[memory]`. They are not additional autonomous agents.
 

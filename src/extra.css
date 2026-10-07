@@ -551,3 +551,9 @@ dl.interp dd small{color:var(--mute)}
 @keyframes btsglow{0%,100%{border-color:var(--rule)}50%{border-color:var(--gold)}}
 @keyframes btsin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.bts-steps li{opacity:1;animation:none}.bts-pipe,.bts-core,.bts-src{animation:none}}
+.lane h3 .lnm{display:flex;flex-direction:column;line-height:1.2;min-width:0}
+.lane h3 .lnm em{font-style:normal;font-weight:600;font-size:11px;color:var(--nm)}
+.lane h3 small{white-space:nowrap}
+.lane h3{align-items:flex-start}
+.lane h3 i{flex:none;margin-top:4px}
+.lane h3 small{margin-top:1px}

@@ -1039,6 +1039,12 @@ dl.interp dd small{color:var(--mute)}
 @keyframes btsglow{0%,100%{border-color:var(--rule)}50%{border-color:var(--gold)}}
 @keyframes btsin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.bts-steps li{opacity:1;animation:none}.bts-pipe,.bts-core,.bts-src{animation:none}}
+.lane h3 .lnm{display:flex;flex-direction:column;line-height:1.2;min-width:0}
+.lane h3 .lnm em{font-style:normal;font-weight:600;font-size:11px;color:var(--nm)}
+.lane h3 small{white-space:nowrap}
+.lane h3{align-items:flex-start}
+.lane h3 i{flex:none;margin-top:4px}
+.lane h3 small{margin-top:1px}
 </style>
 </head>
 <body>
@@ -1111,8 +1117,8 @@ dl.interp dd small{color:var(--mute)}
 
 const TEAMS = {
   sales: { name: 'Sales', color: '#82b6ff' },
-  product: { name: 'Product', color: '#7fd4ab' },
-  marketing: { name: 'Marketing', color: '#f0b870' },
+  product: { name: 'Product (PRP)', short: 'Product', color: '#7fd4ab' },
+  marketing: { name: 'Marketing Content Generation (Market Incubator)', short: 'Marketing', color: '#f0b870' },
   service: { name: 'Service', color: '#b9a5f5' }
 };
 const TEAM_ORDER = ['sales', 'product', 'marketing', 'service'];
@@ -1121,19 +1127,19 @@ const TEAM_ORDER = ['sales', 'product', 'marketing', 'service'];
 const EMPLOYEES = {
   'EMP-PRIYA': { name: 'Priya Shah', team: 'sales', role: 'Wholesaler, Southern California (LA, Orange County, San Diego)', covers: ['ADV-101', 'ADV-102', 'ADV-104', 'ADV-105', 'ADV-106'] },
   'EMP-SAM': { name: 'Sam Lee', team: 'sales', role: 'Internal partner, Southern California', covers: ['ADV-101', 'ADV-102', 'ADV-103', 'ADV-104', 'ADV-105', 'ADV-106', 'ADV-107'] },
-  'EMP-DANA': { name: 'Dana Ortiz', team: 'product', role: 'Investment product specialist', covers: [] },
+  'EMP-DANA': { name: 'Dana Ortiz', team: 'product', role: 'Product Q&A, Product (PRP)', covers: [] },
   'EMP-MARCUS': { name: 'Marcus Bell', team: 'marketing', role: 'Advisor marketing lead', covers: [] },
   'EMP-KIM': { name: 'Kim Nguyen', team: 'service', role: 'Advisor service', covers: [] }
 };
 
 const SUGGESTIONS = {
   sales: ['Identify the growing trends in LA territory', 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month', 'Prep me for my call with Alex tomorrow', 'Prepare Maya’s retirement committee fee comparison review', 'Sofia mentioned ETFs. What should I bring to our next meeting?', 'Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.', 'Why are Daniel’s overall sales down when his ETF sales are up?', 'Which CG ETFs are available at Wells Fargo for Daniel?', 'Prepare me for tomorrow’s meeting with Daniel’s team', 'What has changed since my last meeting with Rachel?'],
-  product: ['Compare BFA and AMBAL: costs, approach and who each suits', 'Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.', 'Compare GFA F-2 costs with VWUAX and VIGAX on $38M', 'Check whether our fee comparison for Maya is still current'],
-  marketing: ['Draft the follow-up email to Alex using Product’s verified comparison', 'Create an ETF email campaign for Sofia', 'Write a LinkedIn post on fee transparency for advisors'],
+  product: ['Compare BFA and AMBAL: costs, approach and who each suits', 'Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.', 'Compare GFA F-2 costs with VWUAX and VIGAX on $38M', 'Check whether our fee comparison for Maya is still current', 'Prep the investment director for Thursday’s meeting with Daniel’s team', 'Build the SRG pitch book on GFA for the advisor channel'],
+  marketing: ['Draft the follow-up email to Alex using Product’s verified comparison', 'Create an ETF email campaign for Sofia', 'Write a LinkedIn post on fee transparency for advisors', 'Refresh the standing GFA materials for the quarter and flag anything expiring', 'Create a custom pitch book on CG ETFs at Wells Fargo for Daniel’s team'],
   service: ['Alex says the link in Priya’s email won’t open', 'Maya says the benchmark explanation is still unclear']
 };
 
-/* The full registry of 37 specialists. tools = what each may call through the MCP or API gateway. */
+/* The full registry of 44 specialists. tools = what each may call through the MCP or API gateway. */
 const AGENTS = {
   'sales.lead': { name: 'Lead Me', team: 'sales', does: 'Prioritizes advisors and opportunities using model signals', tools: ['models.sales_alpha', 'models.territory_trends', 'crm.get_opportunities', 'book.get_assets', 'book.get_flows', 'book.get_market_share', 'taxonomy.resolve', 'pipeline.get', 'engage.get_history', 'platform.get_availability', 'lead.discover', 'lead.get_ranking_trace', 'engage.get_digital', 'book.get_fund_transactions', 'events.get_changes', 'insights.changes_since', 'book.get_activity'] },
   'sales.schedule': { name: 'Schedule Me', team: 'sales', does: 'Finds meeting times for advisors or colleagues and places calendar holds', tools: ['calendar.find_times', 'calendar.create_event', 'crm.get_contact', 'schedule.check_rules', 'schedule.zone_visits', 'crm.get_team'] },
@@ -1149,8 +1155,11 @@ const AGENTS = {
   'product.tone': { name: 'Tone/Style Alignment', team: 'product', does: 'Turns verified product answers into advisor-ready language using approved messaging', tools: ['seismic.get_approved_language'] },
   'product.format': { name: 'Response Formatter', team: 'product', does: 'Formats product answers for the channel', tools: ['taxonomy.resolve', 'fund.compare'] },
   'product.qar': { name: 'QAR', team: 'product', does: 'Produces verified answers; every number traced to a system of record', tools: ['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.cost_on_assets', 'models.plan_fee_comparison', 'seismic.search_content', 'platform.get_availability', 'taxonomy.resolve', 'fund.compare', 'models.get_allocations', 'platform.get_program_rules'] },
-  'product.institutional': { name: 'Institutional Pitch Books', team: 'product', does: 'Institutional product materials', tools: ['seismic.search_content'] },
-  'product.srg': { name: 'SRG Product Pitch Books', team: 'product', does: 'Product pitch books for the retail advisor channel', tools: ['seismic.search_content'] },
+  'product.idprep': { name: 'ID Prep Me', team: 'product', does: 'Prepares an investment director for an advisor or client meeting: who is in the room, what they hold and have asked, how the strategy is positioned and the questions to expect', tools: ['crm.get_contact', 'crm.get_call_notes', 'crm.get_team', 'book.get_assets', 'fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.get_allocations', 'news.get_items', 'content.get_themes', 'seismic.search_content', 'insights.changes_since'] },
+  'product.positioning': { name: 'Strategy Positioning', team: 'product', does: 'Explains how a strategy is positioned: allocation changes, what drove results and peer context, from verified data', tools: ['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.get_allocations', 'fund.compare', 'seismic.resolve_evidence'] },
+  'product.views': { name: 'Market Views', team: 'product', does: 'Summarizes approved house views and market themes that matter for the meeting', tools: ['news.get_items', 'content.get_themes', 'seismic.search_content', 'seismic.get_approved_language'] },
+  'product.institutional': { name: 'Institutional Pitch Books', team: 'product', does: 'Builds institutional pitch books from approved strategy content and verified data', tools: ['seismic.search_content', 'fund.get_facts', 'fund.get_performance', 'models.get_allocations', 'sharepoint.get_disclosures'] },
+  'product.srg': { name: 'SRG Pitch Books', team: 'product', does: 'Builds SRG pitch books for the retail advisor channel from approved content and verified data', tools: ['seismic.search_content', 'fund.get_facts', 'fund.get_performance', 'mstar.get_peers', 'sharepoint.get_disclosures'] },
   'marketing.gather': { name: 'Resource Gatherer', team: 'marketing', does: 'Finds approved content, templates, messaging and landing pages', tools: ['seismic.search_content', 'seismic.get_approved_language', 'aem.get_page', 'mcloud.get_engagement'] },
   'marketing.analyze': { name: 'Document Analyzer', team: 'marketing', does: 'Extracts key points from approved documents', tools: ['seismic.search_content', 'service.get_insights', 'seismic.resolve_evidence'] },
   'marketing.copy': { name: 'Copywriter / Editor', team: 'marketing', does: 'Writes drafts in the audience’s preferred format from verified findings', tools: ['seismic.get_approved_language'] },
@@ -1161,6 +1170,10 @@ const AGENTS = {
   'marketing.dist': { name: 'Distribution', team: 'marketing', does: 'Prepares sends; nothing goes out without human approval', tools: ['mail.draft'] },
   'marketing.voc': { name: 'Voice of Client', team: 'marketing', does: 'Captures explicit advisor statements and feedback, including what advisors ask Service', tools: ['crm.get_call_notes', 'service.get_insights'] },
   'marketing.linkedin': { name: 'LinkedIn Post', team: 'marketing', does: 'Drafts approved public posts with no client identifiers', tools: ['seismic.search_content', 'seismic.get_approved_language', 'mcloud.get_engagement', 'aem.get_page', 'service.get_insights'] },
+  'marketing.bau': { name: 'BAU Content Refresh', team: 'marketing', does: 'Keeps standing material current: quarterly data refreshes, expiring pieces and re-approvals', tools: ['seismic.search_content', 'fund.get_facts', 'fund.get_performance', 'sharepoint.get_disclosures'] },
+  'marketing.inventory': { name: 'Content Inventory', team: 'marketing', does: 'Tracks what is live in Seismic and AEM, its owner, approval date and expiry', tools: ['seismic.search_content', 'aem.get_page', 'mcloud.get_engagement'] },
+  'marketing.pitch_std': { name: 'Standard Pitch Book', team: 'marketing', does: 'Builds standardized pitch books from approved templates with the latest verified data', tools: ['seismic.search_content', 'fund.get_facts', 'fund.get_performance', 'mstar.get_peers', 'sharepoint.get_disclosures'] },
+  'marketing.pitch_custom': { name: 'Custom Pitch Book', team: 'marketing', does: 'Tailors a pitch book to an advisor or firm (their holdings, platform and questions) using approved content only', tools: ['seismic.search_content', 'book.get_assets', 'platform.get_availability', 'crm.get_call_notes', 'fund.compare', 'fund.get_facts', 'sharepoint.get_disclosures'] },
   'marketing.email': { name: 'Personalized Email', team: 'marketing', does: 'Drafts personalized advisor emails', tools: ['mail.draft', 'seismic.search_content', 'seismic.get_approved_language', 'mcloud.get_engagement'] },
   'service.classify': { name: 'Inquiry Classifier', team: 'service', does: 'Classifies incoming advisor inquiries', tools: ['service.get_cases', 'contact.get_interactions'] },
   'service.identity': { name: 'Identity Verifier', team: 'service', does: 'Verifies who is asking and what they may receive', tools: ['crm.get_contact'] },
@@ -1179,29 +1192,36 @@ const ROLES = {
   'sales.wholesalers': { team: 'sales', name: 'Wholesalers', person: 'Priya Shah', does: 'Advisor meetings: preparation, briefs, live conversations' },
   'sales.ssc': { team: 'sales', name: 'SSC', person: 'Nina Alvarez', does: 'Scheduling and follow-up' },
   'sales.internal': { team: 'sales', name: 'Internal wholesalers', person: 'Sam Lee', does: 'Territory insight and prioritization' },
-  'product.specialists': { team: 'product', name: 'Product specialists', person: 'Dana Ortiz', does: 'Fund questions, comparisons, verified answers' },
-  'product.analytics': { team: 'product', name: 'Investment analytics', person: 'Wei Zhang', does: 'Fee math, peer data, portfolio construction' },
-  'marketing.content': { team: 'marketing', name: 'Content & campaigns', person: 'Marcus Bell', does: 'Approved content, drafts, personalized emails' },
+  'product.qa': { team: 'product', name: 'Product Q&A', person: 'Dana Ortiz', does: 'Fund questions, comparisons, analytics tools and verified answers' },
+  'product.strategy': { team: 'product', name: 'Strategy Intel', person: 'Wei Zhang', does: 'Investment director (ID) preparation: positioning, market views and meeting prep' },
+  'product.content': { team: 'product', name: 'Investment content generation', person: 'Elena Park', does: 'Institutional and SRG pitch books' },
+  'marketing.content': { team: 'marketing', name: 'Content generation', person: 'Marcus Bell', does: 'Approved content, drafts, personalized emails and posts' },
   'marketing.compliance': { team: 'marketing', name: 'Compliance review', person: 'Grace Liu', does: 'Claims, disclosures, sign-off' },
   'marketing.distribution': { team: 'marketing', name: 'Distribution', person: 'Omar Haddad', does: 'Audiences and approved sends' },
+  'marketing.bau': { team: 'marketing', name: 'BAU content management', person: 'Leo Brooks', does: 'Keeps standing material current, tracked and re-approved' },
+  'marketing.pitchbooks': { team: 'marketing', name: 'Pitch books', person: 'Tessa Grant', does: 'Standardized and custom pitch book creation' },
   'service.advisor': { team: 'service', name: 'Advisor service', person: 'Kim Nguyen', does: 'Access, delivery and service cases' }
 };
 const AGENT_ROLE = {
   'sales.prep': 'sales.wholesalers', 'sales.engage': 'sales.wholesalers', 'sales.coach': 'sales.wholesalers',
   'sales.schedule': 'sales.ssc', 'sales.follow': 'sales.ssc',
   'sales.lead': 'sales.internal', 'sales.territory': 'sales.internal',
-  'product.tools': 'product.analytics',
+  'product.clarify': 'product.qa', 'product.planner': 'product.qa', 'product.tools': 'product.qa', 'product.summary': 'product.qa', 'product.tone': 'product.qa', 'product.format': 'product.qa', 'product.qar': 'product.qa',
+  'product.idprep': 'product.strategy', 'product.positioning': 'product.strategy', 'product.views': 'product.strategy',
+  'product.institutional': 'product.content', 'product.srg': 'product.content',
+  'marketing.bau': 'marketing.bau', 'marketing.inventory': 'marketing.bau', 'marketing.pitch_std': 'marketing.pitchbooks', 'marketing.pitch_custom': 'marketing.pitchbooks',
   'marketing.legal': 'marketing.compliance', 'marketing.audit': 'marketing.compliance',
   'marketing.dist': 'marketing.distribution', 'marketing.audience': 'marketing.distribution',
   'service.classify': 'service.advisor', 'service.identity': 'service.advisor', 'service.priority': 'service.advisor', 'service.knowledge': 'service.advisor', 'service.account': 'service.advisor', 'service.resolve': 'service.advisor', 'service.escalate': 'service.advisor', 'service.sentiment': 'service.advisor', 'service.crosssell': 'service.advisor', 'service.qa': 'service.advisor'
 };
-const roleOf = agent => AGENT_ROLE[agent] || (AGENTS[agent] ? { sales: 'sales.wholesalers', product: 'product.specialists', marketing: 'marketing.content', service: 'service.advisor' }[AGENTS[agent].team] : null);
+const roleOf = agent => AGENT_ROLE[agent] || (AGENTS[agent] ? { sales: 'sales.wholesalers', product: 'product.qa', marketing: 'marketing.content', service: 'service.advisor' }[AGENTS[agent].team] : null);
 /* Deterministic assignment rules the business asked for: they override the AI when they apply. */
 const ROLE_RULES = [
+  { test: /investment director|\bID (prep|meeting|brief)|prep(are)? (the |our )?ID\b/i, role: 'product.strategy', agent: () => 'product.idprep', why: 'Investment director preparation goes to Strategy Intel' },
   { test: /schedul|follow.?up|book(ing)?\b|calendar|invite|reschedul|reminder|set up (a )?(call|meeting)/i, role: 'sales.ssc', agent: t => /schedul|book|calendar|invite|reschedul|set up/i.test(t) ? 'sales.schedule' : 'sales.follow', why: 'Scheduling and follow-up go to SSC' },
   { test: /\bprep|brief|agenda|talking points|meeting preparation|prepare (me|for)/i, role: 'sales.wholesalers', agent: () => 'sales.prep', why: 'Meeting preparation goes to the wholesaler' }
 ];
-const ROLE_DEFAULT_AGENT = { 'sales.wholesalers': 'sales.prep', 'sales.ssc': 'sales.schedule', 'sales.internal': 'sales.territory', 'product.specialists': 'product.qar', 'product.analytics': 'product.tools', 'marketing.content': 'marketing.email', 'marketing.compliance': 'marketing.legal', 'marketing.distribution': 'marketing.dist', 'service.advisor': 'service.resolve' };
+const ROLE_DEFAULT_AGENT = { 'sales.wholesalers': 'sales.prep', 'sales.ssc': 'sales.schedule', 'sales.internal': 'sales.territory', 'product.qa': 'product.qar', 'product.strategy': 'product.idprep', 'product.content': 'product.srg', 'marketing.content': 'marketing.email', 'marketing.compliance': 'marketing.legal', 'marketing.distribution': 'marketing.dist', 'marketing.bau': 'marketing.bau', 'marketing.pitchbooks': 'marketing.pitch_std', 'service.advisor': 'service.resolve' };
 
 const LAYERS = {
   memory: { name: 'Shared Memory', short: 'Memory', icon: 'memory' },
@@ -1355,7 +1375,7 @@ const EPISODES = [
 /* Durable commitments (workflow state, not memory) */
 const COMMITMENTS = [
   { id: 'TASK-301', adv: 'ADV-101', scope: 'BU-101A', title: 'Send quarterly attribution in the one-page format', owner: 'Priya Shah', due: 'Jan 8, 2027', status: 'Open' },
-  { id: 'TASK-302', adv: 'ADV-102', scope: 'BU-102R', title: 'Clarify what the benchmark represents', owner: 'Product specialist', due: 'Before next committee', status: 'Open' },
+  { id: 'TASK-302', adv: 'ADV-102', scope: 'BU-102R', title: 'Clarify what the benchmark represents', owner: 'Product Q&A', due: 'Before next committee', status: 'Open' },
   { id: 'TASK-303', adv: 'ADV-104', scope: 'BU-104', title: 'Follow up on the role of active managers in her core-satellite model', owner: 'Priya Shah', due: 'Oct 9, 2026', status: 'Open' }
 ];
 
@@ -1597,7 +1617,7 @@ const ADVISOR_TEAMS = {
   'ADV-106': [['Rachel Okafor', 'Lead advisor'], ['Diane Hughes', 'Client service manager']],
   'ADV-107': [['Luis Herrera', 'Principal'], ['Paula Reyes', 'Operations; owns retirement plan paperwork']]
 };
-const COVERAGE_TEAM = [['Priya Shah', 'External wholesaler, Southern California'], ['Sam Lee', 'Internal partner, Southern California'], ['Nina Alvarez', 'SSC: scheduling and follow-up'], ['Dana Ortiz', 'Investment product specialist'], ['Ravi Menon', 'Retirement plan specialist (joins plan and committee meetings)']];
+const COVERAGE_TEAM = [['Priya Shah', 'External wholesaler, Southern California'], ['Sam Lee', 'Internal partner, Southern California'], ['Nina Alvarez', 'SSC: scheduling and follow-up'], ['Dana Ortiz', 'Product Q&A, Product (PRP)'], ['Ravi Menon', 'Retirement plan specialist (joins plan and committee meetings)']];
 /* [coverage analytics] coverage tier and target completed contacts per 90 days */
 const COVERAGE_TIERS = { 'ADV-101': ['A', 4], 'ADV-102': ['A', 4], 'ADV-104': ['A', 4], 'ADV-105': ['A', 4], 'ADV-103': ['B', 2], 'ADV-106': ['B', 2], 'ADV-107': ['C', 1] };
 /* [peer analytics] permitted cohorts: internal coverage data only, no client data */
@@ -1812,17 +1832,28 @@ const SUBAGENTS = {
     Dictation: 'Turns dictated notes into a structured record', Tasks: 'Commitments, owners and due dates', Expenses: 'Matches visits to receipts and policy' } },
   Coach: { agent: 'sales.coach', name: 'Coach Me', subs: {
     Simulation: 'Labeled role-play from sourced preferences', Guide: 'Supported responses to objections' } },
-  Product: { name: 'Product specialists', subs: {
+  Product: { name: 'Product Q&A', subs: {
     'Research Planner': ['product.planner', 'Decides what evidence is needed and where it comes from'],
     'Tool Selection': ['product.tools', 'Runs approved analytics tools'],
     'Response Formatter': ['product.format', 'Formats the verified answer for its audience'],
     QAR: ['product.qar', 'Verified answers; every number traced to a system of record'] } },
-  Marketing: { name: 'Marketing specialists', subs: {
+  Strategy: { name: 'Strategy Intel', subs: {
+    'ID Prep': ['product.idprep', 'Prepares an investment director for an advisor or client meeting'],
+    Positioning: ['product.positioning', 'How a strategy is positioned: allocation changes, drivers, peers'],
+    'Market Views': ['product.views', 'Approved house views and themes for the meeting'] } },
+  InvContent: { name: 'Investment content generation', subs: {
+    'Institutional Pitch Book': ['product.institutional', 'Institutional pitch books from approved strategy content'],
+    'SRG Pitch Book': ['product.srg', 'SRG pitch books for the retail advisor channel'] } },
+  Marketing: { name: 'Marketing content generation', subs: {
     'Resource Gatherer': ['marketing.gather', 'Finds approved content, messaging and pages'],
     'Document Analyzer': ['marketing.analyze', 'Extracts key points from approved documents'],
     Editor: ['marketing.copy', 'Edits and writes from verified findings'],
     'Audience Builder': ['marketing.audience', 'Builds permitted audiences'],
-    Distribution: ['marketing.dist', 'Prepares sends; nothing goes out without approval'] } }
+    Distribution: ['marketing.dist', 'Prepares sends; nothing goes out without approval'],
+    'BAU Refresh': ['marketing.bau', 'Refreshes standing material: quarterly data, expiries, re-approvals'],
+    Inventory: ['marketing.inventory', 'What is live, its owner, approval date and expiry'],
+    'Standard Pitch Book': ['marketing.pitch_std', 'Standardized pitch books from approved templates'],
+    'Custom Pitch Book': ['marketing.pitch_custom', 'Pitch books tailored to an advisor or firm'] } }
 };
 /* "Prep.Notes" → { route, agent, sub, label, does } */
 function routeInfo(route) {
@@ -1898,7 +1929,10 @@ const SUB_USES = {
   'Follow.Dictation': ['call notes'], 'Follow.Tasks': ['task state'], 'Follow.Expenses': ['expense system'],
   'Coach.Simulation': ['call notes', 'memory'], 'Coach.Guide': ['objection playbook', 'fund facts'],
   'Product.Research Planner': ['platform eligibility', 'taxonomy', 'allocation versions', 'program rules'], 'Product.Tool Selection': ['approved comparison tool', 'assets'], 'Product.Response Formatter': ['taxonomy'], 'Product.QAR': ['fund facts', 'approved comparison tool'],
-  'Marketing.Resource Gatherer': ['approved search'], 'Marketing.Document Analyzer': ['evidence resolver'], 'Marketing.Editor': [], 'Marketing.Audience Builder': ['engagements'], 'Marketing.Distribution': []
+  'Marketing.Resource Gatherer': ['approved search'], 'Marketing.Document Analyzer': ['evidence resolver'], 'Marketing.Editor': [], 'Marketing.Audience Builder': ['engagements'], 'Marketing.Distribution': [],
+  'Strategy.ID Prep': ['relationship graph', 'call notes', 'assets', 'fund facts', 'allocation versions', 'news'], 'Strategy.Positioning': ['fund facts', 'allocation versions', 'approved comparison tool', 'evidence resolver'], 'Strategy.Market Views': ['themes', 'news', 'approved search'],
+  'InvContent.Institutional Pitch Book': ['approved search', 'fund facts', 'allocation versions'], 'InvContent.SRG Pitch Book': ['approved search', 'fund facts'],
+  'Marketing.BAU Refresh': ['approved search', 'fund facts'], 'Marketing.Inventory': ['approved search', 'engagements'], 'Marketing.Standard Pitch Book': ['approved search', 'fund facts'], 'Marketing.Custom Pitch Book': ['approved search', 'assets', 'platform eligibility', 'call notes', 'approved comparison tool']
 };
 
 /* Parse a catalogue route into stages. Items in one stage run together; stages run in order.
@@ -2792,7 +2826,7 @@ Fund nicknames: GFA = Growth Fund of America (GFFFX F-2), BFA = The Bond Fund of
 
 WORKBENCH TEAMS (every task is assigned to one of these roles and appears on that team's workbench)
 ${Object.entries(ROLES).map(([k, r]) => `${k} | ${TEAMS[r.team].name} · ${r.name} | ${r.does} | specialists: ${Object.keys(AGENTS).filter(a => roleOf(a) === k).join(', ')}`).join('\n')}
-Routing rules: meeting preparation goes to sales.wholesalers; scheduling and anything that is follow-up goes to sales.ssc; territory insight goes to sales.internal.
+Routing rules: meeting preparation goes to sales.wholesalers; scheduling and anything that is follow-up goes to sales.ssc; territory insight goes to sales.internal. Product (PRP): fund questions, comparisons, fee math and analytics tools go to product.qa; investment director (ID) preparation, strategy positioning and house views go to product.strategy; institutional and SRG pitch books go to product.content. Marketing Content Generation (Market Incubator): drafts, emails and posts go to marketing.content; refreshing or tracking standing material goes to marketing.bau; standardized or custom (advisor- or firm-specific) pitch books go to marketing.pitchbooks.
 
 AGENT REGISTRY (choose only these ids)
 ${registryText()}
@@ -2870,7 +2904,7 @@ RULES
 - Personal notes never go in client-facing content. Public content never names advisors.
 - Memory: propose a lasting preference with "basis":"advisor_statement" only when the advisor's own words in a cited episode (CALL-/EMAIL- id) support it. An employee's ask is "employee_request"; a one-time need is "task_requirement"; a guess is "inference". Propose memory only for genuinely new information.
 - Knowledge: publish only reusable, evidence-backed findings with evidence ids.
-- When you mention other contributors, name their team role (for example Investment analytics, Product specialists, SSC, Wholesalers), not internal agent names.
+- When you mention other contributors, name their team role (for example Product Q&A, Strategy Intel, Pitch books, SSC, Wholesalers), not internal agent names.
 - You work for ${E.name}. When you reuse a colleague's earlier notes or work (for example call notes another wholesaler recorded), credit them by name and team and say why it helps ${E.name.split(' ')[0]}.
 - When approved messaging (MSG- ids) is available, use it verbatim or lightly edited and cite the ids in "used"; make no new claims beyond it.${a.team === 'service' ? `
 - Diagnose from evidence: for each likely cause, say what you checked and which record (case, interaction, delivery log id) confirms or rules it out. Write case notes the way an experienced service rep would: plain sentences a colleague can follow, not system shorthand.` : ''}
@@ -3041,8 +3075,8 @@ RECORDED.push(
       D('missing', 'No fee comparison computed yet', 'Category medians and dollar costs per option come from the model platform, never estimates.'),
       D('memory', 'Read only: basis already recorded', 'MEM-028 already holds how Maya wants fees compared. Nothing new to store.', { class: 'read_only' }),
       D('controls', 'Internal prep; committee pack later', 'No send. Numbers only from the platform and Morningstar; committee disclosures apply when it goes out.'),
-      TK({ id: 'T1', agent: 'product.tools', role: 'product.analytics', title: 'Compute the plan fee comparison', objective: 'Compare each PLAN-102 option with its Morningstar category median in basis points and dollars, and cost both growth options on equal assets', reads: ['knowledge'], tools: ['models.plan_fee_comparison'], why: 'Investment analytics owns fee math; the model platform and Morningstar are the only sources for these numbers.' }),
-      TK({ id: 'T2', agent: 'product.qar', role: 'product.specialists', title: 'Answer the committee’s two questions', objective: 'Answer why the active growth option (GFFFX) costs more than the index option (VIGAX), and what its benchmark represents (TASK-302), from verified evidence', depends_on: ['T1'], reads: ['memory', 'knowledge', 'policy'], tools: ['fund.get_facts', 'seismic.search_content'], why: 'Product specialists own verified answers; QAR reuses K-201 and checks the fund data platform and approved attribution in Seismic.' }),
+      TK({ id: 'T1', agent: 'product.tools', role: 'product.qa', title: 'Compute the plan fee comparison', objective: 'Compare each PLAN-102 option with its Morningstar category median in basis points and dollars, and cost both growth options on equal assets', reads: ['knowledge'], tools: ['models.plan_fee_comparison'], why: 'Product Q&A owns fee math; the model platform and Morningstar are the only sources for these numbers.' }),
+      TK({ id: 'T2', agent: 'product.qar', role: 'product.qa', title: 'Answer the committee’s two questions', objective: 'Answer why the active growth option (GFFFX) costs more than the index option (VIGAX), and what its benchmark represents (TASK-302), from verified evidence', depends_on: ['T1'], reads: ['memory', 'knowledge', 'policy'], tools: ['fund.get_facts', 'seismic.search_content'], why: 'Product Q&A owns verified answers; QAR reuses K-201 and checks the fund data platform and approved attribution in Seismic.' }),
       TK({ id: 'T3', agent: 'sales.prep', role: 'sales.wholesalers', title: 'Prepare Maya’s committee review brief', objective: 'Build Priya’s review brief: plan, lineup and fees, the committee’s objective and concerns, the answers, and what to send by when', depends_on: ['T1', 'T2'], reads: ['memory', 'knowledge', 'policy'], tools: ['crm.get_plan', 'crm.get_call_notes'], why: 'Prep Me builds Priya’s brief from the Salesforce plan record and Maya’s own words on recorded calls.' }),
       D('success', 'Priya walks Maya through every option', 'Each option against its category in dollars and basis points, both committee questions answered, a clear send plan.'),
       L({ k: 'end' })
@@ -3053,12 +3087,12 @@ RECORDED.push(
           output: { kind: 'finding', title: 'PLAN-102 fee comparison vs category medians', body: 'Irvine Precision Manufacturing 401(k), $62M. Four options have expense data:\n\n- Large-cap growth, active (GFA F-2): 0.40% vs 0.75% median; $74,000 a year vs $138,750 at the median\n- Large-cap growth, index (VIGAX): 0.05% vs 0.75%; $4,500 vs $67,500\n- Balanced (AMBAL F-2): 0.35% vs 0.90%; $49,700 vs $127,800\n- Core bond (BFA F-2): 0.34% vs 0.46%; $23,120 vs $31,280\n\nWeighted cost of these four: 0.312%, $151,320 a year.\n\nThe committee’s question, on equal assets: on $18.5M the index option would cost $9,250 a year against GFA’s $74,000.\n\nNot covered: target-date and stable value ($13.5M), no expense data on file.' },
           used: ['PLAN-102', 'MEM-028'], knowledge: [{ label: 'PLAN-102 fee comparison against Morningstar category medians', value: 'All four options with expense data cost less than their category medians: GFA F-2 0.40% vs 0.75%, VIGAX 0.05% vs 0.75%, AMBAL F-2 0.35% vs 0.90%, BFA F-2 0.34% vs 0.46%. Weighted 0.312%.', evidence: ['models.plan_fee_comparison', 'PLAN-102'] }], memory: [], commitments: [], needs_approval: false, open_questions: [], next_step: '' } },
       T2: { calls: [['fund.get_facts', { ticker: 'GFFFX' }], ['fund.get_facts', { ticker: 'VIGAX' }], ['seismic.search_content', { query: 'gfa attribution benchmark capital system' }]],
-        json: { says: 'I reused Product’s earlier finding on why GFA trails the index, checked both funds on the data platform, and used Investment analytics’ dollar figures.',
+        json: { says: 'I reused Product’s earlier finding on why GFA trails the index, checked both funds on the data platform, and used Product Q&A’s dollar figures.',
           output: { kind: 'answer', title: 'Answers for Maya’s committee', body: '1. Why does the active growth option cost more than the index option?\nThey do different jobs. VIGAX tracks the CRSP US Large Cap Growth index, about 166 stocks. GFA is run by several independent managers (The Capital System), benchmarked to the S&P 500, with up to 25% outside the U.S. That research costs more: 0.40% vs 0.05%, or $74,000 vs $9,250 a year on the same $18.5M. Both sit below the 0.75% category median.\n\n2. What does the benchmark represent? (TASK-302)\nGFA is measured against the S&P 500, a broad large-cap index, not a growth index. Comparing it with a growth index measures style, not skill: when a few mega-cap growth stocks lead, the growth index leads (K-201).\n\nSources: GFFFX and VIGAX on the fund data platform; K-201; SEIS-113; SEIS-114.' },
           used: ['K-201', 'GFFFX', 'VIGAX', 'SEIS-113', 'SEIS-114', 'TASK-302', 'MEM-027'], knowledge: [{ label: 'Why an active growth fund costs more than a growth index option', value: 'Different jobs: VIGAX tracks a growth index; GFA uses several independent managers, the broader S&P 500 benchmark and some non-U.S. stocks. 0.40% vs 0.05%; both below the 0.75% Large Growth median.', evidence: ['GFFFX', 'VIGAX', 'K-201'] }], memory: [], commitments: [], needs_approval: false, open_questions: [], next_step: '' } },
       T3: { calls: [['crm.get_plan', { advisor_id: 'ADV-102' }], ['crm.get_call_notes', { advisor_id: 'ADV-102' }]],
         json: { says: 'I built Priya’s brief from the plan record, Maya’s own words on her Sep 19 call, and the numbers and answers Product verified.',
-          output: { kind: 'brief', title: 'Committee fee review: Maya Chen, PLAN-102', body: 'The plan: Irvine Precision Manufacturing 401(k), $62M, 540 participants. Committee meets Nov 12; materials to members Nov 5, and Maya reviews a draft first (EMAIL-0928).\n\nWhat the committee wants (CALL-0919):\n- A prudent fee review documented in the minutes\n- Each option against its Morningstar category median, in dollars and basis points\n- Why the active growth option costs more than the index option\n\nWhat we can now show (Investment analytics, Product specialists):\n- All four options with data are below their category medians; weighted 0.312%\n- Growth options on the same $18.5M: $74,000 active vs $9,250 index, explained by mandate and benchmark\n- The September benchmark question (TASK-302) is answered\n\nGap: no expense data for target-date and stable value ($13.5M).\n\nFormat: committee pack template (SEIS-116), sent by email (MEM-023).' },
+          output: { kind: 'brief', title: 'Committee fee review: Maya Chen, PLAN-102', body: 'The plan: Irvine Precision Manufacturing 401(k), $62M, 540 participants. Committee meets Nov 12; materials to members Nov 5, and Maya reviews a draft first (EMAIL-0928).\n\nWhat the committee wants (CALL-0919):\n- A prudent fee review documented in the minutes\n- Each option against its Morningstar category median, in dollars and basis points\n- Why the active growth option costs more than the index option\n\nWhat we can now show (Product Q&A):\n- All four options with data are below their category medians; weighted 0.312%\n- Growth options on the same $18.5M: $74,000 active vs $9,250 index, explained by mandate and benchmark\n- The September benchmark question (TASK-302) is answered\n\nGap: no expense data for target-date and stable value ($13.5M).\n\nFormat: committee pack template (SEIS-116), sent by email (MEM-023).' },
           used: ['PLAN-102', 'CALL-0919', 'EMAIL-0928', 'MEM-023', 'MEM-026', 'MEM-027', 'MEM-028', 'TASK-302', 'SEIS-116', 'OPP-502'], knowledge: [], memory: [], commitments: [{ title: 'Send Maya the committee fee review draft in the committee pack format', owner: 'Priya Shah', due: 'Nov 2, 2026' }], needs_approval: false, open_questions: ['Which target-date series and stable value fund does the plan use? Needed to complete the comparison.'],
           next_step: 'Email Maya (her channel for committee prep) with the four-option comparison and both answers, and ask for the target-date and stable value fund names so the review covers the whole menu.' } }
     } },
@@ -3071,10 +3105,10 @@ RECORDED.push(
       D('entity', 'Alex → Alex Rivera, Morgan Stanley', 'One graph match; the growth-model unit holds the open decision and the last call.', { advisor: 'ADV-101', unit: 'BU-101A', confidence: 'high' }),
       D('scope', 'Growth model unit only (BU-101A)', 'The 401(k) committee unit is out of scope for this call.'),
       D('known', 'Reuse Priya’s calls and Product’s K-201', 'Priya recorded what Alex asked for (CALL-0922); Product already explained why GFA trailed. No re-research.', { uses: ['HO-101', 'CALL-0922', 'CALL-0814', 'K-201', 'MEM-011', 'MEM-017', 'MEM-014', 'TASK-301'] }),
-      D('missing', 'Dollar costs on $38M not stored', 'Investment analytics computes them on the model platform; nobody estimates.'),
+      D('missing', 'Dollar costs on $38M not stored', 'Product Q&A computes them on the model platform; nobody estimates.'),
       D('memory', 'Read only: nothing new about Alex', 'A coverage change is workflow, not an advisor preference (POL-6). Memory is read, not changed.', { class: 'read_only' }),
       D('controls', 'Internal brief; coaching withheld', 'Priya’s private coaching (MEM-016) is not visible to Sam (POL-5). Every number traced.'),
-      TK({ id: 'T1', agent: 'product.tools', role: 'product.analytics', title: 'Cost Alex’s $38M across three funds', objective: 'Compute annual costs on $38M for GFFFX, VWUAX and VIGAX', reads: ['knowledge'], tools: ['models.cost_on_assets'], why: 'Alex wants fees in dollars (MEM-017); only the model platform may produce them.' }),
+      TK({ id: 'T1', agent: 'product.tools', role: 'product.qa', title: 'Cost Alex’s $38M across three funds', objective: 'Compute annual costs on $38M for GFFFX, VWUAX and VIGAX', reads: ['knowledge'], tools: ['models.cost_on_assets'], why: 'Alex wants fees in dollars (MEM-017); only the model platform may produce them.' }),
       TK({ id: 'T2', agent: 'sales.schedule', role: 'sales.ssc', title: 'Check Alex’s call slot', objective: 'Check tomorrow against Alex’s meeting pattern and propose a slot through Jamie Cho', reads: ['memory'], tools: ['calendar.find_times'], why: 'SSC owns scheduling; Outlook shows Alex’s Tuesday and Thursday 7:30 a.m. pattern.' }),
       TK({ id: 'T3', agent: 'sales.prep', role: 'sales.wholesalers', title: 'Prepare Sam’s handover brief for Alex', objective: 'Build Sam’s one-page brief from Priya’s recorded calls, K-201 and T1’s dollar costs', depends_on: ['T1', 'T2'], reads: ['memory', 'knowledge', 'policy'], tools: ['crm.get_call_notes', 'crm.get_opportunities'], why: 'Prep Me builds Sam’s brief from Salesforce calls and opportunities, plus Product’s verified work.' }),
       D('success', 'Sam takes over; Alex repeats nothing', 'Dollar costs, Priya’s context, the Oct 1 decision and a clear first move for Sam.'),
@@ -3090,7 +3124,7 @@ RECORDED.push(
           output: { kind: 'note', title: 'Call slot for Sam and Alex', body: 'Proposed: Thu Oct 1, 7:30 a.m. PT, Teams, before his committee.\nBackup: Tue Oct 6, 7:30 a.m. PT.\nBook through Jamie Cho (MEM-012).' },
           used: ['MEM-012'], knowledge: [], memory: [], commitments: [{ title: 'Ask Jamie Cho to book Thursday 7:30 a.m. for Alex and Sam', owner: 'Nina Alvarez', due: 'Sep 30' }], needs_approval: false, open_questions: [], next_step: '' } },
       T3: { calls: [['crm.get_call_notes', { advisor_id: 'ADV-101' }], ['crm.get_opportunities', { advisor_id: 'ADV-101' }]],
-        json: { says: 'I built Sam’s brief from Priya’s recorded calls, Product’s finding on GFA and Investment analytics’ dollar costs, so Alex doesn’t have to repeat himself.',
+        json: { says: 'I built Sam’s brief from Priya’s recorded calls, Product’s finding on GFA and Product Q&A’s dollar costs, so Alex doesn’t have to repeat himself.',
           output: { kind: 'brief', title: 'Handover brief: Alex Rivera, for Sam', body: 'Why you’re calling: you become Alex’s primary coverage Oct 1 (HO-101). Priya stays on through his committee.\n\nWhat Priya already covered (CALL-0922, her call on Sep 22):\n- Alex asked for GFA vs the Vanguard growth funds, options for his growth sleeve, and why GFA has trailed\n- He wants one page, data first, no decks (MEM-011), and fees in dollars (MEM-017)\n\nThe decision: keep or replace GFA in his new growth model; committee Oct 1 (OPP-501, Proposal).\n\nLead with dollars on $38M:\n- GFA F-2 $152,000 a year; VWUAX $95,000; VIGAX $19,000\n\nWhy GFA trailed (K-201): different mandate and benchmark, mega-cap concentration in the index, and cost.\n\nStill owed: quarterly attribution in his one-page format (TASK-301), now yours.\n\nRapport (relationship note): training for the California International Marathon in December.' },
           used: ['HO-101', 'CALL-0922', 'K-201', 'MEM-011', 'MEM-017', 'MEM-014', 'MEM-015', 'TASK-301', 'OPP-501'], knowledge: [], memory: [], commitments: [{ title: 'Take over the quarterly attribution in Alex’s one-page format (TASK-301) from Priya', owner: 'Sam Lee', due: 'Jan 8, 2027' }], needs_approval: false, open_questions: ['Should Priya join Thursday’s call to make the introduction?'],
           next_step: 'Confirm Thursday 7:30 a.m. with Jamie Cho today, then open the call as Alex’s new primary coverage and walk him through the one-page dollar comparison before his committee.' } }
@@ -3098,18 +3132,18 @@ RECORDED.push(
 
   { name: 'Why has GFA trailed the Vanguard growth index?', requester: 'EMP-DANA', text: 'Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.',
     orch: [
-      D('requester', 'Dana Ortiz, Product specialist', 'Owns product answers for the field; no advisor relationship data is needed.'),
+      D('requester', 'Dana Ortiz, Product Q&A', 'Owns product answers for the field; no advisor relationship data is needed.'),
       D('intent', 'Verified explanation for advisors', 'A product question with an advisor-facing deliverable.', { intent: 'research' }),
       D('asks', '2 things requested', '1. Explain why GFA trailed · 2. Make it usable by advisors', { asks: ['Explain why GFA trailed the growth index', 'Make it usable by advisors'] }),
       D('entity', 'No advisor; GFFFX and VIGAX', 'GFA resolves to GFFFX (F-2); the Vanguard growth index to VIGAX.', { advisor: null, unit: null, territory: null, confidence: 'high' }),
       D('scope', 'Product level, reusable by anyone', 'No client data. The answer is published for Sales and Marketing to reuse.'),
       D('known', 'K-201 and the attribution report exist', 'K-201 explains the gap; SEIS-113 is the approved attribution report. Refresh, don’t redo.', { uses: ['K-201', 'SEIS-113', 'SEIS-114', 'GFFFX', 'VIGAX'] }),
-      D('missing', 'Cost gap in dollars not stored', 'Investment analytics computes it per $1M on the platform. Returns are never generated (POL-3).'),
+      D('missing', 'Cost gap in dollars not stored', 'Product Q&A computes it per $1M on the platform. Returns are never generated (POL-3).'),
       D('memory', 'None: no advisor involved', 'Nothing about an advisor is read or stored.', { class: 'none' }),
       D('controls', 'Approved language for the advisor version', 'Advisor-ready text uses approved messaging (MSG- ids); performance inserted only at approval.'),
-      TK({ id: 'T1', agent: 'product.tools', role: 'product.analytics', title: 'Quantify cost and peer context', objective: 'Compute the cost gap between GFFFX and VIGAX per $1M and pull the Large Growth category median', reads: ['knowledge'], tools: ['models.cost_on_assets', 'mstar.get_peers'], why: 'Investment analytics runs fee math on the model platform and peer data from Morningstar.' }),
-      TK({ id: 'T2', agent: 'product.qar', role: 'product.specialists', title: 'Verify why GFA trailed', objective: 'Refresh K-201 into a verified explanation of mandate, concentration and cost, citing GFFFX, VIGAX and SEIS-113', depends_on: ['T1'], reads: ['knowledge', 'policy'], tools: ['fund.get_facts', 'seismic.search_content', 'fund.get_performance'], why: 'QAR publishes verified findings; it checks the fund data platform and the approved attribution report in Seismic.' }),
-      TK({ id: 'T3', agent: 'product.tone', role: 'product.specialists', ask: 2, title: 'Write advisor-ready talking points', objective: 'Turn the verified explanation into talking points advisors can use, in approved messaging', depends_on: ['T2'], reads: ['knowledge', 'policy'], tools: ['seismic.get_approved_language'], why: 'Tone/Style Alignment owns advisor-facing language; it pulls approved messaging from Seismic so nothing new is claimed.' }),
+      TK({ id: 'T1', agent: 'product.tools', role: 'product.qa', title: 'Quantify cost and peer context', objective: 'Compute the cost gap between GFFFX and VIGAX per $1M and pull the Large Growth category median', reads: ['knowledge'], tools: ['models.cost_on_assets', 'mstar.get_peers'], why: 'Product Q&A runs fee math on the model platform and peer data from Morningstar.' }),
+      TK({ id: 'T2', agent: 'product.qar', role: 'product.qa', title: 'Verify why GFA trailed', objective: 'Refresh K-201 into a verified explanation of mandate, concentration and cost, citing GFFFX, VIGAX and SEIS-113', depends_on: ['T1'], reads: ['knowledge', 'policy'], tools: ['fund.get_facts', 'seismic.search_content', 'fund.get_performance'], why: 'QAR publishes verified findings; it checks the fund data platform and the approved attribution report in Seismic.' }),
+      TK({ id: 'T3', agent: 'product.tone', role: 'product.qa', ask: 2, title: 'Write advisor-ready talking points', objective: 'Turn the verified explanation into talking points advisors can use, in approved messaging', depends_on: ['T2'], reads: ['knowledge', 'policy'], tools: ['seismic.get_approved_language'], why: 'Tone/Style Alignment owns advisor-facing language; it pulls approved messaging from Seismic so nothing new is claimed.' }),
       D('success', 'Advisors can explain it in a minute', 'A verified internal finding, then talking points in approved language, each with sources.'),
       L({ k: 'end' })
     ].join('\n'),
@@ -3119,11 +3153,11 @@ RECORDED.push(
           output: { kind: 'finding', title: 'Cost and peer context: GFA vs VIGAX', body: '- GFA F-2 (GFFFX): 0.40%, $4,000 a year per $1M\n- Vanguard Growth Index (VIGAX): 0.05%, $500 per $1M\n- Large Growth median: 0.75% (Morningstar)\n\nCost explains 0.35 points a year of any gap, before mandate differences.' },
           used: ['GFFFX', 'VIGAX', 'K-201'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [], next_step: '' } },
       T2: { calls: [['fund.get_facts', { ticker: 'GFFFX' }], ['fund.get_facts', { ticker: 'VIGAX' }], ['seismic.search_content', { query: 'gfa attribution why trailed' }], ['fund.get_performance', { ticker: 'GFFFX' }]],
-        json: { says: 'I refreshed Product’s K-201 against the data platform and the approved attribution report, and folded in Investment analytics’ cost figures.',
+        json: { says: 'I refreshed Product’s K-201 against the data platform and the approved attribution report, and folded in Product Q&A’s cost figures.',
           output: { kind: 'finding', title: 'Why GFA has trailed the Vanguard growth index (verified)', body: '- Different job: GFA is benchmarked to the S&P 500 and invests flexibly across 282 issuers, with up to 25% outside the U.S. (10.8% non-U.S. equities). VIGAX tracks the CRSP US Large Cap Growth index.\n- Concentration: the index holds about 166 stocks, with the top three roughly a third of assets. When a few mega-cap growth stocks lead, it leads.\n- Cost: 0.40% vs 0.05%, $4,000 vs $500 a year per $1M.\n\nNot a skill verdict: judge GFA against the S&P 500 it is managed to.\n\nPerformance: standardized returns are inserted from the fund data platform at approval; SEIS-113 has the quarter’s attribution.' },
           used: ['K-201', 'GFFFX', 'VIGAX', 'SEIS-113'], knowledge: [{ label: 'Why GFA has trailed the Vanguard growth index (refreshed)', value: 'Different mandates: GFA is benchmarked to the S&P 500 across 282 issuers with up to 25% outside the U.S.; the growth index holds about 166 stocks with roughly a third in three, so it leads when mega-caps lead; GFA F-2 costs 0.40% vs 0.05% for VIGAX.', evidence: ['GFFFX', 'VIGAX', 'SEIS-113', 'K-201'] }], memory: [], commitments: [], needs_approval: false, open_questions: [], next_step: '' } },
       T3: { calls: [['seismic.get_approved_language', { topic: 'active index performance benchmark' }]],
-        json: { says: 'I turned Product specialists’ verified finding into talking points built on approved messaging, so advisors can use them without new claims.',
+        json: { says: 'I turned Product Q&A’s verified finding into talking points built on approved messaging, so advisors can use them without new claims.',
           output: { kind: 'answer', title: 'Talking points: why GFA has trailed the growth index', body: 'For advisors, in approved language:\n\n- “Active and index funds do different jobs. An index fund aims to match its benchmark; an active fund aims to do something different, so it will lead and lag at different times.” (MSG-211)\n- GFA is managed to the S&P 500, not a growth index. When a handful of mega-cap growth stocks drive the market, a growth index with about a third of its assets in three stocks will lead.\n- “The Capital System divides each portfolio among several managers who invest independently, so no single view dominates.” (MSG-212)\n- “Judge a fund over a full market cycle and against the benchmark it is managed to, not a single period or a different index.” (MSG-213)\n- Cost is part of it: 0.40% for GFA F-2 vs 0.05% for VIGAX.\n\nUse with SEIS-113 (attribution) and SEIS-114 (Capital System explainer). Returns are added from the data platform at approval.' },
           used: ['MSG-211', 'MSG-212', 'MSG-213', 'K-201', 'SEIS-113', 'SEIS-114'], knowledge: [], memory: [], commitments: [], needs_approval: false, open_questions: [],
           next_step: 'Share the talking points with the Wholesalers alongside SEIS-113 and SEIS-114, so every advisor conversation uses the same verified explanation.' } }
@@ -3528,6 +3562,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const TC = { sales: '#82b6ff', product: '#7fd4ab', marketing: '#f0b870', service: '#b9a5f5' };
+const teamShort = t => TEAMS[t].short || TEAMS[t].name;
 const ICONS = {
   memory: '<path d="M7 7h10v10H7zM10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/>', file: '<path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6"/>',
   shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>', chart: '<path d="M5 20V11M11 20V5M17 20v-7M3 20h18"/>',
@@ -3544,9 +3579,9 @@ const UI = { requester: 'EMP-PRIYA', tab: 'updates', view: 'live', memAdv: null,
 
 /* ---------- static diagram ---------- */
 function buildStatic() {
-  $('whoRow').innerHTML = Object.entries(EMPLOYEES).map(([id, e]) => `<button class="who-chip" data-who="${id}" aria-pressed="${id === UI.requester}"><i style="background:${TC[e.team]}">${e.name.split(' ').map(x => x[0]).join('')}</i>${esc(e.name)} <small>${esc(TEAMS[e.team].name)}</small></button>`).join('');
+  $('whoRow').innerHTML = Object.entries(EMPLOYEES).map(([id, e]) => `<button class="who-chip" data-who="${id}" aria-pressed="${id === UI.requester}"><i style="background:${TC[e.team]}">${e.name.split(' ').map(x => x[0]).join('')}</i>${esc(e.name)} <small>${esc(teamShort(e.team))}</small></button>`).join('');
   $('lanes').innerHTML = TEAM_ORDER.map(t => { const roles = Object.entries(ROLES).filter(([, r]) => r.team === t);
-    return `<div class="lane bcol" data-team="${t}" style="--c:${TC[t]}"><h3><i style="background:${TC[t]}"></i>${TEAMS[t].name}<small>workbench</small></h3>${roles.map(([rid, r]) => `<div class="brole" id="role-${rid.replace('.', '-')}"><div class="brh" title="${esc(r.does)}"><b>${esc(r.name)}</b><small>${esc(r.does)}</small></div><div class="bagents" aria-label="Agents in this role">${Object.keys(AGENTS).filter(a => roleOf(a) === rid).map(a => `<span class="bag" id="bag-${a.replace('.', '-')}" title="${esc(AGENTS[a].name)}: ${esc(AGENTS[a].does)}">${esc(AGENTS[a].name)}</span>`).join('')}</div><div class="btasks" id="bt-${rid.replace('.', '-')}"></div></div>`).join('')}</div>`; }).join('');
+    return `<div class="lane bcol" data-team="${t}" style="--c:${TC[t]}"><h3><i style="background:${TC[t]}"></i><span class="lnm">${esc(TEAMS[t].name.length > 20 ? TEAMS[t].name.replace(/\s*\(.*\)$/, '') : TEAMS[t].name)}${TEAMS[t].name.length > 20 && /\(/.test(TEAMS[t].name) ? `<em>${esc(TEAMS[t].name.match(/\((.*)\)$/)[0])}</em>` : ''}</span><small>workbench</small></h3>${roles.map(([rid, r]) => `<div class="brole" id="role-${rid.replace('.', '-')}"><div class="brh" title="${esc(r.does)}"><b>${esc(r.name)}</b><small>${esc(r.does)}</small></div><div class="bagents" aria-label="Agents in this role">${Object.keys(AGENTS).filter(a => roleOf(a) === rid).map(a => `<span class="bag" id="bag-${a.replace('.', '-')}" title="${esc(AGENTS[a].name)}: ${esc(AGENTS[a].does)}">${esc(AGENTS[a].name)}</span>`).join('')}</div><div class="btasks" id="bt-${rid.replace('.', '-')}"></div></div>`).join('')}</div>`; }).join('');
   $('found').innerHTML = `<div class="tiles">${LAYER_ORDER.map(l => `<button class="tile" id="tile-${l}" data-layer="${l}"><span class="th">${icon(LAYERS[l].icon)}${LAYERS[l].short}</span><span class="cnt"></span><span class="tl"></span></button>`).join('')}</div><div class="fhead"><div><b>Shared AI foundation</b><span>Deterministic rules decide what each agent sees and what gets stored.</span></div><div class="ftot" id="ftot"></div></div>`;
   $('integ').innerHTML = `<div class="systems">${SYS_ORDER.map(k => `<button class="sys" id="sys-${k}" data-sys="${k}">${icon(SYSTEMS[k].icon)}<span><b>${SYSTEMS[k].name}</b><small>${SYSTEMS[k].sub}</small></span><span class="via"></span></button>`).join('')}</div><div class="gw"><b>Enterprise integration</b><span>MCP gateway · API gateway</span><span class="legend"><span class="via MCP" style="display:inline-block">MCP</span>agent tool call <span class="via API" style="display:inline-block">API</span>typed service call</span></div>`;
   $('orch').innerHTML = `<div class="ohead"><div class="oname">${icon('network')}Intelligence & orchestration</div><div class="oreq" id="oreq"></div></div><div class="pipe" id="pipe"></div><div class="othink" id="othink"></div><div class="tchips" id="tchips"></div>`;
@@ -3897,7 +3932,7 @@ function handleOrch(run, o) {
     const rr = ROLES[o.role] ? o.role : null;
     if (!AGENTS[t.agent] && rr) t.agent = ROLE_DEFAULT_AGENT[rr];
     if (!t.objective) t.objective = AGENTS[t.agent] ? AGENTS[t.agent].does : 'Contribute to the request';
-    t.role = rr && roleOf(t.agent) && ROLES[rr].team === AGENTS[t.agent]?.team ? rr : roleOf(t.agent);
+    t.role = rr && roleOf(t.agent) && ROLES[rr].team === AGENTS[t.agent]?.team && !(AGENT_ROLE[t.agent] && AGENTS[t.agent].team !== 'sales') ? rr : roleOf(t.agent); /* Product and Marketing agents belong to one sub-team */
     t.title = String(o.title || '').trim().slice(0, 60) || t.objective.split(/[,.;]/)[0].split(' ').slice(0, 6).join(' ');
     t.ask = Number(o.ask) || null;
     /* business assignment rules for Sales work that orchestration didn't route to a sub-agent */
@@ -4079,7 +4114,7 @@ const SI = { done: '✓', active: '', pending: '', skipped: '–', failed: '!' }
 function stepBody(r, s) {
   if (s.id === 'plan') {
     const succ = s.items.filter(d => d.type === 'success'), fixes = s.items.filter(d => d.type === 'planfix');
-    return `${fixes.map(d => `<div class="dl"><span class="tag2 code">RULE</span><span><b>${esc(d.title)}</b> ${esc(d.detail || '')}</span></div>`).join('')}${r.tasks.map(t => `<div class="dl"><span class="tid" style="background:${TC[ROLES[t.role].team]}">${t.id}</span><span><b>W${t.wave} · ${esc(taskLabel(t))}: ${esc(t.title)}</b> → ${esc(TEAMS[ROLES[t.role].team].name)} · ${esc(ROLES[t.role].name)}<small>${esc(t.objective)}${t.depends_on.length ? ' · after ' + t.depends_on.join(', ') : ' · no dependencies, runs in wave 1'}${(t.services || []).length ? ' · reads ' + t.services.map(k => '[' + k + ']').join(' ') : ''}</small></span></div>`).join('')}${succ.map(d => `<div class="dl"><span class="tag2 ai">DONE WHEN</span><span>${esc(d.title)}</span></div>`).join('')}`;
+    return `${fixes.map(d => `<div class="dl"><span class="tag2 code">RULE</span><span><b>${esc(d.title)}</b> ${esc(d.detail || '')}</span></div>`).join('')}${r.tasks.map(t => `<div class="dl"><span class="tid" style="background:${TC[ROLES[t.role].team]}">${t.id}</span><span><b>W${t.wave} · ${esc(taskLabel(t))}: ${esc(t.title)}</b> → ${esc(teamShort(ROLES[t.role].team))} · ${esc(ROLES[t.role].name)}<small>${esc(t.objective)}${t.depends_on.length ? ' · after ' + t.depends_on.join(', ') : ' · no dependencies, runs in wave 1'}${(t.services || []).length ? ' · reads ' + t.services.map(k => '[' + k + ']').join(' ') : ''}</small></span></div>`).join('')}${succ.map(d => `<div class="dl"><span class="tag2 ai">DONE WHEN</span><span>${esc(d.title)}</span></div>`).join('')}`;
   }
   if (s.id === 'execute') {
     return r.tasks.map(t => { const up = t.depends_on.map(d => r.tasks.find(x => x.id === d)).filter(Boolean);
@@ -4095,14 +4130,14 @@ function renderDecisions() {
   if (r.status === 'done') items.push({ key: 'sum', cls: 'summary', html: `<h3>${r.tasks.length} specialists · ${Math.round((r.t1 - r.t0) / 1000)} s</h3><div class="sgrid"><div><b>${r.stats.reused}</b>facts reused</div><div><b>${r.stats.reads}</b>records delivered</div><div><b>${r.stats.calls}</b>system calls</div><div><b>${r.stats.committed}</b>stored</div><div><b>${r.stats.pending + r.stats.task}</b>kept scoped / pending</div><div><b>${r.stats.blocked}</b>blocked or rejected</div></div>` });
   if (r.status === 'failed') items.push({ key: 'fail', cls: 'blocked', html: `<b>${esc(r.error)}</b>${r.tasks.length ? '' : '<br>No specialist ran.'}<div style="margin-top:8px"><button class="lbtn" data-act="retry">Try again</button></div>${r.orchText ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px">What orchestration returned</summary><div class="stream">${esc(r.orchText.slice(-3000))}</div></details>` : ''}` });
   if (r.status === 'clarify') items.push({ key: 'clar-note', cls: 'clar', html: `<b>Waiting for your answer</b><p style="margin:4px 0 0">${esc(r.clarify)}</p><button class="lbtn primary" data-tab="updates" style="margin-top:6px">Answer in Updates</button>` });
-  items.push({ key: 'req-' + r.id, cls: 'dcard', html: `<div class="dt">REQUEST · ${esc(EMPLOYEES[r.requester].name)}, ${esc(TEAMS[EMPLOYEES[r.requester].team].name)}</div><b class="tt2">“${esc(r.text)}”</b>` });
+  items.push({ key: 'req-' + r.id, cls: 'dcard', html: `<div class="dt">REQUEST · ${esc(EMPLOYEES[r.requester].name)}, ${esc(teamShort(EMPLOYEES[r.requester].team))}</div><b class="tt2">“${esc(r.text)}”</b>` });
   stepStates(r).forEach((s, k) => items.push({ key: 'st-' + s.id, cls: 'scard ' + s.state, html: `<div class="sh"><span class="sn">${s.state === 'done' ? '✓' : s.state === 'active' ? '<span class="spin"></span>' : k + 1}</span><b>${s.name}</b>${s.state === 'skipped' ? '<small>not stated</small>' : ''}</div>${['pending', 'skipped'].includes(s.state) && !(s.id === 'execute' && r.tasks.length) ? '' : `<div class="sb">${stepBody(r, s)}</div>`}` }));
   patchList(pane, items);
 }
 function taskHTML(r, t) {
   const a = AGENTS[t.agent], st = t.state || 'queued', p = t.packet;
   const byLayer = p ? LAYER_ORDER.map(l => [l, p.items.filter(i => i.layer === l)]).filter(x => x[1].length) : [];
-  return `<summary><span class="av" style="background:${TC[a.team]};width:28px;height:28px;border-radius:8px;font-size:12px;font-weight:800;color:#0e2135">${t.id}</span><span><b>${esc(a.name)}</b><small>${esc(TEAMS[a.team].name)} · ${esc(t.objective)}</small></span><span class="st ${st}">${st === 'queued' ? 'Waiting' : st === 'running' ? 'Working' : st === 'done' ? 'Done' : 'Failed'}</span></summary><div class="tbody">
+  return `<summary><span class="av" style="background:${TC[a.team]};width:28px;height:28px;border-radius:8px;font-size:12px;font-weight:800;color:#0e2135">${t.id}</span><span><b>${esc(a.name)}</b><small>${esc(teamShort(a.team))} · ${esc(t.objective)}</small></span><span class="st ${st}">${st === 'queued' ? 'Waiting' : st === 'running' ? 'Working' : st === 'done' ? 'Done' : 'Failed'}</span></summary><div class="tbody">
     ${p ? `<div class="sec"><b>${icon('memory')} Foundation → ${esc(a.name)} · ${p.items.length} items</b>${byLayer.map(([l, its]) => its.map(i => `<div class="pk"><span class="lid">${esc(i.id)}</span><span>${esc(i.label)}: ${esc(String(i.value).slice(0, 150))}<small>${esc(LAYERS[l].short)} · from ${esc(i.from)} · scope ${esc(i.scope)}</small></span></div>`).join('')).join('')}${p.withheld.map(w => `<div class="wh">Withheld ${esc(w.id)}: ${esc(w.why)}</div>`).join('')}</div>` : ''}
     ${t.calls && t.calls.length ? `<div class="sec"><b>${icon('arrow')} ${esc(a.name)} → enterprise systems</b>${t.calls.map(c => `<div class="pk"><span class="vbadge ${c.via || 'API'}">${c.via || '—'}</span><span><code style="font:11.5px var(--code)">${esc(c.name)}(${esc(JSON.stringify(c.input || {}).slice(0, 90))})</code><small>${c.error ? 'Blocked: ' + esc(c.error) : esc(SYSTEMS[c.sys].name) + ' · ' + esc(JSON.stringify(c.out).slice(0, 140))}</small></span></div>`).join('')}</div>` : ''}
     ${t.result ? `<div class="sec"><b>${icon('bolt')} ${esc(a.name)} → foundation</b><p class="says">“${esc(t.result.says || '')}”</p>${t.result.output ? `<div class="outbody"><b>${esc(t.result.output.title)}</b>\n${md(t.result.output.body)}</div>` : ''}${t.result.next_step ? `<p class="hint" style="margin:6px 0 0">Next step for the requester: ${esc(t.result.next_step)}</p>` : ''}${(t.result.open_questions || []).length ? `<p class="hint" style="margin:6px 0 0">Open question: ${esc(t.result.open_questions.join(' '))}</p>` : ''}</div>` : ''}
@@ -4307,8 +4342,8 @@ function saveEdit(id) {
 }
 function renderUpdates() {
   const r = UI.run, pane = $('pane-updates');
-  if (!r) { patchList(pane, [{ key: 'empty', cls: 'empty', html: `<p style="font:400 19px/1.4 var(--serif);color:var(--ink);margin:0 0 8px">Ask for an outcome and press Enter.</p>Orchestration decides the plan, then assigns each task to the right team: Wholesalers, SSC, Product specialists, Content & campaigns and so on. The tasks appear on the workbench, and each team’s output shows up here the moment it’s done.` }]); return; }
-  const items = [{ key: 'req-' + r.id, cls: 'dcard', html: `<div class="dt">REQUEST · ${esc(EMPLOYEES[r.requester].name)}, ${esc(TEAMS[EMPLOYEES[r.requester].team].name)}</div><b class="tt2">“${esc(r.text)}”</b>` }];
+  if (!r) { patchList(pane, [{ key: 'empty', cls: 'empty', html: `<p style="font:400 19px/1.4 var(--serif);color:var(--ink);margin:0 0 8px">Ask for an outcome and press Enter.</p>Orchestration decides the plan, then assigns each task to the right team: Wholesalers, SSC, Product Q&A, Strategy Intel, Content generation, Pitch books and so on. The tasks appear on the workbench, and each team’s output shows up here the moment it’s done.` }]); return; }
+  const items = [{ key: 'req-' + r.id, cls: 'dcard', html: `<div class="dt">REQUEST · ${esc(EMPLOYEES[r.requester].name)}, ${esc(teamShort(EMPLOYEES[r.requester].team))}</div><b class="tt2">“${esc(r.text)}”</b>` }];
   if (r.status === 'thinking' && r.bts) { items.push({ key: 'bts-' + r.id, cls: 'dcard btscard', html: btsHTML(r) }); items.push({ key: 'btslive-' + r.id, cls: 'dcard btslive', html: btsLiveHTML(r) }); }
   if (r.status === 'clarify') items.push({ key: 'clar-' + r.id, cls: 'clar', html: `<b>One question before planning</b><p style="margin:4px 0 0">${esc(r.clarify)}</p><input id="clarIn" placeholder="Your answer"><div style="display:flex;gap:6px;margin-top:6px"><button class="lbtn primary" data-act="answer">Continue</button><button class="lbtn" data-act="assume">Let it assume</button></div>` });
   if (r.interp) items.push({ key: 'interp-' + r.id, cls: 'dcard interpcard', html: interpHTML(r) });
@@ -4316,14 +4351,14 @@ function renderUpdates() {
   const done = r.tasks.filter(t => ['done', 'failed'].includes(t.state)).sort((a, b) => (a.t1 || 0) - (b.t1 || 0));
   for (const t of done) {
     const R = ROLES[t.role], o = outOf(t), [cls, label] = taskStatus(t);
-    items.push({ key: 'out-' + r.id + t.id, cls: 'dcard uout ' + cls, html: `<div class="uh"><i style="background:${TC[R.team]}"></i><span><b>Step ${t.step || '?'} · ${esc(R.name)}</b> · ${esc(TEAMS[R.team].name)}${t.person ? ' · ' + esc(t.person) : ''}<small>${routeChip(t)} ${esc(t.title)} · wave ${t.wave}</small></span><em class="bst ${cls}">${label}</em></div>
+    items.push({ key: 'out-' + r.id + t.id, cls: 'dcard uout ' + cls, html: `<div class="uh"><i style="background:${TC[R.team]}"></i><span><b>Step ${t.step || '?'} · ${esc(R.name)}</b> · ${esc(teamShort(R.team))}${t.person ? ' · ' + esc(t.person) : ''}<small>${routeChip(t)} ${esc(t.title)} · wave ${t.wave}</small></span><em class="bst ${cls}">${label}</em></div>
       ${t.state === 'failed' ? `<div class="blocked">This task didn’t finish: ${esc(t.error)}</div>` : ''}${t.result && t.result.says ? `<p class="says">${esc(t.result.says)}</p>` : ''}${outputHTML(o)}${verdictLines(t)}${contractHTML(t)}${sourcesHTML(r, t)}
       <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">${o && o.status === 'Waiting for approval' ? `<button class="lbtn primary" data-approve="${o.id}">${icon('check')} Approve</button><button class="lbtn" data-edit="${o.id}">Edit</button>` : ''}<button class="lbtn" data-task="${t.id}">Open full output</button></div>` });
   }
   /* the step that is working right now, with each system call as it happens */
   for (const t of r.tasks.filter(t => t.state === 'running')) {
     const R = ROLES[t.role];
-    items.push({ key: 'run-' + r.id + t.id, cls: 'dcard uout running', html: `<div class="uh"><i style="background:${TC[R.team]}"></i><span><b>Step ${t.step || '?'} · ${esc(R.name)}</b> · ${esc(TEAMS[R.team].name)}${t.person ? ' · ' + esc(t.person) : ''}<small>${routeChip(t)} ${esc(t.title)} · wave ${t.wave}</small></span><em class="bst running">In progress</em></div>${t.packet ? sourcesHTML(r, t) : ''}<p class="hint" style="margin:6px 0 0"><span class="spin"></span> ${!t.packet ? 'The foundation is assembling what this role may see…' : t.calls && t.calls.length ? 'Working from these sources…' : 'Reading the foundation; calling systems if anything is missing…'}</p>` });
+    items.push({ key: 'run-' + r.id + t.id, cls: 'dcard uout running', html: `<div class="uh"><i style="background:${TC[R.team]}"></i><span><b>Step ${t.step || '?'} · ${esc(R.name)}</b> · ${esc(teamShort(R.team))}${t.person ? ' · ' + esc(t.person) : ''}<small>${routeChip(t)} ${esc(t.title)} · wave ${t.wave}</small></span><em class="bst running">In progress</em></div>${t.packet ? sourcesHTML(r, t) : ''}<p class="hint" style="margin:6px 0 0"><span class="spin"></span> ${!t.packet ? 'The foundation is assembling what this role may see…' : t.calls && t.calls.length ? 'Working from these sources…' : 'Reading the foundation; calling systems if anything is missing…'}</p>` });
   }
   if (r.status === 'done') items.push({ key: 'final-' + r.id, cls: 'dcard finalcard', html: `<div class="dt">WHAT WAS PRODUCED FOR YOUR REQUEST</div>${r.tasks.map(t => { const o = outOf(t), R = ROLES[t.role]; return `<button class="steprow" data-task="${t.id}"><span class="stepn" style="background:${TC[R.team]}">${t.step}</span><span class="stepb"><b>${esc(o ? o.title : t.title)}</b><small>${esc(R.name)} · ${esc(o ? o.status : t.state === 'failed' ? 'Did not finish' : 'No document; see details')}</small></span><em class="openlink">Open</em></button>`; }).join('')}` });
   if (r.status === 'done') items.push({ key: 'sum-' + r.id, cls: 'summary', html: `<h3>All ${r.tasks.length} tasks done · ${Math.round((r.t1 - r.t0) / 1000)} s</h3><div class="sgrid"><div><b>${r.stats.reused}</b>facts reused</div><div><b>${r.stats.committed}</b>stored</div><div><b>${r.stats.calls}</b>system calls</div></div>` });
@@ -4386,7 +4421,7 @@ function closeDrawer() { $('drawer').hidden = true; $('scrim').hidden = true; }
 function openHelp() {
   openDrawer('How it works', `<p class="lead">Type a request as anyone in Sales, Product, Marketing or Service and press Enter.</p>
   <dl class="kv"><dt>Orchestration</dt><dd>The AI decides who the request is about, what can be reused, what’s missing and how to treat anything new about the advisor, then plans the work. Nine steps, each shown as AI or RULE.</dd>
-  <dt>Workbench</dt><dd>Each task is assigned to a team and role: Wholesalers (meeting prep), SSC (scheduling and follow-up), Internal wholesalers, Product specialists, Investment analytics, Content & campaigns, Compliance review, Distribution, Advisor service. Cards move from Assigned to In progress to Done.</dd>
+  <dt>Workbench</dt><dd>Each task is assigned to a team and role: Wholesalers (meeting prep), SSC (scheduling and follow-up), Internal wholesalers; Product (PRP): Product Q&A, Strategy Intel, Investment content generation; Marketing Content Generation (Market Incubator): Content generation, Compliance review, Distribution, BAU content management, Pitch books; Advisor service. Cards move from Assigned to In progress to Done.</dd>
   <dt>Updates</dt><dd>Each team’s output appears on the right the moment its task finishes, with what was shared, remembered or held for approval. Each step shows where its answer came from: what the foundation sent, which systems it queried and why, and what came back. Drafts can be edited before approval; edits are re-checked. The run ends with what you should do next.</dd>
   <dt>Agents</dt><dd>The full trace for each specialist: the exact context packet, every tool call and result, and each gatekeeper verdict.</dd>
   <dt>Foundation</dt><dd>Plain rules, not AI: what each task may see, evidence and number checks, memory rules, approvals, events and the knowledge graph.</dd></dl>

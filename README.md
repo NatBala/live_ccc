@@ -30,7 +30,22 @@ The foundation has seven components:
 | **Event-Driven Signals** | What changed, and who needs to act? |
 | **Graph Knowledge Layer** | How are people, firms, meetings, funds and documents connected? |
 
-Around it sit **37 named specialists** (Sales 7, Product 9, Marketing 11, Service 10), an **Intelligence & Orchestration** layer that plans and routes work, and **governed integration** with Salesforce (CRM, Service Cloud cases, plan records), Microsoft 365, Seismic (content, approved messaging, LiveSend delivery logs), the fund data platform, Morningstar, Genesys Cloud (contact center and service insights), Salesforce Marketing Cloud and Adobe Experience Manager, through an MCP gateway for agent tool calls and APIs for typed data.
+Around it sit **44 named specialists** (Sales 7, Product 12, Marketing 15, Service 10), an **Intelligence & Orchestration** layer that plans and routes work, and **governed integration** with Salesforce (CRM, Service Cloud cases, plan records), Microsoft 365, Seismic (content, approved messaging, LiveSend delivery logs), the fund data platform, Morningstar, Genesys Cloud (contact center and service insights), Salesforce Marketing Cloud and Adobe Experience Manager, through an MCP gateway for agent tool calls and APIs for typed data.
+
+Workbench teams:
+
+| Team | Roles (workbench lanes) | Agents |
+|---|---|---|
+| Sales | Wholesalers, SSC, Internal wholesalers | Prep Me, Engage Me, Coach Me, Schedule Me, Follow Me, Lead Me, Territory Planning |
+| Product (PRP) | Product Q&A | Query Clarifier, Research Planner, Tool Selection, Contact Summarizer, Tone/Style Alignment, Response Formatter, QAR |
+| | Strategy Intel (investment director prep) | ID Prep Me, Strategy Positioning, Market Views |
+| | Investment content generation | Institutional Pitch Books, SRG Pitch Books |
+| Marketing Content Generation (Market Incubator) | Content generation | Resource Gatherer, Document Analyzer, Copywriter / Editor, Image Analyzer, Voice of Client, LinkedIn Post, Personalized Email |
+| | Compliance review | Legal & Compliance, Audit Support |
+| | Distribution | Distribution, Audience Builder |
+| | BAU content management | BAU Content Refresh, Content Inventory |
+| | Pitch books | Standard Pitch Book, Custom Pitch Book |
+| Service | Advisor service | Ten service agents |
 
 ### What the demo proves
 - **Nobody repeats themselves.** One specialist’s verified work becomes the next one’s starting point, visibly, through the foundation.
@@ -177,7 +192,7 @@ live_ccc/
 │  └─ guided-tour.html    the earlier scripted walkthrough (no AI needed)
 ├─ src/                   app source
 │  ├─ index.tpl.html      page shell
-│  ├─ data.js             reference data: advisors, memory, episodes, funds, content, policies, 37-agent registry
+│  ├─ data.js             reference data: advisors, memory, episodes, funds, content, policies, 44-agent registry
 │  ├─ catalogue.js        Sales AI: intents, sub-agent routes, shared services, the query catalogue
 │  ├─ engine.js           foundation: tools, context packets, gatekeeper, AI connectors (Claude and OpenAI)
 │  ├─ graph.js            advisor knowledge graph

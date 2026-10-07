@@ -5,8 +5,8 @@
 
 const TEAMS = {
   sales: { name: 'Sales', color: '#82b6ff' },
-  product: { name: 'Product', color: '#7fd4ab' },
-  marketing: { name: 'Marketing', color: '#f0b870' },
+  product: { name: 'Product (PRP)', short: 'Product', color: '#7fd4ab' },
+  marketing: { name: 'Marketing Content Generation (Market Incubator)', short: 'Marketing', color: '#f0b870' },
   service: { name: 'Service', color: '#b9a5f5' }
 };
 const TEAM_ORDER = ['sales', 'product', 'marketing', 'service'];
@@ -15,19 +15,19 @@ const TEAM_ORDER = ['sales', 'product', 'marketing', 'service'];
 const EMPLOYEES = {
   'EMP-PRIYA': { name: 'Priya Shah', team: 'sales', role: 'Wholesaler, Southern California (LA, Orange County, San Diego)', covers: ['ADV-101', 'ADV-102', 'ADV-104', 'ADV-105', 'ADV-106'] },
   'EMP-SAM': { name: 'Sam Lee', team: 'sales', role: 'Internal partner, Southern California', covers: ['ADV-101', 'ADV-102', 'ADV-103', 'ADV-104', 'ADV-105', 'ADV-106', 'ADV-107'] },
-  'EMP-DANA': { name: 'Dana Ortiz', team: 'product', role: 'Investment product specialist', covers: [] },
+  'EMP-DANA': { name: 'Dana Ortiz', team: 'product', role: 'Product Q&A, Product (PRP)', covers: [] },
   'EMP-MARCUS': { name: 'Marcus Bell', team: 'marketing', role: 'Advisor marketing lead', covers: [] },
   'EMP-KIM': { name: 'Kim Nguyen', team: 'service', role: 'Advisor service', covers: [] }
 };
 
 const SUGGESTIONS = {
   sales: ['Identify the growing trends in LA territory', 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month', 'Prep me for my call with Alex tomorrow', 'Prepare Maya’s retirement committee fee comparison review', 'Sofia mentioned ETFs. What should I bring to our next meeting?', 'Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.', 'Why are Daniel’s overall sales down when his ETF sales are up?', 'Which CG ETFs are available at Wells Fargo for Daniel?', 'Prepare me for tomorrow’s meeting with Daniel’s team', 'What has changed since my last meeting with Rachel?'],
-  product: ['Compare BFA and AMBAL: costs, approach and who each suits', 'Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.', 'Compare GFA F-2 costs with VWUAX and VIGAX on $38M', 'Check whether our fee comparison for Maya is still current'],
-  marketing: ['Draft the follow-up email to Alex using Product’s verified comparison', 'Create an ETF email campaign for Sofia', 'Write a LinkedIn post on fee transparency for advisors'],
+  product: ['Compare BFA and AMBAL: costs, approach and who each suits', 'Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.', 'Compare GFA F-2 costs with VWUAX and VIGAX on $38M', 'Check whether our fee comparison for Maya is still current', 'Prep the investment director for Thursday’s meeting with Daniel’s team', 'Build the SRG pitch book on GFA for the advisor channel'],
+  marketing: ['Draft the follow-up email to Alex using Product’s verified comparison', 'Create an ETF email campaign for Sofia', 'Write a LinkedIn post on fee transparency for advisors', 'Refresh the standing GFA materials for the quarter and flag anything expiring', 'Create a custom pitch book on CG ETFs at Wells Fargo for Daniel’s team'],
   service: ['Alex says the link in Priya’s email won’t open', 'Maya says the benchmark explanation is still unclear']
 };
 
-/* The full registry of 37 specialists. tools = what each may call through the MCP or API gateway. */
+/* The full registry of 44 specialists. tools = what each may call through the MCP or API gateway. */
 const AGENTS = {
   'sales.lead': { name: 'Lead Me', team: 'sales', does: 'Prioritizes advisors and opportunities using model signals', tools: ['models.sales_alpha', 'models.territory_trends', 'crm.get_opportunities', 'book.get_assets', 'book.get_flows', 'book.get_market_share', 'taxonomy.resolve', 'pipeline.get', 'engage.get_history', 'platform.get_availability', 'lead.discover', 'lead.get_ranking_trace', 'engage.get_digital', 'book.get_fund_transactions', 'events.get_changes', 'insights.changes_since', 'book.get_activity'] },
   'sales.schedule': { name: 'Schedule Me', team: 'sales', does: 'Finds meeting times for advisors or colleagues and places calendar holds', tools: ['calendar.find_times', 'calendar.create_event', 'crm.get_contact', 'schedule.check_rules', 'schedule.zone_visits', 'crm.get_team'] },
@@ -43,8 +43,11 @@ const AGENTS = {
   'product.tone': { name: 'Tone/Style Alignment', team: 'product', does: 'Turns verified product answers into advisor-ready language using approved messaging', tools: ['seismic.get_approved_language'] },
   'product.format': { name: 'Response Formatter', team: 'product', does: 'Formats product answers for the channel', tools: ['taxonomy.resolve', 'fund.compare'] },
   'product.qar': { name: 'QAR', team: 'product', does: 'Produces verified answers; every number traced to a system of record', tools: ['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.cost_on_assets', 'models.plan_fee_comparison', 'seismic.search_content', 'platform.get_availability', 'taxonomy.resolve', 'fund.compare', 'models.get_allocations', 'platform.get_program_rules'] },
-  'product.institutional': { name: 'Institutional Pitch Books', team: 'product', does: 'Institutional product materials', tools: ['seismic.search_content'] },
-  'product.srg': { name: 'SRG Product Pitch Books', team: 'product', does: 'Product pitch books for the retail advisor channel', tools: ['seismic.search_content'] },
+  'product.idprep': { name: 'ID Prep Me', team: 'product', does: 'Prepares an investment director for an advisor or client meeting: who is in the room, what they hold and have asked, how the strategy is positioned and the questions to expect', tools: ['crm.get_contact', 'crm.get_call_notes', 'crm.get_team', 'book.get_assets', 'fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.get_allocations', 'news.get_items', 'content.get_themes', 'seismic.search_content', 'insights.changes_since'] },
+  'product.positioning': { name: 'Strategy Positioning', team: 'product', does: 'Explains how a strategy is positioned: allocation changes, what drove results and peer context, from verified data', tools: ['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.get_allocations', 'fund.compare', 'seismic.resolve_evidence'] },
+  'product.views': { name: 'Market Views', team: 'product', does: 'Summarizes approved house views and market themes that matter for the meeting', tools: ['news.get_items', 'content.get_themes', 'seismic.search_content', 'seismic.get_approved_language'] },
+  'product.institutional': { name: 'Institutional Pitch Books', team: 'product', does: 'Builds institutional pitch books from approved strategy content and verified data', tools: ['seismic.search_content', 'fund.get_facts', 'fund.get_performance', 'models.get_allocations', 'sharepoint.get_disclosures'] },
+  'product.srg': { name: 'SRG Pitch Books', team: 'product', does: 'Builds SRG pitch books for the retail advisor channel from approved content and verified data', tools: ['seismic.search_content', 'fund.get_facts', 'fund.get_performance', 'mstar.get_peers', 'sharepoint.get_disclosures'] },
   'marketing.gather': { name: 'Resource Gatherer', team: 'marketing', does: 'Finds approved content, templates, messaging and landing pages', tools: ['seismic.search_content', 'seismic.get_approved_language', 'aem.get_page', 'mcloud.get_engagement'] },
   'marketing.analyze': { name: 'Document Analyzer', team: 'marketing', does: 'Extracts key points from approved documents', tools: ['seismic.search_content', 'service.get_insights', 'seismic.resolve_evidence'] },
   'marketing.copy': { name: 'Copywriter / Editor', team: 'marketing', does: 'Writes drafts in the audience’s preferred format from verified findings', tools: ['seismic.get_approved_language'] },
@@ -55,6 +58,10 @@ const AGENTS = {
   'marketing.dist': { name: 'Distribution', team: 'marketing', does: 'Prepares sends; nothing goes out without human approval', tools: ['mail.draft'] },
   'marketing.voc': { name: 'Voice of Client', team: 'marketing', does: 'Captures explicit advisor statements and feedback, including what advisors ask Service', tools: ['crm.get_call_notes', 'service.get_insights'] },
   'marketing.linkedin': { name: 'LinkedIn Post', team: 'marketing', does: 'Drafts approved public posts with no client identifiers', tools: ['seismic.search_content', 'seismic.get_approved_language', 'mcloud.get_engagement', 'aem.get_page', 'service.get_insights'] },
+  'marketing.bau': { name: 'BAU Content Refresh', team: 'marketing', does: 'Keeps standing material current: quarterly data refreshes, expiring pieces and re-approvals', tools: ['seismic.search_content', 'fund.get_facts', 'fund.get_performance', 'sharepoint.get_disclosures'] },
+  'marketing.inventory': { name: 'Content Inventory', team: 'marketing', does: 'Tracks what is live in Seismic and AEM, its owner, approval date and expiry', tools: ['seismic.search_content', 'aem.get_page', 'mcloud.get_engagement'] },
+  'marketing.pitch_std': { name: 'Standard Pitch Book', team: 'marketing', does: 'Builds standardized pitch books from approved templates with the latest verified data', tools: ['seismic.search_content', 'fund.get_facts', 'fund.get_performance', 'mstar.get_peers', 'sharepoint.get_disclosures'] },
+  'marketing.pitch_custom': { name: 'Custom Pitch Book', team: 'marketing', does: 'Tailors a pitch book to an advisor or firm (their holdings, platform and questions) using approved content only', tools: ['seismic.search_content', 'book.get_assets', 'platform.get_availability', 'crm.get_call_notes', 'fund.compare', 'fund.get_facts', 'sharepoint.get_disclosures'] },
   'marketing.email': { name: 'Personalized Email', team: 'marketing', does: 'Drafts personalized advisor emails', tools: ['mail.draft', 'seismic.search_content', 'seismic.get_approved_language', 'mcloud.get_engagement'] },
   'service.classify': { name: 'Inquiry Classifier', team: 'service', does: 'Classifies incoming advisor inquiries', tools: ['service.get_cases', 'contact.get_interactions'] },
   'service.identity': { name: 'Identity Verifier', team: 'service', does: 'Verifies who is asking and what they may receive', tools: ['crm.get_contact'] },
@@ -73,29 +80,36 @@ const ROLES = {
   'sales.wholesalers': { team: 'sales', name: 'Wholesalers', person: 'Priya Shah', does: 'Advisor meetings: preparation, briefs, live conversations' },
   'sales.ssc': { team: 'sales', name: 'SSC', person: 'Nina Alvarez', does: 'Scheduling and follow-up' },
   'sales.internal': { team: 'sales', name: 'Internal wholesalers', person: 'Sam Lee', does: 'Territory insight and prioritization' },
-  'product.specialists': { team: 'product', name: 'Product specialists', person: 'Dana Ortiz', does: 'Fund questions, comparisons, verified answers' },
-  'product.analytics': { team: 'product', name: 'Investment analytics', person: 'Wei Zhang', does: 'Fee math, peer data, portfolio construction' },
-  'marketing.content': { team: 'marketing', name: 'Content & campaigns', person: 'Marcus Bell', does: 'Approved content, drafts, personalized emails' },
+  'product.qa': { team: 'product', name: 'Product Q&A', person: 'Dana Ortiz', does: 'Fund questions, comparisons, analytics tools and verified answers' },
+  'product.strategy': { team: 'product', name: 'Strategy Intel', person: 'Wei Zhang', does: 'Investment director (ID) preparation: positioning, market views and meeting prep' },
+  'product.content': { team: 'product', name: 'Investment content generation', person: 'Elena Park', does: 'Institutional and SRG pitch books' },
+  'marketing.content': { team: 'marketing', name: 'Content generation', person: 'Marcus Bell', does: 'Approved content, drafts, personalized emails and posts' },
   'marketing.compliance': { team: 'marketing', name: 'Compliance review', person: 'Grace Liu', does: 'Claims, disclosures, sign-off' },
   'marketing.distribution': { team: 'marketing', name: 'Distribution', person: 'Omar Haddad', does: 'Audiences and approved sends' },
+  'marketing.bau': { team: 'marketing', name: 'BAU content management', person: 'Leo Brooks', does: 'Keeps standing material current, tracked and re-approved' },
+  'marketing.pitchbooks': { team: 'marketing', name: 'Pitch books', person: 'Tessa Grant', does: 'Standardized and custom pitch book creation' },
   'service.advisor': { team: 'service', name: 'Advisor service', person: 'Kim Nguyen', does: 'Access, delivery and service cases' }
 };
 const AGENT_ROLE = {
   'sales.prep': 'sales.wholesalers', 'sales.engage': 'sales.wholesalers', 'sales.coach': 'sales.wholesalers',
   'sales.schedule': 'sales.ssc', 'sales.follow': 'sales.ssc',
   'sales.lead': 'sales.internal', 'sales.territory': 'sales.internal',
-  'product.tools': 'product.analytics',
+  'product.clarify': 'product.qa', 'product.planner': 'product.qa', 'product.tools': 'product.qa', 'product.summary': 'product.qa', 'product.tone': 'product.qa', 'product.format': 'product.qa', 'product.qar': 'product.qa',
+  'product.idprep': 'product.strategy', 'product.positioning': 'product.strategy', 'product.views': 'product.strategy',
+  'product.institutional': 'product.content', 'product.srg': 'product.content',
+  'marketing.bau': 'marketing.bau', 'marketing.inventory': 'marketing.bau', 'marketing.pitch_std': 'marketing.pitchbooks', 'marketing.pitch_custom': 'marketing.pitchbooks',
   'marketing.legal': 'marketing.compliance', 'marketing.audit': 'marketing.compliance',
   'marketing.dist': 'marketing.distribution', 'marketing.audience': 'marketing.distribution',
   'service.classify': 'service.advisor', 'service.identity': 'service.advisor', 'service.priority': 'service.advisor', 'service.knowledge': 'service.advisor', 'service.account': 'service.advisor', 'service.resolve': 'service.advisor', 'service.escalate': 'service.advisor', 'service.sentiment': 'service.advisor', 'service.crosssell': 'service.advisor', 'service.qa': 'service.advisor'
 };
-const roleOf = agent => AGENT_ROLE[agent] || (AGENTS[agent] ? { sales: 'sales.wholesalers', product: 'product.specialists', marketing: 'marketing.content', service: 'service.advisor' }[AGENTS[agent].team] : null);
+const roleOf = agent => AGENT_ROLE[agent] || (AGENTS[agent] ? { sales: 'sales.wholesalers', product: 'product.qa', marketing: 'marketing.content', service: 'service.advisor' }[AGENTS[agent].team] : null);
 /* Deterministic assignment rules the business asked for: they override the AI when they apply. */
 const ROLE_RULES = [
+  { test: /investment director|\bID (prep|meeting|brief)|prep(are)? (the |our )?ID\b/i, role: 'product.strategy', agent: () => 'product.idprep', why: 'Investment director preparation goes to Strategy Intel' },
   { test: /schedul|follow.?up|book(ing)?\b|calendar|invite|reschedul|reminder|set up (a )?(call|meeting)/i, role: 'sales.ssc', agent: t => /schedul|book|calendar|invite|reschedul|set up/i.test(t) ? 'sales.schedule' : 'sales.follow', why: 'Scheduling and follow-up go to SSC' },
   { test: /\bprep|brief|agenda|talking points|meeting preparation|prepare (me|for)/i, role: 'sales.wholesalers', agent: () => 'sales.prep', why: 'Meeting preparation goes to the wholesaler' }
 ];
-const ROLE_DEFAULT_AGENT = { 'sales.wholesalers': 'sales.prep', 'sales.ssc': 'sales.schedule', 'sales.internal': 'sales.territory', 'product.specialists': 'product.qar', 'product.analytics': 'product.tools', 'marketing.content': 'marketing.email', 'marketing.compliance': 'marketing.legal', 'marketing.distribution': 'marketing.dist', 'service.advisor': 'service.resolve' };
+const ROLE_DEFAULT_AGENT = { 'sales.wholesalers': 'sales.prep', 'sales.ssc': 'sales.schedule', 'sales.internal': 'sales.territory', 'product.qa': 'product.qar', 'product.strategy': 'product.idprep', 'product.content': 'product.srg', 'marketing.content': 'marketing.email', 'marketing.compliance': 'marketing.legal', 'marketing.distribution': 'marketing.dist', 'marketing.bau': 'marketing.bau', 'marketing.pitchbooks': 'marketing.pitch_std', 'service.advisor': 'service.resolve' };
 
 const LAYERS = {
   memory: { name: 'Shared Memory', short: 'Memory', icon: 'memory' },
@@ -249,7 +263,7 @@ const EPISODES = [
 /* Durable commitments (workflow state, not memory) */
 const COMMITMENTS = [
   { id: 'TASK-301', adv: 'ADV-101', scope: 'BU-101A', title: 'Send quarterly attribution in the one-page format', owner: 'Priya Shah', due: 'Jan 8, 2027', status: 'Open' },
-  { id: 'TASK-302', adv: 'ADV-102', scope: 'BU-102R', title: 'Clarify what the benchmark represents', owner: 'Product specialist', due: 'Before next committee', status: 'Open' },
+  { id: 'TASK-302', adv: 'ADV-102', scope: 'BU-102R', title: 'Clarify what the benchmark represents', owner: 'Product Q&A', due: 'Before next committee', status: 'Open' },
   { id: 'TASK-303', adv: 'ADV-104', scope: 'BU-104', title: 'Follow up on the role of active managers in her core-satellite model', owner: 'Priya Shah', due: 'Oct 9, 2026', status: 'Open' }
 ];
 
@@ -491,7 +505,7 @@ const ADVISOR_TEAMS = {
   'ADV-106': [['Rachel Okafor', 'Lead advisor'], ['Diane Hughes', 'Client service manager']],
   'ADV-107': [['Luis Herrera', 'Principal'], ['Paula Reyes', 'Operations; owns retirement plan paperwork']]
 };
-const COVERAGE_TEAM = [['Priya Shah', 'External wholesaler, Southern California'], ['Sam Lee', 'Internal partner, Southern California'], ['Nina Alvarez', 'SSC: scheduling and follow-up'], ['Dana Ortiz', 'Investment product specialist'], ['Ravi Menon', 'Retirement plan specialist (joins plan and committee meetings)']];
+const COVERAGE_TEAM = [['Priya Shah', 'External wholesaler, Southern California'], ['Sam Lee', 'Internal partner, Southern California'], ['Nina Alvarez', 'SSC: scheduling and follow-up'], ['Dana Ortiz', 'Product Q&A, Product (PRP)'], ['Ravi Menon', 'Retirement plan specialist (joins plan and committee meetings)']];
 /* [coverage analytics] coverage tier and target completed contacts per 90 days */
 const COVERAGE_TIERS = { 'ADV-101': ['A', 4], 'ADV-102': ['A', 4], 'ADV-104': ['A', 4], 'ADV-105': ['A', 4], 'ADV-103': ['B', 2], 'ADV-106': ['B', 2], 'ADV-107': ['C', 1] };
 /* [peer analytics] permitted cohorts: internal coverage data only, no client data */
