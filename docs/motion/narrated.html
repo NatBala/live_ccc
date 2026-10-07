@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Sales AI narrated demo</title>
+<link rel="stylesheet" href="fonts/local.css">
+<style>
+:root{--bg0:#08131f;--bg1:#0e2135;--ink:#eaf1f8;--mute:#9db2c7;--line:#2a4766;--gold:#ffd27a;--gold2:#e7b54e;--sales:#82b6ff;--product:#7fd4ab;--marketing:#f0b870;--service:#b9a5f5;--compliance:#ff9f8a;--violet:#cfc3ff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg0)}
+body{font-family:'Schibsted Grotesk',sans-serif;color:var(--ink)}
+.stage{position:absolute;inset:0;overflow:hidden;background:radial-gradient(1200px 700px at 30% 20%,#173a5e 0,transparent 60%),radial-gradient(900px 700px at 85% 90%,#1b2f55 0,transparent 60%),linear-gradient(160deg,var(--bg1),var(--bg0))}
+.grid{position:absolute;inset:-100px;background-image:linear-gradient(rgba(130,182,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(130,182,255,.06) 1px,transparent 1px);background-size:64px 64px}
+.glow{position:absolute;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(255,210,122,.15),transparent 65%)}
+.abs{position:absolute}.serif{font-family:'Newsreader',serif}
+.brand{left:56px;top:40px;display:flex;align-items:center;gap:14px;font-weight:700;font-size:24px}
+.brand .dots{display:flex;gap:6px}.brand .dots i{width:12px;height:12px;border-radius:50%}
+.brand small{font-weight:500;color:var(--mute);font-size:20px;margin-left:6px}
+.prog{left:0;bottom:0;height:5px;background:linear-gradient(90deg,var(--gold2),var(--gold))}
+.kicker{font-size:24px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.cap{left:260px;width:1400px;bottom:34px;text-align:center}
+.cap span{display:inline-block;max-width:1400px;padding:12px 26px;border-radius:14px;background:rgba(5,12,20,.72);font-size:30px;line-height:1.35;color:#f4f8fc}
+.card{background:linear-gradient(180deg,rgba(23,48,76,.94),rgba(14,33,53,.94));border:1px solid var(--line);border-radius:24px;box-shadow:0 30px 80px rgba(0,0,0,.35)}
+/* title */
+.tdot{width:56px;height:56px;border-radius:50%;box-shadow:0 0 44px currentColor}
+.tlab{width:160px;text-align:center;font-size:24px;font-weight:700}
+.tbar{width:620px;height:34px;border-radius:14px;background:linear-gradient(90deg,var(--gold2),var(--gold));box-shadow:0 0 60px rgba(255,210,122,.45)}
+.ttitle{width:1920px;text-align:center;font-size:112px;font-weight:500}
+.tsub{width:1920px;text-align:center;font-size:40px;color:var(--mute)}
+/* intelligence */
+.cmd{left:240px;top:140px;width:1440px;height:130px;padding:0 36px;display:flex;align-items:center;gap:24px}
+.who{display:flex;align-items:center;gap:12px;padding:10px 20px;border-radius:99px;background:rgba(130,182,255,.14);border:1px solid rgba(130,182,255,.5);font-size:26px;font-weight:700;white-space:nowrap}
+.who i{width:42px;height:42px;border-radius:50%;background:var(--sales);color:#0e2135;font-style:normal;font-size:17px;font-weight:800;display:grid;place-items:center}
+.who small{color:var(--mute);font-weight:500;font-size:22px}
+.typed{font-size:40px;font-weight:500;white-space:nowrap}
+.caret{display:inline-block;width:3px;height:44px;background:var(--gold);vertical-align:-8px;margin-left:4px}
+.runb{margin-left:auto;padding:16px 30px;border-radius:14px;background:var(--gold);color:#1a2a3a;font-weight:800;font-size:26px}
+.intel{left:240px;top:300px;width:1440px;height:640px;padding:36px 48px;border-left:6px solid #8f7ae0}
+.intel h3{display:flex;align-items:center;gap:18px}
+.tag{font-size:17px;font-weight:800;padding:3px 10px;border-radius:7px;background:#2c2550;color:var(--violet);letter-spacing:.06em}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px 60px;margin-top:22px}
+.f{display:grid;grid-template-columns:240px 1fr;align-items:baseline;gap:18px;padding:16px 0;border-top:1px solid var(--line)}
+.f dt{font-size:24px;color:var(--mute);font-weight:700}
+.f dd{font-size:32px;font-weight:600}
+.f dd small{display:block;font-size:22px;color:var(--mute);font-weight:500;margin-top:2px}
+.ib{display:inline-block;font-size:24px;font-weight:800;letter-spacing:.06em;padding:4px 14px;border-radius:9px;background:#2c2550;color:var(--violet)}
+.lock{display:inline-flex;align-items:center;gap:10px;font-size:28px;font-weight:800;padding:6px 16px;border-radius:10px;background:rgba(255,210,122,.14);color:var(--gold);border:2px solid var(--gold2)}
+.stamp{font-size:18px;font-weight:800;letter-spacing:.1em;color:#9fe3c2;border:2px solid #4fb487;border-radius:8px;padding:5px 12px}
+.fauth{grid-column:1 / -1;border-radius:14px;padding:16px 18px;margin-top:6px;border-top:0}
+/* orchestration */
+.strip{left:240px;top:110px;width:1440px;height:70px;padding:0 28px;display:flex;align-items:center;gap:18px;font-size:26px;border-radius:16px;white-space:nowrap}
+.strip .sep{color:var(--line)}
+.ohead{left:100px;top:206px;display:flex;align-items:baseline;gap:22px}
+.ohead .big{font-size:44px;font-weight:700}
+.wlab{font-size:22px;font-weight:800;letter-spacing:.12em;color:var(--gold);text-transform:uppercase}
+.wlab small{color:var(--mute);letter-spacing:.02em;text-transform:none;font-weight:600;margin-left:10px}
+.step{width:400px;height:140px;padding:18px 22px;border-radius:18px}
+.route{display:inline-block;font-size:22px;font-weight:800;padding:3px 12px;border-radius:8px;border:2px solid var(--c);background:color-mix(in srgb,var(--c) 22%,transparent)}
+.stitle{font-size:28px;font-weight:700;margin-top:8px}
+.svc{display:flex;gap:8px;margin-top:8px}
+.svc span{font-family:'DejaVu Sans Mono',monospace;font-size:16px;padding:2px 8px;border-radius:6px;background:#143a2a;color:#9fe3c2;border:1px solid #2f6b4f}
+.bar{position:absolute;left:0;bottom:0;height:6px;border-radius:0 0 18px 18px;background:var(--c)}
+.chk{position:absolute;right:18px;top:16px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:24px;font-weight:900;background:#1f6b48;color:#d9fbe9}
+.spin{position:absolute;right:20px;top:18px;width:36px;height:36px;border-radius:50%;border:4px solid rgba(255,210,122,.25);border-top-color:var(--gold)}
+.sys{width:360px;height:92px;padding:0 22px;display:flex;align-items:center;gap:16px;border-radius:18px;font-size:26px;font-weight:700}
+.sys small{display:block;font-size:18px;color:var(--mute);font-weight:500}
+.sys .ic{width:50px;height:50px;border-radius:12px;display:grid;place-items:center;background:rgba(130,182,255,.15);font-size:26px}
+.pt{width:16px;height:16px;border-radius:50%;background:var(--gold);box-shadow:0 0 18px var(--gold),0 0 4px #fff}
+.out{width:420px;height:560px;padding:28px;border-left:6px solid var(--gold)}
+.out h4{font-size:34px;font-weight:600;line-height:1.15}
+.ol{display:grid;grid-template-columns:38px 1fr;gap:12px;font-size:23px;line-height:1.3;padding:12px 0;border-top:1px solid var(--line)}
+.ol i{font-style:normal;width:34px;height:34px;border-radius:9px;background:rgba(255,210,122,.18);color:var(--gold);font-weight:800;display:grid;place-items:center;font-size:19px}
+.foot{font-size:21px;color:#9fe3c2;font-weight:700;margin-top:12px}
+/* teams working together */
+.req{left:260px;top:120px;width:1400px;height:136px;padding:0 36px;display:flex;align-items:center;gap:26px;border-left:6px solid var(--sales)}
+.req .q{font-size:36px;line-height:1.25}
+.req .by{font-size:22px;color:var(--mute);margin-top:6px;font-family:'Schibsted Grotesk',sans-serif}
+.av{width:72px;height:72px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:800;font-size:26px;color:#0e2135;background:#dce8f4}
+.st{width:330px;height:380px;padding:24px 24px;border-radius:22px;border-top:7px solid var(--c)}
+.st .team{font-size:21px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
+.st .per{font-size:22px;color:var(--mute);margin-top:4px}
+.st h5{font-size:30px;font-weight:700;margin:16px 0 10px;line-height:1.15}
+.st .li{font-size:22px;line-height:1.3;padding:8px 0;border-top:1px solid var(--line)}
+.st .li b{color:var(--gold)}
+.st .src{font-size:17px;color:#9fe3c2;margin-top:10px;font-family:'DejaVu Sans Mono',monospace}
+.arrow{font-size:40px;color:var(--gold);font-weight:700}
+.found{left:80px;width:1760px;height:84px;border-radius:20px;background:linear-gradient(90deg,rgba(231,181,78,.16),rgba(255,210,122,.26));border:2px solid var(--gold2);display:flex;align-items:center;padding:0 30px;gap:22px;font-size:24px}
+.found b{color:var(--gold);font-weight:800;white-space:nowrap}
+.evt{font-family:'DejaVu Sans Mono',monospace;font-size:17px;padding:4px 10px;border-radius:8px;background:rgba(8,19,31,.6);border:1px solid var(--gold2);color:var(--gold);white-space:nowrap}
+.tok{width:20px;height:20px;border-radius:50%;background:var(--gold);box-shadow:0 0 22px var(--gold),0 0 6px #fff}
+.approve{display:inline-flex;align-items:center;gap:10px;margin-top:14px;padding:12px 22px;border-radius:12px;background:var(--gold);color:#1a2a3a;font-weight:800;font-size:24px}
+.sent{font-size:22px;color:#9fe3c2;font-weight:700;margin-top:12px}
+.tally{left:0;width:1920px;text-align:center;font-size:30px;color:var(--mute)}
+.tally b{color:var(--ink)}
+/* intents */
+.ititle{width:1920px;text-align:center;font-size:84px;font-weight:500}
+.isub{width:1920px;text-align:center;font-size:32px;color:var(--mute)}
+.irow{left:140px;width:1640px;height:128px;padding:0 32px;display:grid;grid-template-columns:560px 240px 1fr;align-items:center;gap:26px;border-radius:20px}
+.ask{font-size:36px;font-weight:600;white-space:nowrap}
+.ask em{font-style:normal;color:var(--gold);background:linear-gradient(var(--gold),var(--gold)) no-repeat 0 100%/var(--u,0%) 3px;padding-bottom:4px}
+.intent{font-size:28px;font-weight:800;letter-spacing:.08em;padding:9px 0;border-radius:12px;text-align:center;color:#0e2135}
+.mini{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;font-size:19px;white-space:nowrap}
+.mini .r{font-weight:800;padding:3px 10px;border-radius:7px;border:2px solid var(--c);background:color-mix(in srgb,var(--c) 20%,transparent)}
+.mini .s{font-family:'DejaVu Sans Mono',monospace;font-size:16px;padding:2px 7px;border-radius:6px;background:#143a2a;color:#9fe3c2;border:1px solid #2f6b4f}
+.mini .a{color:var(--mute)}.mini .ctl{margin-left:6px;color:var(--gold);font-weight:700}
+/* outro */
+.lane{width:390px;height:300px;padding:28px;border-radius:22px;border-top:7px solid var(--c)}
+.lane .team{font-size:23px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
+.lane .per{font-size:24px;color:var(--mute);margin-top:6px}
+.lane .uc{font-size:34px;line-height:1.2;margin-top:18px}
+.fbar{left:180px;width:1560px;height:100px;border-radius:22px;background:linear-gradient(90deg,rgba(231,181,78,.22),rgba(255,210,122,.32));border:2px solid var(--gold2);display:flex;align-items:center;justify-content:center;gap:30px;font-size:28px;font-weight:600}
+.fbar b{color:var(--gold);font-weight:800}
+.conn{width:3px;background:linear-gradient(var(--c),var(--gold))}
+.stats{width:1920px;text-align:center;font-size:32px;color:var(--mute)}.stats b{color:var(--ink)}
+.final{width:1920px;text-align:center;font-size:72px;font-weight:500}
+</style></head>
+<body><div class="stage">
+  <div class="grid" id="grid"></div><div class="glow" id="glow"></div>
+  <div class="abs brand" id="brand"><span class="dots"><i style="background:var(--sales)"></i><i style="background:var(--product)"></i><i style="background:var(--marketing)"></i><i style="background:var(--service)"></i></span>Connected Client Experience<small>Sales AI</small></div>
+
+  <!-- 1. title -->
+  <div id="title">
+    <div class="abs tdot" id="d0" style="background:var(--sales);color:var(--sales)"></div><div class="abs tdot" id="d1" style="background:var(--product);color:var(--product)"></div>
+    <div class="abs tdot" id="d2" style="background:var(--marketing);color:var(--marketing)"></div><div class="abs tdot" id="d3" style="background:var(--service);color:var(--service)"></div>
+    <div class="abs tlab" id="tl0" style="left:640px;top:340px;color:var(--sales)">Sales</div><div class="abs tlab" id="tl1" style="left:800px;top:340px;color:var(--product)">Product</div>
+    <div class="abs tlab" id="tl2" style="left:960px;top:340px;color:var(--marketing)">Marketing</div><div class="abs tlab" id="tl3" style="left:1120px;top:340px;color:var(--service)">Service</div>
+    <div class="abs tbar" id="tbar" style="left:650px;top:500px"></div>
+    <div class="abs ttitle serif" id="ttitle" style="left:0;top:580px">Connected Client Experience</div>
+    <div class="abs tsub" id="tsub" style="left:0;top:730px">Specialist AI agents. One shared foundation.</div>
+  </div>
+
+  <!-- 2. intelligence -->
+  <div id="intel">
+    <div class="abs card cmd" id="cmd"><span class="who"><i>PS</i>Priya Shah <small>Wholesaler</small></span><span class="typed" id="typed"></span><span class="caret" id="caret"></span><span class="runb" id="runb">Run</span></div>
+    <div class="abs card intel" id="icard">
+      <h3><span class="kicker">Intelligence</span><span style="font-size:34px;font-weight:500" class="serif">What Priya actually wants</span><span class="tag">AI</span></h3>
+      <dl class="fields" id="fields">
+        <div class="f"><dt>Subject</dt><dd>Daniel Kim<small>Kim Group model portfolios</small></dd></div>
+        <div class="f"><dt>Business intent</dt><dd><span class="ib">PREPARE</span></dd></div>
+        <div class="f"><dt>Scope</dt><dd>Wealth · Wells Fargo</dd></div>
+        <div class="f"><dt>Time</dt><dd>Tomorrow<small>changes since his Sep 18 call</small></dd></div>
+        <div class="f"><dt>Requested output</dt><dd>A meeting agenda</dd></div>
+        <div class="f"><dt>Constraints</dt><dd>Approved content only</dd></div>
+        <div class="f fauth" id="fauth"><dt>Action authority</dt><dd style="display:flex;align-items:center;gap:18px"><span class="lock">🔒 Read-only</span><span style="font-size:24px;color:var(--mute);font-weight:500">nothing booked, sent or changed</span><span class="stamp" id="stamp">SET BY RULE</span></dd></div>
+      </dl>
+    </div>
+  </div>
+
+  <!-- 3. orchestration -->
+  <div id="orch">
+    <div class="abs card strip" id="strip"><span class="ib" style="font-size:19px">PREPARE</span><b>Daniel Kim · Kim Group</b><span class="sep">|</span>Agenda<span class="sep">|</span><span style="color:var(--gold);font-weight:700">🔒 Read-only</span><span style="margin-left:auto;color:var(--mute)">Priya Shah · Sales</span></div>
+    <div class="abs ohead" id="ohead"><span class="kicker">Orchestration</span><span class="big">5 steps in 3 waves</span></div>
+    <div class="abs wlab" id="w1l" style="left:100px;top:290px">Wave 1<small>3 steps run together</small></div>
+    <div class="abs wlab" id="w2l" style="left:590px;top:290px">Wave 2</div>
+    <div class="abs wlab" id="w3l" style="left:1080px;top:290px">Wave 3</div>
+    <svg class="abs" id="wires" width="1920" height="1080" style="left:0;top:0;overflow:visible"></svg>
+    <div class="abs card step" id="s1" style="left:100px;top:330px;--c:var(--sales)"><span class="route">Prep.Profile</span><div class="stitle">Profile and book</div><div class="svc"><span>[assets]</span><span>[pipeline]</span></div><div class="bar"></div></div>
+    <div class="abs card step" id="s2" style="left:100px;top:490px;--c:var(--sales)"><span class="route">Prep.Notes</span><div class="stitle">What Daniel told us</div><div class="svc"><span>[call notes]</span></div><div class="bar"></div></div>
+    <div class="abs card step" id="s3" style="left:100px;top:650px;--c:var(--sales)"><span class="route">Lead.Insights</span><div class="stitle">What changed in flows</div><div class="svc"><span>[flows]</span></div><div class="bar"></div></div>
+    <div class="abs card step" id="s4" style="left:590px;top:490px;--c:var(--sales)"><span class="route">Prep.Content</span><div class="stitle">Pick approved content</div><div class="svc"><span>[approved search]</span></div><div class="bar"></div></div>
+    <div class="abs card step" id="s5" style="left:1080px;top:490px;--c:var(--sales)"><span class="route">Prep.Agenda</span><div class="stitle">Build the agenda</div><div class="svc"><span>[task state]</span></div><div class="bar"></div></div>
+    <div class="abs card sys" id="y1" style="left:100px;top:860px"><span class="ic">👥</span><span>Salesforce<small>CRM · call notes</small></span></div>
+    <div class="abs card sys" id="y2" style="left:560px;top:860px"><span class="ic">📈</span><span>Data platform<small>book · flows</small></span></div>
+    <div class="abs card sys" id="y3" style="left:1020px;top:860px"><span class="ic">📘</span><span>Seismic<small>approved content</small></span></div>
+    <div id="pts"></div>
+    <div class="abs card out" id="out" style="left:1460px;top:300px">
+      <div class="kicker" style="font-size:19px">Returns</div>
+      <h4 class="serif" style="margin:8px 0 14px">Agenda · Kim Group, Wed Sep 30</h4>
+      <div class="ol"><i>1</i><span>ETFs are now <b>17.8%</b> of his book, up from 9.3%</span></div>
+      <div class="ol"><i>2</i><span>Where active still adds value in core-satellite</span></div>
+      <div class="ol"><i>3</i><span>ETF options his clients ask about</span></div>
+      <div class="ol"><i>4</i><span>Agree which satellites he reviews</span></div>
+      <div class="foot">✓ Every number traced to a source</div>
+    </div>
+  </div>
+
+  <!-- 4. teams working together -->
+  <div id="team">
+    <div class="abs kicker" id="tk" style="left:80px;top:96px">Teams working together</div>
+    <div class="abs card req" id="req" style="top:140px"><span class="av">AR</span><div><div class="q serif">“Show me Growth Fund of America against the Vanguard growth funds. Fees in dollars, on one page.”</div><div class="by">Alex Rivera · Morgan Stanley · advisor, on his Sep 22 call</div></div></div>
+    <div class="abs card st" id="t1" style="left:80px;top:310px;--c:var(--sales)"><div class="team">Sales</div><div class="per">Priya · Wholesaler</div><h5>Captures the request</h5><div class="li">One page, data first</div><div class="li">Fees in dollars on his <b>$38M</b></div><div class="src">CALL-0922 · his own words</div></div>
+    <div class="abs card st" id="t2" style="left:440px;top:310px;--c:var(--product)"><div class="team">Product</div><div class="per">Dana · Product specialist</div><h5>Verifies the costs</h5><div class="li">GFA F-2 · 0.40% · <b>$152,000</b></div><div class="li">VWUAX · 0.25% · <b>$95,000</b></div><div class="li">VIGAX · 0.05% · <b>$19,000</b></div><div class="src">Data platform · per year</div></div>
+    <div class="abs card st" id="t3" style="left:800px;top:310px;--c:var(--marketing)"><div class="team">Marketing</div><div class="per">Marcus · Marketing lead</div><h5>Drafts the one-pager email</h5><div class="li">Uses Product’s verified numbers</div><div class="li">PDF attached, not a link</div><div class="src">Outlook draft</div></div>
+    <div class="abs card st" id="t4" style="left:1160px;top:310px;--c:var(--compliance)"><div class="team">Compliance</div><div class="per">Grace · Compliance review</div><h5>Reviews it</h5><div class="li">Claims match approved messaging</div><div class="li">Disclosures added</div><div class="src">SharePoint rules</div></div>
+    <div class="abs card st" id="t5" style="left:1520px;top:310px;--c:var(--gold)"><div class="team">Approval</div><div class="per">Priya · Wholesaler</div><h5>Approves before it goes out</h5><span class="approve" id="appr">✓ Approve</span><div class="sent" id="sent">Sent to Alex as a PDF</div></div>
+    <div class="abs arrow" id="a1" style="left:415px;top:470px">›</div><div class="abs arrow" id="a2" style="left:775px;top:470px">›</div><div class="abs arrow" id="a3" style="left:1135px;top:470px">›</div><div class="abs arrow" id="a4" style="left:1495px;top:470px">›</div>
+    <div class="abs found" id="found" style="top:760px"><b>Shared AI foundation</b><span class="evt" id="e1">memory.committed</span><span class="evt" id="e2">knowledge.published</span><span class="evt" id="e3">content.drafted</span><span class="evt" id="e4">approval.requested</span></div>
+    <div id="toks"></div>
+    <div class="abs tally" id="tally" style="top:880px"><b>4 handoffs</b> through the foundation &nbsp;·&nbsp; <b>0</b> repeated work &nbsp;·&nbsp; a person approves what goes out</div>
+  </div>
+
+  <!-- 5. same word, different plan -->
+  <div id="etf">
+    <div class="abs ititle serif" id="dtitle" style="left:0;top:120px">Same word. Different plan.</div>
+    <div class="abs isub" id="dsub" style="left:0;top:228px">The intelligence layer reads the business intent, not the keyword.</div>
+    <div class="abs card irow" id="r1" style="top:310px"><div class="ask">“Find <em>ETF</em> leads”</div><div class="intent" style="background:var(--sales)">PRIORITIZE</div><div class="mini"><span class="r" style="--c:var(--sales)">Territory.Health Check</span><span class="s">[taxonomy]</span><span class="a">→</span><span class="r" style="--c:var(--sales)">Lead.Discover</span><span class="a">→</span><span class="r" style="--c:var(--sales)">Lead.Insights</span></div></div>
+    <div class="abs card irow" id="r2" style="top:458px"><div class="ask">“Explain his <em>ETF</em> sales”</div><div class="intent" style="background:var(--compliance)">DIAGNOSE</div><div class="mini"><span class="r" style="--c:var(--sales)">Lead.Insights</span><span class="s">[flows]</span><span class="a">→</span><span class="r" style="--c:var(--sales)">Prep.Fact Check</span><span class="ctl">numbers traced</span></div></div>
+    <div class="abs card irow" id="r3" style="top:606px"><div class="ask">“Is this <em>ETF</em> on his platform?”</div><div class="intent" style="background:var(--product)">VERIFY</div><div class="mini"><span class="r" style="--c:var(--sales)">Prep.Profile</span><span class="a">→</span><span class="r" style="--c:var(--product)">Research Planner</span><span class="s">[platform]</span><span class="a">→</span><span class="r" style="--c:var(--product)">QAR</span></div></div>
+    <div class="abs card irow" id="r4" style="top:754px"><div class="ask">“Send the approved <em>ETF</em> piece”</div><div class="intent" style="background:var(--marketing)">EXECUTE</div><div class="mini"><span class="r" style="--c:var(--sales)">Prep.Content</span><span class="a">→</span><span class="r" style="--c:var(--marketing)">Marketing.Distribution</span><span class="ctl">🔒 approval required</span></div></div>
+  </div>
+
+  <!-- 6. outro -->
+  <div id="outro">
+    <div class="abs card lane" id="l1" style="left:150px;top:170px;--c:var(--sales)"><div class="team">Sales</div><div class="per">Priya · Sam</div><div class="uc serif">Prep, diagnose and verify</div></div>
+    <div class="abs card lane" id="l2" style="left:560px;top:170px;--c:var(--product)"><div class="team">Product</div><div class="per">Dana</div><div class="uc serif">Verified answers advisors can use</div></div>
+    <div class="abs card lane" id="l3" style="left:970px;top:170px;--c:var(--marketing)"><div class="team">Marketing</div><div class="per">Marcus</div><div class="uc serif">Compliant content, approved by a person</div></div>
+    <div class="abs card lane" id="l4" style="left:1380px;top:170px;--c:var(--service)"><div class="team">Service</div><div class="per">Kim</div><div class="uc serif">Cases resolved with evidence</div></div>
+    <div class="abs conn" id="c1" style="left:345px;top:470px;--c:var(--sales)"></div><div class="abs conn" id="c2" style="left:755px;top:470px;--c:var(--product)"></div>
+    <div class="abs conn" id="c3" style="left:1165px;top:470px;--c:var(--marketing)"></div><div class="abs conn" id="c4" style="left:1575px;top:470px;--c:var(--service)"></div>
+    <div class="abs fbar" id="fbar" style="top:570px"><b>Shared AI foundation</b><span>memory</span><span>knowledge</span><span>verification</span><span>events</span><span>graph</span></div>
+    <div class="abs stats" id="stats" style="left:0;top:712px"><b>One foundation</b> &nbsp;·&nbsp; <b>one plan</b> &nbsp;·&nbsp; <b>every number traced</b></div>
+    <div class="abs final serif" id="final" style="left:0;top:790px">Connected Client Experience</div>
+  </div>
+
+  <div class="abs cap" id="cap"><span id="capt"></span></div>
+  <div class="abs prog" id="prog"></div>
+</div>
+<script>
+/* Narration cues (sentence start and end times) and the caption text, injected by build.py */
+const CUES = /*CUES*/null;
+const LINES = /*LINES*/null;
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const eo = x => 1 - Math.pow(1 - x, 3), eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2, back = x => { const c = 1.6; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const lerp = (a, b, x) => a + (b - a) * x;
+const set = (el, o, tx = 0, ty = 0, sc = 1) => { el = typeof el === 'string' ? $(el) : el; el.style.opacity = o; el.style.transform = `translate(${tx}px,${ty}px) scale(${sc})`; el.style.visibility = o <= 0.001 ? 'hidden' : 'visible'; };
+const IN = (t, a, d = 0.6) => eo(seg(t, a, a + d));
+/* a scene is visible from its start to its end, fading in and out */
+const sceneOn = (t, s) => Math.min(eo(seg(t, CUES[s].start, CUES[s].start + 0.6)), 1 - eio(seg(t, CUES[s].end - 0.5, CUES[s].end + 0.1)));
+const L = (s, i) => CUES[s].lines[i][0], LE = (s, i) => CUES[s].lines[i][1];
+
+const REQ = 'Prepare me for tomorrow’s meeting with Daniel’s team';
+/* orchestration wiring */
+const W = $('wires'), NS = 'http://www.w3.org/2000/svg';
+const wireAt = () => [L('orch', 2), L('orch', 2), L('orch', 2), L('orch', 2) + 1.4, L('orch', 3)];
+const wires = [[500, 400, 590, 560], [500, 560, 590, 560], [500, 720, 590, 560], [990, 560, 1080, 560], [1480, 560, 1460, 560]].map(([x1, y1, x2, y2]) => {
+  const p = document.createElementNS(NS, 'path'), mx = (x1 + x2) / 2;
+  p.setAttribute('d', `M${x1} ${y1} C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}`); p.setAttribute('fill', 'none'); p.setAttribute('stroke', '#ffd27a'); p.setAttribute('stroke-width', '3.5'); p.setAttribute('stroke-linecap', 'round');
+  W.appendChild(p); const len = p.getTotalLength(); p.style.strokeDasharray = len; return { p, len };
+});
+const sysPt = { y1: [280, 860], y2: [740, 860], y3: [1200, 860] }, stepPt = { s1: [300, 470], s2: [300, 630], s3: [300, 790], s4: [790, 630], s5: [1280, 630] };
+const flows = [];
+function buildFlows() {
+  const a = L('orch', 1), b = L('orch', 2);
+  [['y1', 's1', a + 0.4], ['y2', 's1', a + 0.9], ['y1', 's2', a + 0.6], ['y2', 's3', a + 1.1], ['y3', 's4', b + 0.3], ['y2', 's5', b + 1.6]].forEach(([s, d, t0]) => { for (let k = 0; k < 6; k++) flows.push({ s, d, t0: t0 + k * 0.32 }); });
+  flows.forEach(f => { const e = document.createElement('div'); e.className = 'abs pt'; $('pts').appendChild(e); f.el = e; });
+}
+/* handoff tokens in the teams scene: down from one station into the foundation, along it, up into the next */
+const hand = [];
+function buildHand() {
+  const xs = [245, 605, 965, 1325, 1685];
+  for (let k = 0; k < 4; k++) { const e = document.createElement('div'); e.className = 'abs tok'; $('toks').appendChild(e); hand.push({ el: e, x1: xs[k], x2: xs[k + 1], t0: L('team', 3 + k) - 0.9 }); }
+}
+function tokPos(h, t) {
+  const p = seg(t, h.t0, h.t0 + 1.5), yTop = 690, yBar = 802;
+  if (p < 0.3) return [h.x1, lerp(yTop, yBar, eio(p / 0.3))];
+  if (p < 0.7) return [lerp(h.x1, h.x2, eio((p - 0.3) / 0.4)), yBar];
+  return [h.x2, lerp(yBar, yTop, eio((p - 0.7) / 0.3))];
+}
+
+function render(t) {
+  $('grid').style.transform = `translate(${-(t * 6) % 64}px,${-(t * 3) % 64}px)`;
+  $('glow').style.left = lerp(-200, 1300, (Math.sin(t * 0.2) + 1) / 2) + 'px'; $('glow').style.top = lerp(-300, 400, (Math.cos(t * 0.15) + 1) / 2) + 'px';
+  $('prog').style.width = (t / CUES.total * 1920) + 'px';
+  set('brand', Math.min(IN(t, CUES.intel.start, 0.6), 1 - eio(seg(t, CUES.outro.start, CUES.outro.start + 0.5))));
+
+  /* captions: the sentence being spoken */
+  let cap = ''; for (const [s, ls] of Object.entries(LINES)) CUES[s].lines.forEach(([a, b], i) => { if (t >= a - 0.1 && t <= b + 0.25) cap = ls[i]; });
+  if ($('capt').textContent !== cap) $('capt').textContent = cap; $('cap').style.opacity = cap ? 1 : 0;
+
+  /* 1. title */
+  set('title', sceneOn(t, 'title'));
+  const st = [[-80, -80], [2000, -60], [-80, 1140], [2000, 1140]];
+  for (let k = 0; k < 4; k++) { const p = eo(seg(t, 0.2 + k * 0.15, 1.6 + k * 0.15)); const el = $('d' + k); el.style.left = lerp(st[k][0], 692 + k * 160, p) + 'px'; el.style.top = lerp(st[k][1], 410, p) + 'px'; el.style.opacity = clamp(p * 2); }
+  const bar = eo(seg(t, 1.4, 2.3)); $('tbar').style.opacity = bar; $('tbar').style.transform = `scaleX(${lerp(0.2, 1, bar)})`;
+  set('ttitle', IN(t, L('title', 0), 0.8), 0, lerp(30, 0, IN(t, L('title', 0), 0.8)));
+  set('tsub', IN(t, L('title', 1), 0.7), 0, lerp(20, 0, IN(t, L('title', 1), 0.7)));
+  for (let k = 0; k < 4; k++) set('tl' + k, IN(t, L('title', 1) + 1.0 + k * 0.45, 0.5), 0, lerp(-12, 0, IN(t, L('title', 1) + 1.0 + k * 0.45, 0.5)));
+
+  /* 2. intelligence */
+  const iOn = sceneOn(t, 'intel'); set('intel', iOn);
+  set('cmd', IN(t, CUES.intel.start, 0.6), 0, lerp(30, 0, IN(t, CUES.intel.start, 0.6)));
+  const ty0 = L('intel', 0) + 2.2, ty1 = LE('intel', 0) - 0.2;
+  $('typed').textContent = REQ.slice(0, Math.round(REQ.length * seg(t, ty0, ty1)));
+  $('caret').style.opacity = t < ty1 + 0.5 ? (Math.floor(t * 3) % 2 ? 1 : 0.2) : 0;
+  $('runb').style.transform = `scale(${1 - 0.08 * Math.sin(seg(t, ty1 + 0.2, ty1 + 0.5) * Math.PI)})`;
+  const ic = IN(t, L('intel', 1), 0.7); set('icard', ic, 0, lerp(40, 0, ic), lerp(.98, 1, ic));
+  const fs = [...$('fields').children], f0 = L('intel', 2), f1 = LE('intel', 2);
+  fs.slice(0, 6).forEach((f, k) => { const a = lerp(f0 - 0.2, f1 - 0.6, k / 5), p = IN(t, a, 0.5); set(f, p, lerp(-24, 0, p)); });
+  const fa = IN(t, L('intel', 3), 0.6); set('fauth', fa, 0, lerp(20, 0, fa)); $('fauth').style.background = `rgba(255,210,122,${0.1 * fa})`; $('fauth').style.boxShadow = `0 0 0 2px rgba(231,181,78,${0.6 * fa})`;
+  const sp = seg(t, L('intel', 3) + 1.4, L('intel', 3) + 1.75); set('stamp', seg(t, L('intel', 3) + 1.4, L('intel', 3) + 1.5), 0, 0, lerp(1.8, 1, clamp(back(sp))));
+
+  /* 3. orchestration */
+  set('orch', sceneOn(t, 'orch'));
+  const o0 = CUES.orch.start, o1 = L('orch', 1), o2 = L('orch', 2), o3 = L('orch', 3);
+  set('strip', IN(t, o0, 0.6)); set('ohead', IN(t, o0 + 0.6, 0.6));
+  set('w1l', IN(t, o1)); set('w2l', IN(t, o2)); set('w3l', IN(t, o2 + 1.4));
+  ['y1', 'y2', 'y3'].forEach((y, k) => set(y, IN(t, o1 + 0.1 + k * 0.15), 0, lerp(30, 0, IN(t, o1 + 0.1 + k * 0.15))));
+  const run = { s1: [o1, o2 - 1.2], s2: [o1, o2 - 1.6], s3: [o1, o2 - 0.8], s4: [o2, o2 + 1.6], s5: [o2 + 1.4, o3 - 0.2] };
+  Object.entries(run).forEach(([id, [a, b]]) => {
+    const el = $(id), p = IN(t, a, 0.5); set(el, p, 0, lerp(24, 0, p), lerp(.96, 1, p));
+    el.querySelector('.bar').style.width = (seg(t, a + 0.3, b) * 100) + '%';
+    let sp2 = el.querySelector('.spin'), ck = el.querySelector('.chk');
+    if (!sp2) { sp2 = document.createElement('div'); sp2.className = 'spin'; el.appendChild(sp2); ck = document.createElement('div'); ck.className = 'chk'; ck.textContent = '✓'; el.appendChild(ck); }
+    const running = t >= a + 0.3 && t < b, done = t >= b;
+    sp2.style.opacity = running ? 1 : 0; sp2.style.transform = `rotate(${t * 400}deg)`;
+    ck.style.opacity = done ? 1 : 0; ck.style.transform = `scale(${done ? back(seg(t, b, b + 0.3)) : 0})`;
+    el.style.boxShadow = running ? `0 0 0 2px rgba(255,210,122,${0.35 + 0.25 * Math.sin(t * 6)}),0 30px 80px rgba(0,0,0,.35)` : '';
+  });
+  const wa = wireAt(); wires.forEach((w, k) => { const p = eio(seg(t, wa[k], wa[k] + 0.6)); w.p.style.strokeDashoffset = w.len * (1 - p); w.p.style.opacity = p > 0 ? 1 : 0; });
+  flows.forEach(f => { const p = seg(t, f.t0, f.t0 + 0.9); const [x1, y1] = sysPt[f.s], [x2, y2] = stepPt[f.d], cx = (x1 + x2) / 2, cy = Math.min(y1, y2) + 40, e = eio(p);
+    f.el.style.left = ((1 - e) * (1 - e) * x1 + 2 * (1 - e) * e * cx + e * e * x2 - 8) + 'px'; f.el.style.top = ((1 - e) * (1 - e) * y1 + 2 * (1 - e) * e * cy + e * e * y2 - 8) + 'px'; f.el.style.opacity = p > 0 && p < 1 ? Math.sin(p * Math.PI) : 0; });
+  const op = IN(t, o3, 0.7); set('out', op, lerp(40, 0, op));
+  [...$('out').querySelectorAll('.ol, .foot')].forEach((r, k) => set(r, IN(t, o3 + 0.4 + k * 0.45, 0.4)));
+
+  /* 4. teams working together */
+  set('team', sceneOn(t, 'team'));
+  set('tk', IN(t, CUES.team.start + 0.2)); set('found', IN(t, L('team', 0) + 0.8, 0.7), 0, lerp(20, 0, IN(t, L('team', 0) + 0.8, 0.7)));
+  set('req', IN(t, L('team', 1), 0.7), 0, lerp(-20, 0, IN(t, L('team', 1), 0.7)));
+  const stA = [L('team', 2), L('team', 3), L('team', 4), L('team', 5), L('team', 5) + 2.6];
+  ['t1', 't2', 't3', 't4', 't5'].forEach((id, k) => { const p = IN(t, stA[k], 0.6); set(id, p, 0, lerp(40, 0, p));
+    const lit = t >= stA[k] && t < (stA[k + 1] || L('team', 6)); $(id).style.boxShadow = lit ? `0 0 0 3px rgba(255,210,122,${0.45 + 0.2 * Math.sin(t * 5)}),0 30px 80px rgba(0,0,0,.35)` : '';
+    [...$(id).querySelectorAll('.li, .src')].forEach((r, j) => set(r, IN(t, stA[k] + 0.5 + j * 0.45, 0.4))); });
+  ['a1', 'a2', 'a3', 'a4'].forEach((a, k) => set(a, IN(t, stA[k + 1] - 0.3, 0.4)));
+  ['e1', 'e2', 'e3', 'e4'].forEach((e, k) => { const a = stA[k + 1] - 0.4, p = IN(t, a, 0.4); set(e, p, 0, 0, lerp(1.25, 1, p)); });
+  hand.forEach(h => { const p = seg(t, h.t0, h.t0 + 1.5), [x, y] = tokPos(h, t); h.el.style.left = (x - 10) + 'px'; h.el.style.top = (y - 10) + 'px'; h.el.style.opacity = p > 0 && p < 1 ? 1 : 0; });
+  const ap = seg(t, stA[4] + 1.2, stA[4] + 1.6); $('appr').style.transform = `scale(${1 - 0.1 * Math.sin(ap * Math.PI)})`; set('sent', IN(t, stA[4] + 1.6, 0.5));
+  set('tally', IN(t, L('team', 6), 0.7), 0, lerp(16, 0, IN(t, L('team', 6), 0.7)));
+
+  /* 5. same word, different plan */
+  set('etf', sceneOn(t, 'etf'));
+  set('dtitle', IN(t, L('etf', 0), 0.7), 0, lerp(24, 0, IN(t, L('etf', 0), 0.7))); set('dsub', IN(t, L('etf', 0) + 0.8, 0.6));
+  const r0 = L('etf', 1), r1 = LE('etf', 1);
+  ['r1', 'r2', 'r3', 'r4'].forEach((r, k) => { const a = lerp(r0, r1 - 1.6, k / 3), p = IN(t, a, 0.5); set(r, p, lerp(-60, 0, p));
+    $(r).querySelector('em').style.setProperty('--u', (seg(t, a + 0.3, a + 0.8) * 100) + '%');
+    const ib = $(r).querySelector('.intent'), q = back(seg(t, a + 0.6, a + 0.95)); ib.style.transform = `scale(${clamp(q, 0, 1.2)})`; ib.style.opacity = seg(t, a + 0.6, a + 0.7);
+    [...$(r).querySelectorAll('.mini > *')].forEach((c, j) => { c.style.opacity = IN(t, L('etf', 2) + j * 0.12, 0.4); }); });
+
+  /* 6. outro */
+  set('outro', IN(t, CUES.outro.start, 0.6));
+  ['l1', 'l2', 'l3', 'l4'].forEach((l, k) => { const p = IN(t, L('outro', 0) + k * 0.5, 0.5); set(l, p, 0, lerp(50, 0, p)); });
+  ['c1', 'c2', 'c3', 'c4'].forEach((c, k) => { const p = eio(seg(t, L('outro', 1) - 0.4 + k * 0.08, L('outro', 1) + 0.1 + k * 0.08)); $(c).style.height = (p * 100) + 'px'; $(c).style.opacity = p > 0 ? 1 : 0; });
+  const fb = IN(t, L('outro', 1), 0.6); set('fbar', fb, 0, 0, lerp(.94, 1, fb)); $('fbar').style.boxShadow = `0 0 ${lerp(0, 70, fb)}px rgba(255,210,122,${0.25 + 0.1 * Math.sin(t * 4)})`;
+  set('stats', IN(t, L('outro', 1) + 0.8, 0.6)); set('final', IN(t, L('outro', 1) + 2.0, 0.7), 0, lerp(16, 0, IN(t, L('outro', 1) + 2.0, 0.7)));
+}
+buildFlows(); buildHand(); window.render = render; render(0);
+if (!/[?&]frames/.test(location.search)) { const a = new Audio('narration.wav'); const go = () => { const t0 = performance.now(); a.currentTime = 0; a.play().catch(() => {}); (function loop(now) { const t = (now - t0) / 1000; render(t % CUES.total); requestAnimationFrame(loop); })(t0); }; document.addEventListener('click', go, { once: true }); }
+</script>
+</body></html>
