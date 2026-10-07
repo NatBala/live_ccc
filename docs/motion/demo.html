@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Sales AI motion demo</title>
+<link rel="stylesheet" href="fonts/local.css">
+<style>
+:root{--bg0:#08131f;--bg1:#0e2135;--bg2:#16375a;--ink:#eaf1f8;--mute:#8fa6bd;--line:#2a4766;--gold:#ffd27a;--gold2:#e7b54e;--sales:#82b6ff;--product:#7fd4ab;--marketing:#f0b870;--service:#b9a5f5;--violet:#cfc3ff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg0)}
+body{font-family:'Schibsted Grotesk',sans-serif;color:var(--ink)}
+.stage{position:absolute;inset:0;overflow:hidden;background:radial-gradient(1200px 700px at 30% 20%,#173a5e 0,transparent 60%),radial-gradient(900px 700px at 85% 90%,#1b2f55 0,transparent 60%),linear-gradient(160deg,var(--bg1),var(--bg0))}
+.grid{position:absolute;inset:-100px;background-image:linear-gradient(rgba(130,182,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(130,182,255,.06) 1px,transparent 1px);background-size:64px 64px}
+.glow{position:absolute;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(255,210,122,.16),transparent 65%);filter:blur(10px)}
+.abs{position:absolute}
+.serif{font-family:'Newsreader',serif}
+.brand{left:56px;top:40px;display:flex;align-items:center;gap:14px;font-weight:700;font-size:24px;letter-spacing:.01em}
+.brand .dots{display:flex;gap:6px}.brand .dots i{width:12px;height:12px;border-radius:50%}
+.brand small{font-weight:500;color:var(--mute);font-size:20px;margin-left:6px}
+.prog{left:0;bottom:0;height:5px;background:linear-gradient(90deg,var(--gold2),var(--gold))}
+.kicker{font-size:22px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+/* title */
+.tdot{width:46px;height:46px;border-radius:50%;box-shadow:0 0 40px currentColor}
+.tbar{width:520px;height:30px;border-radius:12px;background:linear-gradient(90deg,var(--gold2),var(--gold));box-shadow:0 0 60px rgba(255,210,122,.45)}
+.ttitle{width:1920px;text-align:center;font-size:104px;font-weight:500;letter-spacing:-.01em}
+.tsub{width:1920px;text-align:center;font-size:36px;color:var(--mute)}
+/* cards */
+.card{background:linear-gradient(180deg,rgba(23,48,76,.92),rgba(14,33,53,.92));border:1px solid var(--line);border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.35)}
+.cmd{left:300px;top:150px;width:1320px;height:118px;padding:0 34px;display:flex;align-items:center;gap:22px}
+.who{display:flex;align-items:center;gap:12px;padding:10px 18px;border-radius:99px;background:rgba(130,182,255,.14);border:1px solid rgba(130,182,255,.5);font-size:24px;font-weight:700;white-space:nowrap}
+.who i{width:38px;height:38px;border-radius:50%;background:var(--sales);color:#0e2135;font-style:normal;font-size:16px;font-weight:800;display:grid;place-items:center}
+.who small{color:var(--mute);font-weight:500;font-size:20px}
+.typed{font-size:38px;font-weight:500;white-space:nowrap}
+.caret{display:inline-block;width:3px;height:40px;background:var(--gold);vertical-align:-6px;margin-left:4px}
+.runb{margin-left:auto;padding:14px 28px;border-radius:14px;background:var(--gold);color:#1a2a3a;font-weight:800;font-size:24px}
+.intel{left:300px;top:310px;width:1320px;height:600px;padding:34px 44px;border-left:5px solid #8f7ae0}
+.intel h3{display:flex;align-items:center;gap:16px}
+.tag{font-size:16px;font-weight:800;padding:3px 10px;border-radius:7px;background:#2c2550;color:var(--violet);letter-spacing:.06em}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:16px 56px;margin-top:28px}
+.f{display:grid;grid-template-columns:230px 1fr;align-items:baseline;gap:18px;padding:14px 0;border-top:1px solid var(--line)}
+.f dt{font-size:22px;color:var(--mute);font-weight:700}
+.f dd{font-size:28px;font-weight:600}
+.f dd small{display:block;font-size:20px;color:var(--mute);font-weight:500;margin-top:2px}
+.ib{display:inline-block;font-size:22px;font-weight:800;letter-spacing:.06em;padding:4px 12px;border-radius:8px;background:#2c2550;color:var(--violet)}
+.lock{display:inline-flex;align-items:center;gap:10px;font-size:24px;font-weight:800;padding:6px 14px;border-radius:9px;background:rgba(255,210,122,.14);color:var(--gold);border:1.5px solid var(--gold2)}
+.stamp{font-size:16px;font-weight:800;letter-spacing:.1em;color:#9fe3c2;border:2px solid #4fb487;border-radius:8px;padding:4px 10px;transform:rotate(-6deg)}
+.strip{left:300px;top:118px;width:1320px;height:64px;padding:0 26px;display:flex;align-items:center;gap:18px;font-size:23px;border-radius:16px;white-space:nowrap}
+.strip b{font-weight:700}.strip .sep{color:var(--line)}
+/* orchestration */
+.ohead{left:120px;top:212px;display:flex;align-items:baseline;gap:22px}
+.ohead .big{font-size:40px;font-weight:700}
+.wlab{font-size:20px;font-weight:800;letter-spacing:.12em;color:var(--gold);text-transform:uppercase}
+.wlab small{color:var(--mute);letter-spacing:.02em;text-transform:none;font-weight:600;margin-left:10px}
+.step{width:380px;height:128px;padding:16px 20px;border-radius:18px}
+.route{display:inline-block;font-size:20px;font-weight:800;padding:3px 12px;border-radius:8px;border:2px solid var(--c);background:color-mix(in srgb,var(--c) 22%,transparent)}
+.stitle{font-size:26px;font-weight:700;margin-top:8px}
+.svc{display:flex;gap:8px;margin-top:8px}
+.svc span{font-family:'DejaVu Sans Mono',monospace;font-size:15px;padding:2px 8px;border-radius:6px;background:#143a2a;color:#9fe3c2;border:1px solid #2f6b4f}
+.bar{position:absolute;left:0;bottom:0;height:5px;border-radius:0 0 18px 18px;background:var(--c)}
+.chk{position:absolute;right:18px;top:16px;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:22px;font-weight:900;background:#1f6b48;color:#d9fbe9}
+.spin{position:absolute;right:20px;top:18px;width:32px;height:32px;border-radius:50%;border:4px solid rgba(255,210,122,.25);border-top-color:var(--gold)}
+.sys{width:340px;height:86px;padding:0 22px;display:flex;align-items:center;gap:16px;border-radius:18px;font-size:24px;font-weight:700}
+.sys small{display:block;font-size:17px;color:var(--mute);font-weight:500}
+.sys .ic{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:rgba(130,182,255,.15);font-size:24px}
+.pt{width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 18px var(--gold),0 0 4px #fff}
+.out{width:380px;height:470px;padding:26px 26px;border-left:5px solid var(--gold)}
+.out h4{font-size:30px;font-weight:700;line-height:1.15}
+.ol{display:grid;grid-template-columns:34px 1fr;gap:10px;font-size:20px;line-height:1.3;padding:11px 0;border-top:1px solid var(--line)}
+.ol i{font-style:normal;width:30px;height:30px;border-radius:8px;background:rgba(255,210,122,.18);color:var(--gold);font-weight:800;display:grid;place-items:center;font-size:17px}
+.foot{font-size:18px;color:#9fe3c2;font-weight:700;margin-top:12px}
+/* intents */
+.ititle{width:1920px;text-align:center;font-size:76px;font-weight:500}
+.isub{width:1920px;text-align:center;font-size:30px;color:var(--mute)}
+.irow{left:160px;width:1600px;height:120px;padding:0 30px;display:grid;grid-template-columns:510px 210px 1fr;align-items:center;gap:26px;border-radius:20px}
+.ask{font-size:32px;font-weight:600;white-space:nowrap}
+.ask em{font-style:normal;color:var(--gold);background:linear-gradient(var(--gold),var(--gold)) no-repeat 0 100%/var(--u,0%) 3px;padding-bottom:4px}
+.intent{font-size:26px;font-weight:800;letter-spacing:.08em;padding:8px 0;border-radius:12px;text-align:center;color:#0e2135}
+.mini{display:flex;align-items:center;gap:7px;flex-wrap:nowrap;font-size:17px;white-space:nowrap}
+.mini .r{font-weight:800;padding:3px 10px;border-radius:7px;border:2px solid var(--c);background:color-mix(in srgb,var(--c) 20%,transparent)}
+.mini .s{font-family:'DejaVu Sans Mono',monospace;font-size:15px;padding:2px 7px;border-radius:6px;background:#143a2a;color:#9fe3c2;border:1px solid #2f6b4f}
+.mini .a{color:var(--mute)}
+.mini .ctl{margin-left:6px;color:var(--gold);font-weight:700}
+/* outro */
+.lane{width:380px;height:300px;padding:28px;border-radius:22px;border-top:6px solid var(--c)}
+.lane .team{font-size:22px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
+.lane .per{font-size:24px;color:var(--mute);margin-top:6px}
+.lane .uc{font-size:34px;line-height:1.2;margin-top:18px}
+.fbar{left:200px;width:1520px;height:96px;border-radius:22px;background:linear-gradient(90deg,rgba(231,181,78,.22),rgba(255,210,122,.32));border:2px solid var(--gold2);display:flex;align-items:center;justify-content:center;gap:28px;font-size:26px;font-weight:600}
+.fbar b{color:var(--gold);font-weight:800}
+.conn{width:3px;background:linear-gradient(var(--c),var(--gold))}
+.stats{width:1920px;text-align:center;font-size:30px;color:var(--mute)}
+.stats b{color:var(--ink)}
+.final{width:1920px;text-align:center;font-size:64px;font-weight:500}
+</style></head>
+<body><div class="stage" id="stage">
+  <div class="grid" id="grid"></div>
+  <div class="glow" id="glow"></div>
+
+  <!-- persistent brand + progress -->
+  <div class="abs brand" id="brand"><span class="dots"><i style="background:var(--sales)"></i><i style="background:var(--product)"></i><i style="background:var(--marketing)"></i><i style="background:var(--service)"></i></span>Connected Client Experience<small>Sales AI</small></div>
+  <div class="abs prog" id="prog"></div>
+
+  <!-- A. title -->
+  <div id="A">
+    <div class="abs tdot" id="d0" style="background:var(--sales);color:var(--sales)"></div>
+    <div class="abs tdot" id="d1" style="background:var(--product);color:var(--product)"></div>
+    <div class="abs tdot" id="d2" style="background:var(--marketing);color:var(--marketing)"></div>
+    <div class="abs tdot" id="d3" style="background:var(--service);color:var(--service)"></div>
+    <div class="abs tbar" id="tbar" style="left:700px;top:520px"></div>
+    <div class="abs ttitle serif" id="ttitle" style="left:0;top:600px">Connected Client Experience</div>
+    <div class="abs tsub" id="tsub" style="left:0;top:740px">Specialist agents. One shared AI foundation. One plan.</div>
+  </div>
+
+  <!-- B. request + intelligence -->
+  <div id="B">
+    <div class="abs card cmd" id="cmd"><span class="who"><i>PS</i>Priya Shah <small>Sales</small></span><span class="typed" id="typed"></span><span class="caret" id="caret"></span><span class="runb" id="runb">Run</span></div>
+    <div class="abs card intel" id="intel">
+      <h3><span class="kicker">Intelligence</span><span style="font-size:30px;font-weight:600" class="serif">What Priya actually wants</span><span class="tag">AI</span></h3>
+      <dl class="fields" id="fields">
+        <div class="f"><dt>Subject</dt><dd>Daniel Kim<small>Kim Group model portfolios · Wells Fargo</small></dd></div>
+        <div class="f"><dt>Business intent</dt><dd><span class="ib">PREPARE</span></dd></div>
+        <div class="f"><dt>Scope</dt><dd>Wealth · model portfolios</dd></div>
+        <div class="f"><dt>Time</dt><dd>Tomorrow<small>changes since the Sep 18 call</small></dd></div>
+        <div class="f"><dt>Constraints</dt><dd>Approved content only</dd></div>
+        <div class="f"><dt>Requested output</dt><dd>Agenda</dd></div>
+        <div class="f"><dt>Missing</dt><dd>Meeting length<small>assume 30 minutes</small></dd></div>
+        <div class="f"><dt>Action authority</dt><dd style="display:flex;align-items:center;gap:16px"><span class="lock">🔒 Read-only</span><span class="stamp" id="stamp">BY RULE</span></dd></div>
+      </dl>
+    </div>
+  </div>
+
+  <!-- C. orchestration -->
+  <div id="C">
+    <div class="abs card strip" id="strip"><span class="ib" style="font-size:18px">PREPARE</span><b>Daniel Kim · Kim Group</b><span class="sep">|</span>Agenda<span class="sep">|</span><span style="color:var(--gold);font-weight:700">🔒 Read-only</span><span style="margin-left:auto;color:var(--mute)">Priya Shah · Sales</span></div>
+    <div class="abs ohead" id="ohead"><span class="kicker">Orchestration</span><span class="big">5 steps in 3 waves</span></div>
+    <div class="abs wlab" id="w1l" style="left:120px;top:290px">Wave 1<small>3 steps run together</small></div>
+    <div class="abs wlab" id="w2l" style="left:590px;top:290px">Wave 2</div>
+    <div class="abs wlab" id="w3l" style="left:1060px;top:290px">Wave 3</div>
+    <svg class="abs" id="wires" width="1920" height="1080" style="left:0;top:0;overflow:visible"></svg>
+    <div class="abs card step" id="s1" style="left:120px;top:330px;--c:var(--sales)"><span class="route">Prep.Profile</span><div class="stitle">Profile, book &amp; pipeline</div><div class="svc"><span>[assets]</span><span>[pipeline]</span></div><div class="bar"></div></div>
+    <div class="abs card step" id="s2" style="left:120px;top:480px;--c:var(--sales)"><span class="route">Prep.Notes</span><div class="stitle">What Daniel told us</div><div class="svc"><span>[call notes]</span></div><div class="bar"></div></div>
+    <div class="abs card step" id="s3" style="left:120px;top:630px;--c:var(--sales)"><span class="route">Lead.Insights</span><div class="stitle">What changed in his flows</div><div class="svc"><span>[flows]</span><span>[change history]</span></div><div class="bar"></div></div>
+    <div class="abs card step" id="s4" style="left:590px;top:480px;--c:var(--sales)"><span class="route">Prep.Content</span><div class="stitle">Pick approved content</div><div class="svc"><span>[approved search]</span></div><div class="bar"></div></div>
+    <div class="abs card step" id="s5" style="left:1060px;top:480px;--c:var(--sales)"><span class="route">Prep.Agenda</span><div class="stitle">Build the agenda</div><div class="svc"><span>[task state]</span></div><div class="bar"></div></div>
+    <div class="abs card sys" id="y1" style="left:120px;top:860px"><span class="ic">👥</span><span>Salesforce<small>CRM · calls · pipeline</small></span></div>
+    <div class="abs card sys" id="y2" style="left:560px;top:860px"><span class="ic">📈</span><span>Data &amp; model platform<small>book · flows · change history</small></span></div>
+    <div class="abs card sys" id="y3" style="left:1000px;top:860px"><span class="ic">📘</span><span>Seismic<small>approved content</small></span></div>
+    <div id="pts"></div>
+    <div class="abs card out" id="out" style="left:1510px;top:330px">
+      <div class="kicker" style="font-size:18px">Returns</div>
+      <h4 class="serif" style="margin:8px 0 14px">Agenda · Kim Group, Wed Sep 30</h4>
+      <div class="ol"><i>1</i><span>ETFs now <b>17.8%</b> of his book, up from 9.3%</span></div>
+      <div class="ol"><i>2</i><span>Where active still adds value in core-satellite</span></div>
+      <div class="ol"><i>3</i><span>ETF options his clients ask about</span></div>
+      <div class="ol"><i>4</i><span>Agree which satellites he reviews this quarter</span></div>
+      <div class="foot">✓ Nothing booked or sent · every number traced</div>
+    </div>
+  </div>
+
+  <!-- D. same word, different intent -->
+  <div id="D">
+    <div class="abs ititle serif" id="dtitle" style="left:0;top:150px">Same word. Different plan.</div>
+    <div class="abs isub" id="dsub" style="left:0;top:252px">The intelligence layer reads the business intent, not the keyword.</div>
+    <div class="abs card irow" id="r1" style="top:340px"><div class="ask">“Find <em>ETF</em> leads”</div><div class="intent" style="background:var(--sales)">PRIORITIZE</div><div class="mini"><span class="r" style="--c:var(--sales)">Territory.Health Check</span><span class="s">[taxonomy]</span><span class="a">→</span><span class="r" style="--c:var(--sales)">Lead.Discover</span><span class="a">→</span><span class="r" style="--c:var(--sales)">Lead.Insights</span></div></div>
+    <div class="abs card irow" id="r2" style="top:484px"><div class="ask">“Explain his <em>ETF</em> sales”</div><div class="intent" style="background:#ff9f8a">DIAGNOSE</div><div class="mini"><span class="r" style="--c:var(--sales)">Lead.Insights</span><span class="s">[flows]</span><span class="a">→</span><span class="r" style="--c:var(--sales)">Prep.Fact Check</span><span class="ctl">numbers traced</span></div></div>
+    <div class="abs card irow" id="r3" style="top:628px"><div class="ask">“Is this <em>ETF</em> on his platform?”</div><div class="intent" style="background:var(--product)">VERIFY</div><div class="mini"><span class="r" style="--c:var(--sales)">Prep.Profile</span><span class="a">→</span><span class="r" style="--c:var(--product)">Research Planner</span><span class="s">[platform]</span><span class="a">→</span><span class="r" style="--c:var(--product)">QAR</span></div></div>
+    <div class="abs card irow" id="r4" style="top:772px"><div class="ask">“Send the approved <em>ETF</em> piece”</div><div class="intent" style="background:var(--marketing)">EXECUTE</div><div class="mini"><span class="r" style="--c:var(--sales)">Prep.Content</span><span class="a">→</span><span class="r" style="--c:var(--marketing)">Marketing.Distribution</span><span class="ctl">🔒 approval required</span></div></div>
+  </div>
+
+  <!-- E. outro -->
+  <div id="E">
+    <div class="abs card lane" id="l1" style="left:200px;top:200px;--c:var(--sales)"><div class="team">Sales</div><div class="per">Priya · Sam</div><div class="uc serif">Prep, diagnose and verify, with every number traced</div></div>
+    <div class="abs card lane" id="l2" style="left:580px;top:200px;--c:var(--product)"><div class="team">Product</div><div class="per">Dana</div><div class="uc serif">Verified answers advisors can use</div></div>
+    <div class="abs card lane" id="l3" style="left:960px;top:200px;--c:var(--marketing)"><div class="team">Marketing</div><div class="per">Marcus</div><div class="uc serif">Compliant posts and emails, approved by a person</div></div>
+    <div class="abs card lane" id="l4" style="left:1340px;top:200px;--c:var(--service)"><div class="team">Service</div><div class="per">Kim</div><div class="uc serif">Cases resolved with evidence</div></div>
+    <div class="abs conn" id="c1" style="left:390px;top:500px;--c:var(--sales)"></div>
+    <div class="abs conn" id="c2" style="left:770px;top:500px;--c:var(--product)"></div>
+    <div class="abs conn" id="c3" style="left:1150px;top:500px;--c:var(--marketing)"></div>
+    <div class="abs conn" id="c4" style="left:1530px;top:500px;--c:var(--service)"></div>
+    <div class="abs fbar" id="fbar" style="top:600px"><b>Shared AI foundation</b><span>memory</span><span>knowledge</span><span>verification</span><span>events</span><span>graph</span></div>
+    <div class="abs stats" id="stats" style="left:0;top:740px"><b>58</b> catalogued requests &nbsp;·&nbsp; <b>11</b> business intents &nbsp;·&nbsp; plans in parallel waves &nbsp;·&nbsp; <b>every number traced</b></div>
+    <div class="abs final serif" id="final" style="left:0;top:830px">Connected Client Experience</div>
+  </div>
+</div>
+<script>
+/* Deterministic timeline: render(t) sets every element from the time alone, so each video frame is exact. */
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const eo = x => 1 - Math.pow(1 - x, 3), eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2, back = x => { const c = 1.6; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const lerp = (a, b, x) => a + (b - a) * x;
+const set = (el, o, tx = 0, ty = 0, sc = 1) => { el = typeof el === 'string' ? $(el) : el; el.style.opacity = o; el.style.transform = `translate(${tx}px,${ty}px) scale(${sc})`; el.style.visibility = o <= 0.001 ? 'hidden' : 'visible'; };
+/* scene window: fade in over [a, a+i], hold, fade out over [b-o, b] */
+const win = (t, a, b, i = .4, o = .4) => Math.min(eo(seg(t, a, a + i)), 1 - eio(seg(t, b - o, b)));
+
+const REQ = 'Prepare me for tomorrow’s meeting with Daniel’s team';
+/* connectors between waves: [x1, y1, x2, y2, draw at] */
+const W = $('wires'), NS = 'http://www.w3.org/2000/svg';
+const wires = [[500, 394, 590, 544, 7.35], [500, 544, 590, 544, 7.35], [500, 694, 590, 544, 7.35], [970, 544, 1060, 544, 8.2], [1440, 544, 1510, 544, 9.0]].map(([x1, y1, x2, y2, at]) => {
+  const p = document.createElementNS(NS, 'path'), mx = (x1 + x2) / 2;
+  p.setAttribute('d', `M${x1} ${y1} C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}`); p.setAttribute('fill', 'none'); p.setAttribute('stroke', '#ffd27a'); p.setAttribute('stroke-width', '3'); p.setAttribute('stroke-linecap', 'round');
+  W.appendChild(p); const L = p.getTotalLength(); p.style.strokeDasharray = L; return { p, L, at };
+});
+
+/* data particles: [from system, to step, start time] */
+const sysPt = { y1: [290, 860], y2: [730, 860], y3: [1170, 860] }, stepPt = { s1: [310, 458], s2: [310, 608], s3: [310, 758], s4: [780, 608], s5: [1250, 608] };
+const flows = [];
+[['y1', 's1', 6.15], ['y2', 's1', 6.3], ['y1', 's2', 6.2], ['y2', 's3', 6.25], ['y3', 's4', 7.65], ['y2', 's5', 8.4]].forEach(([s, d, t0]) => { for (let k = 0; k < 5; k++) flows.push({ s, d, t0: t0 + k * 0.17 }); });
+flows.forEach(f => { const e = document.createElement('div'); e.className = 'abs pt'; $('pts').appendChild(e); f.el = e; });
+
+function render(t) {
+  /* background drift */
+  $('grid').style.transform = `translate(${-(t * 6) % 64}px,${-(t * 3) % 64}px)`;
+  $('glow').style.left = (lerp(-200, 1300, (Math.sin(t * 0.35) + 1) / 2)) + 'px'; $('glow').style.top = (lerp(-300, 400, (Math.cos(t * 0.27) + 1) / 2)) + 'px';
+  $('prog').style.width = (t / 15 * 1920) + 'px';
+  set('brand', eo(seg(t, 2.2, 2.7)) * (1 - eio(seg(t, 14.0, 14.5))));
+
+  /* A. title: four team dots dock on the foundation bar, then the name */
+  const A = 1 - eio(seg(t, 2.0, 2.4)); set('A', A, 0, 0, lerp(1, 1.04, seg(t, 2.0, 2.4)));
+  const starts = [[-80, -80], [2000, -60], [-80, 1140], [2000, 1140]];
+  for (let k = 0; k < 4; k++) { const p = eo(seg(t, 0.05 + k * 0.08, 0.95 + k * 0.08)), tx = 790 + k * 100, ty = 450; const el = $('d' + k); el.style.left = lerp(starts[k][0], tx, p) + 'px'; el.style.top = lerp(starts[k][1], ty, p) + 'px'; el.style.opacity = clamp(p * 2); }
+  const bar = eo(seg(t, 0.6, 1.2)); $('tbar').style.opacity = bar; $('tbar').style.transform = `scaleX(${lerp(0.2, 1, bar)})`;
+  set('ttitle', eo(seg(t, 0.95, 1.5)), 0, lerp(30, 0, eo(seg(t, 0.95, 1.5))));
+  set('tsub', eo(seg(t, 1.25, 1.8)), 0, lerp(24, 0, eo(seg(t, 1.25, 1.8))));
+
+  /* B. the request types itself, then the interpretation fills in */
+  const bIn = eo(seg(t, 2.2, 2.6)), bOut = eio(seg(t, 5.45, 5.85));
+  set('B', bIn * (1 - bOut));
+  set('cmd', bIn, 0, lerp(30, 0, bIn) + lerp(0, -40, bOut));
+  const n = Math.round(REQ.length * seg(t, 2.55, 3.55)); $('typed').textContent = REQ.slice(0, n);
+  $('caret').style.opacity = t < 3.7 ? (Math.floor(t * 4) % 2 ? 1 : 0.2) : 0;
+  const press = seg(t, 3.6, 3.8); $('runb').style.transform = `scale(${1 - 0.08 * Math.sin(press * Math.PI)})`;
+  const ip = eo(seg(t, 3.75, 4.15)); set('intel', ip, 0, lerp(40, 0, ip) + lerp(0, -30, bOut), lerp(.98, 1, ip));
+  [...$('fields').children].forEach((f, k) => { const p = eo(seg(t, 3.95 + k * 0.13, 4.35 + k * 0.13)); set(f, p, lerp(-24, 0, p)); });
+  const sp = back(seg(t, 5.05, 5.3)); set('stamp', seg(t, 5.05, 5.12), 0, 0, lerp(1.8, 1, clamp(sp)));
+
+  /* C. orchestration in waves */
+  const cOn = win(t, 5.7, 9.95, 0.45, 0.4); set('C', cOn);
+  set('strip', eo(seg(t, 5.7, 6.1)), 0, lerp(-20, 0, eo(seg(t, 5.7, 6.1))));
+  set('ohead', eo(seg(t, 5.8, 6.2)));
+  set('w1l', eo(seg(t, 5.9, 6.2))); set('w2l', eo(seg(t, 7.35, 7.6))); set('w3l', eo(seg(t, 8.25, 8.5)));
+  ['y1', 'y2', 'y3'].forEach((y, k) => set(y, eo(seg(t, 5.85 + k * 0.08, 6.25 + k * 0.08)), 0, lerp(30, 0, eo(seg(t, 5.85 + k * 0.08, 6.25 + k * 0.08)))));
+  const run = { s1: [6.0, 7.2], s2: [6.0, 7.05], s3: [6.0, 7.3], s4: [7.45, 8.15], s5: [8.3, 9.0] };
+  Object.entries(run).forEach(([id, [a, b]]) => {
+    const el = $(id), p = eo(seg(t, a - 0.05, a + 0.3)); set(el, p, 0, lerp(24, 0, p), lerp(.96, 1, p));
+    el.querySelector('.bar').style.width = (seg(t, a + 0.15, b) * 100) + '%';
+    let st = el.querySelector('.spin'), ck = el.querySelector('.chk');
+    if (!st) { st = document.createElement('div'); st.className = 'spin'; el.appendChild(st); ck = document.createElement('div'); ck.className = 'chk'; ck.textContent = '✓'; el.appendChild(ck); }
+    const running = t >= a + 0.15 && t < b, done = t >= b;
+    st.style.opacity = running ? 1 : 0; st.style.transform = `rotate(${t * 540}deg)`;
+    ck.style.opacity = done ? 1 : 0; ck.style.transform = `scale(${done ? back(seg(t, b, b + 0.25)) : 0})`;
+    el.style.boxShadow = running ? `0 0 0 2px rgba(255,210,122,${0.35 + 0.25 * Math.sin(t * 10)}),0 30px 80px rgba(0,0,0,.35)` : '';
+  });
+  wires.forEach(w => { const p = eio(seg(t, w.at, w.at + 0.35)); w.p.style.strokeDashoffset = w.L * (1 - p); w.p.style.opacity = p > 0 ? 1 : 0; });
+  flows.forEach(f => { const p = seg(t, f.t0, f.t0 + 0.55); const [x1, y1] = sysPt[f.s], [x2, y2] = stepPt[f.d], cx = (x1 + x2) / 2, cy = Math.min(y1, y2) + 40;
+    const e = eio(p), x = (1 - e) * (1 - e) * x1 + 2 * (1 - e) * e * cx + e * e * x2, y = (1 - e) * (1 - e) * y1 + 2 * (1 - e) * e * cy + e * e * y2;
+    f.el.style.left = (x - 7) + 'px'; f.el.style.top = (y - 7) + 'px'; f.el.style.opacity = p > 0 && p < 1 ? Math.sin(p * Math.PI) : 0; });
+  const op = eo(seg(t, 9.0, 9.4)); set('out', op, lerp(40, 0, op));
+  [...$('out').querySelectorAll('.ol, .foot')].forEach((r, k) => set(r, eo(seg(t, 9.1 + k * 0.1, 9.35 + k * 0.1))));
+
+  /* D. same word, different intent */
+  const dOn = win(t, 9.95, 12.95, 0.35, 0.35); set('D', dOn);
+  set('dtitle', eo(seg(t, 9.95, 10.35)), 0, lerp(24, 0, eo(seg(t, 9.95, 10.35))));
+  set('dsub', eo(seg(t, 10.15, 10.5)));
+  ['r1', 'r2', 'r3', 'r4'].forEach((r, k) => { const a = 10.35 + k * 0.42, p = eo(seg(t, a, a + 0.35)); set(r, p, lerp(-60, 0, p));
+    $(r).querySelector('em').style.setProperty('--u', (seg(t, a + 0.2, a + 0.5) * 100) + '%');
+    const ib = $(r).querySelector('.intent'), q = back(seg(t, a + 0.25, a + 0.5)); ib.style.transform = `scale(${clamp(q, 0, 1.2)})`; ib.style.opacity = seg(t, a + 0.25, a + 0.32);
+    [...$(r).querySelectorAll('.mini > *')].forEach((c, j) => { c.style.opacity = eo(seg(t, a + 0.35 + j * 0.05, a + 0.5 + j * 0.05)); }); });
+
+  /* E. outro: four teams, one shared foundation */
+  const eOn = eo(seg(t, 12.95, 13.3)); set('E', eOn);
+  ['l1', 'l2', 'l3', 'l4'].forEach((l, k) => { const p = eo(seg(t, 13.0 + k * 0.1, 13.4 + k * 0.1)); set(l, p, 0, lerp(50, 0, p)); });
+  ['c1', 'c2', 'c3', 'c4'].forEach((c, k) => { const p = eio(seg(t, 13.45 + k * 0.05, 13.75 + k * 0.05)); $(c).style.height = (p * 100) + 'px'; $(c).style.opacity = p > 0 ? 1 : 0; });
+  const fb = eo(seg(t, 13.55, 13.9)); set('fbar', fb, 0, 0, lerp(.94, 1, fb)); $('fbar').style.boxShadow = `0 0 ${lerp(0, 70, fb)}px rgba(255,210,122,${0.25 + 0.1 * Math.sin(t * 6)})`;
+  set('stats', eo(seg(t, 13.9, 14.25)), 0, lerp(16, 0, eo(seg(t, 13.9, 14.25))));
+  set('final', eo(seg(t, 14.2, 14.6)), 0, lerp(16, 0, eo(seg(t, 14.2, 14.6))));
+}
+window.render = render;
+render(0);
+/* preview in a browser: play in real time and loop */
+if (!/[?&]frames/.test(location.search)) { const t0 = performance.now(); (function loop(now) { render(((now - t0) / 1000) % 15); requestAnimationFrame(loop); })(t0); }
+</script>
+</body></html>
