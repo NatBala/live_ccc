@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Agent Harness · Connected Client Experience</title>
 <style>:root{--bg:#f3f5f9;--panel:#fff;--ink:#121c2b;--ink2:#46556a;--mut:#7d8a9c;--line:#e2e7ef;--line2:#eef1f6;--acc:#c8501e;--acc2:#fff1e8;--ok:#0f8a5f;--okbg:#e6f6ee;--warn:#a35a00;--warnbg:#fff3df;--dn:#c2410c;--blue:#2563eb;--bluebg:#e8f0ff;--sh:0 1px 2px rgba(16,24,40,.06),0 6px 20px rgba(16,24,40,.06);--r:14px;
-  --sans:Inter,ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--serif:Georgia,"Times New Roman",serif;--navy:#0f1d33}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d131c;--panel:#151d29;--ink:#e8edf4;--ink2:#b3bfcd;--mut:#8592a3;--line:#253042;--line2:#1b2431;--acc:#ff8a4c;--acc2:#2a1b12;--ok:#3ccf91;--okbg:#0f281e;--warn:#ffb54a;--warnbg:#2b2111;--dn:#ff8a5c;--blue:#7aa7ff;--bluebg:#16233d;--sh:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3)}}
+  --sans:Inter,ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--serif:Georgia,"Times New Roman",serif;--navy:#1e3a5f}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:14px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
 button{font:inherit;cursor:pointer;color:inherit}
@@ -37,7 +36,7 @@ button{font:inherit;cursor:pointer;color:inherit}
 body.benched .stage{grid-template-columns:360px minmax(0,1fr) 560px}
 .orch{background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;padding:16px}
 .oh{display:flex;align-items:center;gap:10px;margin-bottom:12px}.oh b{font-size:15px}.oh small{display:block;color:var(--mut);font-size:12px}
-.obadge{width:34px;height:34px;border-radius:10px;background:var(--navy);color:#ffd27a;display:grid;place-items:center;flex:none}
+.obadge{width:34px;height:34px;border-radius:10px;background:var(--acc2);color:var(--acc);display:grid;place-items:center;flex:none}
 .obadge.pulse{animation:glow 1.2s ease-in-out infinite}@keyframes glow{50%{box-shadow:0 0 0 6px rgba(255,210,122,.35)}}
 .olead{color:var(--ink2);font-size:13.5px;margin:0 0 14px}
 .olbl{display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin:0 0 7px}
@@ -87,7 +86,7 @@ body.benched .stage{grid-template-columns:360px minmax(0,1fr) 560px}
 .pcard.landed{animation:land .6s ease}@keyframes land{30%{transform:scale(1.06)}}
 .av{position:relative;display:block}
 .ring{position:absolute;inset:-5px;border-radius:50%;border:3px solid var(--acc);border-right-color:transparent;animation:spin 1s linear infinite}
-.cnt{position:absolute;top:-4px;right:-6px;min-width:20px;height:20px;border-radius:99px;background:var(--navy);color:#ffd27a;font:800 11px/20px var(--sans);padding:0 5px;box-shadow:0 0 0 2px var(--panel)}
+.cnt{position:absolute;top:-4px;right:-6px;min-width:20px;height:20px;border-radius:99px;background:var(--acc);color:#fff;font:800 11px/20px var(--sans);padding:0 5px;box-shadow:0 0 0 2px var(--panel)}
 .pn{display:flex;flex-direction:column}.pn b{font-size:13.5px}.pn b em{font-style:normal;font-size:10px;font-weight:700;color:var(--acc);background:var(--acc2);border-radius:99px;padding:0 5px;vertical-align:1px}.pn small{color:var(--mut);font-size:11.5px}
 .pdo{font-size:11px;color:var(--mut);line-height:1.3}
 .pst{font-size:11px;font-weight:800;border-radius:99px;padding:2px 9px}
@@ -109,7 +108,7 @@ body.benched .stage{grid-template-columns:360px minmax(0,1fr) 560px}
 .card{border:1px solid var(--line);border-radius:12px;padding:11px 13px}
 .card h3{margin:0 0 4px;font-size:15.5px}.card p{margin:0 0 4px;font-size:13px;color:var(--ink2)}.why{background:var(--line2);border-radius:8px;padding:6px 9px}
 .agentrow{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-bottom:5px}
-.agentb{font-weight:800;font-size:13px;background:var(--navy);color:#ffd27a;border-radius:8px;padding:3px 9px}
+.agentb{font-weight:800;font-size:13px;background:var(--bluebg);color:var(--blue);border-radius:8px;padding:3px 9px}
 .route{font:700 11px var(--mono);color:var(--acc);background:var(--acc2);border-radius:6px;padding:2px 6px}.svc{font:500 11px var(--mono);color:var(--mut)}
 .dep{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12.5px}.dep span{flex:1;display:flex;flex-direction:column}.dep small{color:var(--mut)}
 .ctxsum{font-size:12.5px;color:var(--ink2);margin-bottom:6px}.reuse{color:#7c5cd6}
@@ -133,15 +132,15 @@ body.benched .stage{grid-template-columns:360px minmax(0,1fr) 560px}
 .approvebar{position:sticky;bottom:-20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--warnbg);border:1px solid #f2c776;border-radius:12px;padding:10px 12px;font-size:12.5px;box-shadow:var(--sh)}.approvebar span{flex:1;min-width:180px}
 .empty{padding:10px 2px}.muted{color:var(--mut);font-size:12.5px}
 /* foundation */
-.found{display:flex;align-items:center;gap:18px;padding:10px 18px;background:var(--navy);color:#dfe7f3;overflow-x:auto}
-.fl{display:flex;flex-direction:column;min-width:170px}.fl b{color:#ffd27a;font-size:13px}.fl small{color:#9fb0c7;font-size:11.5px;white-space:nowrap}
+.found{display:flex;align-items:center;gap:18px;padding:10px 18px;background:var(--panel);border-top:1px solid var(--line);color:var(--ink);overflow-x:auto;box-shadow:0 -4px 16px rgba(16,24,40,.04)}
+.fl{display:flex;flex-direction:column;min-width:170px}.fl b{color:var(--acc);font-size:13px}.fl small{color:var(--mut);font-size:11.5px;white-space:nowrap}
 .layers{display:flex;gap:6px}
-.ly{display:flex;flex-direction:column;align-items:center;min-width:78px;padding:6px 8px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);transition:all .3s}
-.ly b{font-size:17px;color:#fff}.ly span{font-size:10.5px;color:#9fb0c7;white-space:nowrap}
-.ly.read{border-color:var(--c);background:color-mix(in srgb,var(--c) 22%,transparent)}.ly.write{border-color:var(--c);background:color-mix(in srgb,var(--c) 45%,transparent);transform:translateY(-3px)}
+.ly{display:flex;flex-direction:column;align-items:center;min-width:78px;padding:6px 8px;border-radius:10px;background:var(--bg);border:1px solid var(--line);border-top:3px solid var(--c);transition:all .3s}
+.ly b{font-size:17px;color:var(--ink)}.ly span{font-size:10.5px;color:var(--mut);white-space:nowrap}
+.ly.read{border-color:var(--c);background:color-mix(in srgb,var(--c) 12%,#fff)}.ly.write{border-color:var(--c);background:color-mix(in srgb,var(--c) 24%,#fff);transform:translateY(-3px)}
 .syss{display:flex;flex-wrap:wrap;gap:5px;margin-left:auto}
-.sy{font-size:11px;border-radius:99px;padding:2px 9px;background:rgba(255,255,255,.06);color:#9fb0c7;display:flex;gap:5px;align-items:center;transition:all .25s}.sy b{color:#fff}
-.sy.used{background:color-mix(in srgb,var(--c) 30%,transparent);color:#fff}.sy.hot{background:var(--c);color:#fff;box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 40%,transparent)}
+.sy{font-size:11px;border-radius:99px;padding:2px 9px;background:var(--bg);border:1px solid var(--line);color:var(--ink2);display:flex;gap:5px;align-items:center;transition:all .25s}.sy b{color:inherit}
+.sy.used{background:color-mix(in srgb,var(--c) 14%,#fff);border-color:var(--c);color:var(--ink)}.sy.hot{background:var(--c);color:#fff;box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 40%,transparent)}
 /* flying tickets */
 .fly{position:fixed;inset:0;pointer-events:none;z-index:50}
 .tk{position:fixed;transform:translate(0,0);margin:-14px 0 0 -40px;width:80px;height:28px;border-radius:7px;background:var(--panel);border:2px solid var(--c);border-left-width:6px;font:800 10.5px/24px var(--mono);text-align:center;color:var(--ink);box-shadow:0 8px 20px rgba(16,24,40,.25);transition:transform .85s cubic-bezier(.5,0,.2,1),opacity .85s ease-in}
@@ -154,6 +153,38 @@ body.benched .stage{grid-template-columns:360px minmax(0,1fr) 560px}
 @media (max-width:1050px){.stage,body.benched .stage{grid-template-columns:1fr}.orch{border-right:0;border-bottom:1px solid var(--line);max-height:none}.app{height:auto;min-height:100vh}.bench{position:fixed;inset:0;z-index:30}.top{flex-wrap:wrap}.cmd{order:3;flex-basis:100%}.found{flex-wrap:wrap}.syss{margin-left:0}.brand b{display:none}}
 @media (max-width:640px){.cards{grid-template-columns:repeat(2,1fr)}.legend{display:none}.topact .ghost:last-child{display:none}.layers{flex-wrap:wrap}.ly{min-width:64px}}
 @media (max-width:640px){.top{padding:8px 12px;gap:8px}.cmd{margin:0;max-width:100%;min-width:0}.cmd .askbtn span,.cmd .askbtn i{display:none}.send{padding:8px 11px}.topact{flex-wrap:wrap;gap:6px}.topact .mode{display:none}.brand{flex:1}}
+
+/* run all, results, sign-off */
+.cta{background:linear-gradient(135deg,#fff7f1,#fff);border:1.5px solid #f6c7a8;border-radius:14px;padding:12px;margin-bottom:14px;display:flex;flex-direction:column;gap:6px}
+.cta small{color:var(--ink2);font-size:12.5px}
+.cta.on{flex-direction:row;align-items:center;gap:10px;color:var(--acc)}.cta.on span:nth-child(2){flex:1;display:flex;flex-direction:column;color:var(--ink)}
+.runall{border:0;background:linear-gradient(135deg,#ff7a3d,#c8501e);color:#fff;font-weight:800;font-size:15px;border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(200,80,30,.28);transition:transform .15s}.runall:hover{transform:translateY(-1px)}
+.runall.sm2{font-size:13px;padding:8px 14px;border-radius:10px}
+.linkbtn.r{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:700;color:var(--acc);text-decoration:none;font-size:12px}
+.fh{align-items:center}.fh small{flex:1}
+.vtabs{display:flex;gap:4px;background:var(--line2);border-radius:11px;padding:3px}
+.vtabs button{border:0;background:none;border-radius:8px;padding:6px 14px;font-weight:700;font-size:13.5px;color:var(--ink2)}.vtabs button.on{background:var(--panel);color:var(--ink);box-shadow:var(--sh)}.vtabs button:disabled{opacity:.4;cursor:default}.vtabs i{font-style:normal;color:var(--ok)}
+.floorbody>.legend{margin:0 0 10px}
+.pill.signoff,.pst.signoff{background:#fff0d9;color:var(--warn)}.dot.signoff{background:#e0a21b}
+.results{display:flex;flex-direction:column;gap:12px;padding-bottom:20px}
+.rhead{display:flex;flex-direction:column;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--sh)}
+.rhead small{color:var(--ok);font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase}.rhead h2{margin:2px 0 0;font:400 23px/1.25 var(--serif)}
+.rstats{display:flex;flex-wrap:wrap;gap:6px}.rstats span{font-size:12px;color:var(--ink2);background:var(--bg);border-radius:99px;padding:3px 10px}.rstats b{color:var(--ink)}
+.signbox{background:var(--warnbg);border:1px solid #f2c776;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}.signbox>small{color:var(--ink2)}
+.sorow{display:flex;align-items:center;gap:9px;background:var(--panel);border-radius:10px;padding:7px 9px}.sorow span{flex:1;display:flex;flex-direction:column}.sorow small{color:var(--mut);font-size:11.5px}
+.otiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.otile{display:flex;gap:11px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px;box-shadow:var(--sh);text-decoration:none;color:inherit;animation:rise .4s ease both}
+.otile.doc:hover{border-color:var(--acc)}
+.oic{font-size:24px;line-height:1}
+.otile>div{display:flex;flex-direction:column;gap:2px;min-width:0}.otile small{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ok)}
+.otile b{font-size:15px}.otile span{font-size:12.5px;color:var(--ink2)}.otile em{font-style:normal;font-size:11.5px;color:var(--ink2)}.otile em.w{color:var(--warn);font-weight:700}.otile em.ok{color:var(--ok)}.otile i{font-style:normal;font-size:11px;color:var(--mut);margin-top:3px}
+.fups{display:flex;flex-direction:column;gap:5px}.fup{display:flex;align-items:baseline;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:13px;flex-wrap:wrap}.fup small{color:var(--mut)}
+.deliv{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh);overflow:hidden;scroll-margin-top:12px}
+.deliv header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:linear-gradient(#fbfcfe,#f5f7fb)}
+.deliv header span{flex:1;display:flex;flex-direction:column}.deliv header small{font:800 10.5px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--acc)}.deliv header b{font-size:16px}.deliv header i{font-style:normal;font-size:12px;color:var(--mut)}
+.deliv .db{padding:10px 22px 14px;max-width:820px}
+.deliv footer{padding:8px 16px;border-top:1px solid var(--line);font-size:11.5px;color:var(--mut);display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.results>.olbl{margin:6px 0 -4px}
 </style>
 </head>
 <body>
@@ -2882,7 +2913,7 @@ let ME = 'EMP-PRIYA';
 const meName = () => EMPLOYEES[ME].name;
 
 /* ---------- state ---------- */
-const ST = { approved: new Set(), flown: new Set(), open: null, openTask: null, auto: false, ops: [], flash: {}, menu: false, shownPlan: null };
+const ST = { approved: new Set(), flown: new Set(), open: null, openTask: null, auto: false, ops: [], flash: {}, menu: false, shownPlan: null, view: 'floor' };
 const run = () => UI.run;
 const tid = (r, t) => `CCE-${1000 + parseInt(String(r.id).replace(/\D/g, '') || '0', 10) * 10 + (t.step || 0)}`;
 const personOf = t => t.person || (ROLES[t.role] || {}).person || meName();
@@ -2891,10 +2922,12 @@ const depsOf = (r, t) => t.depends_on.map(d => r.tasks.find(x => x.id === d)).fi
 function status(r, t) {
   if (t.state === 'running') return 'running';
   if (t.state === 'failed') return 'failed';
-  if (t.state === 'done') return ST.approved.has(t.id) ? 'approved' : 'review';
+  if (t.state === 'done') return !ST.approved.has(t.id) ? 'review' : waitingOutput(t) ? 'signoff' : 'approved';
   return depsOf(r, t).every(d => ST.approved.has(d.id)) ? 'ready' : 'blocked';
 }
-const ST_LABEL = { ready: 'New ticket', blocked: 'Waiting on handoff', running: 'Agents working', review: 'Waiting for approval', approved: 'Approved', failed: 'Failed', idle: 'No tickets' };
+const ST_LABEL = { ready: 'New ticket', blocked: 'Waiting on handoff', running: 'Agents working', review: 'Waiting for approval', signoff: 'Needs your sign-off', approved: 'Done', failed: 'Failed', idle: 'No tickets' };
+const outputsOf = t => (t.verdicts || []).filter(v => v.kind === 'output').map(v => F.outputs.find(o => o.id === v.id)).filter(Boolean);
+const waitingOutput = t => outputsOf(t).find(o => o.status === 'Waiting for approval');
 const busyPlanning = () => !!(run() && run().status === 'thinking');
 const anyRunning = () => !!(run() && run().tasks.some(t => t.state === 'running'));
 
@@ -2906,7 +2939,7 @@ function ask(text, clarified) {
   if (busyPlanning() || anyRunning()) { toast('Still working on the current request.'); return; }
   const rec = RECORDED.find(r => r.text === text && r.requester === ME) || RECORDED.find(r => r.text === text);
   if (AI.mode !== 'live' && !rec) { ST.nokey = text; UI.run = null; paintAll(); return; }
-  ST.nokey = null; ST.approved = new Set(); ST.flown = new Set(); ST.open = null; ST.openTask = null; ST.auto = false; ST.shownPlan = null;
+  ST.nokey = null; ST.approved = new Set(); ST.flown = new Set(); ST.open = null; ST.openTask = null; ST.auto = false; ST.shownPlan = null; ST.view = 'floor';
   if (rec && AI.mode !== 'live' && rec.requester !== ME) { ME = rec.requester; }
   UI.requester = ME; UI.run = null;
   runRequest(text, AI.mode === 'live' ? null : rec, Object.assign({ planOnly: true }, clarified ? { clarified } : {}));
@@ -2927,26 +2960,27 @@ async function startTask(t) {
   try { await runTask(r, t); } catch (e) { t.state = 'failed'; t.error = errText(e); }
   paintAll();
 }
-function approve(t) {
-  const r = run(); if (!r || t.state !== 'done') return;
+function signOff(o, by) { if (o && o.status === 'Waiting for approval') { o.status = 'Approved by ' + (by || meName()); logEvent('approval.granted', o.title, ME, o.adv); flashTile('policy', 'write'); } }
+/* hand a finished ticket to the next team; signOutputs also approves its client-facing drafts */
+function approve(t, signOutputs = true) {
+  const r = run(); if (!r || t.state !== 'done' || ST.approved.has(t.id)) return;
   ST.approved.add(t.id);
-  (t.verdicts || []).filter(v => v.kind === 'output').forEach(v => { const o = F.outputs.find(x => x.id === v.id); if (o && o.status === 'Waiting for approval') { o.status = 'Approved by ' + personOf(t); logEvent('approval.granted', o.title, ME, o.adv); flashTile('policy', 'write'); } });
+  if (signOutputs) outputsOf(t).forEach(o => signOff(o, meName()));
   logEvent('ticket.approved', `${tid(r, t)} ${t.title}`, ME, r.advisor);
   r.tasks.filter(x => x.depends_on.includes(t.id)).forEach((x, k) => setTimeout(() => fly(cardOf(personOf(t)), cardOf(personOf(x)), tid(r, x), TCOL(roleOfT(x).team), 'handoff'), k * 220));
-  if (r.tasks.every(x => ST.approved.has(x.id))) { finishRun(r); toast('Delivered. Every ticket approved.'); }
+  if (r.tasks.every(x => ST.approved.has(x.id))) { finishRun(r); ST.view = 'results'; ST.open = null; toast(r.tasks.some(waitingOutput) ? 'Done. Client-facing drafts are waiting for your sign-off.' : 'Delivered.'); }
   paintAll();
 }
 function sendBack(t) { if (t.state !== 'done') return; ['result', 'verdicts', 'calls', 'packet', 'contract', 'toolResults', 'error'].forEach(k => delete t[k]); t.state = 'queued'; paintAll(); }
-async function autopilot() {
-  const r = run(); if (!r || !r.tasks.length) return;
-  ST.auto = true; paintAll();
+/* run every ticket in dependency order; internal work hands off automatically, client-facing drafts wait for sign-off at the end */
+async function runAll() {
+  const r = run(); if (!r || !r.tasks.length || ST.auto) return;
+  ST.auto = true; ST.open = null; ST.view = 'floor'; paintAll();
   while (ST.auto && run() === r && !r.tasks.every(t => ST.approved.has(t.id))) {
     const ready = r.tasks.filter(t => status(r, t) === 'ready');
-    if (ready.length) { ST.open = personOf(ready[0]); ST.openTask = ready[0].id; await Promise.all(ready.map(startTask)); continue; }
+    if (ready.length) { await Promise.all(ready.map(startTask)); await sleep(500); ready.filter(t => t.state === 'done').forEach(t => approve(t, false)); continue; }
     const rev = r.tasks.filter(t => status(r, t) === 'review');
-    const needsYou = rev.find(t => (t.verdicts || []).some(v => v.kind === 'output' && (F.outputs.find(o => o.id === v.id) || {}).status === 'Waiting for approval'));
-    if (needsYou) { ST.auto = false; ST.open = personOf(needsYou); ST.openTask = needsYou.id; toast(`${personOf(needsYou)} needs your approval before this goes anywhere.`); break; }
-    if (rev.length) { for (const t of rev) { await sleep(700); approve(t); } continue; }
+    if (rev.length) { rev.forEach(t => approve(t, false)); continue; }
     break;
   }
   ST.auto = false; paintAll();
@@ -3002,13 +3036,14 @@ function paintOrch() {
   const done = r.tasks.filter(t => ST.approved.has(t.id)).length;
   const head = thinking ? `<div class="ostat think"><span class="spin"></span><span><b>${h(DRAFTING[B.drafting] || 'Planning')}</b><small>${r.replay ? 'Replaying the orchestrator’s saved reasoning' : B.chars ? `${B.chars.toLocaleString()} characters from the model` : 'Sending the request and foundation context'}</small></span></div>`
     : r.status === 'clarify' ? `<div class="ostat ask"><b>One question</b><small>The foundation couldn’t settle this</small></div>`
-    : r.status === 'done' ? `<div class="ostat ok"><b>Delivered</b><small>${r.tasks.length} tickets approved · ${Math.round(((r.t1 || Date.now()) - r.t0) / 1000)} s</small></div>`
-    : r.tasks.length ? `<div class="ostat plan"><b>${r.tasks.length} tickets · ${new Set(r.tasks.map(t => roleOfT(t).team)).size} teams</b><small>${done} of ${r.tasks.length} approved</small><span class="obar"><i style="width:${done / r.tasks.length * 100}%"></i></span></div>` : '';
+    : r.status === 'done' ? `<div class="ostat ok"><b>Delivered</b><small>${r.tasks.length} tickets done · ${Math.round(((r.t1 || Date.now()) - r.t0) / 1000)} s${r.tasks.some(waitingOutput) ? ' · sign-off needed' : ''}</small></div>`
+    : r.tasks.length ? `<div class="ostat plan"><b>${r.tasks.length} tickets · ${new Set(r.tasks.map(t => roleOfT(t).team)).size} teams</b><small>${done} of ${r.tasks.length} done</small><span class="obar"><i style="width:${done / r.tasks.length * 100}%"></i></span></div>` : '';
   setHTML(el('orch'), `<div class="oh"><span class="obadge${thinking ? ' pulse' : ''}">${icoOrch()}</span><div><b>Orchestrator</b><small>${r.replay ? 'Replaying a saved AI run' : 'Live AI'}</small></div></div>
     <div class="req">${avatar(EMPLOYEES[r.requester].name, TCOL(EMPLOYEES[r.requester].team), 30)}<span><small>${h(EMPLOYEES[r.requester].name)} asked</small>“${h(r.text.replace(/ \(clarification:.*\)$/, ''))}”</span></div>
     ${head}
     ${r.status === 'clarify' ? clarifyHTML(r) : ''}
-    ${r.tasks.length && r.status !== 'clarify' ? `<div class="osec"><div class="olbl">Tickets${r.status !== 'done' ? `<button type="button" class="auto${ST.auto ? ' on' : ''}" data-auto>${ST.auto ? '■ Stop auto-pilot' : '▶ Auto-pilot'}</button>` : ''}</div>
+    ${r.tasks.length && ['planned', 'running'].includes(r.status) ? (ST.auto ? `<div class="cta on"><span class="spin"></span><span><b>Running all agents</b><small>${r.tasks.filter(t => t.state === 'running').map(t => personOf(t).split(' ')[0]).join(' and ') || 'Handing off'} · ${done} of ${r.tasks.length} done</small></span><button type="button" class="ghost sm" data-stop>Pause</button></div>` : r.tasks.some(t => status(r, t) === 'ready') ? `<div class="cta"><b>${r.status === 'planned' ? 'Plan ready' : 'Ready to continue'}</b><small>Run every agent in order, with each team handing off to the next. Client-facing drafts wait for your sign-off at the end. Or open a person on the floor to run one ticket.</small><button type="button" class="runall" data-runall>▶ Run all agents</button></div>` : '') : ''}
+    ${r.tasks.length && r.status !== 'clarify' ? `<div class="osec"><div class="olbl">Tickets${r.status === 'done' ? '<button type="button" class="linkbtn r" data-view="results">See results →</button>' : ''}</div>
       ${waves.map(w => `<div class="wv"><span>Wave ${w}</span>${r.tasks.filter(t => t.wave === w).length > 1 ? 'in parallel' : ''}</div>${r.tasks.filter(t => t.wave === w).map(t => { const s = status(r, t), R = roleOfT(t); return `<button type="button" class="trow ${s}${ST.openTask === t.id ? ' sel' : ''}" data-task="${t.id}">${avatar(personOf(t), TCOL(R.team), 26)}<span><small>${tid(r, t)} · ${h(R.name)}</small><b>${h(t.title)}</b></span><em class="pill ${s}">${h(ST_LABEL[s])}</em></button>`; }).join('')}`).join('')}
       <p class="hint">Click a person on the floor to open their ticket.</p></div>` : ''}
     ${r.status === 'done' || r.status === 'failed' ? finalHTML(r) : ''}
@@ -3036,14 +3071,20 @@ const icoOrch = () => '<svg viewBox="0 0 24 24" width="18" height="18" fill="non
 function paintFloor() {
   const r = run(), box = el('floor');
   if (!box._init) {
-    box.innerHTML = `<div class="fh"><div><b>Team floor</b><small id="fsub"></small></div><div class="legend">${['ready', 'running', 'review', 'approved'].map(s => `<span><i class="dot ${s}"></i>${ST_LABEL[s]}</span>`).join('')}</div></div>` +
-      TEAM_ORDER.map(tm => `<div class="team" style="--c:${TCOL(tm)}"><div class="teamh"><i></i>${h(TEAMS[tm].name)}</div><div class="cards">${ROSTER.filter(p => p.team === tm).map(p => `<button type="button" class="pcard idle" data-person="${h(p.name)}" style="--c:${TCOL(tm)}"></button>`).join('')}</div></div>`).join('');
+    box.innerHTML = `<div class="fh"><div class="vtabs" id="vtabs"></div><small id="fsub"></small><span id="fcta"></span></div><div class="results" id="results"></div><div class="floorbody" id="floorbody"><div class="legend">${['ready', 'running', 'review', 'approved'].map(s => `<span><i class="dot ${s}"></i>${ST_LABEL[s]}</span>`).join('')}</div>` +
+      TEAM_ORDER.map(tm => `<div class="team" style="--c:${TCOL(tm)}"><div class="teamh"><i></i>${h(TEAMS[tm].name)}</div><div class="cards">${ROSTER.filter(p => p.team === tm).map(p => `<button type="button" class="pcard idle" data-person="${h(p.name)}" style="--c:${TCOL(tm)}"></button>`).join('')}</div></div>`).join('') + '</div>';
     box._init = 1;
   }
+  const hasRes = r && r.tasks.some(t => t.result);
+  if (!hasRes && ST.view === 'results') ST.view = 'floor';
+  setHTML(el('vtabs'), `<button type="button" class="${ST.view === 'floor' ? 'on' : ''}" data-view="floor">Team floor</button><button type="button" class="${ST.view === 'results' ? 'on' : ''}" data-view="results" ${hasRes ? '' : 'disabled'}>Results${r && r.status === 'done' ? ' <i>✓</i>' : ''}</button>`);
+  setHTML(el('fcta'), r && r.tasks.length && ['planned', 'running'].includes(r.status) && !ST.auto && r.tasks.some(t => status(r, t) === 'ready') ? '<button type="button" class="runall sm2" data-runall>▶ Run all agents</button>' : '');
+  el('results').hidden = ST.view !== 'results'; el('floorbody').hidden = ST.view === 'results';
+  if (ST.view === 'results' && r) setHTML(el('results'), resultsHTML(r));
   el('fsub').textContent = !r ? 'Everyone who can take a ticket' : r.tasks.length ? `${r.tasks.length} tickets routed by the orchestrator` : r.status === 'thinking' ? 'Waiting for the plan…' : '';
   box.querySelectorAll('.pcard').forEach(c => {
     const p = ROSTER.find(x => x.name === c.dataset.person), ts = r ? r.tasks.filter(t => personOf(t) === p.name) : [];
-    const ss = ts.map(t => status(r, t)), s = !ts.length ? 'idle' : ['running', 'review', 'ready', 'failed', 'blocked', 'approved'].find(x => ss.includes(x));
+    const ss = ts.map(t => status(r, t)), s = !ts.length ? 'idle' : ['running', 'review', 'signoff', 'ready', 'failed', 'blocked', 'approved'].find(x => ss.includes(x));
     const agents = [...new Set(ts.map(t => t.route || AGENTS[t.agent].name))];
     c.className = `pcard ${s}${ST.open === p.name ? ' sel' : ''}${c.classList.contains('landed') ? ' landed' : ''}`;
     setHTML(c, `<span class="av">${avatar(p.name, TCOL(p.team), 58)}${s === 'running' ? '<span class="ring"></span>' : ''}${ts.length ? `<span class="cnt">${ts.length}</span>` : ''}</span>
@@ -3051,6 +3092,37 @@ function paintFloor() {
       ${ts.length ? `<span class="pst ${s}">${h(ST_LABEL[s])}</span><span class="pag">${agents.slice(0, 2).map(a => `<em>${h(a)}</em>`).join('')}</span>` : `<span class="pdo">${h(p.does)}</span>`}`);
   });
 }
+
+/* the final output: what actually happened */
+const OUT_ICON = { 'calendar.create_event': '📅', 'mail.draft': '✉️', 'crm.create_task': '✅', 'crm.log_activity': '📝', 'service.update_case': '🛠️' };
+function actionTile(c, t) {
+  const o = c.out || {}, i = c.input || {}, who = personOf(t);
+  if (c.name === 'calendar.create_event') { const hold = /tentative|hold/i.test(o.status || ''); return { icon: '📅', kind: hold ? 'Meeting on hold' : 'Meeting scheduled', big: o.time || i.time || '', title: o.title || i.title, lines: [(o.attendees || []).join(', '), o.status], id: o.event_id, who }; }
+  if (c.name === 'mail.draft') return { icon: '✉️', kind: 'Email drafted', big: o.subject || i.subject || '', title: 'To ' + (o.to || i.to || ''), lines: [o.status], id: o.draft_id, who };
+  if (c.name === 'crm.create_task') return { icon: '✅', kind: 'Follow-up task created', big: o.title || i.title || '', title: [o.owner && 'Owner ' + o.owner, o.due && 'due ' + o.due].filter(Boolean).join(', '), lines: [], id: o.task_id, who };
+  if (c.name === 'crm.log_activity') return { icon: '📝', kind: 'Logged to Salesforce', big: '', title: o.logged || '', lines: [], id: o.activity_id, who };
+  if (c.name === 'service.update_case') return { icon: '🛠️', kind: 'Case updated', big: o.status || '', title: o.case_id || o.id || '', lines: [], id: o.case_id, who };
+  return null;
+}
+function resultsHTML(r) {
+  const S = r.stats, E = EMPLOYEES[r.requester], doneAll = r.status === 'done';
+  const acts = r.tasks.flatMap(t => (t.calls || []).filter(c => c.rw === 'write' && !c.error).map(c => actionTile(c, t))).filter(Boolean);
+  const docs = r.tasks.filter(t => t.result && t.result.output && t.result.output.body);
+  const waiting = r.tasks.flatMap(t => outputsOf(t).filter(o => o.status === 'Waiting for approval').map(o => ({ o, t })));
+  const proposed = r.tasks.flatMap(t => (t.verdicts || []).filter(v => v.kind === 'commitment').map(v => ({ v, t })));
+  const stored = r.tasks.flatMap(t => (t.verdicts || []).filter(v => ['published', 'committed'].includes(v.status) && v.kind !== 'output').map(v => ({ v, t })));
+  const tiles = acts.map(a => `<div class="otile"><span class="oic">${a.icon}</span><div><small>${h(a.kind)}</small>${a.big ? `<b>${h(a.big)}</b>` : ''}<span>${h(a.title || '')}</span>${a.lines.filter(Boolean).map(l => `<em>${h(l)}</em>`).join('')}<i>${h(a.who)}${a.id ? ' · ' + h(a.id) : ''}</i></div></div>`)
+    .concat(docs.map(t => { const o = t.result.output, rec = outputsOf(t)[0]; return `<a class="otile doc" href="#doc-${t.id}"><span class="oic">📄</span><div><small>${h(kindName(o.kind))} ready</small><b>${h(o.title || t.title)}</b><span>${h(personOf(t))} · ${h(roleOfT(t).name)}</span>${rec ? `<em class="${rec.status === 'Waiting for approval' ? 'w' : 'ok'}">${h(rec.status)}</em>` : ''}</div></a>`; }));
+  return `<div class="rhead"><div><small>${doneAll ? 'Delivered for' : 'In progress for'} ${h(E.name)}</small><h2>${h(r.text.replace(/ \(clarification:.*\)$/, ''))}</h2></div>
+      <div class="rstats"><span><b>${r.tasks.length}</b> tickets</span><span><b>${new Set(r.tasks.map(t => roleOfT(t).team)).size}</b> teams</span><span><b>${S.reads}</b> foundation items</span><span><b>${S.reused}</b> reused</span><span><b>${S.calls}</b> system calls</span><span><b>${S.committed}</b> stored back</span></div></div>
+    ${waiting.length ? `<div class="signbox"><b>Needs your sign-off</b><small>Client-facing. Nothing goes out until you approve.</small>${waiting.map(({ o, t }) => `<div class="sorow">${avatar(personOf(t), TCOL(roleOfT(t).team), 28)}<span><b>${h(o.title)}</b><small>${h(kindName(o.kind))} from ${h(personOf(t))}</small></span><a class="ghost sm" href="#doc-${t.id}">Review</a><button type="button" class="primary sm" data-signoff="${h(o.id)}">✓ Approve</button></div>`).join('')}</div>` : ''}
+    <div class="olbl">What happened</div><div class="otiles">${tiles.join('') || '<p class="muted">Nothing finished yet.</p>'}</div>
+    ${proposed.length ? `<div class="olbl">Follow-ups</div><div class="fups">${proposed.map(({ v, t }) => `<div class="fup"><span class="pill ${v.status === 'committed' ? 'approved' : 'review'}">${v.status === 'committed' ? 'Created' : 'Proposed'}</span><b>${h(v.title || '')}</b><small>${h(personOf(t))}${v.reason ? ' · ' + h(v.reason) : ''}</small></div>`).join('')}</div>` : ''}
+    <div class="olbl">Deliverables</div>
+    ${docs.map(t => { const o = t.result.output, rec = outputsOf(t)[0], R = roleOfT(t); return `<article class="deliv" id="doc-${t.id}"><header>${avatar(personOf(t), TCOL(R.team), 34)}<span><small>${h(kindName(o.kind))} · ${tid(r, t)}</small><b>${h(o.title || t.title)}</b><i>${h(personOf(t))} · ${h(R.name)} · ${h(AGENTS[t.agent].name)}${t.contract && t.contract.as_of.length ? ' · as of ' + h(t.contract.as_of.join(', ')) : ''}</i></span>${rec ? `<em class="pill ${rec.status === 'Waiting for approval' ? 'review' : 'approved'}">${h(rec.status)}</em>` : ''}</header><div class="db">${bodyHTML(o.body)}</div>${t.contract && t.contract.sources.length ? `<footer>Sources: ${t.contract.sources.slice(0, 8).map(x => `<span class="sid">${h(x)}</span>`).join(' ')}</footer>` : ''}</article>`; }).join('') || '<p class="muted">No documents yet.</p>'}
+    ${stored.length ? `<div class="olbl">Stored for next time</div><div class="fups">${stored.map(({ v, t }) => `<div class="fup"><span class="pill approved">${v.kind === 'memory' ? 'Memory' : v.kind === 'knowledge' ? 'Knowledge' : h(v.kind)}</span><b>${h(v.title || v.id || '')}</b><small>${h(personOf(t))}${v.id ? ' · ' + h(v.id) : ''}</small></div>`).join('')}</div>` : ''}`;
+}
+const kindName = k => ({ brief: 'Brief', note: 'Note', email: 'Email draft', comparison: 'Comparison', one_pager: 'One-pager', agenda: 'Agenda', finding: 'Finding', content_pick: 'Content pick', case_note: 'Case note', post: 'Post' }[k] || String(k || 'Output').replace(/_/g, ' ').replace(/^./, c => c.toUpperCase()));
 
 /* right: the workbench for one person */
 function paintBench() {
@@ -3081,7 +3153,7 @@ function ticketHTML(r, t, p) {
   const P = t.packet || (r.tasks.length ? (() => { try { return buildPacket(t, r); } catch (e) { return null; } })() : null);
   const byL = {}; (P ? P.items : []).forEach(i => (byL[i.layer] = byL[i.layer] || []).push(i));
   const reused = P ? P.items.filter(i => reusedIn(t, i)) : [];
-  const steps = ['Assigned', 'Agents working', 'Review', 'Approved'], at = { ready: 0, blocked: 0, running: 1, failed: 1, review: 2, approved: 3 }[s];
+  const steps = ['Assigned', 'Agents working', 'Review', 'Done'], at = { ready: 0, blocked: 0, running: 1, failed: 1, review: 2, signoff: 2, approved: 3 }[s];
   const out = t.result && t.result.output;
   const waitOut = (t.verdicts || []).map(v => v.kind === 'output' && F.outputs.find(o => o.id === v.id)).find(o => o && o.status === 'Waiting for approval');
   return `<div class="tkhead"><span class="tkid">${tid(r, t)}</span><em class="pill ${s}">${h(ST_LABEL[s])}</em><span class="muted">from Orchestrator for ${h(EMPLOYEES[r.requester].name)} · wave ${t.wave}</span></div>
@@ -3102,6 +3174,7 @@ function ticketHTML(r, t, p) {
     ${t.result ? `<div class="card"><div class="olbl">Result</div>${t.result.says ? `<p class="says">“${h(t.result.says)}”</p>` : ''}${out && out.body ? `<div class="doc"><div class="dh"><span class="kind">${h(String(out.kind || 'output').toUpperCase())}</span><b>${h(out.title || '')}</b>${t.contract && t.contract.as_of.length ? `<small>As of ${h(t.contract.as_of.join(', '))}</small>` : ''}</div><div class="db">${bodyHTML(out.body)}</div></div>` : ''}</div>` : ''}
     ${t.verdicts ? `<div class="card"><div class="olbl">Gatekeeper</div><div class="vds">${t.verdicts.map(v => { const o = v.kind === 'output' && F.outputs.find(y => y.id === v.id), vs = o && o.status === 'Waiting for approval' ? 'approval' : v.status; return `<span class="vd ${vs}" title="${h(v.reason || '')}">${h(v.kind)}: ${h(VERB[vs] || vs)}${v.id ? ` <span class="sid">${h(v.id)}</span>` : ''}${['rejected', 'blocked', 'flagged'].includes(vs) && v.reason ? ` <em>${h(v.reason)}</em>` : ''}</span>`; }).join('')}</div></div>` : ''}
     ${s === 'review' ? `<div class="approvebar"><span>${waitOut ? `<b>Client-facing.</b> Nothing goes out until you approve “${h(waitOut.title)}”.` : `<b>Review ${h(p.name.split(' ')[0])}’s work.</b> Approving hands it to the next team.`}</span><button type="button" class="ghost" data-back="${t.id}">Request changes</button><button type="button" class="primary" data-approve="${t.id}">✓ Approve and hand off</button></div>` : ''}
+    ${s === 'signoff' ? `<div class="approvebar"><span><b>Handed off.</b> “${h(waitOut.title)}” is client-facing and waits for your sign-off.</span><button type="button" class="primary" data-signoff="${h(waitOut.id)}">✓ Approve</button></div>` : ''}
     ${s === 'failed' ? `<div class="warnbox">${h(t.error || 'Failed')}</div>` : ''}`;
 }
 
@@ -3128,7 +3201,10 @@ document.addEventListener('click', e => {
   if ((x = q('[data-ask]'))) { ask(x.dataset.ask); return; }
   if ((x = q('[data-answer]'))) { answer(x.dataset.answer); return; }
   if (q('[data-answer-input]')) { answer(q('.qcard').querySelector('.clarIn').value.trim()); return; }
-  if (q('[data-auto]')) { if (ST.auto) { ST.auto = false; paintAll(); } else autopilot(); return; }
+  if (q('[data-runall]')) { runAll(); return; }
+  if (q('[data-stop]')) { ST.auto = false; paintAll(); return; }
+  if ((x = q('[data-view]'))) { ST.view = x.dataset.view; if (ST.view === 'results') ST.open = null; paintAll(); return; }
+  if ((x = q('[data-signoff]'))) { signOff(F.outputs.find(o => o.id === x.dataset.signoff)); paintAll(); return; }
   if ((x = q('[data-task]'))) { const t = run().tasks.find(y => y.id === x.dataset.task); ST.open = personOf(t); ST.openTask = t.id; paintAll(); return; }
   if ((x = q('.pcard'))) { ST.open = x.dataset.person; const t = run() && run().tasks.find(y => personOf(y) === ST.open); ST.openTask = t ? t.id : null; paintAll(); return; }
   if ((x = q('[data-tab-task]'))) { ST.openTask = x.dataset.tabTask; paintAll(); return; }
@@ -3143,7 +3219,7 @@ el('newChat').onclick = () => { if (busyPlanning() || anyRunning()) return; UI.r
 
 UI.requester = ME; paintAll();
 initAI().then(paintAll);
-window.HARNESS = { ask, answer, startTask, approve, autopilot, ST, status };
+window.HARNESS = { ask, answer, startTask, approve, runAll, ST, status };
 })();
 
 </script>

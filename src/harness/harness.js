@@ -47,7 +47,7 @@ let ME = 'EMP-PRIYA';
 const meName = () => EMPLOYEES[ME].name;
 
 /* ---------- state ---------- */
-const ST = { approved: new Set(), flown: new Set(), open: null, openTask: null, auto: false, ops: [], flash: {}, menu: false, shownPlan: null };
+const ST = { approved: new Set(), flown: new Set(), open: null, openTask: null, auto: false, ops: [], flash: {}, menu: false, shownPlan: null, view: 'floor' };
 const run = () => UI.run;
 const tid = (r, t) => `CCE-${1000 + parseInt(String(r.id).replace(/\D/g, '') || '0', 10) * 10 + (t.step || 0)}`;
 const personOf = t => t.person || (ROLES[t.role] || {}).person || meName();
@@ -56,10 +56,12 @@ const depsOf = (r, t) => t.depends_on.map(d => r.tasks.find(x => x.id === d)).fi
 function status(r, t) {
   if (t.state === 'running') return 'running';
   if (t.state === 'failed') return 'failed';
-  if (t.state === 'done') return ST.approved.has(t.id) ? 'approved' : 'review';
+  if (t.state === 'done') return !ST.approved.has(t.id) ? 'review' : waitingOutput(t) ? 'signoff' : 'approved';
   return depsOf(r, t).every(d => ST.approved.has(d.id)) ? 'ready' : 'blocked';
 }
-const ST_LABEL = { ready: 'New ticket', blocked: 'Waiting on handoff', running: 'Agents working', review: 'Waiting for approval', approved: 'Approved', failed: 'Failed', idle: 'No tickets' };
+const ST_LABEL = { ready: 'New ticket', blocked: 'Waiting on handoff', running: 'Agents working', review: 'Waiting for approval', signoff: 'Needs your sign-off', approved: 'Done', failed: 'Failed', idle: 'No tickets' };
+const outputsOf = t => (t.verdicts || []).filter(v => v.kind === 'output').map(v => F.outputs.find(o => o.id === v.id)).filter(Boolean);
+const waitingOutput = t => outputsOf(t).find(o => o.status === 'Waiting for approval');
 const busyPlanning = () => !!(run() && run().status === 'thinking');
 const anyRunning = () => !!(run() && run().tasks.some(t => t.state === 'running'));
 
@@ -71,7 +73,7 @@ function ask(text, clarified) {
   if (busyPlanning() || anyRunning()) { toast('Still working on the current request.'); return; }
   const rec = RECORDED.find(r => r.text === text && r.requester === ME) || RECORDED.find(r => r.text === text);
   if (AI.mode !== 'live' && !rec) { ST.nokey = text; UI.run = null; paintAll(); return; }
-  ST.nokey = null; ST.approved = new Set(); ST.flown = new Set(); ST.open = null; ST.openTask = null; ST.auto = false; ST.shownPlan = null;
+  ST.nokey = null; ST.approved = new Set(); ST.flown = new Set(); ST.open = null; ST.openTask = null; ST.auto = false; ST.shownPlan = null; ST.view = 'floor';
   if (rec && AI.mode !== 'live' && rec.requester !== ME) { ME = rec.requester; }
   UI.requester = ME; UI.run = null;
   runRequest(text, AI.mode === 'live' ? null : rec, Object.assign({ planOnly: true }, clarified ? { clarified } : {}));
@@ -92,26 +94,27 @@ async function startTask(t) {
   try { await runTask(r, t); } catch (e) { t.state = 'failed'; t.error = errText(e); }
   paintAll();
 }
-function approve(t) {
-  const r = run(); if (!r || t.state !== 'done') return;
+function signOff(o, by) { if (o && o.status === 'Waiting for approval') { o.status = 'Approved by ' + (by || meName()); logEvent('approval.granted', o.title, ME, o.adv); flashTile('policy', 'write'); } }
+/* hand a finished ticket to the next team; signOutputs also approves its client-facing drafts */
+function approve(t, signOutputs = true) {
+  const r = run(); if (!r || t.state !== 'done' || ST.approved.has(t.id)) return;
   ST.approved.add(t.id);
-  (t.verdicts || []).filter(v => v.kind === 'output').forEach(v => { const o = F.outputs.find(x => x.id === v.id); if (o && o.status === 'Waiting for approval') { o.status = 'Approved by ' + personOf(t); logEvent('approval.granted', o.title, ME, o.adv); flashTile('policy', 'write'); } });
+  if (signOutputs) outputsOf(t).forEach(o => signOff(o, meName()));
   logEvent('ticket.approved', `${tid(r, t)} ${t.title}`, ME, r.advisor);
   r.tasks.filter(x => x.depends_on.includes(t.id)).forEach((x, k) => setTimeout(() => fly(cardOf(personOf(t)), cardOf(personOf(x)), tid(r, x), TCOL(roleOfT(x).team), 'handoff'), k * 220));
-  if (r.tasks.every(x => ST.approved.has(x.id))) { finishRun(r); toast('Delivered. Every ticket approved.'); }
+  if (r.tasks.every(x => ST.approved.has(x.id))) { finishRun(r); ST.view = 'results'; ST.open = null; toast(r.tasks.some(waitingOutput) ? 'Done. Client-facing drafts are waiting for your sign-off.' : 'Delivered.'); }
   paintAll();
 }
 function sendBack(t) { if (t.state !== 'done') return; ['result', 'verdicts', 'calls', 'packet', 'contract', 'toolResults', 'error'].forEach(k => delete t[k]); t.state = 'queued'; paintAll(); }
-async function autopilot() {
-  const r = run(); if (!r || !r.tasks.length) return;
-  ST.auto = true; paintAll();
+/* run every ticket in dependency order; internal work hands off automatically, client-facing drafts wait for sign-off at the end */
+async function runAll() {
+  const r = run(); if (!r || !r.tasks.length || ST.auto) return;
+  ST.auto = true; ST.open = null; ST.view = 'floor'; paintAll();
   while (ST.auto && run() === r && !r.tasks.every(t => ST.approved.has(t.id))) {
     const ready = r.tasks.filter(t => status(r, t) === 'ready');
-    if (ready.length) { ST.open = personOf(ready[0]); ST.openTask = ready[0].id; await Promise.all(ready.map(startTask)); continue; }
+    if (ready.length) { await Promise.all(ready.map(startTask)); await sleep(500); ready.filter(t => t.state === 'done').forEach(t => approve(t, false)); continue; }
     const rev = r.tasks.filter(t => status(r, t) === 'review');
-    const needsYou = rev.find(t => (t.verdicts || []).some(v => v.kind === 'output' && (F.outputs.find(o => o.id === v.id) || {}).status === 'Waiting for approval'));
-    if (needsYou) { ST.auto = false; ST.open = personOf(needsYou); ST.openTask = needsYou.id; toast(`${personOf(needsYou)} needs your approval before this goes anywhere.`); break; }
-    if (rev.length) { for (const t of rev) { await sleep(700); approve(t); } continue; }
+    if (rev.length) { rev.forEach(t => approve(t, false)); continue; }
     break;
   }
   ST.auto = false; paintAll();
@@ -167,13 +170,14 @@ function paintOrch() {
   const done = r.tasks.filter(t => ST.approved.has(t.id)).length;
   const head = thinking ? `<div class="ostat think"><span class="spin"></span><span><b>${h(DRAFTING[B.drafting] || 'Planning')}</b><small>${r.replay ? 'Replaying the orchestrator’s saved reasoning' : B.chars ? `${B.chars.toLocaleString()} characters from the model` : 'Sending the request and foundation context'}</small></span></div>`
     : r.status === 'clarify' ? `<div class="ostat ask"><b>One question</b><small>The foundation couldn’t settle this</small></div>`
-    : r.status === 'done' ? `<div class="ostat ok"><b>Delivered</b><small>${r.tasks.length} tickets approved · ${Math.round(((r.t1 || Date.now()) - r.t0) / 1000)} s</small></div>`
-    : r.tasks.length ? `<div class="ostat plan"><b>${r.tasks.length} tickets · ${new Set(r.tasks.map(t => roleOfT(t).team)).size} teams</b><small>${done} of ${r.tasks.length} approved</small><span class="obar"><i style="width:${done / r.tasks.length * 100}%"></i></span></div>` : '';
+    : r.status === 'done' ? `<div class="ostat ok"><b>Delivered</b><small>${r.tasks.length} tickets done · ${Math.round(((r.t1 || Date.now()) - r.t0) / 1000)} s${r.tasks.some(waitingOutput) ? ' · sign-off needed' : ''}</small></div>`
+    : r.tasks.length ? `<div class="ostat plan"><b>${r.tasks.length} tickets · ${new Set(r.tasks.map(t => roleOfT(t).team)).size} teams</b><small>${done} of ${r.tasks.length} done</small><span class="obar"><i style="width:${done / r.tasks.length * 100}%"></i></span></div>` : '';
   setHTML(el('orch'), `<div class="oh"><span class="obadge${thinking ? ' pulse' : ''}">${icoOrch()}</span><div><b>Orchestrator</b><small>${r.replay ? 'Replaying a saved AI run' : 'Live AI'}</small></div></div>
     <div class="req">${avatar(EMPLOYEES[r.requester].name, TCOL(EMPLOYEES[r.requester].team), 30)}<span><small>${h(EMPLOYEES[r.requester].name)} asked</small>“${h(r.text.replace(/ \(clarification:.*\)$/, ''))}”</span></div>
     ${head}
     ${r.status === 'clarify' ? clarifyHTML(r) : ''}
-    ${r.tasks.length && r.status !== 'clarify' ? `<div class="osec"><div class="olbl">Tickets${r.status !== 'done' ? `<button type="button" class="auto${ST.auto ? ' on' : ''}" data-auto>${ST.auto ? '■ Stop auto-pilot' : '▶ Auto-pilot'}</button>` : ''}</div>
+    ${r.tasks.length && ['planned', 'running'].includes(r.status) ? (ST.auto ? `<div class="cta on"><span class="spin"></span><span><b>Running all agents</b><small>${r.tasks.filter(t => t.state === 'running').map(t => personOf(t).split(' ')[0]).join(' and ') || 'Handing off'} · ${done} of ${r.tasks.length} done</small></span><button type="button" class="ghost sm" data-stop>Pause</button></div>` : r.tasks.some(t => status(r, t) === 'ready') ? `<div class="cta"><b>${r.status === 'planned' ? 'Plan ready' : 'Ready to continue'}</b><small>Run every agent in order, with each team handing off to the next. Client-facing drafts wait for your sign-off at the end. Or open a person on the floor to run one ticket.</small><button type="button" class="runall" data-runall>▶ Run all agents</button></div>` : '') : ''}
+    ${r.tasks.length && r.status !== 'clarify' ? `<div class="osec"><div class="olbl">Tickets${r.status === 'done' ? '<button type="button" class="linkbtn r" data-view="results">See results →</button>' : ''}</div>
       ${waves.map(w => `<div class="wv"><span>Wave ${w}</span>${r.tasks.filter(t => t.wave === w).length > 1 ? 'in parallel' : ''}</div>${r.tasks.filter(t => t.wave === w).map(t => { const s = status(r, t), R = roleOfT(t); return `<button type="button" class="trow ${s}${ST.openTask === t.id ? ' sel' : ''}" data-task="${t.id}">${avatar(personOf(t), TCOL(R.team), 26)}<span><small>${tid(r, t)} · ${h(R.name)}</small><b>${h(t.title)}</b></span><em class="pill ${s}">${h(ST_LABEL[s])}</em></button>`; }).join('')}`).join('')}
       <p class="hint">Click a person on the floor to open their ticket.</p></div>` : ''}
     ${r.status === 'done' || r.status === 'failed' ? finalHTML(r) : ''}
@@ -201,14 +205,20 @@ const icoOrch = () => '<svg viewBox="0 0 24 24" width="18" height="18" fill="non
 function paintFloor() {
   const r = run(), box = el('floor');
   if (!box._init) {
-    box.innerHTML = `<div class="fh"><div><b>Team floor</b><small id="fsub"></small></div><div class="legend">${['ready', 'running', 'review', 'approved'].map(s => `<span><i class="dot ${s}"></i>${ST_LABEL[s]}</span>`).join('')}</div></div>` +
-      TEAM_ORDER.map(tm => `<div class="team" style="--c:${TCOL(tm)}"><div class="teamh"><i></i>${h(TEAMS[tm].name)}</div><div class="cards">${ROSTER.filter(p => p.team === tm).map(p => `<button type="button" class="pcard idle" data-person="${h(p.name)}" style="--c:${TCOL(tm)}"></button>`).join('')}</div></div>`).join('');
+    box.innerHTML = `<div class="fh"><div class="vtabs" id="vtabs"></div><small id="fsub"></small><span id="fcta"></span></div><div class="results" id="results"></div><div class="floorbody" id="floorbody"><div class="legend">${['ready', 'running', 'review', 'approved'].map(s => `<span><i class="dot ${s}"></i>${ST_LABEL[s]}</span>`).join('')}</div>` +
+      TEAM_ORDER.map(tm => `<div class="team" style="--c:${TCOL(tm)}"><div class="teamh"><i></i>${h(TEAMS[tm].name)}</div><div class="cards">${ROSTER.filter(p => p.team === tm).map(p => `<button type="button" class="pcard idle" data-person="${h(p.name)}" style="--c:${TCOL(tm)}"></button>`).join('')}</div></div>`).join('') + '</div>';
     box._init = 1;
   }
+  const hasRes = r && r.tasks.some(t => t.result);
+  if (!hasRes && ST.view === 'results') ST.view = 'floor';
+  setHTML(el('vtabs'), `<button type="button" class="${ST.view === 'floor' ? 'on' : ''}" data-view="floor">Team floor</button><button type="button" class="${ST.view === 'results' ? 'on' : ''}" data-view="results" ${hasRes ? '' : 'disabled'}>Results${r && r.status === 'done' ? ' <i>✓</i>' : ''}</button>`);
+  setHTML(el('fcta'), r && r.tasks.length && ['planned', 'running'].includes(r.status) && !ST.auto && r.tasks.some(t => status(r, t) === 'ready') ? '<button type="button" class="runall sm2" data-runall>▶ Run all agents</button>' : '');
+  el('results').hidden = ST.view !== 'results'; el('floorbody').hidden = ST.view === 'results';
+  if (ST.view === 'results' && r) setHTML(el('results'), resultsHTML(r));
   el('fsub').textContent = !r ? 'Everyone who can take a ticket' : r.tasks.length ? `${r.tasks.length} tickets routed by the orchestrator` : r.status === 'thinking' ? 'Waiting for the plan…' : '';
   box.querySelectorAll('.pcard').forEach(c => {
     const p = ROSTER.find(x => x.name === c.dataset.person), ts = r ? r.tasks.filter(t => personOf(t) === p.name) : [];
-    const ss = ts.map(t => status(r, t)), s = !ts.length ? 'idle' : ['running', 'review', 'ready', 'failed', 'blocked', 'approved'].find(x => ss.includes(x));
+    const ss = ts.map(t => status(r, t)), s = !ts.length ? 'idle' : ['running', 'review', 'signoff', 'ready', 'failed', 'blocked', 'approved'].find(x => ss.includes(x));
     const agents = [...new Set(ts.map(t => t.route || AGENTS[t.agent].name))];
     c.className = `pcard ${s}${ST.open === p.name ? ' sel' : ''}${c.classList.contains('landed') ? ' landed' : ''}`;
     setHTML(c, `<span class="av">${avatar(p.name, TCOL(p.team), 58)}${s === 'running' ? '<span class="ring"></span>' : ''}${ts.length ? `<span class="cnt">${ts.length}</span>` : ''}</span>
@@ -216,6 +226,37 @@ function paintFloor() {
       ${ts.length ? `<span class="pst ${s}">${h(ST_LABEL[s])}</span><span class="pag">${agents.slice(0, 2).map(a => `<em>${h(a)}</em>`).join('')}</span>` : `<span class="pdo">${h(p.does)}</span>`}`);
   });
 }
+
+/* the final output: what actually happened */
+const OUT_ICON = { 'calendar.create_event': '📅', 'mail.draft': '✉️', 'crm.create_task': '✅', 'crm.log_activity': '📝', 'service.update_case': '🛠️' };
+function actionTile(c, t) {
+  const o = c.out || {}, i = c.input || {}, who = personOf(t);
+  if (c.name === 'calendar.create_event') { const hold = /tentative|hold/i.test(o.status || ''); return { icon: '📅', kind: hold ? 'Meeting on hold' : 'Meeting scheduled', big: o.time || i.time || '', title: o.title || i.title, lines: [(o.attendees || []).join(', '), o.status], id: o.event_id, who }; }
+  if (c.name === 'mail.draft') return { icon: '✉️', kind: 'Email drafted', big: o.subject || i.subject || '', title: 'To ' + (o.to || i.to || ''), lines: [o.status], id: o.draft_id, who };
+  if (c.name === 'crm.create_task') return { icon: '✅', kind: 'Follow-up task created', big: o.title || i.title || '', title: [o.owner && 'Owner ' + o.owner, o.due && 'due ' + o.due].filter(Boolean).join(', '), lines: [], id: o.task_id, who };
+  if (c.name === 'crm.log_activity') return { icon: '📝', kind: 'Logged to Salesforce', big: '', title: o.logged || '', lines: [], id: o.activity_id, who };
+  if (c.name === 'service.update_case') return { icon: '🛠️', kind: 'Case updated', big: o.status || '', title: o.case_id || o.id || '', lines: [], id: o.case_id, who };
+  return null;
+}
+function resultsHTML(r) {
+  const S = r.stats, E = EMPLOYEES[r.requester], doneAll = r.status === 'done';
+  const acts = r.tasks.flatMap(t => (t.calls || []).filter(c => c.rw === 'write' && !c.error).map(c => actionTile(c, t))).filter(Boolean);
+  const docs = r.tasks.filter(t => t.result && t.result.output && t.result.output.body);
+  const waiting = r.tasks.flatMap(t => outputsOf(t).filter(o => o.status === 'Waiting for approval').map(o => ({ o, t })));
+  const proposed = r.tasks.flatMap(t => (t.verdicts || []).filter(v => v.kind === 'commitment').map(v => ({ v, t })));
+  const stored = r.tasks.flatMap(t => (t.verdicts || []).filter(v => ['published', 'committed'].includes(v.status) && v.kind !== 'output').map(v => ({ v, t })));
+  const tiles = acts.map(a => `<div class="otile"><span class="oic">${a.icon}</span><div><small>${h(a.kind)}</small>${a.big ? `<b>${h(a.big)}</b>` : ''}<span>${h(a.title || '')}</span>${a.lines.filter(Boolean).map(l => `<em>${h(l)}</em>`).join('')}<i>${h(a.who)}${a.id ? ' · ' + h(a.id) : ''}</i></div></div>`)
+    .concat(docs.map(t => { const o = t.result.output, rec = outputsOf(t)[0]; return `<a class="otile doc" href="#doc-${t.id}"><span class="oic">📄</span><div><small>${h(kindName(o.kind))} ready</small><b>${h(o.title || t.title)}</b><span>${h(personOf(t))} · ${h(roleOfT(t).name)}</span>${rec ? `<em class="${rec.status === 'Waiting for approval' ? 'w' : 'ok'}">${h(rec.status)}</em>` : ''}</div></a>`; }));
+  return `<div class="rhead"><div><small>${doneAll ? 'Delivered for' : 'In progress for'} ${h(E.name)}</small><h2>${h(r.text.replace(/ \(clarification:.*\)$/, ''))}</h2></div>
+      <div class="rstats"><span><b>${r.tasks.length}</b> tickets</span><span><b>${new Set(r.tasks.map(t => roleOfT(t).team)).size}</b> teams</span><span><b>${S.reads}</b> foundation items</span><span><b>${S.reused}</b> reused</span><span><b>${S.calls}</b> system calls</span><span><b>${S.committed}</b> stored back</span></div></div>
+    ${waiting.length ? `<div class="signbox"><b>Needs your sign-off</b><small>Client-facing. Nothing goes out until you approve.</small>${waiting.map(({ o, t }) => `<div class="sorow">${avatar(personOf(t), TCOL(roleOfT(t).team), 28)}<span><b>${h(o.title)}</b><small>${h(kindName(o.kind))} from ${h(personOf(t))}</small></span><a class="ghost sm" href="#doc-${t.id}">Review</a><button type="button" class="primary sm" data-signoff="${h(o.id)}">✓ Approve</button></div>`).join('')}</div>` : ''}
+    <div class="olbl">What happened</div><div class="otiles">${tiles.join('') || '<p class="muted">Nothing finished yet.</p>'}</div>
+    ${proposed.length ? `<div class="olbl">Follow-ups</div><div class="fups">${proposed.map(({ v, t }) => `<div class="fup"><span class="pill ${v.status === 'committed' ? 'approved' : 'review'}">${v.status === 'committed' ? 'Created' : 'Proposed'}</span><b>${h(v.title || '')}</b><small>${h(personOf(t))}${v.reason ? ' · ' + h(v.reason) : ''}</small></div>`).join('')}</div>` : ''}
+    <div class="olbl">Deliverables</div>
+    ${docs.map(t => { const o = t.result.output, rec = outputsOf(t)[0], R = roleOfT(t); return `<article class="deliv" id="doc-${t.id}"><header>${avatar(personOf(t), TCOL(R.team), 34)}<span><small>${h(kindName(o.kind))} · ${tid(r, t)}</small><b>${h(o.title || t.title)}</b><i>${h(personOf(t))} · ${h(R.name)} · ${h(AGENTS[t.agent].name)}${t.contract && t.contract.as_of.length ? ' · as of ' + h(t.contract.as_of.join(', ')) : ''}</i></span>${rec ? `<em class="pill ${rec.status === 'Waiting for approval' ? 'review' : 'approved'}">${h(rec.status)}</em>` : ''}</header><div class="db">${bodyHTML(o.body)}</div>${t.contract && t.contract.sources.length ? `<footer>Sources: ${t.contract.sources.slice(0, 8).map(x => `<span class="sid">${h(x)}</span>`).join(' ')}</footer>` : ''}</article>`; }).join('') || '<p class="muted">No documents yet.</p>'}
+    ${stored.length ? `<div class="olbl">Stored for next time</div><div class="fups">${stored.map(({ v, t }) => `<div class="fup"><span class="pill approved">${v.kind === 'memory' ? 'Memory' : v.kind === 'knowledge' ? 'Knowledge' : h(v.kind)}</span><b>${h(v.title || v.id || '')}</b><small>${h(personOf(t))}${v.id ? ' · ' + h(v.id) : ''}</small></div>`).join('')}</div>` : ''}`;
+}
+const kindName = k => ({ brief: 'Brief', note: 'Note', email: 'Email draft', comparison: 'Comparison', one_pager: 'One-pager', agenda: 'Agenda', finding: 'Finding', content_pick: 'Content pick', case_note: 'Case note', post: 'Post' }[k] || String(k || 'Output').replace(/_/g, ' ').replace(/^./, c => c.toUpperCase()));
 
 /* right: the workbench for one person */
 function paintBench() {
@@ -246,7 +287,7 @@ function ticketHTML(r, t, p) {
   const P = t.packet || (r.tasks.length ? (() => { try { return buildPacket(t, r); } catch (e) { return null; } })() : null);
   const byL = {}; (P ? P.items : []).forEach(i => (byL[i.layer] = byL[i.layer] || []).push(i));
   const reused = P ? P.items.filter(i => reusedIn(t, i)) : [];
-  const steps = ['Assigned', 'Agents working', 'Review', 'Approved'], at = { ready: 0, blocked: 0, running: 1, failed: 1, review: 2, approved: 3 }[s];
+  const steps = ['Assigned', 'Agents working', 'Review', 'Done'], at = { ready: 0, blocked: 0, running: 1, failed: 1, review: 2, signoff: 2, approved: 3 }[s];
   const out = t.result && t.result.output;
   const waitOut = (t.verdicts || []).map(v => v.kind === 'output' && F.outputs.find(o => o.id === v.id)).find(o => o && o.status === 'Waiting for approval');
   return `<div class="tkhead"><span class="tkid">${tid(r, t)}</span><em class="pill ${s}">${h(ST_LABEL[s])}</em><span class="muted">from Orchestrator for ${h(EMPLOYEES[r.requester].name)} · wave ${t.wave}</span></div>
@@ -267,6 +308,7 @@ function ticketHTML(r, t, p) {
     ${t.result ? `<div class="card"><div class="olbl">Result</div>${t.result.says ? `<p class="says">“${h(t.result.says)}”</p>` : ''}${out && out.body ? `<div class="doc"><div class="dh"><span class="kind">${h(String(out.kind || 'output').toUpperCase())}</span><b>${h(out.title || '')}</b>${t.contract && t.contract.as_of.length ? `<small>As of ${h(t.contract.as_of.join(', '))}</small>` : ''}</div><div class="db">${bodyHTML(out.body)}</div></div>` : ''}</div>` : ''}
     ${t.verdicts ? `<div class="card"><div class="olbl">Gatekeeper</div><div class="vds">${t.verdicts.map(v => { const o = v.kind === 'output' && F.outputs.find(y => y.id === v.id), vs = o && o.status === 'Waiting for approval' ? 'approval' : v.status; return `<span class="vd ${vs}" title="${h(v.reason || '')}">${h(v.kind)}: ${h(VERB[vs] || vs)}${v.id ? ` <span class="sid">${h(v.id)}</span>` : ''}${['rejected', 'blocked', 'flagged'].includes(vs) && v.reason ? ` <em>${h(v.reason)}</em>` : ''}</span>`; }).join('')}</div></div>` : ''}
     ${s === 'review' ? `<div class="approvebar"><span>${waitOut ? `<b>Client-facing.</b> Nothing goes out until you approve “${h(waitOut.title)}”.` : `<b>Review ${h(p.name.split(' ')[0])}’s work.</b> Approving hands it to the next team.`}</span><button type="button" class="ghost" data-back="${t.id}">Request changes</button><button type="button" class="primary" data-approve="${t.id}">✓ Approve and hand off</button></div>` : ''}
+    ${s === 'signoff' ? `<div class="approvebar"><span><b>Handed off.</b> “${h(waitOut.title)}” is client-facing and waits for your sign-off.</span><button type="button" class="primary" data-signoff="${h(waitOut.id)}">✓ Approve</button></div>` : ''}
     ${s === 'failed' ? `<div class="warnbox">${h(t.error || 'Failed')}</div>` : ''}`;
 }
 
@@ -293,7 +335,10 @@ document.addEventListener('click', e => {
   if ((x = q('[data-ask]'))) { ask(x.dataset.ask); return; }
   if ((x = q('[data-answer]'))) { answer(x.dataset.answer); return; }
   if (q('[data-answer-input]')) { answer(q('.qcard').querySelector('.clarIn').value.trim()); return; }
-  if (q('[data-auto]')) { if (ST.auto) { ST.auto = false; paintAll(); } else autopilot(); return; }
+  if (q('[data-runall]')) { runAll(); return; }
+  if (q('[data-stop]')) { ST.auto = false; paintAll(); return; }
+  if ((x = q('[data-view]'))) { ST.view = x.dataset.view; if (ST.view === 'results') ST.open = null; paintAll(); return; }
+  if ((x = q('[data-signoff]'))) { signOff(F.outputs.find(o => o.id === x.dataset.signoff)); paintAll(); return; }
   if ((x = q('[data-task]'))) { const t = run().tasks.find(y => y.id === x.dataset.task); ST.open = personOf(t); ST.openTask = t.id; paintAll(); return; }
   if ((x = q('.pcard'))) { ST.open = x.dataset.person; const t = run() && run().tasks.find(y => personOf(y) === ST.open); ST.openTask = t ? t.id : null; paintAll(); return; }
   if ((x = q('[data-tab-task]'))) { ST.openTask = x.dataset.tabTask; paintAll(); return; }
@@ -308,5 +353,5 @@ el('newChat').onclick = () => { if (busyPlanning() || anyRunning()) return; UI.r
 
 UI.requester = ME; paintAll();
 initAI().then(paintAll);
-window.HARNESS = { ask, answer, startTask, approve, autopilot, ST, status };
+window.HARNESS = { ask, answer, startTask, approve, runAll, ST, status };
 })();
