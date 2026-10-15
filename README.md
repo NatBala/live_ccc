@@ -11,18 +11,22 @@ You type a request as a real role (a wholesaler, a product specialist, a markete
 
 ## Agent Harness (default view on this branch)
 
-`public/index.html` is now the **Agent Harness**, a conversational view for business users (the classic workbench and foundation view is at `public/classic.html`, linked from the header). It works the way Claude Code or Codex does, but for wholesalers, marketers and product teams:
+`public/index.html` is the **Agent Harness**: the business user's view of the same intelligence, orchestration and shared foundation the classic view runs (`public/classic.html`, linked from the header). Nothing in it is scripted. The run pipeline (`src/pipeline.js`) is shared by both views; the harness only renders what it does, as a conversation:
 
-1. **Ask in your own words.** The harness reads the intent, the advisor and the authority (read-only, draft only, or needs approval) and shows what it understood.
-2. **Clarifying questions with options.** One question at a time, with a recommended choice, multi-select where it makes sense, a free-text "other", and keys 1 to 4.
-3. **A plan you can follow.** Steps grouped into waves, each tagged with the system it uses and the template it fills.
-4. **Live connections.** Each step shows it connecting to Salesforce, the data platform, Seismic, the insights feed, SharePoint, Outlook or the dealer platform feed, the calls it makes and what came back. The right rail lights up each system as it is used.
-5. **Information passed.** After each step, a handoff line shows exactly what moved to the next step (for example "CG assets $232M, net flows $15.2M → Compose from template").
-6. **Templates.** Steps that write something open a Seismic template (meeting brief, agenda, talking points, market update email, LinkedIn post, standard or custom pitch book) and fill its slots from the systems above.
-7. **Dynamic components.** Results appear as live cards: advisor snapshot, sales and redemptions, what changed since the last meeting, platform availability, this week's themes, approved Seismic content, disclosures, the composed document, a compliance pre-check, and selectable calendar slots.
-8. **Approval before anything changes.** Placing a calendar hold, sending to compliance or drafting in Outlook waits for a click.
+1. **Intelligence.** What the foundation already knew before the model answered (graph lookup, the foundation context sent to the orchestrator, similar catalogue requests, authority set by rule). Then the orchestrator's decisions stream in, tagged AI or RULE, with what it **assumed instead of asking**, and its interpretation (subject, scope, time, output, constraints, and what is not in the foundation).
+2. **A question only when the foundation can't settle it.** The orchestrator checks the graph, session, memory, episodes, findings and content first. It never asks for logistics (meeting times, attendees, availability), which go to SSC (Schedule Me / Follow Me), or for data a specialist can fetch. When it does ask, it says what it checked and offers options.
+3. **Orchestration.** The plan: which team and person own each step, the sub-agent route, the shared services it reads, the waves and dependencies, and the authority cap.
+4. **Each specialist, live:**
+   - its context packet from the shared foundation, by layer, with the items reused from other teams highlighted and anything withheld by policy;
+   - the steps it builds on;
+   - the system calls it made through MCP or APIs, only for what the foundation didn't already hold;
+   - its output;
+   - the gatekeeper's verdicts (published to knowledge, committed to memory, rejected, waiting for approval).
+5. **What the foundation saved.** Items read, work reused, system calls, results stored back for the next person, and drafts waiting for approval.
 
-Flows included: meeting prep (brief, agenda or talking points), market update (email, talking points or LinkedIn), explain an advisor's sales, schedule a meeting, standard or custom pitch book, and platform availability. Data comes from the same tools the agents use (`src/engine.js` over `src/data.js`), so every number is traceable. Source: `src/harness/`. Add `?fast=1` to the URL to run the animations quickly.
+The right-hand rail shows the foundation layers lighting up as they are read and written, live reads, calls, handoffs and write-backs, and which systems were used.
+
+With an OpenAI or Azure OpenAI key on the server (see "Run it"), requests are planned and worked live. Without one, the saved AI runs in `src/replay.js` replay through the same foundation, tools and checks. Add `?fast=1` to the address to skip presentation pauses.
 
 ## Background
 
