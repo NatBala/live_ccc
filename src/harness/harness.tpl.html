@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Harness · Connected Client Experience</title>
+<style>/*CSS*/</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><span class="mark"><i></i><i></i><i></i><i></i></span><b>Connected Client Experience</b><em>Agent Harness</em></div>
+    <div class="who" id="who" role="group" aria-label="Who is asking"></div>
+    <div class="topact"><button class="ghost" id="newChat" type="button">New conversation</button><a class="ghost" href="classic.html">Classic view</a></div>
+  </header>
+  <div class="shell">
+    <main class="thread-wrap">
+      <div class="thread" id="thread" aria-live="polite"></div>
+      <form class="composer" id="composer" autocomplete="off">
+        <div class="cbox">
+          <textarea id="ask" rows="1" placeholder="Ask for what you need, in your own words…" aria-label="Your request"></textarea>
+          <button type="submit" class="send" id="send" aria-label="Send">↑</button>
+        </div>
+        <div class="hintline"><span>Enter to send · Shift+Enter for a new line · 1 to 4 picks an option</span><span id="modeTag">Read-only until you approve an action</span></div>
+      </form>
+    </main>
+    <aside class="rail" id="rail" aria-label="Connections"></aside>
+  </div>
+</div>
+<script>
+/*DATA*/
+/*CATALOGUE*/
+/*ENGINE*/
+/*HARNESS*/
+</script>
+</body>
+</html>

@@ -8,6 +8,22 @@ You type a request as a real role (a wholesaler, a product specialist, a markete
 
 ---
 
+
+## Agent Harness (default view on this branch)
+
+`public/index.html` is now the **Agent Harness**, a conversational view for business users (the classic workbench and foundation view is at `public/classic.html`, linked from the header). It works the way Claude Code or Codex does, but for wholesalers, marketers and product teams:
+
+1. **Ask in your own words.** The harness reads the intent, the advisor and the authority (read-only, draft only, or needs approval) and shows what it understood.
+2. **Clarifying questions with options.** One question at a time, with a recommended choice, multi-select where it makes sense, a free-text "other", and keys 1 to 4.
+3. **A plan you can follow.** Steps grouped into waves, each tagged with the system it uses and the template it fills.
+4. **Live connections.** Each step shows it connecting to Salesforce, the data platform, Seismic, the insights feed, SharePoint, Outlook or the dealer platform feed, the calls it makes and what came back. The right rail lights up each system as it is used.
+5. **Information passed.** After each step, a handoff line shows exactly what moved to the next step (for example "CG assets $232M, net flows $15.2M → Compose from template").
+6. **Templates.** Steps that write something open a Seismic template (meeting brief, agenda, talking points, market update email, LinkedIn post, standard or custom pitch book) and fill its slots from the systems above.
+7. **Dynamic components.** Results appear as live cards: advisor snapshot, sales and redemptions, what changed since the last meeting, platform availability, this week's themes, approved Seismic content, disclosures, the composed document, a compliance pre-check, and selectable calendar slots.
+8. **Approval before anything changes.** Placing a calendar hold, sending to compliance or drafting in Outlook waits for a click.
+
+Flows included: meeting prep (brief, agenda or talking points), market update (email, talking points or LinkedIn), explain an advisor's sales, schedule a meeting, standard or custom pitch book, and platform availability. Data comes from the same tools the agents use (`src/engine.js` over `src/data.js`), so every number is traceable. Source: `src/harness/`. Add `?fast=1` to the URL to run the animations quickly.
+
 ## Background
 
 ### The problem

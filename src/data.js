@@ -82,7 +82,7 @@ const ROLES = {
   'sales.internal': { team: 'sales', name: 'Internal wholesalers', person: 'Sam Lee', does: 'Territory insight and prioritization' },
   'product.qa': { team: 'product', name: 'Product Q&A', person: 'Dana Ortiz', does: 'Fund questions, comparisons, analytics tools and verified answers' },
   'product.strategy': { team: 'product', name: 'Strategy Intel', person: 'Wei Zhang', does: 'Investment director (ID) preparation: positioning, market views and meeting prep' },
-  'product.content': { team: 'product', name: 'Investment content generation', person: 'Elena Park', does: 'Institutional and SRG pitch books' },
+  'product.content': { team: 'product', name: 'Investment content generation', person: 'Nora Quinn', does: 'Institutional and SRG pitch books' },
   'marketing.content': { team: 'marketing', name: 'Content generation', person: 'Marcus Bell', does: 'Approved content, drafts, personalized emails and posts' },
   'marketing.compliance': { team: 'marketing', name: 'Compliance review', person: 'Grace Liu', does: 'Claims, disclosures, sign-off' },
   'marketing.distribution': { team: 'marketing', name: 'Distribution', person: 'Omar Haddad', does: 'Audiences and approved sends' },
