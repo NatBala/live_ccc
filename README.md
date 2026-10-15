@@ -14,7 +14,7 @@ You type a request as a real role (a wholesaler, a product specialist, a markete
 `public/index.html` is the **Agent Harness**, a single-screen view that shows a business leader how a request is planned and carried out across teams. The classic workbench view is at `public/classic.html`. Both run the same pipeline (`src/pipeline.js` over `src/engine.js`): the orchestrator plans from the shared foundation, specialists work from context packets, tools go through the gateway, and the gatekeeper checks every result. Nothing in the harness is scripted.
 
 - **Orchestrator panel (left).** Planning status, then the plan: tickets by wave, a **Run all agents** button, what the foundation answered instead of asking, the interpretation and the grounding.
-- **Orchestration canvas (centre).** Requester → Orchestrator hub → each workbench, above a shared-foundation band and a row of systems. The conversation is animated along the connections:
+- **Orchestration canvas (centre).** Requester → Intelligence hub → each workbench, above a shared-foundation band and a row of systems. The conversation is animated along the connections:
   - *Assigned*: the planner sends a ticket to a workbench.
   - *Picked up* and *Done*: the workbench reports back to the planner.
   - *Handoff*: the planner relays finished work to the next workbench.

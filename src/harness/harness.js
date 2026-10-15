@@ -23,6 +23,8 @@ function badge() {}
 function buildStaticWho() {}
 
 (() => {
+/* the planner's display name, in one place; alternatives: Conductor, Nexus, Maestro, Synapse */
+const HUB = 'Intelligence';
 const el = id => document.getElementById(id);
 const h = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const QS = new URLSearchParams(location.search);
@@ -157,7 +159,7 @@ async function runAll() {
 
 /* ---------- communication: messages travel along the canvas ---------- */
 const MSG_ICON = { request: 'send', assign: 'inbox', ack: 'play', report: 'check', handoff: 'arrow', signoff: 'alert', deliver: 'sparkles', approve: 'check', back: 'undo' };
-const nodeName = id => id === 'hub' ? 'Orchestrator' : id === 'req' ? (run() ? EMPLOYEES[run().requester].name : meName()) : id.slice(2);
+const nodeName = id => id === 'hub' ? HUB : id === 'req' ? (run() ? EMPLOYEES[run().requester].name : meName()) : id.slice(2);
 function comm(from, to, text, kind) {
   ST.msgs.unshift({ from, to, text, kind, at: Date.now() }); ST.msgs = ST.msgs.slice(0, 40);
   travel(from, to, kind === 'assign' ? text.split(' · ')[0].replace('Assigned ', '') : { request: 'Request', ack: 'Picked up', report: 'Done', handoff: 'Handoff', signoff: 'Sign-off', deliver: 'Delivered', approve: 'Approved', back: 'Changes' }[kind] || '', kind);
@@ -220,8 +222,8 @@ const kv = (k, v) => v ? `<div class="kvr"><span>${h(k)}</span><span>${v}</span>
 function paintOrch() {
   const r = run();
   if (!r) {
-    setHTML(el('orch'), `<div class="ohead"><span class="omark">${I('branch', 16)}</span><div><b>Orchestrator</b><small>Intelligence and orchestration</small></div></div>
-      <div class="intro"><h2>What outcome do you need?</h2><p>The orchestrator checks the shared foundation, plans the work and routes a ticket to every team that owns a piece of it.</p>
+    setHTML(el('orch'), `<div class="ohead"><span class="omark">${I('branch', 16)}</span><div><b>${HUB}</b><small>Plans from the shared foundation</small></div></div>
+      <div class="intro"><h2>What outcome do you need?</h2><p>${HUB} checks the shared foundation, plans the work and routes a ticket to every team that owns a piece of it.</p>
         <ol class="how"><li><span>1</span>Plan from what the foundation knows</li><li><span>2</span>Route tickets to the owning teams</li><li><span>3</span>Agents run, people approve</li></ol></div>
       ${ST.nokey ? `<div class="callout warn">${I('alert', 16)}<div><b>No AI key on this server.</b> “${h(ST.nokey)}” can’t be planned live. Choose a saved AI run below, or add an OpenAI or Azure OpenAI key.</div></div>` : ''}
       <div class="sh">${AI.mode === 'live' ? 'Suggested' : 'Saved AI runs'}</div><div class="sugs">${suggestions().map(s => `<button type="button" class="sug" data-ask="${h(s)}"><span>${h(s)}</span>${I('arrow', 14)}</button>`).join('')}</div>`);
@@ -242,8 +244,8 @@ function paintOrch() {
   else if (r.tasks.length) stat = `<div class="scard plan"><div class="srow"><b>${r.status === 'planned' ? 'Plan ready' : ST.auto ? 'Running all agents' : 'In progress'}</b>${ST.auto ? '<span class="spin"></span>' : ''}</div>
       <div class="kpis"><div><b>${r.tasks.length}</b><small>tickets</small></div><div><b>${teams}</b><small>team${teams > 1 ? 's' : ''}</small></div><div><b>${waves.length}</b><small>wave${waves.length > 1 ? 's' : ''}</small></div><div><b>${done}/${r.tasks.length}</b><small>done</small></div></div>
       <div class="prog"><i style="width:${done / r.tasks.length * 100}%"></i></div>
-      ${ST.auto ? `<button type="button" class="btn subtle block" data-stop>${I('pause', 14)} Pause</button>` : ready ? `<button type="button" class="btn primary block lg" data-runall>${I('play', 14)} Run all agents</button><small class="note">Teams hand off through the orchestrator. Client-facing drafts wait for your sign-off.</small>` : ''}</div>`;
-  setHTML(el('orch'), `<div class="ohead"><span class="omark${thinking ? ' pulse' : ''}">${I('branch', 16)}</span><div><b>Orchestrator</b><small>${r.replay ? 'Replaying a saved AI run' : 'Intelligence and orchestration'}</small></div></div>
+      ${ST.auto ? `<button type="button" class="btn subtle block" data-stop>${I('pause', 14)} Pause</button>` : ready ? `<button type="button" class="btn primary block lg" data-runall>${I('play', 14)} Run all agents</button><small class="note">Teams hand off through ${HUB}. Client-facing drafts wait for your sign-off.</small>` : ''}</div>`;
+  setHTML(el('orch'), `<div class="ohead"><span class="omark${thinking ? ' pulse' : ''}">${I('branch', 16)}</span><div><b>${HUB}</b><small>${r.replay ? 'Replaying a saved AI run' : 'Planning and orchestration'}</small></div></div>
     <div class="reqq">${avatar(EMPLOYEES[r.requester].name, EMPLOYEES[r.requester].team, 26)}<div><small>${h(EMPLOYEES[r.requester].name)}</small><p>${h(r.text.replace(/ \(clarification:.*\)$/, ''))}</p></div></div>
     ${stat}
     ${r.status === 'clarify' ? clarifyHTML(r) : ''}
@@ -310,7 +312,7 @@ function paintCanvas() {
   const reqState = r ? (r.status === 'done' ? 'done' : r.tasks.some(waitingOutput) ? 'wait' : 'active') : 'idle';
   items.push({ k: 'req', html: `${avatar(E.name, E.team, 34)}<div><small>Requester</small><b>${h(E.name)}</b><span>${r ? (r.status === 'done' ? 'Delivered' : r.tasks.some(waitingOutput) ? 'Sign-off waiting' : 'Waiting for results') : 'Ready to ask'}</span></div>`, cls: 'nd req ' + reqState });
   const thinking = r && r.status === 'thinking';
-  items.push({ k: 'hub', html: `<div class="orb${thinking || anyRunning() || ST.auto ? ' spin2' : ''}"><i></i><i></i></div><div class="hubc">${I('branch', 22)}<b>Orchestrator</b><small>${!r ? 'Idle' : thinking ? 'Planning' : r.status === 'clarify' ? 'Asking' : r.status === 'done' ? 'Complete' : `${r.tasks.filter(t => ST.approved.has(t.id)).length}/${r.tasks.length} done`}</small></div>`, cls: 'nd hub' + (thinking ? ' think' : '') });
+  items.push({ k: 'hub', html: `<div class="orb${thinking || anyRunning() || ST.auto ? ' spin2' : ''}"><i></i><i></i></div><div class="hubc">${I('branch', 22)}<b>${HUB}</b><small>${!r ? 'Idle' : thinking ? 'Planning' : r.status === 'clarify' ? 'Asking' : r.status === 'done' ? 'Complete' : `${r.tasks.filter(t => ST.approved.has(t.id)).length}/${r.tasks.length} done`}</small></div>`, cls: 'nd hub' + (thinking ? ' think' : '') });
   if (r) {
     const per = {}; r.tasks.forEach(t => (per[personOf(t)] = per[personOf(t)] || []).push(t));
     Object.entries(per).forEach(([p, ts]) => {
@@ -349,7 +351,7 @@ function paintCanvas() {
   base.innerHTML = edges.join('');
   /* wave headers */
   const lane = cv.querySelector('.lane');
-  setHTML(lane, L.waves.map((w, i) => `<span class="wvh" style="left:${L.x0 + i * L.colW}px">${L.waves.length > 1 ? 'Wave ' + w : 'Workbenches'}</span>`).join('') + (!r ? `<div class="idle-hint" style="left:${P2.hub.x + P2.hub.w + 70}px;top:${P2.hub.y + 10}px"><b>Workbenches appear here</b><span>Each step of the plan becomes a ticket on the workbench of the person who owns it. Messages flow through the orchestrator as work is picked up, finished and handed off.</span><div class="roster">${ROSTER.map(p => `<button type="button" class="rp" data-person="${h(p.name)}" title="${h(p.name)} · ${h(p.role)}">${avatar(p.name, p.team, 26)}</button>`).join('')}</div></div>` : ''));
+  setHTML(lane, L.waves.map((w, i) => `<span class="wvh" style="left:${L.x0 + i * L.colW}px">${L.waves.length > 1 ? 'Wave ' + w : 'Workbenches'}</span>`).join('') + (!r ? `<div class="idle-hint" style="left:${P2.hub.x + P2.hub.w + 70}px;top:${P2.hub.y + 10}px"><b>Workbenches appear here</b><span>Each step of the plan becomes a ticket on the workbench of the person who owns it. Messages flow through ${HUB} as work is picked up, finished and handed off.</span><div class="roster">${ROSTER.map(p => `<button type="button" class="rp" data-person="${h(p.name)}" title="${h(p.name)} · ${h(p.role)}">${avatar(p.name, p.team, 26)}</button>`).join('')}</div></div>` : ''));
 }
 
 /* the live dock: what each agent is doing right now, without scrolling */
@@ -406,7 +408,7 @@ function paintFeed() {
   const box = el('feed'); if (!box) return;
   const r = run(), ms = ST.msgs.slice(0, 7);
   const who = id => id === 'hub' ? `<span class="hubdot">${I('branch', 11)}</span>` : id === 'req' ? avatar(nodeName(id), r ? EMPLOYEES[r.requester].team : EMPLOYEES[ME].team, 20) : (() => { const t = r && r.tasks.find(x => 'p:' + personOf(x) === id); return avatar(id.slice(2), t ? roleOfT(t).team : 'sales', 20); })();
-  setHTML(box, `<div class="fdh">${I('msg', 13)}<b>Orchestration messages</b><small>${ST.msgs.length}</small></div>${ms.length ? ms.map((m, i) => `<div class="fm ${m.kind}${i === 0 ? ' new' : ''}"><span class="fw">${who(m.from)}${I('arrow', 10, 'ar')}${who(m.to)}</span><div><b>${h(m.text)}</b><small>${h(first(nodeName(m.from)))} → ${h(first(nodeName(m.to)))} · ${ago(m.at)}</small></div></div>`).join('') : '<p class="fempty">Assignments, pick-ups, reports and handoffs between the orchestrator and each workbench appear here.</p>'}`);
+  setHTML(box, `<div class="fdh">${I('msg', 13)}<b>Live messages</b><small>${ST.msgs.length}</small></div>${ms.length ? ms.map((m, i) => `<div class="fm ${m.kind}${i === 0 ? ' new' : ''}"><span class="fw">${who(m.from)}${I('arrow', 10, 'ar')}${who(m.to)}</span><div><b>${h(m.text)}</b><small>${h(first(nodeName(m.from)))} → ${h(first(nodeName(m.to)))} · ${ago(m.at)}</small></div></div>`).join('') : '<p class="fempty">Assignments, pick-ups, reports and handoffs between the orchestrator and each workbench appear here.</p>'}`);
 }
 const ago = t => { const s = Math.round((Date.now() - t) / 1000); return s < 3 ? 'now' : s < 60 ? s + 's ago' : Math.round(s / 60) + 'm ago'; };
 setInterval(() => { if (ST.msgs.length) paintFeed(); }, 5000);
@@ -469,13 +471,13 @@ function ticketHTML(r, t, p) {
   const byL = {}; (Pk ? Pk.items : []).forEach(i => (byL[i.layer] = byL[i.layer] || []).push(i));
   const reused = Pk ? Pk.items.filter(i => reusedIn(t, i)) : [], total = Pk ? Pk.items.length : 0;
   const out = t.result && t.result.output;
-  const tl = [['done', 'inbox', 'Assigned by the orchestrator', `${h(EMPLOYEES[r.requester].name)}’s request · wave ${t.wave}`]];
+  const tl = [['done', 'inbox', `Assigned by ${HUB}`, `${h(EMPLOYEES[r.requester].name)}’s request · wave ${t.wave}`]];
   if (t.packet) tl.push(['done', 'layers', 'Context attached from the shared foundation', `${t.packet.items.length} items${reused.length ? `, ${reused.length} reused from other teams` : ''}`]);
   (t.calls || []).forEach(c => tl.push([c.error ? 'err' : 'done', 'db', `<span class="sysn" style="--c:${SYS_COL[c.sys] || '#64748b'}">${h(SYS_SHORT[c.sys] || 'Gateway')}</span>${h(callText(c))}`, c.error ? h(c.error) : `${h(gist(c.out))}${c.out && c.out.synthesized ? ' <span class="demo">demo data</span>' : ''}`]));
   if (t.state === 'running') tl.push(['now', 'cpu', !t.packet ? 'Assembling context' : 'Working', '']);
   if (t.result) tl.push(['done', 'sparkles', 'Result produced', h(t.result.says || '')]);
   if (t.verdicts) tl.push(['done', 'shield', 'Gatekeeper checks', t.verdicts.map(v => { const o = v.kind === 'output' && F.outputs.find(y => y.id === v.id), vs = o && o.status === 'Waiting for approval' ? 'approval' : v.status; return `<span class="vd ${vs}">${h(v.kind)} · ${h(VERB[vs] || vs)}${v.id ? ` <code>${h(v.id)}</code>` : ''}</span>`; }).join('')]);
-  if (ST.approved.has(t.id)) tl.push(['done', 'arrow', 'Reported back; the orchestrator handed it on', r.tasks.filter(x => x.depends_on.includes(t.id)).map(x => `${tid(r, x)} · ${h(personOf(x))}`).join(', ') || 'Final step']);
+  if (ST.approved.has(t.id)) tl.push(['done', 'arrow', `Reported back; ${HUB} handed it on`, r.tasks.filter(x => x.depends_on.includes(t.id)).map(x => `${tid(r, x)} · ${h(personOf(x))}`).join(', ') || 'Final step']);
   return `<h2 class="ttl">${h(t.title)}</h2>
     <div class="props">${kv('Status', badge2(s))}${kv('Assignee', `${avatar(p.name, p.team, 20)} ${h(p.name)}`)}${kv('Team', `<span class="tdot" style="--c:${TCOL(R.team)}"></span>${h(R.name)} · ${h(teamName(R.team))}`)}${kv('Requested by', `${avatar(EMPLOYEES[r.requester].name, EMPLOYEES[r.requester].team, 20)} ${h(EMPLOYEES[r.requester].name)}`)}${kv('Agent', `<span class="chip strong">${I('cpu', 11)}${h(A.name)}</span>${t.route ? `<code>${h(t.route)}</code>` : ''}`)}${deps.length ? kv('Depends on', deps.map(d => `<span class="dep">${badge2(status(r, d))}<code>${tid(r, d)}</code> ${h(personOf(d))}</span>`).join('')) : ''}</div>
     <div class="blk"><div class="sh">Description</div><p>${h(t.objective)}</p>${t.why ? `<p class="why">${I('branch', 13)} <span><b>Routed to ${h(R.name)}:</b> ${h(t.why)}</span></p>` : ''}</div>
@@ -484,7 +486,7 @@ function ticketHTML(r, t, p) {
       <div class="llg">${Object.entries(byL).map(([l, xs]) => `<span><i style="--c:${LAYER_COL[l] || '#64748b'}"></i>${h((LAYERS[l] || {}).short || l)} ${xs.length}</span>`).join('')}<span class="sum">${total} items${reused.length ? ` · <b>${reused.length} reused</b>` : ''}${Pk.withheld.length ? ` · ${Pk.withheld.length} withheld` : ''}</span></div>
       <div class="items">${Pk.items.filter(i => i.layer !== 'policy').sort((x, y) => reusedIn(t, y) - reusedIn(t, x)).slice(0, 4).map(i => `<div class="it${reusedIn(t, i) ? ' re' : ''}"><i style="--c:${LAYER_COL[i.layer] || '#64748b'}"></i><div><b>${h(i.label)}</b> <code>${h(i.id)}</code>${reusedIn(t, i) ? '<span class="reuse">Reused</span>' : ''}<p>${h(String(i.value).slice(0, 130))}${String(i.value).length > 130 ? '…' : ''}</p><small>${h(i.from || '')}</small></div></div>`).join('')}
       ${Pk.withheld.slice(0, 2).map(w => `<div class="it wh">${I('lock', 13)}<div><b>Withheld</b> <code>${h(w.id)}</code><p>${h(w.why)}</p></div></div>`).join('')}</div></div>` : ''}
-    ${s === 'blocked' ? `<div class="callout">${I('clock', 16)}<div>Starts when the orchestrator hands over ${deps.filter(d => !ST.approved.has(d.id)).map(d => `<code>${tid(r, d)}</code> (${h(personOf(d))})`).join(', ')}.</div></div>` : ''}
+    ${s === 'blocked' ? `<div class="callout">${I('clock', 16)}<div>Starts when ${HUB} hands over ${deps.filter(d => !ST.approved.has(d.id)).map(d => `<code>${tid(r, d)}</code> (${h(personOf(d))})`).join(', ')}.</div></div>` : ''}
     <div class="blk"><div class="sh">Activity</div><ol class="act">${tl.map(([st, ic, a, b2]) => `<li class="${st}"><span class="an2">${st === 'now' ? '<span class="spin"></span>' : I(ic, 13)}</span><div><b>${a}</b>${b2 ? `<small>${b2}</small>` : ''}</div></li>`).join('')}</ol></div>
     ${out && out.body ? `<div class="blk"><div class="sh">Result</div><article class="deliv in"><header><div><small>${h(kindName(out.kind))}</small><b>${h(out.title || '')}</b>${t.contract && t.contract.as_of.length ? `<span>As of ${h(t.contract.as_of.join(', '))}</span>` : ''}</div></header><div class="docb">${bodyHTML(out.body)}</div></article></div>` : ''}
     ${s === 'failed' ? `<div class="callout bad">${I('alert', 16)}<div>${h(t.error || 'Failed')}</div></div>` : ''}`;
@@ -493,7 +495,7 @@ function footHTML(r, t, p) {
   const s = status(r, t), w = waitingOutput(t);
   if (s === 'ready') return `<span>Runs here; watch it live on the canvas</span><button type="button" class="btn primary" data-run="${t.id}">${I('play', 13)} Run agents</button>`;
   if (s === 'running') return `<span class="busy"><span class="spin"></span> Agents working…</span>`;
-  if (s === 'review') return `<span>${w ? '<b>Client-facing.</b> Approving signs it off.' : 'Approving reports back to the orchestrator, which hands it on.'}</span><button type="button" class="btn subtle" data-back="${t.id}">${I('undo', 13)} Request changes</button><button type="button" class="btn primary" data-approve="${t.id}">${I('check', 13)} Approve and hand off</button>`;
+  if (s === 'review') return `<span>${w ? '<b>Client-facing.</b> Approving signs it off.' : `Approving reports back to ${HUB}, which hands it on.`}</span><button type="button" class="btn subtle" data-back="${t.id}">${I('undo', 13)} Request changes</button><button type="button" class="btn primary" data-approve="${t.id}">${I('check', 13)} Approve and hand off</button>`;
   if (s === 'signoff') return `<span>“${h(w.title)}” waits for your sign-off.</span><button type="button" class="btn primary" data-signoff="${h(w.id)}">${I('check', 13)} Approve</button>`;
   if (s === 'approved') return `<span class="okt">${I('check', 14)} Done and handed off</span>`;
   if (s === 'blocked') return `<span class="busy">${I('clock', 14)} Waiting on an upstream ticket</span>`;
