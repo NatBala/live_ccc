@@ -1,10 +1,12 @@
-/* ===== Agent Harness: the orchestration floor =====
+/* ===== Agent Harness: the orchestration canvas =====
    A request goes through the real pipeline (pipeline.js over engine.js): the
    orchestrator plans it from the shared foundation (live AI, or a saved AI run
-   replayed), and every step becomes a ticket on a person's workbench. A person
-   opens their ticket, runs their agents, reviews what came back and approves
-   it, which hands the work to the next team. Nothing here is scripted; this
-   file only stages what the pipeline does so a business leader can follow it. */
+   replayed), and every step becomes a ticket on a person's workbench. The
+   canvas shows the conversation that follows: the planner assigns, each
+   workbench picks up and reports back, the planner relays the handoff to the
+   next workbench, context rises from the foundation, systems are read, and
+   verified work is written back. The live dock shows each running agent's
+   progress and output as it happens. Nothing here is scripted. */
 
 /* ---- hooks the shared pipeline calls (the classic view has its own) ---- */
 const HX_NULL = { disabled: false, hidden: false, value: '', blur() {}, focus() {}, classList: { add() {}, remove() {}, toggle() {} }, offsetWidth: 0, style: {} };
@@ -26,17 +28,19 @@ const h = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&l
 const QS = new URLSearchParams(location.search);
 if (QS.has('fast')) SLEEP_SCALE = 0.05;
 UI.readPause = 0;
+const ANIM = () => Math.max(SLEEP_SCALE, 0.35);
 
 /* ---------- design tokens used from script ---------- */
 const TEAM = { sales: '#2563eb', product: '#059669', marketing: '#d97706', service: '#7c3aed' };
 const TCOL = t => TEAM[t] || '#64748b';
 const LAYER_COL = { memory: '#7c3aed', knowledge: '#059669', policy: '#dc2626', models: '#2563eb', feedback: '#b45309', events: '#d97706', graph: '#0891b2' };
 const SYS_COL = { sf: '#0b84d8', m365: '#2f5bea', seismic: '#e0482f', fund: '#059669', mstar: '#b91c1c', gen: '#ea580c', mcloud: '#0284c7', aem: '#9333ea', news: '#b45309', exp: '#475569' };
+const SYS_SHORT = { sf: 'Salesforce', m365: 'Microsoft 365', seismic: 'Seismic', fund: 'Data platform', mstar: 'Morningstar', gen: 'Genesys', mcloud: 'Marketing Cloud', aem: 'AEM', news: 'News feed', exp: 'Expenses' };
 const DRAFTING = { start: 'Reading the request', requester: 'Checking who is asking', entity: 'Resolving the advisor in the graph', intent: 'Classifying the business intent', asks: 'Splitting the request into asks', interpretation: 'Writing the interpretation', missing: 'Checking what the foundation already answers', memory: 'Applying memory rules', reuse: 'Looking for reusable work', controls: 'Setting controls', success: 'Defining done', task: 'Routing tickets to teams', clarify: 'Drafting a question', next: 'Planning' };
 
 /* ---------- icons (stroke, 24px grid) ---------- */
 const P = {
-  play: 'M7 5l12 7-12 7z', check: 'M5 12.5l4.5 4.5L19 7.5', x: 'M6 6l12 12M18 6L6 18',
+  play: 'M7 5l12 7-12 7z', check: 'M5 12.5l4.5 4.5L19 7.5', x: 'M6 6l12 12M18 6L6 18', send: 'M4 12l16-8-6 16-2-7z',
   clock: 'M12 7v5l3 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z', alert: 'M12 8v5M12 16.5v.5M10.3 3.9L2.5 17.5A2 2 0 004.2 20.5h15.6a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z',
   cal: 'M4 7a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2zM4 10h16M9 3v4M15 3v4', mail: 'M4 6h16v12H4zM4 7l8 6 8-6', doc: 'M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6',
   task: 'M9 11l2.5 2.5L16 9M5 4h14v16H5z', note: 'M5 4h14v12l-4 4H5zM15 16v4M9 9h6M9 13h4', tool: 'M14.5 6.5a4 4 0 01-5 5L4 17l3 3 5.5-5.5a4 4 0 005-5l-2.5 2.5-2.5-.5-.5-2.5z',
@@ -46,7 +50,8 @@ const P = {
   lock: 'M6 11h12v10H6zM8 11V8a4 4 0 018 0v3', users: 'M9 11a4 4 0 100-8 4 4 0 000 8zM2 21c0-3.5 3-6 7-6s7 2.5 7 6M16 3.5a4 4 0 010 7.5M18 14.5c2.4.8 4 2.9 4 6.5',
   sparkles: 'M9 4l1.4 4.1L14.5 9.5l-4.1 1.4L9 15l-1.4-4.1L3.5 9.5l4.1-1.4zM17 13l.8 2.2 2.2.8-2.2.8L17 19l-.8-2.2L14 16l2.2-.8z',
   cpu: 'M8 8h8v8H8zM5 5h14v14H5zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3', link: 'M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1',
-  undo: 'M9 14L4 9l5-5M4 9h11a5 5 0 010 10h-3', eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 100-6 3 3 0 000 6z', target: 'M12 21a9 9 0 100-18 9 9 0 000 18zM12 16a4 4 0 100-8 4 4 0 000 8zM12 12h.01'
+  undo: 'M9 14L4 9l5-5M4 9h11a5 5 0 010 10h-3', eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 100-6 3 3 0 000 6z', target: 'M12 21a9 9 0 100-18 9 9 0 000 18zM12 16a4 4 0 100-8 4 4 0 000 8zM12 12h.01',
+  msg: 'M4 5h16v11H8l-4 4z', pulse: 'M3 12h4l3-8 4 16 3-8h4', expand: 'M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7'
 };
 const I = (n, s = 16, cls = '') => `<svg class="i ${cls}" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${P[n] || P.doc}"/></svg>`;
 
@@ -63,7 +68,7 @@ let ME = 'EMP-PRIYA';
 const meName = () => EMPLOYEES[ME].name;
 
 /* ---------- state ---------- */
-const ST = { approved: new Set(), open: null, openTask: null, auto: false, ops: [], flash: {}, menu: false, shownPlan: null, view: 'floor' };
+const ST = { approved: new Set(), open: null, openTask: null, auto: false, flash: {}, menu: false, announced: null, view: 'floor', msgs: [], type: {}, recent: [], pos: {} };
 const run = () => UI.run;
 const tid = (r, t) => `CCE-${1000 + parseInt(String(r.id).replace(/\D/g, '') || '0', 10) * 10 + (t.step || 0)}`;
 const personOf = t => t.person || (ROLES[t.role] || {}).person || meName();
@@ -71,6 +76,7 @@ const roleOfT = t => ROLES[t.role] || { name: AGENTS[t.agent].name, team: AGENTS
 const depsOf = (r, t) => t.depends_on.map(d => r.tasks.find(x => x.id === d)).filter(Boolean);
 const outputsOf = t => (t.verdicts || []).filter(v => v.kind === 'output').map(v => F.outputs.find(o => o.id === v.id)).filter(Boolean);
 const waitingOutput = t => outputsOf(t).find(o => o.status === 'Waiting for approval');
+const first = n => String(n).split(' ')[0];
 function status(r, t) {
   if (t.state === 'running') return 'running';
   if (t.state === 'failed') return 'failed';
@@ -83,6 +89,12 @@ const badge2 = s => `<span class="badge ${s}">${I(ST_ICON[s], 12)}${h(ST_LABEL[s
 const busyPlanning = () => !!(run() && run().status === 'thinking');
 const anyRunning = () => !!(run() && run().tasks.some(t => t.state === 'running'));
 const teamName = t => TEAMS[t].short || TEAMS[t].name;
+const kindName = k => ({ brief: 'Brief', note: 'Note', email: 'Email draft', comparison: 'Comparison', one_pager: 'One-pager', agenda: 'Agenda', finding: 'Finding', content_pick: 'Content selection', case_note: 'Case note', post: 'Post', answer: 'Answer' }[k] || String(k || 'Output').replace(/_/g, ' ').replace(/^./, c => c.toUpperCase()));
+/* a tool call, said the way a business user would */
+const CALL_WORDS = { find_times: 'Checked availability', create_event: 'Placed a calendar hold', draft: 'Drafted an email', create_task: 'Created a task', log_activity: 'Logged the activity', update_case: 'Updated the case', cost_on_assets: 'Computed costs', compare: 'Compared funds', search_content: 'Searched approved content', synthesize: 'Generated demo evidence', changes_since: 'Read changes since last meeting', get_peers: 'Read peer data', resolve: 'Resolved fund categories', get_approved_language: 'Read approved language', get_disclosures: 'Read disclosures', plan_fee_comparison: 'Compared plan fees', portfolio_construction: 'Built a portfolio view', get_recommendations: 'Read recommendations', resolve_evidence: 'Traced the evidence' };
+const callText = c => { const k = c.name.split('.')[1] || c.name; return CALL_WORDS[k] || (c.rw === 'write' ? 'Updated ' : 'Read ') + k.replace(/^get_/, '').replace(/_/g, ' '); };
+const gist = out => { if (out == null) return ''; if (typeof out !== 'object') return ''; if (Array.isArray(out)) return `${out.length} record${out.length === 1 ? '' : 's'}`; const a = Object.entries(out).find(([, x]) => Array.isArray(x) && x.length); return a ? `${a[1].length} ${a[0].replace(/_/g, ' ')}` : ''; };
+const reusedIn = (t, i) => { const rec = F.memory.find(m => m.id === i.id) || F.findings.find(k => k.id === i.id); return !!(rec && (rec.origin || rec.by) && (rec.origin || rec.by) !== t.agent); };
 
 /* ---------- requests ---------- */
 const recordedFor = who => RECORDED.filter(r => r.requester === who || (EMPLOYEES[r.requester] && EMPLOYEES[r.requester].team === EMPLOYEES[who].team));
@@ -92,10 +104,11 @@ function ask(text, clarified) {
   if (busyPlanning() || anyRunning()) { toast('Still working on the current request.'); return; }
   const rec = RECORDED.find(r => r.text === text && r.requester === ME) || RECORDED.find(r => r.text === text);
   if (AI.mode !== 'live' && !rec) { ST.nokey = text; UI.run = null; paintAll(); return; }
-  Object.assign(ST, { nokey: null, approved: new Set(), open: null, openTask: null, auto: false, shownPlan: null, view: 'floor' });
+  Object.assign(ST, { nokey: null, approved: new Set(), open: null, openTask: null, auto: false, announced: null, view: 'floor', msgs: [], type: {}, recent: [] });
   if (rec && AI.mode !== 'live' && rec.requester !== ME) ME = rec.requester;
   UI.requester = ME; UI.run = null;
   runRequest(text, AI.mode === 'live' ? null : rec, Object.assign({ planOnly: true }, clarified ? { clarified } : {}));
+  setTimeout(() => comm('req', 'hub', `Request: “${text.replace(/ \(clarification:.*\)$/, '').slice(0, 60)}${text.length > 60 ? '…' : ''}”`, 'request'), 80);
 }
 function answer(v) {
   const r = run(); if (!r || r.status !== 'clarify' || !v) return;
@@ -108,29 +121,33 @@ async function startTask(t) {
   if (AI.mode !== 'live' && !(r.replay && !r.replay.orchOnly)) { toast('Running agents needs live AI.'); return; }
   if (r.status === 'planned') { r.status = 'running'; r.t0 = Date.now(); if (r.advisor) { F.session.advisor = r.advisor; F.session.unit = r.unit || null; } F.session.requests.push({ text: r.text, adv: r.advisor }); }
   if (!UI.ctl || UI.ctl.signal.aborted) UI.ctl = new AbortController();
+  ST.recent = [t.id, ...ST.recent.filter(x => x !== t.id)].slice(0, 6);
+  comm('p:' + personOf(t), 'hub', `Picked up ${tid(r, t)} · running ${AGENTS[t.agent].name}`, 'ack');
   paintAll();
   try { await runTask(r, t); } catch (e) { t.state = 'failed'; t.error = errText(e); }
+  if (t.state === 'done') { const o = t.result && t.result.output; comm('p:' + personOf(t), 'hub', `Done ${tid(r, t)} · ${o && o.title ? o.title : t.title}`, 'report'); }
   paintAll();
 }
-function signOff(o, by) { if (o && o.status === 'Waiting for approval') { o.status = 'Approved by ' + (by || meName()); logEvent('approval.granted', o.title, ME, o.adv); flashTile('policy', 'write'); } }
-/* hand a finished ticket to the next team; signOutputs also approves its client-facing drafts */
+function signOff(o, by) { if (o && o.status === 'Waiting for approval') { o.status = 'Approved by ' + (by || meName()); logEvent('approval.granted', o.title, ME, o.adv); flashTile('policy', 'write'); comm('req', 'hub', `Approved “${o.title}”`, 'approve'); } }
+/* hand a finished ticket on: the planner relays it to each dependent workbench */
 function approve(t, signOutputs = true) {
   const r = run(); if (!r || t.state !== 'done' || ST.approved.has(t.id)) return;
   ST.approved.add(t.id);
   if (signOutputs) outputsOf(t).forEach(o => signOff(o, meName()));
   logEvent('ticket.approved', `${tid(r, t)} ${t.title}`, ME, r.advisor);
-  r.tasks.filter(x => x.depends_on.includes(t.id)).forEach((x, k) => setTimeout(() => fly(cardOf(personOf(t)), cardOf(personOf(x)), tid(r, x), roleOfT(x).team, 'handoff'), k * 220));
-  if (r.tasks.every(x => ST.approved.has(x.id))) { finishRun(r); ST.view = 'results'; ST.open = null; toast(r.tasks.some(waitingOutput) ? 'Complete. Client-facing items are waiting for your sign-off.' : 'Complete.'); }
+  const o = t.result && t.result.output, what = o && o.title ? o.title : t.title;
+  r.tasks.filter(x => x.depends_on.includes(t.id)).forEach((x, k) => setTimeout(() => comm('hub', 'p:' + personOf(x), `Handoff to ${tid(r, x)} · “${what}” from ${first(personOf(t))}`, 'handoff'), 300 + k * 260));
+  const w = waitingOutput(t); if (w && !signOutputs) setTimeout(() => comm('hub', 'req', `Sign-off needed · “${w.title}”`, 'signoff'), 200);
+  if (r.tasks.every(x => ST.approved.has(x.id))) { finishRun(r); setTimeout(() => comm('hub', 'req', `Delivered · ${r.tasks.filter(x => x.result && x.result.output).length} deliverables`, 'deliver'), 500); setTimeout(() => { ST.view = 'results'; ST.open = null; paintAll(); }, 2800 * ANIM()); toast(r.tasks.some(waitingOutput) ? 'Complete. Client-facing items are waiting for your sign-off.' : 'Complete.'); }
   paintAll();
 }
-function sendBack(t) { if (t.state !== 'done') return; ['result', 'verdicts', 'calls', 'packet', 'contract', 'toolResults', 'error'].forEach(k => delete t[k]); t.state = 'queued'; paintAll(); }
-/* run every ticket in dependency order; internal work hands off automatically, client-facing drafts wait for sign-off */
+function sendBack(t) { if (t.state !== 'done') return; ['result', 'verdicts', 'calls', 'packet', 'contract', 'toolResults', 'error'].forEach(k => delete t[k]); t.state = 'queued'; delete ST.type[t.id]; comm('p:' + personOf(t), 'hub', `Changes requested on ${tid(run(), t)}`, 'back'); paintAll(); }
 async function runAll() {
   const r = run(); if (!r || !r.tasks.length || ST.auto) return;
   ST.auto = true; ST.open = null; ST.view = 'floor'; paintAll();
   while (ST.auto && run() === r && !r.tasks.every(t => ST.approved.has(t.id))) {
     const ready = r.tasks.filter(t => status(r, t) === 'ready');
-    if (ready.length) { await Promise.all(ready.map(startTask)); await sleep(500); ready.filter(t => t.state === 'done').forEach(t => approve(t, false)); continue; }
+    if (ready.length) { await Promise.all(ready.map(startTask)); await sleep(700); ready.filter(t => t.state === 'done').forEach(t => approve(t, false)); await sleep(500); continue; }
     const rev = r.tasks.filter(t => status(r, t) === 'review');
     if (rev.length) { rev.forEach(t => approve(t, false)); continue; }
     break;
@@ -138,32 +155,63 @@ async function runAll() {
   ST.auto = false; paintAll();
 }
 
-/* ---------- flying tickets ---------- */
-const cardOf = name => document.querySelector(`.pc[data-person="${CSS.escape(name)}"]`);
-function fly(from, to, label, team, kind = 'assign') {
-  if (!from || !to) return;
-  const a = from.getBoundingClientRect(), b = to.getBoundingClientRect(), f = document.createElement('div');
-  f.className = 'tk ' + kind; f.style.setProperty('--c', TCOL(team)); f.innerHTML = `${I(kind === 'handoff' ? 'arrow' : 'inbox', 12)}${h(label)}`;
-  f.style.left = a.left + a.width / 2 + 'px'; f.style.top = a.top + a.height / 2 + 'px';
-  el('fly').appendChild(f);
-  requestAnimationFrame(() => requestAnimationFrame(() => { f.style.transform = `translate(${b.left + 46 - (a.left + a.width / 2)}px, ${b.top + b.height / 2 - (a.top + a.height / 2)}px)`; f.style.opacity = '0'; }));
-  setTimeout(() => { f.remove(); to.classList.remove('landed'); void to.offsetWidth; to.classList.add('landed'); }, 900 * Math.max(SLEEP_SCALE, 0.3));
+/* ---------- communication: messages travel along the canvas ---------- */
+const MSG_ICON = { request: 'send', assign: 'inbox', ack: 'play', report: 'check', handoff: 'arrow', signoff: 'alert', deliver: 'sparkles', approve: 'check', back: 'undo' };
+const nodeName = id => id === 'hub' ? 'Orchestrator' : id === 'req' ? (run() ? EMPLOYEES[run().requester].name : meName()) : id.slice(2);
+function comm(from, to, text, kind) {
+  ST.msgs.unshift({ from, to, text, kind, at: Date.now() }); ST.msgs = ST.msgs.slice(0, 40);
+  travel(from, to, kind === 'assign' ? text.split(' · ')[0].replace('Assigned ', '') : { request: 'Request', ack: 'Picked up', report: 'Done', handoff: 'Handoff', signoff: 'Sign-off', deliver: 'Delivered', approve: 'Approved', back: 'Changes' }[kind] || '', kind);
+  paintFeed();
 }
-function flyAssignments(r) {
-  if (ST.shownPlan === r.id || !r.tasks.length || !['planned', 'running'].includes(r.status)) return;
-  ST.shownPlan = r.id;
-  r.tasks.forEach((t, k) => setTimeout(() => fly(document.querySelector('.orch .omark') || el('orch'), cardOf(personOf(t)), tid(r, t), roleOfT(t).team), 250 + k * 260 * Math.max(SLEEP_SCALE, 0.3)));
+function anchor(id, side) {
+  const p = ST.pos[id]; if (!p) return null;
+  if (side === 'r') return [p.x + p.w, p.y + p.h / 2];
+  if (side === 'l') return [p.x, p.y + p.h / 2];
+  if (side === 'b') return [p.x + p.w / 2, p.y + p.h];
+  if (side === 't') return [p.x + p.w / 2, p.y];
+  return [p.x + p.w / 2, p.y + p.h / 2];
+}
+function ends(from, to) {
+  const order = id => id === 'req' ? 0 : id === 'hub' ? 1 : id.startsWith('p:') ? 2 : 3;
+  if (to.startsWith('sys:') || to === 'found') return [anchor(from, 'b'), anchor(to, 't')];
+  if (from.startsWith('sys:') || from === 'found') return [anchor(from, 't'), anchor(to, 'b')];
+  return order(from) <= order(to) ? [anchor(from, 'r'), anchor(to, 'l')] : [anchor(from, 'l'), anchor(to, 'r')];
+}
+function curve(a, b) {
+  const vertical = Math.abs(b[1] - a[1]) > Math.abs(b[0] - a[0]) * 1.2;
+  if (vertical) { const dy = (b[1] - a[1]) * .5; return [a, [a[0], a[1] + dy], [b[0], b[1] - dy], b]; }
+  const dx = Math.max(40, Math.abs(b[0] - a[0]) * .5) * (b[0] >= a[0] ? 1 : -1); return [a, [a[0] + dx, a[1]], [b[0] - dx, b[1]], b];
+}
+const bez = (c, t) => [0, 1].map(k => (1 - t) ** 3 * c[0][k] + 3 * (1 - t) ** 2 * t * c[1][k] + 3 * (1 - t) * t ** 2 * c[2][k] + t ** 3 * c[3][k]);
+const pathD = c => `M${c[0][0]},${c[0][1]} C${c[1][0]},${c[1][1]} ${c[2][0]},${c[2][1]} ${c[3][0]},${c[3][1]}`;
+function travel(from, to, label, kind, color) {
+  const cv = el('canvas'); if (!cv || ST.view !== 'floor') return;
+  const e = ends(from, to); if (!e[0] || !e[1]) return;
+  const c = curve(e[0], e[1]), d = document.createElement('div'), dur = 1100 * ANIM();
+  d.className = 'pk ' + (kind || ''); if (color) d.style.setProperty('--c', color);
+  d.innerHTML = `${I(MSG_ICON[kind] || 'db', 11)}${label ? `<span>${h(label)}</span>` : ''}`;
+  cv.appendChild(d);
+  const trail = document.createElementNS('http://www.w3.org/2000/svg', 'path'); trail.setAttribute('d', pathD(c)); trail.setAttribute('class', 'trail ' + (kind || '')); if (color) trail.style.stroke = color;
+  const svg = cv.querySelector('svg.edges'); if (svg) svg.appendChild(trail);
+  const t0 = performance.now();
+  const step = now => { const k = Math.min(1, (now - t0) / dur), e2 = k < .5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2, p = bez(c, e2); d.style.transform = `translate(${p[0]}px,${p[1]}px) translate(-50%,-50%)`; d.style.opacity = k > .88 ? (1 - k) / .12 : 1; if (k < 1) requestAnimationFrame(step); else { d.remove(); trail.classList.add('gone'); setTimeout(() => trail.remove(), 600); const n = cv.querySelector(`[data-node="${CSS.escape(to)}"]`); if (n) { n.classList.remove('ping'); void n.offsetWidth; n.classList.add('ping'); } } };
+  requestAnimationFrame(step);
+}
+function announcePlan(r) {
+  if (ST.announced === r.id || !r.tasks.length || !['planned', 'running'].includes(r.status)) return;
+  ST.announced = r.id;
+  r.tasks.forEach((t, k) => setTimeout(() => comm('hub', 'p:' + personOf(t), `Assigned ${tid(r, t)} · ${t.title}`, 'assign'), 350 + k * 420 * ANIM()));
 }
 
 /* ---------- painting ---------- */
 function setHTML(node, html) { if (node && node._h !== html) { node.innerHTML = html; node._h = html; } }
 let raf = 0;
 HX.schedule = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; paintAll(); }); };
-function paintAll() { paintTop(); paintOrch(); paintFloor(); paintBench(); paintFound(); const r = run(); if (r) flyAssignments(r); }
+function paintAll() { paintTop(); paintOrch(); paintFloor(); paintBench(); const r = run(); if (r) announcePlan(r); }
 
 function paintTop() {
   const E = EMPLOYEES[ME];
-  setHTML(el('asker'), `<button type="button" class="askbtn" data-menu title="Asking as ${h(E.name)}">${avatar(E.name, E.team, 24)}<span>${h(E.name.split(' ')[0])}</span>${I('chevron', 12, 'rot')}</button>${ST.menu ? `<div class="menu"><div class="mh">Ask as</div>${Object.entries(EMPLOYEES).map(([id, e]) => `<button type="button" data-me="${id}" class="${id === ME ? 'on' : ''}">${avatar(e.name, e.team, 28)}<span><b>${h(e.name)}</b><small>${h(e.role.split(',')[0])} · ${h(teamName(e.team))}</small></span>${id === ME ? I('check', 14) : ''}</button>`).join('')}</div>` : ''}`);
+  setHTML(el('asker'), `<button type="button" class="askbtn" data-menu title="Asking as ${h(E.name)}">${avatar(E.name, E.team, 24)}<span>${h(first(E.name))}</span>${I('chevron', 12, 'rot')}</button>${ST.menu ? `<div class="menu"><div class="mh">Ask as</div>${Object.entries(EMPLOYEES).map(([id, e]) => `<button type="button" data-me="${id}" class="${id === ME ? 'on' : ''}">${avatar(e.name, e.team, 28)}<span><b>${h(e.name)}</b><small>${h(e.role.split(',')[0])} · ${h(teamName(e.team))}</small></span>${id === ME ? I('check', 14) : ''}</button>`).join('')}</div>` : ''}`);
   el('send').disabled = busyPlanning() || anyRunning();
   const m = el('modeTag'); m.className = 'env ' + (AI.mode === 'live' ? 'live' : AI.mode === 'checking' ? '' : 'replay');
   m.innerHTML = `<i></i>${AI.mode === 'live' ? `Live · ${h(AI.provider || 'AI')}` : AI.mode === 'checking' ? 'Connecting' : 'Replay · saved AI runs'}`;
@@ -196,7 +244,7 @@ function paintOrch() {
   else if (r.tasks.length) stat = `<div class="scard plan"><div class="srow"><b>${r.status === 'planned' ? 'Plan ready' : ST.auto ? 'Running all agents' : 'In progress'}</b>${ST.auto ? '<span class="spin"></span>' : ''}</div>
       <div class="kpis"><div><b>${r.tasks.length}</b><small>tickets</small></div><div><b>${teams}</b><small>team${teams > 1 ? 's' : ''}</small></div><div><b>${waves.length}</b><small>wave${waves.length > 1 ? 's' : ''}</small></div><div><b>${done}/${r.tasks.length}</b><small>done</small></div></div>
       <div class="prog"><i style="width:${done / r.tasks.length * 100}%"></i></div>
-      ${ST.auto ? `<button type="button" class="btn subtle block" data-stop>${I('pause', 14)} Pause</button>` : ready ? `<button type="button" class="btn primary block lg" data-runall>${I('play', 14)} Run all agents</button><small class="note">Teams hand off automatically. Client-facing drafts wait for your sign-off.</small>` : ''}</div>`;
+      ${ST.auto ? `<button type="button" class="btn subtle block" data-stop>${I('pause', 14)} Pause</button>` : ready ? `<button type="button" class="btn primary block lg" data-runall>${I('play', 14)} Run all agents</button><small class="note">Teams hand off through the orchestrator. Client-facing drafts wait for your sign-off.</small>` : ''}</div>`;
   setHTML(el('orch'), `<div class="ohead"><span class="omark${thinking ? ' pulse' : ''}">${I('branch', 16)}</span><div><b>Orchestrator</b><small>${r.replay ? 'Replaying a saved AI run' : 'Live AI'}</small></div></div>
     <div class="reqq">${avatar(EMPLOYEES[r.requester].name, EMPLOYEES[r.requester].team, 26)}<div><small>${h(EMPLOYEES[r.requester].name)}</small><p>${h(r.text.replace(/ \(clarification:.*\)$/, ''))}</p></div></div>
     ${stat}
@@ -205,39 +253,165 @@ function paintOrch() {
     ${r.tasks.length && r.status !== 'clarify' ? `<div class="sh">Tickets</div><div class="tl">${waves.map(w => `<div class="wv">Wave ${w}${r.tasks.filter(t => t.wave === w).length > 1 ? ' · parallel' : ''}</div>${r.tasks.filter(t => t.wave === w).map(t => { const s = status(r, t), R = roleOfT(t); return `<button type="button" class="tr ${s}${ST.openTask === t.id ? ' sel' : ''}" data-task="${t.id}"><span class="node ${s}">${s === 'running' ? '<span class="spin"></span>' : I(ST_ICON[s], 12)}</span><span class="trb"><b>${h(t.title)}</b><small><code>${tid(r, t)}</code> · ${h(R.name)} · ${h(personOf(t))}</small></span></button>`; }).join('')}`).join('')}</div>` : ''}
     ${assumed.length || known.length ? `<div class="sh">Answered by the foundation</div><div class="ans">${known.slice(0, 2).concat(assumed).slice(0, 4).map(d => `<div class="an">${I('check', 14)}<div><b>${h(d.title)}</b><small>${h(d.detail || '')}</small></div></div>`).join('')}</div>` : ''}
     ${In ? `<div class="sh">Interpretation</div><div class="kvs">${kv('Intent', In.intent ? `<span class="tag">${h(In.intent)}</span>` : '')}${kv('Subject', h(In.subject && In.subject.label))}${kv('Output', h(In.output))}${kv('Time', h(In.time))}${kv('Authority', r.authority ? `${I('lock', 12)} ${h(AUTHORITY[r.authority].label)}` : '')}</div>` : ''}
-    <div class="sh">Grounding</div><div class="kvs">${kv('Graph', h(lookup ? lookup.detail || lookup.title : '…'))}${C.memories != null ? kv('Context', `${C.memories} memories · ${C.content} approved pieces · ${C.funds} funds · ${C.routes} routes`) : ''}</div>
-    ${r.status === 'done' ? `<div class="sh">Foundation impact</div><div class="kvs">${kv('Items read', String(r.stats.reads))}${kv('Reused', String(r.stats.reused))}${kv('System calls', String(r.stats.calls))}${kv('Stored back', String(r.stats.committed))}</div>` : ''}`);
+    <div class="sh">Grounding</div><div class="kvs">${kv('Graph', h(lookup ? lookup.detail || lookup.title : '…'))}${C.memories != null ? kv('Context', `${C.memories} memories · ${C.content} approved pieces · ${C.funds} funds · ${C.routes} routes`) : ''}</div>`);
 }
 function clarifyHTML(r) {
   const opts = (r.clarifyOptions || []).length ? r.clarifyOptions : (r.resolution && r.resolution.candidates || []).slice(0, 3).map(c => c.name);
   return `<div class="qcard"><b>${h(r.clarify)}</b>${r.clarifyWhy ? `<p>${h(r.clarifyWhy)}</p>` : ''}${opts.map((o, k) => `<button type="button" class="opt" data-answer="${h(o)}"><kbd>${k + 1}</kbd>${h(o)}</button>`).join('')}<div class="other"><input class="clarIn" placeholder="Type an answer…"><button type="button" class="btn subtle sm" data-answer-input>Answer</button></div><button type="button" class="link" data-answer="Make your best assumption and continue">Proceed with a stated assumption</button></div>`;
 }
 
-/* middle: team floor and results */
+/* middle: orchestration canvas + live dock, or results */
 function paintFloor() {
   const r = run(), box = el('floor');
   if (!box._init) {
-    box.innerHTML = `<div class="fh"><div class="seg" id="vtabs"></div><span id="fsub" class="fsub"></span><span id="fcta"></span></div><div class="results" id="results"></div><div class="floorbody" id="floorbody">` +
-      TEAM_ORDER.map(tm => `<section class="team" data-team="${tm}" style="--c:${TCOL(tm)}"><header><i></i><b>${h(TEAMS[tm].name)}</b><small class="tc"></small></header><div class="grid">${ROSTER.filter(p => p.team === tm).map(p => `<button type="button" class="pc idle" data-person="${h(p.name)}" style="--c:${TCOL(tm)}"></button>`).join('')}</div></section>`).join('') + '</div>';
+    box.innerHTML = `<div class="fh"><div class="seg" id="vtabs"></div><span id="fsub" class="fsub"></span><span id="fcta"></span></div>
+      <div class="results" id="results"></div>
+      <div class="orchview" id="orchview"><div class="canvas" id="canvas"><svg class="edges"><defs><linearGradient id="beam" x1="0" x2="1"><stop offset="0" stop-color="#2f5bea" stop-opacity="0"/><stop offset=".5" stop-color="#2f5bea"/><stop offset="1" stop-color="#10b981" stop-opacity="0"/></linearGradient></defs><g class="base"></g></svg><div class="nodes"></div><div class="lane"></div></div>
+        <div class="dock"><div class="live" id="live"></div><div class="feed" id="feed"></div></div></div>`;
     box._init = 1;
+    new ResizeObserver(() => paintCanvas()).observe(el('canvas'));
+    setInterval(tickType, 30);
   }
   const hasRes = r && r.tasks.some(t => t.result);
   if (!hasRes && ST.view === 'results') ST.view = 'floor';
-  setHTML(el('vtabs'), `<button type="button" class="${ST.view === 'floor' ? 'on' : ''}" data-view="floor">${I('users', 14)} Team floor</button><button type="button" class="${ST.view === 'results' ? 'on' : ''}" data-view="results" ${hasRes ? '' : 'disabled'}>${I('doc', 14)} Results${r && r.status === 'done' ? '<i class="dotok"></i>' : ''}</button>`);
-  el('fsub').textContent = !r ? 'Everyone who can take a ticket' : r.tasks.length ? `${r.tasks.length} ticket${r.tasks.length > 1 ? 's' : ''} routed by the orchestrator` : r.status === 'thinking' ? 'Waiting for the plan' : '';
+  setHTML(el('vtabs'), `<button type="button" class="${ST.view === 'floor' ? 'on' : ''}" data-view="floor">${I('branch', 14)} Orchestration</button><button type="button" class="${ST.view === 'results' ? 'on' : ''}" data-view="results" ${hasRes ? '' : 'disabled'}>${I('doc', 14)} Results${r && r.status === 'done' ? '<i class="dotok"></i>' : ''}</button>`);
+  el('fsub').textContent = !r ? 'Ask for an outcome to see the plan come to life' : r.tasks.length ? `${r.tasks.length} ticket${r.tasks.length > 1 ? 's' : ''} across ${new Set(r.tasks.map(t => personOf(t))).size} workbench${new Set(r.tasks.map(t => personOf(t))).size > 1 ? 'es' : ''}` : r.status === 'thinking' ? 'Planning from the shared foundation…' : '';
   setHTML(el('fcta'), r && r.tasks.length && ['planned', 'running'].includes(r.status) && !ST.auto && r.tasks.some(t => status(r, t) === 'ready') ? `<button type="button" class="btn primary" data-runall>${I('play', 13)} Run all agents</button>` : '');
-  el('results').hidden = ST.view !== 'results'; el('floorbody').hidden = ST.view === 'results';
+  el('results').hidden = ST.view !== 'results'; el('orchview').hidden = ST.view === 'results';
   if (ST.view === 'results' && r) setHTML(el('results'), resultsHTML(r));
-  box.querySelectorAll('.team').forEach(sec => { const n = r ? r.tasks.filter(t => roleOfT(t).team === sec.dataset.team).length : 0; sec.querySelector('.tc').textContent = n ? `${n} ticket${n > 1 ? 's' : ''}` : ''; sec.classList.toggle('active', !!n); });
-  box.querySelectorAll('.pc').forEach(c => {
-    const p = ROSTER.find(x => x.name === c.dataset.person), ts = r ? r.tasks.filter(t => personOf(t) === p.name) : [];
-    const ss = ts.map(t => status(r, t)), s = !ts.length ? 'idle' : ['running', 'review', 'signoff', 'ready', 'failed', 'blocked', 'approved'].find(x => ss.includes(x));
-    const cur = ts.find(t => status(r, t) === s) || ts[0], doneN = ts.filter(t => ST.approved.has(t.id)).length;
-    c.className = `pc ${s}${ST.open === p.name ? ' sel' : ''}${c.classList.contains('landed') ? ' landed' : ''}`;
-    setHTML(c, `<div class="pct">${avatar(p.name, p.team, 38, s)}<div class="pcn"><b>${h(p.name)}${p.name === meName() ? '<em>You</em>' : ''}</b><small>${h(p.role)}</small></div>${ts.length ? badge2(s) : ''}</div>
-      ${cur ? `<div class="pcb"><span class="pti"><code>${tid(r, cur)}</code>${h(cur.title)}</span><span class="pag">${[...new Set(ts.map(t => t.route || AGENTS[t.agent].name))].slice(0, 2).map(a => `<em>${I('cpu', 11)}${h(a)}</em>`).join('')}${ts.length > 1 ? `<em class="more">${doneN}/${ts.length} done</em>` : ''}</span></div><div class="pbar ${s}"><i style="width:${s === 'approved' ? 100 : s === 'signoff' || s === 'review' ? 85 : s === 'running' ? 50 : 6}%"></i></div>` : ''}`);
-  });
+  else { paintCanvas(); paintLive(); paintFeed(); }
 }
+
+/* the canvas: requester → orchestrator → workbenches by wave, over the foundation and systems */
+function layout(r) {
+  const cv = el('canvas'), W = cv.clientWidth, H = cv.clientHeight, laneH = 104, top = 14, Hn = Math.max(160, H - laneH - top - 10);
+  const pos = {}, nodeH = 66;
+  const reqW = 168, hubW = 132, hubH = 132;
+  pos.req = { x: 16, y: top + Hn / 2 - nodeH / 2, w: reqW, h: nodeH };
+  pos.hub = { x: 16 + reqW + 54, y: top + Hn / 2 - hubH / 2, w: hubW, h: hubH };
+  const people = [];
+  if (r && r.tasks.length) {
+    const firstWave = {}; r.tasks.forEach(t => { const p = personOf(t); firstWave[p] = Math.min(firstWave[p] || 99, t.wave); });
+    Object.entries(firstWave).forEach(([p, w]) => people.push({ p, w }));
+  }
+  const waves = [...new Set(people.map(x => x.w))].sort((a, b) => a - b);
+  const x0 = pos.hub.x + hubW + 70, avail = W - x0 - 16, colW = waves.length ? Math.min(250, avail / waves.length) : 0, nodeW = Math.max(150, Math.min(222, colW - 26));
+  waves.forEach((w, ci) => { const col = people.filter(x => x.w === w), gap = Math.min(nodeH + 26, Hn / col.length); col.forEach((x, k) => { pos['p:' + x.p] = { x: x0 + ci * colW, y: top + Hn / 2 - (col.length * gap) / 2 + k * gap + (gap - nodeH) / 2, w: nodeW, h: nodeH, wave: w }; }); });
+  pos.found = { x: 16, y: H - laneH + 4, w: W - 32, h: 40 };
+  const sysW = (W - 32) / SYS_ORDER.length;
+  SYS_ORDER.forEach((k, i) => { pos['sys:' + k] = { x: 16 + i * sysW + 3, y: H - 46, w: sysW - 6, h: 30 }; });
+  return { pos, waves, x0, colW, W, H, Hn };
+}
+function paintCanvas() {
+  const cv = el('canvas'); if (!cv || ST.view !== 'floor') return;
+  const r = run(), L = layout(r); ST.pos = L.pos;
+  const nodes = cv.querySelector('.nodes'), svg = cv.querySelector('svg.edges'), base = svg.querySelector('g.base');
+  svg.setAttribute('width', L.W); svg.setAttribute('height', L.H);
+  const E = r ? EMPLOYEES[r.requester] : EMPLOYEES[ME];
+  const items = [];
+  const reqState = r ? (r.status === 'done' ? 'done' : r.tasks.some(waitingOutput) ? 'wait' : 'active') : 'idle';
+  items.push({ k: 'req', html: `${avatar(E.name, E.team, 34)}<div><small>Requester</small><b>${h(E.name)}</b><span>${r ? (r.status === 'done' ? 'Delivered' : r.tasks.some(waitingOutput) ? 'Sign-off waiting' : 'Waiting for results') : 'Ready to ask'}</span></div>`, cls: 'nd req ' + reqState });
+  const thinking = r && r.status === 'thinking';
+  items.push({ k: 'hub', html: `<div class="orb${thinking || anyRunning() || ST.auto ? ' spin2' : ''}"><i></i><i></i></div><div class="hubc">${I('branch', 22)}<b>Orchestrator</b><small>${!r ? 'Idle' : thinking ? 'Planning' : r.status === 'clarify' ? 'Asking' : r.status === 'done' ? 'Complete' : `${r.tasks.filter(t => ST.approved.has(t.id)).length}/${r.tasks.length} done`}</small></div>`, cls: 'nd hub' + (thinking ? ' think' : '') });
+  if (r) {
+    const per = {}; r.tasks.forEach(t => (per[personOf(t)] = per[personOf(t)] || []).push(t));
+    Object.entries(per).forEach(([p, ts]) => {
+      const R = roleOfT(ts[0]), ss = ts.map(t => status(r, t)), s = ['running', 'review', 'signoff', 'ready', 'failed', 'blocked', 'approved'].find(x => ss.includes(x)), cur = ts.find(t => status(r, t) === s) || ts[0];
+      const pr = ROSTER.find(x => x.name === p);
+      items.push({ k: 'p:' + p, html: `${avatar(p, R.team, 34, s)}<div><small>${h(R.name)}</small><b>${h(p)}</b><span><code>${tid(r, cur)}</code>${ts.length > 1 ? ` +${ts.length - 1}` : ''}</span></div>${badge2(s)}${s === 'running' ? '<i class="scan"></i>' : ''}`, cls: `nd wb ${s}${ST.open === p ? ' sel' : ''}`, team: R.team, person: p });
+      void pr;
+    });
+  }
+  const now = performance.now(), hot = k => { const f = ST.flash[k]; if (!f) return ''; const at = typeof f === 'number' ? f : f.at; return now - at < 1400 ? (f.cls || 'hot') : ''; };
+  items.push({ k: 'found', html: `<span class="fl2">${I('layers', 14)}<b>Shared foundation</b></span>${LAYER_ORDER.map(l => `<span class="ly2 ${hot('l:' + l)}" style="--c:${LAYER_COL[l]}"><i></i>${h(LAYERS[l].short || LAYERS[l].name)}<b>${layerCount(l)}</b></span>`).join('')}`, cls: 'nd found' });
+  SYS_ORDER.forEach(k => { const n = r ? r.tasks.reduce((m, t) => m + (t.calls || []).filter(c => c.sys === k).length, 0) : 0; items.push({ k: 'sys:' + k, html: `<i></i>${h(SYS_SHORT[k])}${n ? `<b>${n}</b>` : ''}`, cls: `nd sys ${hot('s:' + k) ? 'hot' : n ? 'used' : ''}`, color: SYS_COL[k] }); });
+  /* keyed nodes, positioned absolutely */
+  const have = new Map([...nodes.children].map(c => [c.dataset.node, c]));
+  items.forEach(it => {
+    let c = have.get(it.k); const p = L.pos[it.k]; if (!p) return;
+    if (!c) { c = document.createElement('div'); c.dataset.node = it.k; nodes.appendChild(c); c.style.left = p.x + 'px'; c.style.top = p.y + 'px'; c.classList.add('enter'); }
+    const keep = ['ping', 'enter'].filter(x => c.classList.contains(x));
+    c.className = it.cls + ' ' + keep.join(' ');
+    if (it.team) c.style.setProperty('--c', TCOL(it.team)); if (it.color) c.style.setProperty('--c', it.color);
+    if (it.person) c.dataset.person = it.person;
+    c.style.left = p.x + 'px'; c.style.top = p.y + 'px'; c.style.width = p.w + 'px'; c.style.height = p.h + 'px';
+    setHTML(c, it.html); have.delete(it.k);
+  });
+  have.forEach(c => c.remove());
+  /* base edges */
+  const P2 = L.pos, edges = [];
+  const line = (a, b, cls) => { const e2 = ends(a, b); if (e2[0] && e2[1]) edges.push(`<path class="${cls}" d="${pathD(curve(e2[0], e2[1]))}"/>`); };
+  line('req', 'hub', 'edge' + (r ? ' on' : ''));
+  if (r) Object.keys(P2).filter(k => k.startsWith('p:')).forEach(k => {
+    const ts = r.tasks.filter(t => 'p:' + personOf(t) === k), running = ts.some(t => t.state === 'running');
+    line('hub', k, 'edge on' + (running ? ' live' : ''));
+    if (running) line('hub', k, 'beam');
+    const a = anchor(k, 'b'); edges.push(`<path class="drop${running ? ' live' : ''}" d="M${a[0]},${a[1]} L${a[0]},${P2.found.y}"/>`);
+  });
+  base.innerHTML = edges.join('');
+  /* wave headers */
+  const lane = cv.querySelector('.lane');
+  setHTML(lane, L.waves.map((w, i) => `<span class="wvh" style="left:${L.x0 + i * L.colW}px">${L.waves.length > 1 ? 'Wave ' + w : 'Workbenches'}</span>`).join('') + (!r ? `<div class="idle-hint" style="left:${P2.hub.x + P2.hub.w + 70}px;top:${P2.hub.y + 10}px"><b>Workbenches appear here</b><span>Each step of the plan becomes a ticket on the workbench of the person who owns it. Messages flow through the orchestrator as work is picked up, finished and handed off.</span><div class="roster">${ROSTER.map(p => `<button type="button" class="rp" data-person="${h(p.name)}" title="${h(p.name)} · ${h(p.role)}">${avatar(p.name, p.team, 26)}</button>`).join('')}</div></div>` : ''));
+}
+
+/* the live dock: what each agent is doing right now, without scrolling */
+function liveTickets(r) {
+  if (!r) return [];
+  const running = r.tasks.filter(t => t.state === 'running');
+  const rest = ST.recent.map(id => r.tasks.find(t => t.id === id)).filter(t => t && !running.includes(t));
+  return running.concat(rest).slice(0, 3);
+}
+function stepsOf(t) {
+  const st = [
+    ['Context', !!t.packet, t.packet ? `${t.packet.items.length} items` : ''],
+    ['Systems', !!t.result, (t.calls || []).length ? `${t.calls.length} read${t.calls.length > 1 ? 's' : ''}` : t.packet ? 'checking' : ''],
+    ['Drafting', !!t.result, t.result ? 'written' : ''],
+    ['Verified', !!t.verdicts, t.verdicts ? `${t.verdicts.filter(v => ['published', 'committed'].includes(v.status)).length} stored` : '']];
+  const cur = st.findIndex(s => !s[1]);
+  return st.map((s, i) => ({ label: s[0], done: s[1], now: t.state === 'running' && i === cur, note: s[2] }));
+}
+function plain(body) { return String(body || '').replace(/\*\*/g, '').replace(/^#+\s*/gm, ''); }
+function tickType() {
+  const r = run(); if (!r) return; let any = false;
+  liveTickets(r).forEach(t => { const o = t.result && t.result.output, full = o ? plain(o.body).length : 0; const cur = ST.type[t.id] || 0; if (o && cur < full) { ST.type[t.id] = Math.min(full, cur + Math.max(4, Math.round(full / 90))); any = true; } });
+  if (any) paintLive();
+}
+function paintLive() {
+  const box = el('live'); if (!box) return;
+  const r = run(), ts = liveTickets(r);
+  if (!ts.length) { setHTML(box, `<div class="lempty">${I('pulse', 22)}<b>${r && r.tasks.length ? 'Ready when you are' : 'Live agent output'}</b><span>${r && r.tasks.length ? 'Press Run all agents, or open a workbench and run one ticket. Progress and output stream in here.' : 'When agents run, their progress and output stream in here, live.'}</span></div>`); return; }
+  if (box.querySelector('.lempty')) box.innerHTML = '';
+  box._h = null;
+  const cards = ts.map(t => {
+    const s = status(r, t), R = roleOfT(t), p = personOf(t), o = t.result && t.result.output, n = ST.type[t.id] || 0;
+    const sys = {}; (t.calls || []).forEach(c => { (sys[c.sys] = sys[c.sys] || []).push(c); });
+    const lastCall = (t.calls || []).slice(-1)[0];
+    const reused = t.packet ? t.packet.items.filter(i => reusedIn(t, i)).length : 0;
+    const text = o ? plain(o.body).slice(0, n) : '';
+    const now = t.state === 'running' ? (!t.packet ? 'Assembling context from the shared foundation' : lastCall ? `${SYS_SHORT[lastCall.sys] || 'Gateway'} · ${callText(lastCall)}` : 'Reading the context') : '';
+    const inner = `
+      <header>${avatar(p, R.team, 28, s)}<div><b>${h(p)}</b><small>${h(R.name)} · <code>${tid(r, t)}</code></small></div>${badge2(s)}</header>
+      <div class="lt">${h(t.title)}</div>
+      <div class="trk">${stepsOf(t).map(x => `<span class="${x.done ? 'done' : x.now ? 'now' : ''}"><i>${x.done ? I('check', 10) : x.now ? '<span class="spin"></span>' : ''}</i><b>${x.label}</b><small>${h(x.note)}</small></span>`).join('')}</div>
+      <div class="lsys">${t.packet ? `<span class="lchip found">${I('layers', 11)}${t.packet.items.length} from foundation${reused ? ` · ${reused} reused` : ''}</span>` : ''}${Object.entries(sys).map(([k, cs]) => `<span class="lchip" style="--c:${SYS_COL[k] || '#64748b'}" title="${h(cs.map(callText).join(', '))}"><i></i>${h(SYS_SHORT[k] || k)} · ${h(callText(cs[cs.length - 1]).toLowerCase())}${cs.length > 1 ? ` +${cs.length - 1}` : ''}</span>`).join('')}</div>
+      <div class="lout">${o ? `<div class="lot"><small>${h(kindName(o.kind))}</small><b>${h(o.title || '')}</b></div><p>${h(text)}${n < plain(o.body).length ? '<i class="caret"></i>' : ''}</p>` : now ? `<div class="lnow"><span class="dots"><i></i><i></i><i></i></span>${h(now)}</div>` : t.state === 'failed' ? `<div class="lnow bad">${h(t.error || 'Failed')}</div>` : ''}</div>
+      <footer><button type="button" class="link" data-task="${t.id}">${I('expand', 12)} Open ticket</button></footer>`;
+    return { k: t.id, cls: `lc ${s}`, color: TCOL(R.team), html: inner };
+  });
+  /* keyed cards: each animates in once, then only its contents change */
+  const have = new Map([...box.children].map(c => [c.dataset.k, c]));
+  cards.forEach((c, i) => { let n = have.get(c.k); if (!n) { n = document.createElement('article'); n.dataset.k = c.k; n.classList.add('fresh'); } if (box.children[i] !== n) box.insertBefore(n, box.children[i] || null); n.className = c.cls + (n.classList.contains('fresh') ? ' fresh' : ''); n.style.setProperty('--c', c.color); setHTML(n, c.html); have.delete(c.k); });
+  have.forEach(n => n.remove());
+  setTimeout(() => box.querySelectorAll('.fresh').forEach(n => n.classList.remove('fresh')), 500);
+}
+function paintFeed() {
+  const box = el('feed'); if (!box) return;
+  const r = run(), ms = ST.msgs.slice(0, 7);
+  const who = id => id === 'hub' ? `<span class="hubdot">${I('branch', 11)}</span>` : id === 'req' ? avatar(nodeName(id), r ? EMPLOYEES[r.requester].team : EMPLOYEES[ME].team, 20) : (() => { const t = r && r.tasks.find(x => 'p:' + personOf(x) === id); return avatar(id.slice(2), t ? roleOfT(t).team : 'sales', 20); })();
+  setHTML(box, `<div class="fdh">${I('msg', 13)}<b>Orchestration messages</b><small>${ST.msgs.length}</small></div>${ms.length ? ms.map((m, i) => `<div class="fm ${m.kind}${i === 0 ? ' new' : ''}"><span class="fw">${who(m.from)}${I('arrow', 10, 'ar')}${who(m.to)}</span><div><b>${h(m.text)}</b><small>${h(first(nodeName(m.from)))} → ${h(first(nodeName(m.to)))} · ${ago(m.at)}</small></div></div>`).join('') : '<p class="fempty">Assignments, pick-ups, reports and handoffs between the orchestrator and each workbench appear here.</p>'}`);
+}
+const ago = t => { const s = Math.round((Date.now() - t) / 1000); return s < 3 ? 'now' : s < 60 ? s + 's ago' : Math.round(s / 60) + 'm ago'; };
+setInterval(() => { if (ST.msgs.length) paintFeed(); }, 5000);
 
 /* the final output */
 function actionTile(c, t) {
@@ -249,7 +423,6 @@ function actionTile(c, t) {
   if (c.name === 'service.update_case') return { icon: 'tool', tone: 'amber', kind: 'Case updated', big: o.status || '', title: o.case_id || '', lines: [], id: o.case_id, who, team };
   return null;
 }
-const kindName = k => ({ brief: 'Brief', note: 'Note', email: 'Email draft', comparison: 'Comparison', one_pager: 'One-pager', agenda: 'Agenda', finding: 'Finding', content_pick: 'Content selection', case_note: 'Case note', post: 'Post', answer: 'Answer' }[k] || String(k || 'Output').replace(/_/g, ' ').replace(/^./, c => c.toUpperCase()));
 function resultsHTML(r) {
   const S = r.stats, E = EMPLOYEES[r.requester], doneAll = r.status === 'done', teams = new Set(r.tasks.map(t => roleOfT(t).team));
   const acts = r.tasks.flatMap(t => (t.calls || []).filter(c => c.rw === 'write' && !c.error).map(c => actionTile(c, t))).filter(Boolean);
@@ -260,21 +433,21 @@ function resultsHTML(r) {
   const secs = Math.max(1, Math.round(((r.t1 || Date.now()) - r.t0) / 1000));
   const tiles = acts.map(a => `<div class="ot ${a.tone}"><span class="oti">${I(a.icon, 18)}</span><div class="otb"><small>${h(a.kind)}</small>${a.big ? `<b>${h(a.big)}</b>` : ''}<span>${h(a.title || '')}</span>${a.lines.filter(Boolean).map(l => `<em>${h(l)}</em>`).join('')}<footer>${avatar(a.who, a.team, 18)}${h(a.who)}${a.id ? `<code>${h(a.id)}</code>` : ''}</footer></div></div>`)
     .concat(docs.map(t => { const o = t.result.output, rec = outputsOf(t)[0]; return `<a class="ot doc" href="#doc-${t.id}"><span class="oti">${I('doc', 18)}</span><div class="otb"><small>${h(kindName(o.kind))}</small><b>${h(o.title || t.title)}</b>${rec ? `<em class="${rec.status === 'Waiting for approval' ? 'w' : 'ok'}">${rec.status === 'Waiting for approval' ? 'Awaiting sign-off' : h(rec.status)}</em>` : ''}<footer>${avatar(personOf(t), roleOfT(t).team, 18)}${h(personOf(t))} · ${h(roleOfT(t).name)}</footer></div></a>`; }));
-  return `<section class="hero"><div class="hl"><span class="st ${doneAll ? 'ok' : ''}">${I(doneAll ? 'check' : 'clock', 13)}${doneAll ? 'Complete' : 'In progress'}</span><h1>${h(r.text.replace(/ \(clarification:.*\)$/, ''))}</h1><p>Requested by ${h(E.name)} · ${r.tasks.length} tickets across ${teams.size} team${teams.size > 1 ? 's' : ''} · ${secs} s</p></div>
-      <div class="metrics"><div><b>${S.reads}</b><small>Foundation items read</small></div><div><b>${S.reused}</b><small>Reused from other teams</small></div><div><b>${S.calls}</b><small>System calls</small></div><div><b>${S.committed}</b><small>Stored back</small></div></div></section>
+  return `<section class="hero"><div class="hl"><span class="st ${doneAll ? 'ok' : ''}">${I(doneAll ? 'check' : 'clock', 13)}${doneAll ? 'Complete' : 'In progress'}</span><h1>${h(r.text.replace(/ \(clarification:.*\)$/, ''))}</h1><p>Requested by ${h(E.name)} · ${r.tasks.length} tickets across ${teams.size} team${teams.size > 1 ? 's' : ''} · ${secs} s · ${ST.msgs.length} orchestration messages</p></div>
+      <div class="metrics"><div><b>${S.reads}</b><small>Foundation items read</small></div><div><b>${S.reused}</b><small>Reused from other teams</small></div><div><b>${S.calls}</b><small>System reads and writes</small></div><div><b>${S.committed}</b><small>Stored back</small></div></div></section>
     ${waiting.length ? `<section class="signbox"><header>${I('alert', 16)}<div><b>Awaiting your sign-off</b><small>Client-facing. Nothing is sent until you approve.</small></div></header>${waiting.map(({ o, t }) => `<div class="sr">${avatar(personOf(t), roleOfT(t).team, 28)}<div><b>${h(o.title)}</b><small>${h(kindName(o.kind))} · ${h(personOf(t))}, ${h(roleOfT(t).name)}</small></div><a class="btn subtle sm" href="#doc-${t.id}">${I('eye', 13)} Review</a><button type="button" class="btn primary sm" data-signoff="${h(o.id)}">${I('check', 13)} Approve</button></div>`).join('')}</section>` : ''}
     <div class="sh2">Outcomes</div><div class="ots">${tiles.join('') || '<p class="muted">Nothing finished yet.</p>'}</div>
     ${proposed.length ? `<div class="sh2">Follow-ups</div><div class="list">${proposed.map(({ v, t }) => `<div class="li">${I('task', 15)}<div><b>${h(v.title || '')}</b><small>${h(personOf(t))}${v.reason ? ' · ' + h(v.reason) : ''}</small></div><span class="badge ${v.status === 'committed' ? 'approved' : 'review'}">${v.status === 'committed' ? 'Created' : 'Proposed'}</span></div>`).join('')}</div>` : ''}
     <div class="sh2">Deliverables</div>
-    ${docs.map(t => { const o = t.result.output, rec = outputsOf(t)[0], R = roleOfT(t); return `<article class="deliv" id="doc-${t.id}"><header>${avatar(personOf(t), R.team, 32)}<div><small>${h(kindName(o.kind))} · <code>${tid(r, t)}</code></small><b>${h(o.title || t.title)}</b><span>${h(personOf(t))} · ${h(R.name)} · ${h(AGENTS[t.agent].name)}${t.contract && t.contract.as_of.length ? ' · as of ' + h(t.contract.as_of.join(', ')) : ''}</span></div>${rec ? `<span class="badge ${rec.status === 'Waiting for approval' ? 'signoff' : 'approved'}">${rec.status === 'Waiting for approval' ? 'Awaiting sign-off' : 'Ready'}</span>` : ''}</header><div class="docb">${bodyHTML(o.body)}</div>${t.contract && t.contract.sources.length ? `<footer>${I('link', 12)} ${t.contract.sources.slice(0, 8).map(x => `<code>${h(x)}</code>`).join('')}</footer>` : ''}</article>`; }).join('') || '<p class="muted">No documents yet.</p>'}
+    ${docs.map(t => { const o = t.result.output, rec = outputsOf(t)[0], R = roleOfT(t); return `<article class="deliv" id="doc-${t.id}"><header>${avatar(personOf(t), R.team, 32)}<div><small>${h(kindName(o.kind))} · <code>${tid(r, t)}</code></small><b>${h(o.title || t.title)}</b><span>${h(personOf(t))} · ${h(R.name)} · ${h(AGENTS[t.agent].name)}${t.contract && t.contract.as_of.length ? ' · as of ' + h(t.contract.as_of.join(', ')) : ''}</span></div>${rec ? `<span class="badge ${rec.status === 'Waiting for approval' ? 'signoff' : 'approved'}">${rec.status === 'Waiting for approval' ? 'Awaiting sign-off' : 'Ready'}</span>` : ''}</header><div class="docb">${bodyHTML(o.body)}</div>${t.contract && t.contract.sources.length ? `<footer>${I('link', 12)} ${t.contract.sources.filter(x => !/\./.test(x)).slice(0, 8).map(x => `<code>${h(x)}</code>`).join('')}</footer>` : ''}</article>`; }).join('') || '<p class="muted">No documents yet.</p>'}
     ${stored.length ? `<div class="sh2">Stored for next time</div><div class="list">${stored.map(({ v, t }) => `<div class="li">${I(v.kind === 'memory' ? 'db' : 'layers', 15)}<div><b>${h(v.title || v.id || '')}</b><small>${v.kind === 'memory' ? 'Shared memory' : 'Shared knowledge'} · ${h(personOf(t))}</small></div>${v.id ? `<code>${h(v.id)}</code>` : ''}</div>`).join('')}</div>` : ''}`;
 }
 
-/* right: the ticket */
+/* right: the ticket (overlay) */
 function paintBench() {
   const r = run(), b = el('bench');
-  if (!ST.open) { b.hidden = true; document.body.classList.remove('benched'); return; }
-  b.hidden = false; document.body.classList.add('benched');
+  if (!ST.open) { b.hidden = true; return; }
+  b.hidden = false;
   const p = ROSTER.find(x => x.name === ST.open) || { name: ST.open, team: 'sales', role: '', does: '' };
   const ts = r ? r.tasks.filter(t => personOf(t) === p.name) : [];
   const t = ts.find(x => x.id === ST.openTask) || ts[0];
@@ -285,9 +458,6 @@ function paintBench() {
   setHTML(b.querySelector('.bbody'), t ? ticketHTML(r, t, p) : `<div class="emptyp">${avatar(p.name, p.team, 56)}<h3>${h(p.name)}</h3><p>${h(p.role)} · ${h(teamName(p.team))}</p><p class="muted">${h(p.does)}</p><div class="sh">Agents on this workbench</div><div class="chips">${Object.keys(AGENTS).filter(a => roleOf(a) === p.rid).map(a => `<span class="chip">${I('cpu', 11)}${h(AGENTS[a].name)}</span>`).join('')}</div></div>`);
   setHTML(b.querySelector('.bfoot'), t ? footHTML(r, t, p) : '');
 }
-const gist = out => { if (out == null) return ''; if (typeof out !== 'object') return String(out).slice(0, 60); if (Array.isArray(out)) return `${out.length} record${out.length === 1 ? '' : 's'}`; const a = Object.entries(out).find(([, x]) => Array.isArray(x) && x.length); return a ? `${a[1].length} ${a[0].replace(/_/g, ' ')}` : `${Object.keys(out).length} fields`; };
-const argText = i => Object.entries(i || {}).filter(([, x]) => x !== '' && x != null).map(([k, x]) => `${k}: ${Array.isArray(x) ? x.join(', ') : String(x)}`.slice(0, 34)).join(', ');
-const reusedIn = (t, i) => { const rec = F.memory.find(m => m.id === i.id) || F.findings.find(k => k.id === i.id); return !!(rec && (rec.origin || rec.by) && (rec.origin || rec.by) !== t.agent); };
 function bodyHTML(s) {
   const ids = x => h(x).replace(/\b([A-Z]{2,5}-[A-Z0-9]{1,6}(?:-[A-Z0-9]+)?)\b/g, '<code>$1</code>').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   let html = '', list = false;
@@ -301,56 +471,47 @@ function ticketHTML(r, t, p) {
   const byL = {}; (Pk ? Pk.items : []).forEach(i => (byL[i.layer] = byL[i.layer] || []).push(i));
   const reused = Pk ? Pk.items.filter(i => reusedIn(t, i)) : [], total = Pk ? Pk.items.length : 0;
   const out = t.result && t.result.output;
-  const timeline = [];
-  timeline.push(['done', 'inbox', 'Assigned by the orchestrator', `${h(EMPLOYEES[r.requester].name)}’s request · wave ${t.wave}`]);
-  if (t.packet) timeline.push(['done', 'layers', 'Context attached from the shared foundation', `${t.packet.items.length} items${reused.length ? `, ${reused.length} reused from other teams` : ''}`]);
-  (t.calls || []).forEach(c => timeline.push([c.error ? 'err' : 'done', 'db', `<span class="sysn" style="--c:${SYS_COL[c.sys] || '#64748b'}">${h((SYSTEMS[c.sys] || {}).name || c.sys || 'Gateway')}</span><code>${h(c.name)}</code>`, c.error ? h(c.error) : `${h(argText(c.input))}${argText(c.input) ? ' → ' : ''}${h(gist(c.out))}${c.out && c.out.synthesized ? ' <span class="demo">demo data</span>' : ''} · ${h(c.via || '')}`]));
-  if (t.state === 'running') timeline.push(['now', 'cpu', !t.packet ? 'Assembling context' : t.calls && t.calls.length ? 'Drafting from context and results' : 'Calling systems only for what the foundation lacks', '']);
-  if (t.result) timeline.push(['done', 'sparkles', 'Result produced', h(t.result.says || '')]);
-  if (t.verdicts) timeline.push(['done', 'shield', 'Gatekeeper checks', t.verdicts.map(v => { const o = v.kind === 'output' && F.outputs.find(y => y.id === v.id), vs = o && o.status === 'Waiting for approval' ? 'approval' : v.status; return `<span class="vd ${vs}">${h(v.kind)} · ${h(VERB[vs] || vs)}${v.id ? ` <code>${h(v.id)}</code>` : ''}</span>`; }).join('')]);
-  if (ST.approved.has(t.id)) timeline.push(['done', 'arrow', 'Handed off', r.tasks.filter(x => x.depends_on.includes(t.id)).map(x => `${tid(r, x)} · ${h(personOf(x))}`).join(', ') || 'Final step']);
+  const tl = [['done', 'inbox', 'Assigned by the orchestrator', `${h(EMPLOYEES[r.requester].name)}’s request · wave ${t.wave}`]];
+  if (t.packet) tl.push(['done', 'layers', 'Context attached from the shared foundation', `${t.packet.items.length} items${reused.length ? `, ${reused.length} reused from other teams` : ''}`]);
+  (t.calls || []).forEach(c => tl.push([c.error ? 'err' : 'done', 'db', `<span class="sysn" style="--c:${SYS_COL[c.sys] || '#64748b'}">${h(SYS_SHORT[c.sys] || 'Gateway')}</span>${h(callText(c))}`, c.error ? h(c.error) : `${h(gist(c.out))}${c.out && c.out.synthesized ? ' <span class="demo">demo data</span>' : ''}`]));
+  if (t.state === 'running') tl.push(['now', 'cpu', !t.packet ? 'Assembling context' : 'Working', '']);
+  if (t.result) tl.push(['done', 'sparkles', 'Result produced', h(t.result.says || '')]);
+  if (t.verdicts) tl.push(['done', 'shield', 'Gatekeeper checks', t.verdicts.map(v => { const o = v.kind === 'output' && F.outputs.find(y => y.id === v.id), vs = o && o.status === 'Waiting for approval' ? 'approval' : v.status; return `<span class="vd ${vs}">${h(v.kind)} · ${h(VERB[vs] || vs)}${v.id ? ` <code>${h(v.id)}</code>` : ''}</span>`; }).join('')]);
+  if (ST.approved.has(t.id)) tl.push(['done', 'arrow', 'Reported back; the orchestrator handed it on', r.tasks.filter(x => x.depends_on.includes(t.id)).map(x => `${tid(r, x)} · ${h(personOf(x))}`).join(', ') || 'Final step']);
   return `<h2 class="ttl">${h(t.title)}</h2>
-    <div class="props">
-      ${kv('Status', badge2(s))}
-      ${kv('Assignee', `${avatar(p.name, p.team, 20)} ${h(p.name)}`)}
-      ${kv('Team', `<span class="tdot" style="--c:${TCOL(R.team)}"></span>${h(R.name)} · ${h(teamName(R.team))}`)}
-      ${kv('Requested by', `${avatar(EMPLOYEES[r.requester].name, EMPLOYEES[r.requester].team, 20)} ${h(EMPLOYEES[r.requester].name)}`)}
-      ${kv('Agent', `<span class="chip strong">${I('cpu', 11)}${h(A.name)}</span>${t.route ? `<code>${h(t.route)}</code>` : ''}`)}
-      ${(t.services || []).length ? kv('Reads', t.services.map(x => `<span class="chip">${h(x)}</span>`).join('')) : ''}
-      ${deps.length ? kv('Depends on', deps.map(d => `<span class="dep">${badge2(status(r, d))}<code>${tid(r, d)}</code> ${h(personOf(d))}</span>`).join('')) : ''}
-    </div>
+    <div class="props">${kv('Status', badge2(s))}${kv('Assignee', `${avatar(p.name, p.team, 20)} ${h(p.name)}`)}${kv('Team', `<span class="tdot" style="--c:${TCOL(R.team)}"></span>${h(R.name)} · ${h(teamName(R.team))}`)}${kv('Requested by', `${avatar(EMPLOYEES[r.requester].name, EMPLOYEES[r.requester].team, 20)} ${h(EMPLOYEES[r.requester].name)}`)}${kv('Agent', `<span class="chip strong">${I('cpu', 11)}${h(A.name)}</span>${t.route ? `<code>${h(t.route)}</code>` : ''}`)}${deps.length ? kv('Depends on', deps.map(d => `<span class="dep">${badge2(status(r, d))}<code>${tid(r, d)}</code> ${h(personOf(d))}</span>`).join('')) : ''}</div>
     <div class="blk"><div class="sh">Description</div><p>${h(t.objective)}</p>${t.why ? `<p class="why">${I('branch', 13)} <span><b>Routed to ${h(R.name)}:</b> ${h(t.why)}</span></p>` : ''}</div>
     ${Pk ? `<div class="blk"><div class="sh">Context from the shared foundation <small>${t.packet ? 'attached' : 'preview'}</small></div>
       <div class="lbar">${Object.entries(byL).map(([l, xs]) => `<i style="flex:${xs.length};--c:${LAYER_COL[l] || '#64748b'}" title="${h((LAYERS[l] || {}).name || l)}: ${xs.length}"></i>`).join('')}</div>
       <div class="llg">${Object.entries(byL).map(([l, xs]) => `<span><i style="--c:${LAYER_COL[l] || '#64748b'}"></i>${h((LAYERS[l] || {}).short || l)} ${xs.length}</span>`).join('')}<span class="sum">${total} items${reused.length ? ` · <b>${reused.length} reused</b>` : ''}${Pk.withheld.length ? ` · ${Pk.withheld.length} withheld` : ''}</span></div>
       <div class="items">${Pk.items.filter(i => i.layer !== 'policy').sort((x, y) => reusedIn(t, y) - reusedIn(t, x)).slice(0, 4).map(i => `<div class="it${reusedIn(t, i) ? ' re' : ''}"><i style="--c:${LAYER_COL[i.layer] || '#64748b'}"></i><div><b>${h(i.label)}</b> <code>${h(i.id)}</code>${reusedIn(t, i) ? '<span class="reuse">Reused</span>' : ''}<p>${h(String(i.value).slice(0, 130))}${String(i.value).length > 130 ? '…' : ''}</p><small>${h(i.from || '')}</small></div></div>`).join('')}
       ${Pk.withheld.slice(0, 2).map(w => `<div class="it wh">${I('lock', 13)}<div><b>Withheld</b> <code>${h(w.id)}</code><p>${h(w.why)}</p></div></div>`).join('')}</div></div>` : ''}
-    ${s === 'blocked' ? `<div class="callout">${I('clock', 16)}<div>Starts when ${deps.filter(d => !ST.approved.has(d.id)).map(d => `<code>${tid(r, d)}</code> (${h(personOf(d))})`).join(', ')} is handed off.</div></div>` : ''}
-    <div class="blk"><div class="sh">Activity</div><ol class="act">${timeline.map(([st, ic, a, b2]) => `<li class="${st}"><span class="an2">${st === 'now' ? '<span class="spin"></span>' : I(ic, 13)}</span><div><b>${a}</b>${b2 ? `<small>${b2}</small>` : ''}</div></li>`).join('')}</ol></div>
+    ${s === 'blocked' ? `<div class="callout">${I('clock', 16)}<div>Starts when the orchestrator hands over ${deps.filter(d => !ST.approved.has(d.id)).map(d => `<code>${tid(r, d)}</code> (${h(personOf(d))})`).join(', ')}.</div></div>` : ''}
+    <div class="blk"><div class="sh">Activity</div><ol class="act">${tl.map(([st, ic, a, b2]) => `<li class="${st}"><span class="an2">${st === 'now' ? '<span class="spin"></span>' : I(ic, 13)}</span><div><b>${a}</b>${b2 ? `<small>${b2}</small>` : ''}</div></li>`).join('')}</ol></div>
     ${out && out.body ? `<div class="blk"><div class="sh">Result</div><article class="deliv in"><header><div><small>${h(kindName(out.kind))}</small><b>${h(out.title || '')}</b>${t.contract && t.contract.as_of.length ? `<span>As of ${h(t.contract.as_of.join(', '))}</span>` : ''}</div></header><div class="docb">${bodyHTML(out.body)}</div></article></div>` : ''}
     ${s === 'failed' ? `<div class="callout bad">${I('alert', 16)}<div>${h(t.error || 'Failed')}</div></div>` : ''}`;
 }
 function footHTML(r, t, p) {
   const s = status(r, t), w = waitingOutput(t);
-  if (s === 'ready') return `<span>Ready for ${h(p.name.split(' ')[0])}’s agents</span><button type="button" class="btn primary" data-run="${t.id}">${I('play', 13)} Run agents</button>`;
+  if (s === 'ready') return `<span>Runs here; watch it live on the canvas</span><button type="button" class="btn primary" data-run="${t.id}">${I('play', 13)} Run agents</button>`;
   if (s === 'running') return `<span class="busy"><span class="spin"></span> Agents working…</span>`;
-  if (s === 'review') return `<span>${w ? '<b>Client-facing.</b> Approving signs it off.' : 'Approving hands this to the next team.'}</span><button type="button" class="btn subtle" data-back="${t.id}">${I('undo', 13)} Request changes</button><button type="button" class="btn primary" data-approve="${t.id}">${I('check', 13)} Approve and hand off</button>`;
+  if (s === 'review') return `<span>${w ? '<b>Client-facing.</b> Approving signs it off.' : 'Approving reports back to the orchestrator, which hands it on.'}</span><button type="button" class="btn subtle" data-back="${t.id}">${I('undo', 13)} Request changes</button><button type="button" class="btn primary" data-approve="${t.id}">${I('check', 13)} Approve and hand off</button>`;
   if (s === 'signoff') return `<span>“${h(w.title)}” waits for your sign-off.</span><button type="button" class="btn primary" data-signoff="${h(w.id)}">${I('check', 13)} Approve</button>`;
   if (s === 'approved') return `<span class="okt">${I('check', 14)} Done and handed off</span>`;
   if (s === 'blocked') return `<span class="busy">${I('clock', 14)} Waiting on an upstream ticket</span>`;
   return '';
 }
 
-/* bottom: the shared foundation */
-HX.op = o => { ST.ops.push(Object.assign({ at: performance.now() }, o)); if (o.kind === 'call' && o.sys) ST.flash['s:' + o.sys] = performance.now(); HX.schedule(); setTimeout(HX.schedule, 1500); };
+/* ---------- the pipeline's own signals, shown on the canvas ---------- */
+const taskById = id => run() && run().tasks.find(t => t.id === id);
+HX.op = o => {
+  const t = o.task && taskById(o.task), pid = t ? 'p:' + personOf(t) : null;
+  if (o.kind === 'call' && o.sys) { ST.flash['s:' + o.sys] = performance.now(); if (pid) { const c = (t.calls || []).slice(-1)[0]; travel(pid, 'sys:' + o.sys, SYS_SHORT[o.sys], 'call', SYS_COL[o.sys]); void c; } }
+  if (o.kind === 'read' && pid && o.layer) setTimeout(() => travel('found', pid, (LAYERS[o.layer] || {}).short || o.layer, 'read', LAYER_COL[o.layer]), 120 * (o.lane + 2 || 0));
+  if (o.kind === 'write' && pid && o.layer) setTimeout(() => travel(pid, 'found', (LAYERS[o.layer] || {}).short || o.layer, 'write', LAYER_COL[o.layer]), 150 * (o.lane + 2 || 0));
+  HX.schedule(); setTimeout(HX.schedule, 1500);
+};
 HX.flash = (l, cls) => { ST.flash['l:' + l] = { at: performance.now(), cls }; HX.schedule(); setTimeout(HX.schedule, 1500); };
-function paintFound() {
-  const now = performance.now(), r = run(), hot = k => { const f = ST.flash[k]; if (!f) return ''; const at = typeof f === 'number' ? f : f.at; return now - at < 1400 ? (f.cls || 'hot') : ''; };
-  const last = ST.ops.filter(o => ['read', 'call', 'handoff', 'write'].includes(o.kind)).slice(-1)[0], fresh = last && now - last.at < 2500;
-  setHTML(el('found'), `<div class="fl">${I('layers', 15)}<b>Shared foundation</b><span class="live${fresh ? ' on' : ''}"><i></i>${fresh ? h(`${{ read: 'Reading', write: 'Writing', call: 'Calling', handoff: 'Handing off' }[last.kind]} ${last.kind === 'call' ? (SYSTEMS[last.sys] || {}).name || '' : last.kind === 'handoff' ? 'via knowledge' : (LAYERS[last.layer] || {}).short || ''}`) : 'Idle'}</span></div>
-    <div class="lys">${LAYER_ORDER.map(l => `<span class="ly ${hot('l:' + l)}" style="--c:${LAYER_COL[l]}"><i></i>${h(LAYERS[l].short || LAYERS[l].name)}<b>${layerCount(l)}</b></span>`).join('')}</div>
-    <div class="sys">${SYS_ORDER.map(k => { const n = r ? r.tasks.reduce((m, t) => m + (t.calls || []).filter(c => c.sys === k).length, 0) : 0; return `<span class="sy ${hot('s:' + k) ? 'hot' : n ? 'used' : ''}" style="--c:${SYS_COL[k]}" title="${h(SYSTEMS[k].name)}"><i></i>${h(SYSTEMS[k].name.split(/[ &]/)[0])}${n ? `<b>${n}</b>` : ''}</span>`; }).join('')}</div>`);
-}
 
 /* ---------- events ---------- */
 let tt; HX.toast = m => { const t = el('toast'); t.innerHTML = `${I('check', 14)}<span>${h(m)}</span>`; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 3400); };
@@ -359,19 +520,19 @@ document.addEventListener('click', e => {
   const q = s => e.target.closest(s); let x;
   if (q('[data-menu]')) { ST.menu = !ST.menu; paintTop(); return; }
   if (ST.menu && !q('.menu')) { ST.menu = false; paintTop(); }
-  if ((x = q('[data-me]'))) { if (!busyPlanning() && !anyRunning()) { ME = x.dataset.me; UI.requester = ME; UI.run = null; ST.open = null; ST.nokey = null; } ST.menu = false; paintAll(); return; }
+  if ((x = q('[data-me]'))) { if (!busyPlanning() && !anyRunning()) { ME = x.dataset.me; UI.requester = ME; UI.run = null; ST.open = null; ST.nokey = null; ST.msgs = []; } ST.menu = false; paintAll(); return; }
   if ((x = q('[data-ask]'))) { ask(x.dataset.ask); return; }
   if ((x = q('[data-answer]'))) { answer(x.dataset.answer); return; }
   if (q('[data-answer-input]')) { answer(q('.qcard').querySelector('.clarIn').value.trim()); return; }
-  if (q('[data-runall]')) { runAll(); return; }
+  if (q('[data-runall]')) { ST.open = null; runAll(); return; }
   if (q('[data-stop]')) { ST.auto = false; paintAll(); return; }
   if ((x = q('[data-view]'))) { ST.view = x.dataset.view; if (ST.view === 'results') ST.open = null; paintAll(); return; }
   if ((x = q('[data-signoff]'))) { signOff(F.outputs.find(o => o.id === x.dataset.signoff)); paintAll(); return; }
-  if ((x = q('[data-task]'))) { const t = run().tasks.find(y => y.id === x.dataset.task); ST.open = personOf(t); ST.openTask = t.id; ST.view = 'floor'; paintAll(); return; }
-  if ((x = q('.pc'))) { ST.open = x.dataset.person; const t = run() && run().tasks.find(y => personOf(y) === ST.open); ST.openTask = t ? t.id : null; paintAll(); return; }
+  if ((x = q('[data-task]'))) { const t = run().tasks.find(y => y.id === x.dataset.task); ST.open = personOf(t); ST.openTask = t.id; paintAll(); return; }
+  if ((x = q('.nd.wb, .rp'))) { ST.open = x.dataset.person; const t = run() && run().tasks.find(y => personOf(y) === ST.open); ST.openTask = t ? t.id : null; paintAll(); return; }
   if ((x = q('[data-tab-task]'))) { ST.openTask = x.dataset.tabTask; paintAll(); return; }
   if (q('[data-close]')) { ST.open = null; ST.openTask = null; paintAll(); return; }
-  if ((x = q('[data-run]'))) { startTask(run().tasks.find(y => y.id === x.dataset.run)); return; }
+  if ((x = q('[data-run]'))) { const t = run().tasks.find(y => y.id === x.dataset.run); ST.open = null; ST.view = 'floor'; startTask(t); return; }
   if ((x = q('[data-approve]'))) { approve(run().tasks.find(y => y.id === x.dataset.approve)); return; }
   if ((x = q('[data-back]'))) { sendBack(run().tasks.find(y => y.id === x.dataset.back)); return; }
 });
@@ -381,7 +542,7 @@ document.addEventListener('keydown', e => {
   if (e.target.classList && e.target.classList.contains('clarIn') && e.key === 'Enter') answer(e.target.value.trim());
 });
 el('composer').onsubmit = e => { e.preventDefault(); const v = el('ask').value; el('ask').value = ''; ask(v); };
-el('newChat').onclick = () => { if (busyPlanning() || anyRunning()) return; UI.run = null; ST.open = null; ST.nokey = null; ST.auto = false; F.session.advisor = null; paintAll(); };
+el('newChat').onclick = () => { if (busyPlanning() || anyRunning()) return; UI.run = null; ST.open = null; ST.nokey = null; ST.auto = false; ST.msgs = []; F.session.advisor = null; paintAll(); };
 
 UI.requester = ME; paintAll();
 initAI().then(paintAll);

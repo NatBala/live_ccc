@@ -11,19 +11,21 @@ You type a request as a real role (a wholesaler, a product specialist, a markete
 
 ## Agent Harness (default view on this branch)
 
-The interface uses Inter type, a neutral slate palette with a single blue accent, an SVG icon set, monogram avatars with status rings, and a light theme throughout. Tickets look and behave like an issue tracker: properties, description, foundation context and an activity timeline.
+`public/index.html` is the **Agent Harness**, a single-screen view that shows a business leader how a request is planned and carried out across teams. The classic workbench view is at `public/classic.html`. Both run the same pipeline (`src/pipeline.js` over `src/engine.js`): the orchestrator plans from the shared foundation, specialists work from context packets, tools go through the gateway, and the gatekeeper checks every result. Nothing in the harness is scripted.
 
-`public/index.html` is the **Agent Harness**, an orchestration floor that lets a business leader follow how work moves through the teams. The classic view is at `public/classic.html` (linked from the header). Both run the same pipeline (`src/pipeline.js` over `src/engine.js`): the orchestrator plans from the shared foundation, specialists work from context packets, tools go through the gateway, and the gatekeeper checks every result. Nothing in the harness is scripted.
+- **Orchestrator panel (left).** Planning status, then the plan: tickets by wave, a **Run all agents** button, what the foundation answered instead of asking, the interpretation and the grounding.
+- **Orchestration canvas (centre).** Requester → Orchestrator hub → each workbench, above a shared-foundation band and a row of systems. The conversation is animated along the connections:
+  - *Assigned*: the planner sends a ticket to a workbench.
+  - *Picked up* and *Done*: the workbench reports back to the planner.
+  - *Handoff*: the planner relays finished work to the next workbench.
+  - *Sign-off* and *Delivered*: back to the requester.
+  - Context rises from the foundation layers into a workbench, systems are read or written, and verified results drop back into the foundation. Live connections show a moving beam.
+- **Live dock (bottom, fixed height, no scrolling).** One card per running ticket, with a Context → Systems → Drafting → Verified tracker, foundation and system chips in plain words ("Salesforce · read call notes", not tool names), and the output typing itself in as the agent finishes.
+- **Message feed.** The latest messages between the orchestrator, the workbenches and the requester.
+- **Ticket overlay.** Click a workbench to open its ticket: properties, description, foundation context, activity (in plain words), result, and Run agents / Approve and hand off / Request changes. Running a ticket closes the overlay so you can watch it live.
+- **Results.** Outcomes (meetings held, emails drafted, tasks created), sign-off, deliverables with sources, follow-ups and what was stored for next time.
 
-- **Command bar.** Pick who is asking and type a request.
-- **Orchestrator (left).** Live planning status, then the tickets by wave with their status and an approval progress bar. It also shows what was **answered from the foundation instead of asked**, the interpretation, and what the foundation was checked for (graph match, context, authority). It asks a question only when the foundation can't settle something, and never about logistics, which SSC handles.
-- **Team floor (centre).** Every persona with an illustrated avatar, grouped by team: Sales, Product (PRP), Marketing Content Generation (Market Incubator) and Service. As the plan lands, ticket chips fly from the orchestrator to the people who own each step. Each card shows its ticket count, status (new ticket, agents working, waiting for approval, approved) and the agents involved.
-- **Workbench (right).** Click a person to open their ticket. You see the request and why it was routed to them, the agents on it, the tickets it builds on, and the context the foundation attaches (with work reused from other teams and anything withheld by policy). Press **Run agents** to watch the system calls, the result and the gatekeeper verdicts, then **Approve and hand off**. Approval unlocks the next teams' tickets, and the handoff flies across the floor.
-- **Run all agents.** As soon as the plan is ready, one button runs every ticket in dependency order. Each team hands off to the next automatically; client-facing drafts wait for your sign-off at the end so they never block the flow. You can still open any person and run one ticket at a time.
-- **Results.** When the work is done, the Results tab shows what happened: meetings scheduled or held (with time, attendees and event id), emails drafted, tasks created, every deliverable as a readable document with who produced it and its sources, follow-ups, what needs your sign-off (with Approve), and what was stored in the foundation for next time.
-- **Shared foundation (bottom).** Memory, knowledge, verification, models, feedback, events and graph light up as they're read and written; the system pills light up when called.
-
-With an OpenAI or Azure OpenAI key on the server (see "Run it"), requests are planned and worked live. Without one, the saved AI runs in `src/replay.js` replay through the same foundation, tools and checks. Add `?fast=1` to the address to speed up presentation pauses.
+With an OpenAI or Azure OpenAI key on the server (see "Run it"), requests are planned and worked live. Without one, the saved AI runs in `src/replay.js` replay through the same foundation, tools and checks. Add `?fast=1` to the address to speed up the presentation.
 
 ## Background
 
