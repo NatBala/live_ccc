@@ -124,10 +124,10 @@ async function startTask(t) {
   if (r.status === 'planned') { r.status = 'running'; r.t0 = Date.now(); if (r.advisor) { F.session.advisor = r.advisor; F.session.unit = r.unit || null; } F.session.requests.push({ text: r.text, adv: r.advisor }); }
   if (!UI.ctl || UI.ctl.signal.aborted) UI.ctl = new AbortController();
   ST.recent = [t.id, ...ST.recent.filter(x => x !== t.id)].slice(0, 6);
-  comm('p:' + personOf(t), 'hub', `Picked up ${tid(r, t)} · running ${AGENTS[t.agent].name}`, 'ack');
+  comm('t:' + t.id, 'hub', `Picked up ${tid(r, t)} · running ${AGENTS[t.agent].name}`, 'ack');
   paintAll();
   try { await runTask(r, t); } catch (e) { t.state = 'failed'; t.error = errText(e); }
-  if (t.state === 'done') { const o = t.result && t.result.output; comm('p:' + personOf(t), 'hub', `Done ${tid(r, t)} · ${o && o.title ? o.title : t.title}`, 'report'); }
+  if (t.state === 'done') { const o = t.result && t.result.output; comm('t:' + t.id, 'hub', `Done ${tid(r, t)} · ${o && o.title ? o.title : t.title}`, 'report'); }
   paintAll();
 }
 function signOff(o, by) { if (o && o.status === 'Waiting for approval') { o.status = 'Approved by ' + (by || meName()); logEvent('approval.granted', o.title, ME, o.adv); flashTile('policy', 'write'); comm('req', 'hub', `Approved “${o.title}”`, 'approve'); } }
@@ -138,12 +138,12 @@ function approve(t, signOutputs = true) {
   if (signOutputs) outputsOf(t).forEach(o => signOff(o, meName()));
   logEvent('ticket.approved', `${tid(r, t)} ${t.title}`, ME, r.advisor);
   const o = t.result && t.result.output, what = o && o.title ? o.title : t.title;
-  r.tasks.filter(x => x.depends_on.includes(t.id)).forEach((x, k) => setTimeout(() => comm('hub', 'p:' + personOf(x), `Handoff to ${tid(r, x)} · “${what}” from ${first(personOf(t))}`, 'handoff'), 300 + k * 260));
+  r.tasks.filter(x => x.depends_on.includes(t.id)).forEach((x, k) => setTimeout(() => comm('hub', 't:' + x.id, `Handoff to ${tid(r, x)} · “${what}” from ${first(personOf(t))}`, 'handoff'), 300 + k * 260));
   const w = waitingOutput(t); if (w && !signOutputs) setTimeout(() => comm('hub', 'req', `Sign-off needed · “${w.title}”`, 'signoff'), 200);
   if (r.tasks.every(x => ST.approved.has(x.id))) { finishRun(r); setTimeout(() => comm('hub', 'req', `Delivered · ${r.tasks.filter(x => x.result && x.result.output).length} deliverables`, 'deliver'), 500); setTimeout(() => { ST.view = 'results'; ST.open = null; paintAll(); }, 2800 * ANIM()); toast(r.tasks.some(waitingOutput) ? 'Complete. Client-facing items are waiting for your sign-off.' : 'Complete.'); }
   paintAll();
 }
-function sendBack(t) { if (t.state !== 'done') return; ['result', 'verdicts', 'calls', 'packet', 'contract', 'toolResults', 'error'].forEach(k => delete t[k]); t.state = 'queued'; delete ST.type[t.id]; comm('p:' + personOf(t), 'hub', `Changes requested on ${tid(run(), t)}`, 'back'); paintAll(); }
+function sendBack(t) { if (t.state !== 'done') return; ['result', 'verdicts', 'calls', 'packet', 'contract', 'toolResults', 'error'].forEach(k => delete t[k]); t.state = 'queued'; delete ST.type[t.id]; comm('t:' + t.id, 'hub', `Changes requested on ${tid(run(), t)}`, 'back'); paintAll(); }
 async function runAll() {
   const r = run(); if (!r || !r.tasks.length || ST.auto) return;
   ST.auto = true; ST.open = null; ST.view = 'floor'; paintAll();
@@ -159,7 +159,7 @@ async function runAll() {
 
 /* ---------- communication: messages travel along the canvas ---------- */
 const MSG_ICON = { request: 'send', assign: 'inbox', ack: 'play', report: 'check', handoff: 'arrow', signoff: 'alert', deliver: 'sparkles', approve: 'check', back: 'undo' };
-const nodeName = id => id === 'hub' ? HUB : id === 'req' ? (run() ? EMPLOYEES[run().requester].name : meName()) : id.slice(2);
+const nodeName = id => id === 'hub' ? HUB : id === 'req' ? (run() ? EMPLOYEES[run().requester].name : meName()) : id.startsWith('t:') ? (() => { const t = run() && run().tasks.find(x => x.id === id.slice(2)); return t ? personOf(t) : id; })() : id.slice(2);
 function comm(from, to, text, kind) {
   ST.msgs.unshift({ from, to, text, kind, at: Date.now() }); ST.msgs = ST.msgs.slice(0, 40);
   travel(from, to, kind === 'assign' ? text.split(' · ')[0].replace('Assigned ', '') : { request: 'Request', ack: 'Picked up', report: 'Done', handoff: 'Handoff', signoff: 'Sign-off', deliver: 'Delivered', approve: 'Approved', back: 'Changes' }[kind] || '', kind);
@@ -174,7 +174,7 @@ function anchor(id, side) {
   return [p.x + p.w / 2, p.y + p.h / 2];
 }
 function ends(from, to) {
-  const order = id => id === 'req' ? 0 : id === 'hub' ? 1 : id.startsWith('p:') ? 2 : 3;
+  const order = id => id === 'req' ? 0 : id === 'hub' ? 1 : id.startsWith('t:') ? 2 : 3;
   if (to.startsWith('sys:') || to === 'found') return [anchor(from, 'b'), anchor(to, 't')];
   if (from.startsWith('sys:') || from === 'found') return [anchor(from, 't'), anchor(to, 'b')];
   return order(from) <= order(to) ? [anchor(from, 'r'), anchor(to, 'l')] : [anchor(from, 'l'), anchor(to, 'r')];
@@ -202,7 +202,7 @@ function travel(from, to, label, kind, color) {
 function announcePlan(r) {
   if (ST.announced === r.id || !r.tasks.length || !['planned', 'running'].includes(r.status)) return;
   ST.announced = r.id;
-  r.tasks.forEach((t, k) => setTimeout(() => comm('hub', 'p:' + personOf(t), `Assigned ${tid(r, t)} · ${t.title}`, 'assign'), 350 + k * 420 * ANIM()));
+  r.tasks.forEach((t, k) => setTimeout(() => comm('hub', 't:' + t.id, `Assigned ${tid(r, t)} · ${t.title}`, 'assign'), 350 + k * 420 * ANIM()));
 }
 
 /* ---------- painting ---------- */
@@ -240,7 +240,7 @@ function paintOrch() {
   let stat = '';
   if (thinking) stat = `<div class="scard think"><div class="srow"><span class="spin"></span><b>${h(DRAFTING[B.drafting] || 'Planning')}</b></div><div class="shimmer"></div><small>${r.replay ? 'Replaying the orchestrator’s saved reasoning' : B.chars ? `${B.chars.toLocaleString()} characters streamed from the model` : 'Sending the request with foundation context'}</small></div>`;
   else if (r.status === 'clarify') stat = `<div class="scard ask"><div class="srow">${I('alert', 16)}<b>One question</b></div><small>The foundation couldn’t settle this on its own.</small></div>`;
-  else if (r.status === 'done') stat = `<div class="scard ok"><div class="srow">${I('check', 16)}<b>Complete</b></div><small>${r.tasks.length} tickets · ${teams} team${teams > 1 ? 's' : ''} · ${Math.max(1, Math.round(((r.t1 || Date.now()) - r.t0) / 1000))} s${r.tasks.some(waitingOutput) ? ' · sign-off pending' : ''}</small><button type="button" class="btn primary block" data-view="results">View results ${I('arrow', 14)}</button></div>`;
+  else if (r.status === 'done') stat = `<div class="scard ok"><div class="srow">${I('check', 16)}<b>Complete</b></div><small>${r.tasks.length} tickets · ${teams} team${teams > 1 ? 's' : ''} · ${Math.max(1, Math.round(((r.t1 || Date.now()) - r.t0) / 1000))} s${r.tasks.some(waitingOutput) ? ' · sign-off pending' : ''}</small><div class="twob"><button type="button" class="btn primary" data-view="results">${I('doc', 13)} Results</button><button type="button" class="btn" data-view="found">${I('layers', 13)} Foundation</button></div></div>`;
   else if (r.tasks.length) stat = `<div class="scard plan"><div class="srow"><b>${r.status === 'planned' ? 'Plan ready' : ST.auto ? 'Running all agents' : 'In progress'}</b>${ST.auto ? '<span class="spin"></span>' : ''}</div>
       <div class="kpis"><div><b>${r.tasks.length}</b><small>tickets</small></div><div><b>${teams}</b><small>team${teams > 1 ? 's' : ''}</small></div><div><b>${waves.length}</b><small>wave${waves.length > 1 ? 's' : ''}</small></div><div><b>${done}/${r.tasks.length}</b><small>done</small></div></div>
       <div class="prog"><i style="width:${done / r.tasks.length * 100}%"></i></div>
@@ -265,7 +265,7 @@ function paintFloor() {
   const r = run(), box = el('floor');
   if (!box._init) {
     box.innerHTML = `<div class="fh"><div class="seg" id="vtabs"></div><span id="fsub" class="fsub"></span><span id="fcta"></span></div>
-      <div class="results" id="results"></div>
+      <div class="results" id="results"></div><div class="fview" id="fview"></div>
       <div class="orchview" id="orchview"><div class="canvas" id="canvas"><svg class="edges"><defs><linearGradient id="beam" x1="0" x2="1"><stop offset="0" stop-color="#2f5bea" stop-opacity="0"/><stop offset=".5" stop-color="#2f5bea"/><stop offset="1" stop-color="#10b981" stop-opacity="0"/></linearGradient></defs><g class="base"></g></svg><div class="nodes"></div><div class="lane"></div></div>
         <div class="dock"><div class="live" id="live"></div><div class="feed" id="feed"></div></div></div>`;
     box._init = 1;
@@ -273,12 +273,13 @@ function paintFloor() {
     setInterval(tickType, 30);
   }
   const hasRes = r && r.tasks.some(t => t.result);
-  if (!hasRes && ST.view === 'results') ST.view = 'floor';
-  setHTML(el('vtabs'), `<button type="button" class="${ST.view === 'floor' ? 'on' : ''}" data-view="floor">${I('branch', 14)} Orchestration</button><button type="button" class="${ST.view === 'results' ? 'on' : ''}" data-view="results" ${hasRes ? '' : 'disabled'}>${I('doc', 14)} Results${r && r.status === 'done' ? '<i class="dotok"></i>' : ''}</button>`);
+  if (!hasRes && ST.view !== 'floor') ST.view = 'floor';
+  setHTML(el('vtabs'), `<button type="button" class="${ST.view === 'floor' ? 'on' : ''}" data-view="floor">${I('branch', 14)} Orchestration</button><button type="button" class="${ST.view === 'results' ? 'on' : ''}" data-view="results" ${hasRes ? '' : 'disabled'}>${I('doc', 14)} Results${r && r.status === 'done' ? '<i class="dotok"></i>' : ''}</button><button type="button" class="${ST.view === 'found' ? 'on' : ''}" data-view="found" ${hasRes ? '' : 'disabled'}>${I('layers', 14)} Foundation</button>`);
   el('fsub').textContent = !r ? 'Ask for an outcome to see the plan come to life' : r.tasks.length ? `${r.tasks.length} ticket${r.tasks.length > 1 ? 's' : ''} across ${new Set(r.tasks.map(t => personOf(t))).size} workbench${new Set(r.tasks.map(t => personOf(t))).size > 1 ? 'es' : ''}` : r.status === 'thinking' ? 'Planning from the shared foundation…' : '';
   setHTML(el('fcta'), r && r.tasks.length && ['planned', 'running'].includes(r.status) && !ST.auto && r.tasks.some(t => status(r, t) === 'ready') ? `<button type="button" class="btn primary" data-runall>${I('play', 13)} Run all agents</button>` : '');
-  el('results').hidden = ST.view !== 'results'; el('orchview').hidden = ST.view === 'results';
+  el('results').hidden = ST.view !== 'results'; el('fview').hidden = ST.view !== 'found'; el('orchview').hidden = ST.view !== 'floor';
   if (ST.view === 'results' && r) setHTML(el('results'), resultsHTML(r));
+  else if (ST.view === 'found' && r) setHTML(el('fview'), foundationHTML(r));
   else { paintCanvas(); paintLive(); paintFeed(); }
 }
 
@@ -286,17 +287,13 @@ function paintFloor() {
 function layout(r) {
   const cv = el('canvas'), W = cv.clientWidth, H = cv.clientHeight, laneH = 104, top = 14, Hn = Math.max(160, H - laneH - top - 10);
   const pos = {}, nodeH = 66;
-  const reqW = 168, hubW = 132, hubH = 132;
+  const reqW = 152, hubW = 124, hubH = 124;
   pos.req = { x: 16, y: top + Hn / 2 - nodeH / 2, w: reqW, h: nodeH };
-  pos.hub = { x: 16 + reqW + 54, y: top + Hn / 2 - hubH / 2, w: hubW, h: hubH };
-  const people = [];
-  if (r && r.tasks.length) {
-    const firstWave = {}; r.tasks.forEach(t => { const p = personOf(t); firstWave[p] = Math.min(firstWave[p] || 99, t.wave); });
-    Object.entries(firstWave).forEach(([p, w]) => people.push({ p, w }));
-  }
-  const waves = [...new Set(people.map(x => x.w))].sort((a, b) => a - b);
-  const x0 = pos.hub.x + hubW + 70, avail = W - x0 - 16, colW = waves.length ? Math.min(250, avail / waves.length) : 0, nodeW = Math.max(150, Math.min(222, colW - 26));
-  waves.forEach((w, ci) => { const col = people.filter(x => x.w === w), gap = Math.min(nodeH + 26, Hn / col.length); col.forEach((x, k) => { pos['p:' + x.p] = { x: x0 + ci * colW, y: top + Hn / 2 - (col.length * gap) / 2 + k * gap + (gap - nodeH) / 2, w: nodeW, h: nodeH, wave: w }; }); });
+  pos.hub = { x: 16 + reqW + 40, y: top + Hn / 2 - hubH / 2, w: hubW, h: hubH };
+  const waves = r && r.tasks.length ? [...new Set(r.tasks.map(t => t.wave))].sort((a, b) => a - b) : [];
+  const x0 = pos.hub.x + hubW + 58, avail = W - x0 - 16, colW = waves.length ? Math.min(260, avail / waves.length) : 0, nodeW = Math.max(150, Math.min(232, colW - 22));
+  waves.forEach((w, ci) => { const col = r.tasks.filter(t => t.wave === w).sort((a, b) => a.step - b.step), gap = Math.min(nodeH + 20, (Hn - 16) / col.length), nh = Math.min(nodeH, gap - 10);
+    col.forEach((t, k) => { pos['t:' + t.id] = { x: x0 + ci * colW, y: top + 18 + (Hn - 16) / 2 - (col.length * gap) / 2 + k * gap + (gap - nh) / 2, w: nodeW, h: nh, wave: w, compact: nh < 56 }; }); });
   pos.found = { x: 16, y: H - laneH + 4, w: W - 32, h: 40 };
   const sysW = (W - 32) / SYS_ORDER.length;
   SYS_ORDER.forEach((k, i) => { pos['sys:' + k] = { x: 16 + i * sysW + 3, y: H - 46, w: sysW - 6, h: 30 }; });
@@ -313,15 +310,10 @@ function paintCanvas() {
   items.push({ k: 'req', html: `${avatar(E.name, E.team, 34)}<div><small>Requester</small><b>${h(E.name)}</b><span>${r ? (r.status === 'done' ? 'Delivered' : r.tasks.some(waitingOutput) ? 'Sign-off waiting' : 'Waiting for results') : 'Ready to ask'}</span></div>`, cls: 'nd req ' + reqState });
   const thinking = r && r.status === 'thinking';
   items.push({ k: 'hub', html: `<div class="orb${thinking || anyRunning() || ST.auto ? ' spin2' : ''}"><i></i><i></i></div><div class="hubc">${I('branch', 22)}<b>${HUB}</b><small>${!r ? 'Idle' : thinking ? 'Planning' : r.status === 'clarify' ? 'Asking' : r.status === 'done' ? 'Complete' : `${r.tasks.filter(t => ST.approved.has(t.id)).length}/${r.tasks.length} done`}</small></div>`, cls: 'nd hub' + (thinking ? ' think' : '') });
-  if (r) {
-    const per = {}; r.tasks.forEach(t => (per[personOf(t)] = per[personOf(t)] || []).push(t));
-    Object.entries(per).forEach(([p, ts]) => {
-      const R = roleOfT(ts[0]), ss = ts.map(t => status(r, t)), s = ['running', 'review', 'signoff', 'ready', 'failed', 'blocked', 'approved'].find(x => ss.includes(x)), cur = ts.find(t => status(r, t) === s) || ts[0];
-      const pr = ROSTER.find(x => x.name === p);
-      items.push({ k: 'p:' + p, html: `${avatar(p, R.team, 34, s)}<div><small>${h(R.name)}</small><b>${h(p)}</b><span><code>${tid(r, cur)}</code>${ts.length > 1 ? ` +${ts.length - 1}` : ''}</span></div>${badge2(s)}${s === 'running' ? '<i class="scan"></i>' : ''}`, cls: `nd wb ${s}${ST.open === p ? ' sel' : ''}`, team: R.team, person: p });
-      void pr;
-    });
-  }
+  if (r) r.tasks.forEach(t => {
+    const st = status(r, t), R = roleOfT(t), p = personOf(t), P0 = L.pos['t:' + t.id] || {};
+    items.push({ k: 't:' + t.id, html: `${avatar(p, R.team, P0.compact ? 26 : 32, st)}<div><small><code>${tid(r, t)}</code> ${h(R.name)}</small><b>${h(t.title)}</b>${P0.compact ? '' : `<span>${h(p)}${p === meName() ? ' · you' : ''}</span>`}</div>${badge2(st)}${st === 'running' ? '<i class="scan"></i>' : ''}`, cls: `nd wb ${st}${ST.openTask === t.id && ST.open ? ' sel' : ''}${P0.compact ? ' compact' : ''}`, team: R.team, task: t.id });
+  });
   const now = performance.now(), hot = k => { const f = ST.flash[k]; if (!f) return ''; const at = typeof f === 'number' ? f : f.at; return now - at < 1400 ? (f.cls || 'hot') : ''; };
   items.push({ k: 'found', html: `<span class="fl2">${I('layers', 14)}<b>Shared foundation</b></span>${LAYER_ORDER.map(l => `<span class="ly2 ${hot('l:' + l)}" style="--c:${LAYER_COL[l]}"><i></i>${h(LAYERS[l].short || LAYERS[l].name)}<b>${layerCount(l)}</b></span>`).join('')}`, cls: 'nd found' });
   SYS_ORDER.forEach(k => { const n = r ? r.tasks.reduce((m, t) => m + (t.calls || []).filter(c => c.sys === k).length, 0) : 0; items.push({ k: 'sys:' + k, html: `<i></i>${h(SYS_SHORT[k])}${n ? `<b>${n}</b>` : ''}`, cls: `nd sys ${hot('s:' + k) ? 'hot' : n ? 'used' : ''}`, color: SYS_COL[k] }); });
@@ -333,7 +325,7 @@ function paintCanvas() {
     const keep = ['ping', 'enter'].filter(x => c.classList.contains(x));
     c.className = it.cls + ' ' + keep.join(' ');
     if (it.team) c.style.setProperty('--c', TCOL(it.team)); if (it.color) c.style.setProperty('--c', it.color);
-    if (it.person) c.dataset.person = it.person;
+    if (it.task) c.dataset.task2 = it.task;
     c.style.left = p.x + 'px'; c.style.top = p.y + 'px'; c.style.width = p.w + 'px'; c.style.height = p.h + 'px';
     setHTML(c, it.html); have.delete(it.k);
   });
@@ -342,16 +334,20 @@ function paintCanvas() {
   const P2 = L.pos, edges = [];
   const line = (a, b, cls) => { const e2 = ends(a, b); if (e2[0] && e2[1]) edges.push(`<path class="${cls}" d="${pathD(curve(e2[0], e2[1]))}"/>`); };
   line('req', 'hub', 'edge' + (r ? ' on' : ''));
-  if (r) Object.keys(P2).filter(k => k.startsWith('p:')).forEach(k => {
-    const ts = r.tasks.filter(t => 'p:' + personOf(t) === k), running = ts.some(t => t.state === 'running');
+  if (r) r.tasks.forEach(t => {
+    const k = 't:' + t.id; if (!P2[k]) return; const running = t.state === 'running';
     line('hub', k, 'edge on' + (running ? ' live' : ''));
     if (running) line('hub', k, 'beam');
-    const a = anchor(k, 'b'); edges.push(`<path class="drop${running ? ' live' : ''}" d="M${a[0]},${a[1]} L${a[0]},${P2.found.y}"/>`);
+    t.depends_on.forEach(d => { if (P2['t:' + d]) line('t:' + d, k, 'dep'); });
+    const a2 = anchor(k, 'b'); edges.push(`<path class="drop${running ? ' live' : ''}" d="M${a2[0]},${a2[1]} L${a2[0]},${P2.found.y}"/>`);
   });
   base.innerHTML = edges.join('');
   /* wave headers */
   const lane = cv.querySelector('.lane');
-  setHTML(lane, L.waves.map((w, i) => `<span class="wvh" style="left:${L.x0 + i * L.colW}px">${L.waves.length > 1 ? 'Wave ' + w : 'Workbenches'}</span>`).join('') + (!r ? `<div class="idle-hint" style="left:${P2.hub.x + P2.hub.w + 70}px;top:${P2.hub.y + 10}px"><b>Workbenches appear here</b><span>Each step of the plan becomes a ticket on the workbench of the person who owns it. Messages flow through ${HUB} as work is picked up, finished and handed off.</span><div class="roster">${ROSTER.map(p => `<button type="button" class="rp" data-person="${h(p.name)}" title="${h(p.name)} · ${h(p.role)}">${avatar(p.name, p.team, 26)}</button>`).join('')}</div></div>` : ''));
+  const par = L.waves.map((w, i) => { const col = r.tasks.filter(t => t.wave === w), live = col.filter(t => t.state === 'running').length, ps = col.map(t => P2['t:' + t.id]).filter(Boolean);
+    const top2 = Math.min(...ps.map(p => p.y)), bot = Math.max(...ps.map(p => p.y + p.h));
+    return `<span class="wvh${live > 1 ? ' on' : ''}" style="left:${L.x0 + i * L.colW}px">Wave ${w}${col.length > 1 ? ` · ${live > 1 ? `<b><i></i>${live} running in parallel</b>` : `${col.length} in parallel`}` : ''}</span>${col.length > 1 ? `<span class="pbr${live > 1 ? ' on' : ''}" style="left:${L.x0 + i * L.colW - 9}px;top:${top2}px;height:${bot - top2}px"></span>` : ''}`; }).join('');
+  setHTML(lane, par + (!r ? `<div class="idle-hint" style="left:${P2.hub.x + P2.hub.w + 70}px;top:${P2.hub.y + 10}px"><b>Workbenches appear here</b><span>Each step of the plan becomes a ticket on the workbench of the person who owns it. Messages flow through ${HUB} as work is picked up, finished and handed off.</span><div class="roster">${ROSTER.map(p => `<button type="button" class="rp" data-person="${h(p.name)}" title="${h(p.name)} · ${h(p.role)}">${avatar(p.name, p.team, 26)}</button>`).join('')}</div></div>` : ''));
 }
 
 /* the live dock: what each agent is doing right now, without scrolling */
@@ -407,7 +403,7 @@ function paintLive() {
 function paintFeed() {
   const box = el('feed'); if (!box) return;
   const r = run(), ms = ST.msgs.slice(0, 7);
-  const who = id => id === 'hub' ? `<span class="hubdot">${I('branch', 11)}</span>` : id === 'req' ? avatar(nodeName(id), r ? EMPLOYEES[r.requester].team : EMPLOYEES[ME].team, 20) : (() => { const t = r && r.tasks.find(x => 'p:' + personOf(x) === id); return avatar(id.slice(2), t ? roleOfT(t).team : 'sales', 20); })();
+  const who = id => id === 'hub' ? `<span class="hubdot">${I('branch', 11)}</span>` : id === 'req' ? avatar(nodeName(id), r ? EMPLOYEES[r.requester].team : EMPLOYEES[ME].team, 20) : (() => { const t = r && r.tasks.find(x => 't:' + x.id === id); return t ? avatar(personOf(t), roleOfT(t).team, 20) : avatar(id.slice(2), 'sales', 20); })();
   setHTML(box, `<div class="fdh">${I('msg', 13)}<b>Live messages</b><small>${ST.msgs.length}</small></div>${ms.length ? ms.map((m, i) => `<div class="fm ${m.kind}${i === 0 ? ' new' : ''}"><span class="fw">${who(m.from)}${I('arrow', 10, 'ar')}${who(m.to)}</span><div><b>${h(m.text)}</b><small>${h(first(nodeName(m.from)))} → ${h(first(nodeName(m.to)))} · ${ago(m.at)}</small></div></div>`).join('') : '<p class="fempty">Assignments, pick-ups, reports and handoffs between the orchestrator and each workbench appear here.</p>'}`);
 }
 const ago = t => { const s = Math.round((Date.now() - t) / 1000); return s < 3 ? 'now' : s < 60 ? s + 's ago' : Math.round(s / 60) + 'm ago'; };
@@ -434,13 +430,86 @@ function resultsHTML(r) {
   const tiles = acts.map(a => `<div class="ot ${a.tone}"><span class="oti">${I(a.icon, 18)}</span><div class="otb"><small>${h(a.kind)}</small>${a.big ? `<b>${h(a.big)}</b>` : ''}<span>${h(a.title || '')}</span>${a.lines.filter(Boolean).map(l => `<em>${h(l)}</em>`).join('')}<footer>${avatar(a.who, a.team, 18)}${h(a.who)}${a.id ? `<code>${h(a.id)}</code>` : ''}</footer></div></div>`)
     .concat(docs.map(t => { const o = t.result.output, rec = outputsOf(t)[0]; return `<a class="ot doc" href="#doc-${t.id}"><span class="oti">${I('doc', 18)}</span><div class="otb"><small>${h(kindName(o.kind))}</small><b>${h(o.title || t.title)}</b>${rec ? `<em class="${rec.status === 'Waiting for approval' ? 'w' : 'ok'}">${rec.status === 'Waiting for approval' ? 'Awaiting sign-off' : h(rec.status)}</em>` : ''}<footer>${avatar(personOf(t), roleOfT(t).team, 18)}${h(personOf(t))} · ${h(roleOfT(t).name)}</footer></div></a>`; }));
   return `<section class="hero"><div class="hl"><span class="st ${doneAll ? 'ok' : ''}">${I(doneAll ? 'check' : 'clock', 13)}${doneAll ? 'Complete' : 'In progress'}</span><h1>${h(r.text.replace(/ \(clarification:.*\)$/, ''))}</h1><p>Requested by ${h(E.name)} · ${r.tasks.length} tickets across ${teams.size} team${teams.size > 1 ? 's' : ''} · ${secs} s · ${ST.msgs.length} orchestration messages</p></div>
-      <div class="metrics"><div><b>${S.reads}</b><small>Foundation items read</small></div><div><b>${S.reused}</b><small>Reused from other teams</small></div><div><b>${S.calls}</b><small>System reads and writes</small></div><div><b>${S.committed}</b><small>Stored back</small></div></div></section>
+      <div class="metrics"><div class="mlink" data-view="found"><b>${S.reads}</b><small>Foundation items read ${I('arrow', 11)}</small></div><div><b>${S.reused}</b><small>Reused from other teams</small></div><div><b>${S.calls}</b><small>System reads and writes</small></div><div><b>${S.committed}</b><small>Stored back</small></div></div></section>
     ${waiting.length ? `<section class="signbox"><header>${I('alert', 16)}<div><b>Awaiting your sign-off</b><small>Client-facing. Nothing is sent until you approve.</small></div></header>${waiting.map(({ o, t }) => `<div class="sr">${avatar(personOf(t), roleOfT(t).team, 28)}<div><b>${h(o.title)}</b><small>${h(kindName(o.kind))} · ${h(personOf(t))}, ${h(roleOfT(t).name)}</small></div><a class="btn subtle sm" href="#doc-${t.id}">${I('eye', 13)} Review</a><button type="button" class="btn primary sm" data-signoff="${h(o.id)}">${I('check', 13)} Approve</button></div>`).join('')}</section>` : ''}
     <div class="sh2">Outcomes</div><div class="ots">${tiles.join('') || '<p class="muted">Nothing finished yet.</p>'}</div>
     ${proposed.length ? `<div class="sh2">Follow-ups</div><div class="list">${proposed.map(({ v, t }) => `<div class="li">${I('task', 15)}<div><b>${h(v.title || '')}</b><small>${h(personOf(t))}${v.reason ? ' · ' + h(v.reason) : ''}</small></div><span class="badge ${v.status === 'committed' ? 'approved' : 'review'}">${v.status === 'committed' ? 'Created' : 'Proposed'}</span></div>`).join('')}</div>` : ''}
     <div class="sh2">Deliverables</div>
     ${docs.map(t => { const o = t.result.output, rec = outputsOf(t)[0], R = roleOfT(t); return `<article class="deliv" id="doc-${t.id}"><header>${avatar(personOf(t), R.team, 32)}<div><small>${h(kindName(o.kind))} · <code>${tid(r, t)}</code></small><b>${h(o.title || t.title)}</b><span>${h(personOf(t))} · ${h(R.name)} · ${h(AGENTS[t.agent].name)}${t.contract && t.contract.as_of.length ? ' · as of ' + h(t.contract.as_of.join(', ')) : ''}</span></div>${rec ? `<span class="badge ${rec.status === 'Waiting for approval' ? 'signoff' : 'approved'}">${rec.status === 'Waiting for approval' ? 'Awaiting sign-off' : 'Ready'}</span>` : ''}</header><div class="docb">${bodyHTML(o.body)}</div>${t.contract && t.contract.sources.length ? `<footer>${I('link', 12)} ${t.contract.sources.filter(x => !/\./.test(x)).slice(0, 8).map(x => `<code>${h(x)}</code>`).join('')}</footer>` : ''}</article>`; }).join('') || '<p class="muted">No documents yet.</p>'}
     ${stored.length ? `<div class="sh2">Stored for next time</div><div class="list">${stored.map(({ v, t }) => `<div class="li">${I(v.kind === 'memory' ? 'db' : 'layers', 15)}<div><b>${h(v.title || v.id || '')}</b><small>${v.kind === 'memory' ? 'Shared memory' : 'Shared knowledge'} · ${h(personOf(t))}</small></div>${v.id ? `<code>${h(v.id)}</code>` : ''}</div>`).join('')}</div>` : ''}`;
+}
+
+
+/* ---------- the foundation after a run: graph, memory, what was used and what changed ---------- */
+const GTYPE = { advisor: ['#0f172a', 'Advisor'], employee: ['#2563eb', 'Colleague'], firm: ['#64748b', 'Firm'], unit: ['#0891b2', 'Business unit'], memory: ['#7c3aed', 'Memory'], finding: ['#059669', 'Finding'], output: ['#e0482f', 'Deliverable'], task: ['#d97706', 'Follow-up'], fund: ['#2f5bea', 'Fund'], episode: ['#9333ea', 'Conversation'], content: ['#b45309', 'Approved content'], pending: ['#f59e0b', 'Pending memory'] };
+function runSets(r) {
+  const read = new Map(), cited = new Set();
+  r.tasks.forEach(t => { (t.packet ? t.packet.items : []).forEach(i => { const e = read.get(i.id) || { item: i, by: [] }; e.by.push(t); read.set(i.id, e); }); ((t.result && t.result.used) || []).forEach(id => cited.add(id)); });
+  const changed = F.changes.filter(c => c.run === r.id), fresh = new Set(F.graph.nodes.filter(n => n.run === r.id).map(n => n.id));
+  const updated = new Set(changed.filter(c => c.before !== 'Not recorded').map(c => c.id));
+  return { read, cited, changed, fresh, updated };
+}
+function graphSVG(r, S) {
+  const centre = r.advisor || (EMPLOYEES[r.requester] ? r.requester : null); if (!centre) return '<p class="muted">No advisor in this request, so there is no relationship graph to show.</p>';
+  const G = F.graph, byId = id => G.nodes.find(n => n.id === id);
+  const adj = G.edges.filter(e => e.from === centre || e.to === centre).map(e => ({ id: e.from === centre ? e.to : e.from, label: e.label, run: e.run }));
+  const pick = new Map(); adj.forEach(a => { const n = byId(a.id); if (n) pick.set(a.id, { n, rel: a.label, edgeRun: a.run }); });
+  /* nodes this run created that hang off another node (outputs, findings, follow-ups) */
+  G.nodes.filter(n => n.run === r.id && !pick.has(n.id) && n.id !== centre).forEach(n => pick.set(n.id, { n, rel: G.edges.find(e => (e.from === n.id || e.to === n.id) && e.run === r.id)?.label || 'new', edgeRun: r.id }));
+  /* foundation items read that are not graph nodes yet: conversations, approved content, funds, findings */
+  S.read.forEach((e, id) => { if (pick.has(id) || id === centre || ['policy', 'models'].includes(e.item.layer)) return; const n = byId(id); const type = n ? n.type : /^(CALL|EMAIL|MTG)-/.test(id) ? 'episode' : /^SEIS-/.test(id) ? 'content' : FUNDS[id] ? 'fund' : e.item.layer === 'knowledge' ? 'finding' : e.item.layer === 'memory' ? 'memory' : null; if (type && !['advisor', 'firm'].includes(type)) pick.set(id, { n: { id, label: n ? n.label : e.item.label, type }, rel: 'read', virtual: !n }); });
+  F.pending.filter(p => p.run === r.id).forEach(p => pick.set(p.id, { n: { id: p.id, label: p.attr, type: 'pending' }, rel: 'pending', edgeRun: r.id }));
+  const order = ['employee', 'firm', 'unit', 'memory', 'pending', 'episode', 'content', 'fund', 'finding', 'task', 'output'];
+  const list = [...pick.values()].filter(x => GTYPE[x.n.type]).sort((a, b) => order.indexOf(a.n.type) - order.indexOf(b.n.type)).slice(0, 34);
+  const W = 880, H = 480, cx = W / 2, cy = H / 2;
+  const inner = list.filter(x => ['employee', 'firm', 'unit', 'memory', 'pending'].includes(x.n.type)), outer = list.filter(x => !inner.includes(x));
+  const place = (arr, rx, ry, off) => arr.forEach((x, i) => { const a = off + (i / Math.max(1, arr.length)) * Math.PI * 2; x.x = cx + Math.cos(a) * rx; x.y = cy + Math.sin(a) * ry; x.a = a; });
+  place(inner, 150, 118, -Math.PI / 2); place(outer, 268, 196, -Math.PI / 2 + .2);
+  const stateOf = x => S.updated.has(x.n.id) ? 'upd' : (S.fresh.has(x.n.id) || x.n.type === 'pending' || x.edgeRun === r.id && x.rel !== 'read') ? 'new' : S.cited.has(x.n.id) ? 'cited' : S.read.has(x.n.id) ? 'read' : 'idle';
+  const lab = s2 => String(s2).replace(/,.*$/, '').slice(0, 26) + (String(s2).length > 26 ? '…' : '');
+  const C = byId(centre) || { label: centre };
+  const sel = ST.gsel;
+  const edges = list.map(x => { const st = stateOf(x); return `<line x1="${cx}" y1="${cy}" x2="${x.x.toFixed(1)}" y2="${x.y.toFixed(1)}" class="ge ${st}${sel && sel !== x.n.id ? ' dim' : ''}"/>`; }).join('');
+  const nodes = list.map(x => { const st = stateOf(x), [col] = GTYPE[x.n.type], right = Math.cos(x.a) >= 0, rr = ['output', 'finding'].includes(x.n.type) ? 9 : 7.5;
+    return `<g class="gn ${st}${sel === x.n.id ? ' sel' : ''}${sel && sel !== x.n.id ? ' dim' : ''}" data-gnode="${h(x.n.id)}" transform="translate(${x.x.toFixed(1)},${x.y.toFixed(1)})"><title>${h(x.n.label)} · ${h(GTYPE[x.n.type][1])} · ${h(x.n.id)}</title>${st === 'new' || st === 'upd' ? `<circle r="${rr + 7}" class="halo"/>` : ''}<circle r="${rr}" fill="${col}" class="dot"/>${st === 'read' || st === 'cited' ? `<circle r="${rr + 3.5}" class="ring"/>` : ''}<text x="${right ? rr + 6 : -(rr + 6)}" y="4" text-anchor="${right ? 'start' : 'end'}">${h(lab(x.n.label))}</text>${st === 'new' || st === 'upd' ? `<text class="tagt" x="${right ? rr + 6 : -(rr + 6)}" y="-9" text-anchor="${right ? 'start' : 'end'}">${st === 'new' ? 'NEW' : 'UPDATED'}</text>` : ''}</g>`; }).join('');
+  const centreNode = `<g class="gn centre" transform="translate(${cx},${cy})"><circle r="26" class="halo2"/><circle r="20" fill="#0f172a"/><text y="4" text-anchor="middle" class="ci">${h(initials(C.label))}</text><text y="40" text-anchor="middle" class="cl">${h(String(C.label).replace(/,.*$/, ''))}</text></g>`;
+  const types = [...new Set(list.map(x => x.n.type))];
+  return `<svg class="kg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${edges}${centreNode}${nodes}</svg>
+    <div class="glegend">${types.map(t => `<span><i style="background:${GTYPE[t][0]}"></i>${GTYPE[t][1]}</span>`).join('')}<span class="sep2"></span><span><i class="lg-read"></i>Read</span><span><i class="lg-cited"></i>Cited in output</span><span><i class="lg-new"></i>New</span><span><i class="lg-upd"></i>Updated</span></div>`;
+}
+function nodeDetail(r, S, id) {
+  if (!id) return `<div class="gdet muted">${I('target', 14)} Click a node to see what it holds and which tickets used it.</div>`;
+  const m = F.memory.filter(x => x.id === id).slice(-1)[0], k = F.findings.find(x => x.id === id), o = F.outputs.find(x => x.id === id), ep = F.episodes.find(x => x.id === id), c = CONTENT.find(x => x.id === id), pd = F.pending.find(x => x.id === id), gn = F.graph.nodes.find(x => x.id === id);
+  const rd = S.read.get(id), ch = S.changed.find(x => x.id === id);
+  const title = (m && m.attr) || (k && k.label) || (o && o.title) || (ep && `${ep.kind}, ${ep.date}`) || (c && c.title) || (pd && pd.attr) || (gn && gn.label) || (rd && rd.item.label) || id;
+  const value = (m && m.value) || (k && k.value) || (o && o.body) || (ep && ep.text) || (c && `${c.audience} · ${c.format} · ${c.status}`) || (pd && `${pd.value} · ${pd.reason}`) || (rd && rd.item.value) || '';
+  return `<div class="gdet"><div class="gdh"><code>${h(id)}</code><b>${h(title)}</b><button type="button" class="x" data-gnode="${h(id)}">${I('x', 13)}</button></div>${value ? `<p>${h(String(value).slice(0, 320))}${String(value).length > 320 ? '…' : ''}</p>` : ''}
+    ${ch ? `<div class="chg"><span>Before</span><s>${h(ch.before)}</s><span>After</span><b>${h(ch.after)}</b><small>rev ${ch.rev} · source ${h(ch.src)} · ${h(AGENTS[ch.by] ? AGENTS[ch.by].name : ch.by)}</small></div>` : ''}
+    ${rd ? `<small class="usedby">Read by ${rd.by.map(t => `<code>${tid(r, t)}</code> ${h(first(personOf(t)))}`).join(', ')}${S.cited.has(id) ? ' · cited in the output' : ''}</small>` : ''}${m && m.basis ? `<small class="usedby">${h(m.basis)} · ${h(m.src || '')} · scope ${h(m.scope)}</small>` : ''}</div>`;
+}
+function foundationHTML(r) {
+  const S = runSets(r), adv = r.advisor;
+  const verdicts = r.tasks.flatMap(t => (t.verdicts || []).map(v => ({ v, t })));
+  const written = verdicts.filter(({ v }) => ['published', 'committed', 'pending', 'rejected', 'proposed', 'approval', 'blocked', 'flagged', 'task'].includes(v.status));
+  const nNew = S.fresh.size;
+  const counts = [['Read', S.read.size], ['Cited', [...S.cited].filter(id => S.read.has(id)).length], ['Reused', r.stats.reused], ['New', nNew], ['Updated', S.updated.size], ['Not stored', verdicts.filter(({ v }) => ['rejected', 'blocked'].includes(v.status)).length]];
+  const mem = adv ? F.memory.filter(m => m.adv === adv) : [];
+  const tab = ST.ftab || 'memory';
+  const memRow = m => { const ch = S.changed.find(c => c.id === m.id && c.rev === m.rev), st = m.status === 'superseded' ? 'old' : ch ? (ch.before === 'Not recorded' ? 'new' : 'upd') : S.cited.has(m.id) ? 'cited' : S.read.has(m.id) ? 'read' : 'idle';
+    return `<div class="mr ${st}"><div class="mrh"><b>${h(m.attr)}</b><code>${h(m.id)}</code>${{ new: '<span class="badge approved">New</span>', upd: '<span class="badge review">Updated</span>', old: '<span class="badge blocked">Superseded</span>', cited: '<span class="badge ready">Cited</span>', read: '<span class="badge running">Read</span>', idle: '' }[st]}</div>
+      ${ch && ch.before !== 'Not recorded' ? `<div class="chg"><span>Before</span><s>${h(ch.before)}</s><span>After</span><b>${h(ch.after)}</b></div>` : `<p class="${st === 'old' ? 'strike' : ''}">${h(m.value)}</p>`}
+      <small>${h(m.basis || '')}${m.src ? ' · ' + h(m.src) : ''} · scope ${h(m.scope)}${m.access && m.access !== 'shared' ? ' · ' + h(m.access.replace('owner:', 'private to ')) : ''}${m.rev > 1 ? ' · rev ' + m.rev : ''}</small></div>`; };
+  const memRank = m => m.status === 'superseded' ? 5 : S.changed.some(c => c.id === m.id && c.rev === m.rev) ? 0 : S.cited.has(m.id) ? 1 : S.read.has(m.id) ? 2 : 3;
+  const byLayer = {}; S.read.forEach((e, id) => (byLayer[e.item.layer] = byLayer[e.item.layer] || []).push({ id, e }));
+  const VW = { published: ['Published to knowledge', 'approved'], committed: ['Committed to memory', 'approved'], pending: ['Pending confirmation', 'review'], rejected: ['Not stored', 'failed'], blocked: ['Blocked', 'failed'], flagged: ['Flagged for a number check', 'review'], proposed: ['Proposed, needs you', 'review'], approval: ['Waiting for approval', 'signoff'], task: ['Kept to this task', 'blocked'] };
+  const panes = {
+    memory: mem.length ? `<div class="mlist">${mem.slice().sort((a, b) => memRank(a) - memRank(b)).map(memRow).join('')}${F.pending.filter(p => p.adv === adv).map(p => `<div class="mr pend"><div class="mrh"><b>${h(p.attr)}</b><code>${h(p.id)}</code><span class="badge review">Pending</span></div><p>${h(p.value)}</p><small>${h(p.reason)}</small></div>`).join('')}</div>` : '<p class="muted">No advisor memory for this request.</p>',
+    used: `<div class="ulist">${Object.entries(byLayer).map(([l, xs]) => `<div class="ul"><div class="ulh"><i style="background:${LAYER_COL[l] || '#64748b'}"></i><b>${h((LAYERS[l] || {}).name || l)}</b><small>${xs.length}</small></div>${xs.map(({ id, e }) => `<div class="ui${S.cited.has(id) ? ' cited' : ''}${reusedIn(e.by[0], e.item) ? ' re' : ''}"><code>${h(id)}</code><div><b>${h(e.item.label)}</b><small>${h(String(e.item.value).slice(0, 110))}${String(e.item.value).length > 110 ? '…' : ''}</small></div><span class="ub">${e.by.map(t => avatar(personOf(t), roleOfT(t).team, 18)).join('')}${S.cited.has(id) ? '<em>cited</em>' : ''}${reusedIn(e.by[0], e.item) ? '<em class="rz2">reused</em>' : ''}</span></div>`).join('')}</div>`).join('') || '<p class="muted">Nothing read yet.</p>'}</div>`,
+    written: `<div class="wlist">${written.map(({ v, t }) => { const [lbl, cls] = VW[v.status] || [v.status, 'blocked']; return `<div class="wi"><span class="wk">${I(v.kind === 'memory' ? 'db' : v.kind === 'knowledge' ? 'layers' : v.kind === 'output' ? 'doc' : 'task', 14)}</span><div><b>${h(v.title || v.id || v.kind)}</b><small>${h(v.kind)} · ${h(personOf(t))}, <code>${tid(r, t)}</code>${v.reason ? ' · ' + h(v.reason) : ''}</small></div><span class="badge ${cls}">${h(lbl)}</span>${v.id ? `<code>${h(v.id)}</code>` : ''}</div>`; }).join('') || '<p class="muted">Nothing written yet.</p>'}</div>`
+  };
+  return `<section class="fhero"><div><small>Shared foundation · ${h(adv ? ADVISORS[adv].name : EMPLOYEES[r.requester].name)}</small><h2>What this request used and changed</h2></div><div class="fcounts">${counts.map(([k, n]) => `<div><b>${n}</b><small>${k}</small></div>`).join('')}</div></section>
+    <div class="fgrid"><section class="gcard"><div class="gch"><b>${I('branch', 14)} Knowledge graph</b><small>This request’s neighbourhood: what it read, cited and added</small></div>${graphSVG(r, S)}${nodeDetail(r, S, ST.gsel)}</section>
+      <section class="pcard2"><div class="ptabs">${[['memory', 'Memory', mem.length], ['used', 'Used', S.read.size], ['written', 'Written back', written.length]].map(([k, l, n]) => `<button type="button" class="${tab === k ? 'on' : ''}" data-ftab="${k}">${l}<small>${n}</small></button>`).join('')}</div><div class="pbody">${panes[tab]}</div></section></div>`;
 }
 
 /* right: the ticket (overlay) */
@@ -505,7 +574,7 @@ function footHTML(r, t, p) {
 /* ---------- the pipeline's own signals, shown on the canvas ---------- */
 const taskById = id => run() && run().tasks.find(t => t.id === id);
 HX.op = o => {
-  const t = o.task && taskById(o.task), pid = t ? 'p:' + personOf(t) : null;
+  const t = o.task && taskById(o.task), pid = t ? 't:' + t.id : null;
   if (o.kind === 'call' && o.sys) { ST.flash['s:' + o.sys] = performance.now(); if (pid) { const c = (t.calls || []).slice(-1)[0]; travel(pid, 'sys:' + o.sys, SYS_SHORT[o.sys], 'call', SYS_COL[o.sys]); void c; } }
   if (o.kind === 'read' && pid && o.layer) setTimeout(() => travel('found', pid, (LAYERS[o.layer] || {}).short || o.layer, 'read', LAYER_COL[o.layer]), 120 * (o.lane + 2 || 0));
   if (o.kind === 'write' && pid && o.layer) setTimeout(() => travel(pid, 'found', (LAYERS[o.layer] || {}).short || o.layer, 'write', LAYER_COL[o.layer]), 150 * (o.lane + 2 || 0));
@@ -526,10 +595,13 @@ document.addEventListener('click', e => {
   if (q('[data-answer-input]')) { answer(q('.qcard').querySelector('.clarIn').value.trim()); return; }
   if (q('[data-runall]')) { ST.open = null; runAll(); return; }
   if (q('[data-stop]')) { ST.auto = false; paintAll(); return; }
-  if ((x = q('[data-view]'))) { ST.view = x.dataset.view; if (ST.view === 'results') ST.open = null; paintAll(); return; }
+  if ((x = q('[data-view]'))) { ST.view = x.dataset.view; if (ST.view !== 'floor') ST.open = null; paintAll(); return; }
+  if ((x = q('[data-gnode]'))) { ST.gsel = ST.gsel === x.dataset.gnode ? null : x.dataset.gnode; paintAll(); return; }
+  if ((x = q('[data-ftab]'))) { ST.ftab = x.dataset.ftab; paintAll(); return; }
   if ((x = q('[data-signoff]'))) { signOff(F.outputs.find(o => o.id === x.dataset.signoff)); paintAll(); return; }
   if ((x = q('[data-task]'))) { const t = run().tasks.find(y => y.id === x.dataset.task); ST.open = personOf(t); ST.openTask = t.id; paintAll(); return; }
-  if ((x = q('.nd.wb, .rp'))) { ST.open = x.dataset.person; const t = run() && run().tasks.find(y => personOf(y) === ST.open); ST.openTask = t ? t.id : null; paintAll(); return; }
+  if ((x = q('.nd.wb'))) { const t = run().tasks.find(y => y.id === x.dataset.task2); if (t) { ST.open = personOf(t); ST.openTask = t.id; paintAll(); } return; }
+  if ((x = q('.rp'))) { ST.open = x.dataset.person; const t = run() && run().tasks.find(y => personOf(y) === ST.open); ST.openTask = t ? t.id : null; paintAll(); return; }
   if ((x = q('[data-tab-task]'))) { ST.openTask = x.dataset.tabTask; paintAll(); return; }
   if (q('[data-close]')) { ST.open = null; ST.openTask = null; paintAll(); return; }
   if ((x = q('[data-run]'))) { const t = run().tasks.find(y => y.id === x.dataset.run); ST.open = null; ST.view = 'floor'; startTask(t); return; }

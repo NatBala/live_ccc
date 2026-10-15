@@ -170,7 +170,7 @@ const SUB_USES = {
   'Follow.Dictation': ['call notes'], 'Follow.Tasks': ['task state'], 'Follow.Expenses': ['expense system'],
   'Coach.Simulation': ['call notes', 'memory'], 'Coach.Guide': ['objection playbook', 'fund facts'],
   'Product.Research Planner': ['platform eligibility', 'taxonomy', 'allocation versions', 'program rules'], 'Product.Tool Selection': ['approved comparison tool', 'assets'], 'Product.Response Formatter': ['taxonomy'], 'Product.QAR': ['fund facts', 'approved comparison tool'],
-  'Marketing.Resource Gatherer': ['approved search'], 'Marketing.Document Analyzer': ['evidence resolver'], 'Marketing.Editor': [], 'Marketing.Audience Builder': ['engagements'], 'Marketing.Distribution': [],
+  'Marketing.Resource Gatherer': ['approved search'], 'Marketing.Document Analyzer': ['evidence resolver'], 'Marketing.Editor': ['approved search'], 'Marketing.Audience Builder': ['engagements'], 'Marketing.Distribution': [],
   'Strategy.ID Prep': ['relationship graph', 'call notes', 'assets', 'fund facts', 'allocation versions', 'news'], 'Strategy.Positioning': ['fund facts', 'allocation versions', 'approved comparison tool', 'evidence resolver'], 'Strategy.Market Views': ['themes', 'news', 'approved search'],
   'InvContent.Institutional Pitch Book': ['approved search', 'fund facts', 'allocation versions'], 'InvContent.SRG Pitch Book': ['approved search', 'fund facts'],
   'Marketing.BAU Refresh': ['approved search', 'fund facts'], 'Marketing.Inventory': ['approved search', 'engagements'], 'Marketing.Standard Pitch Book': ['approved search', 'fund facts'], 'Marketing.Custom Pitch Book': ['approved search', 'assets', 'platform eligibility', 'call notes', 'approved comparison tool']

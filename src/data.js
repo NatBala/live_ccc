@@ -50,7 +50,7 @@ const AGENTS = {
   'product.srg': { name: 'SRG Pitch Books', team: 'product', does: 'Builds SRG pitch books for the retail advisor channel from approved content and verified data', tools: ['seismic.search_content', 'fund.get_facts', 'fund.get_performance', 'mstar.get_peers', 'sharepoint.get_disclosures'] },
   'marketing.gather': { name: 'Resource Gatherer', team: 'marketing', does: 'Finds approved content, templates, messaging and landing pages', tools: ['seismic.search_content', 'seismic.get_approved_language', 'aem.get_page', 'mcloud.get_engagement'] },
   'marketing.analyze': { name: 'Document Analyzer', team: 'marketing', does: 'Extracts key points from approved documents', tools: ['seismic.search_content', 'service.get_insights', 'seismic.resolve_evidence'] },
-  'marketing.copy': { name: 'Copywriter / Editor', team: 'marketing', does: 'Writes drafts in the audience’s preferred format from verified findings', tools: ['seismic.get_approved_language'] },
+  'marketing.copy': { name: 'Copywriter / Editor', team: 'marketing', does: 'Writes one-pagers and drafts in the audience’s preferred format from approved Seismic templates and verified findings', tools: ['seismic.search_content', 'seismic.get_approved_language', 'seismic.get_recommendations'] },
   'marketing.audit': { name: 'Audit Support', team: 'marketing', does: 'Keeps the audit trail for published material', tools: [] },
   'marketing.legal': { name: 'Legal & Compliance', team: 'marketing', does: 'Reviews claims, performance presentation and disclosures', tools: ['sharepoint.get_disclosures', 'seismic.get_approved_language'] },
   'marketing.image': { name: 'Image Analyzer', team: 'marketing', does: 'Checks charts and images in materials', tools: [] },
@@ -106,6 +106,7 @@ const roleOf = agent => AGENT_ROLE[agent] || (AGENTS[agent] ? { sales: 'sales.wh
 /* Deterministic assignment rules the business asked for: they override the AI when they apply. */
 const ROLE_RULES = [
   { test: /investment director|\bID (prep|meeting|brief)|prep(are)? (the |our )?ID\b/i, role: 'product.strategy', agent: () => 'product.idprep', why: 'Investment director preparation goes to Strategy Intel' },
+  { test: /\bone.?pager\b|flyer|brochure|campaign|linkedin|marketing (piece|content|material)|client.?facing (piece|summary|content)/i, role: 'marketing.content', agent: () => 'marketing.copy', why: 'Client-facing content goes to Marketing and is built from approved Seismic material' },
   { test: /schedul|follow.?up|book(ing)?\b|calendar|invite|reschedul|reminder|set up (a )?(call|meeting)/i, role: 'sales.ssc', agent: t => /schedul|book|calendar|invite|reschedul|set up/i.test(t) ? 'sales.schedule' : 'sales.follow', why: 'Scheduling and follow-up go to SSC' },
   { test: /\bprep|brief|agenda|talking points|meeting preparation|prepare (me|for)/i, role: 'sales.wholesalers', agent: () => 'sales.prep', why: 'Meeting preparation goes to the wholesaler' }
 ];
