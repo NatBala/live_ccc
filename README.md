@@ -11,6 +11,8 @@ You type a request as a real role (a wholesaler, a product specialist, a markete
 
 ## Agent Harness (default view on this branch)
 
+The interface uses Inter type, a neutral slate palette with a single blue accent, an SVG icon set, monogram avatars with status rings, and a light theme throughout. Tickets look and behave like an issue tracker: properties, description, foundation context and an activity timeline.
+
 `public/index.html` is the **Agent Harness**, an orchestration floor that lets a business leader follow how work moves through the teams. The classic view is at `public/classic.html` (linked from the header). Both run the same pipeline (`src/pipeline.js` over `src/engine.js`): the orchestrator plans from the shared foundation, specialists work from context packets, tools go through the gateway, and the gatekeeper checks every result. Nothing in the harness is scripted.
 
 - **Command bar.** Pick who is asking and type a request.

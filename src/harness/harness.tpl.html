@@ -4,23 +4,27 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Agent Harness · Connected Client Experience</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
 <style>/*CSS*/</style>
 </head>
 <body>
 <div class="app">
   <header class="top">
-    <div class="brand"><span class="mark"><i></i><i></i><i></i><i></i></span><b>Connected Client Experience</b><em>Agent Harness</em></div>
+    <div class="brand"><span class="logo"></span><b>Connected Client Experience</b><span class="sep"></span><span class="prod">Agent Harness</span></div>
     <form class="cmd" id="composer" autocomplete="off">
-      <span class="asker" id="asker" title="Who is asking"></span>
-      <input id="ask" type="text" placeholder="Ask for an outcome, in your own words…" aria-label="Your request">
-      <button type="submit" class="send" id="send">Send</button>
+      <span class="asker" id="asker"></span>
+      <input id="ask" type="text" placeholder="Describe the outcome you need…" aria-label="Your request">
+      <kbd>↵</kbd>
+      <button type="submit" class="btn primary" id="send">Plan</button>
     </form>
-    <div class="topact"><span class="mode" id="modeTag">Connecting…</span><button class="ghost" id="newChat" type="button">New request</button><a class="ghost" href="classic.html">Classic view</a></div>
+    <div class="topact"><span class="env" id="modeTag">Connecting…</span><button class="btn subtle" id="newChat" type="button">New request</button><a class="btn subtle" href="classic.html">Classic view</a></div>
   </header>
   <div class="stage">
     <aside class="orch" id="orch" aria-label="Orchestrator"></aside>
     <main class="floor" id="floor" aria-label="Team floor"></main>
-    <section class="bench" id="bench" aria-label="Workbench" hidden></section>
+    <section class="bench" id="bench" aria-label="Ticket" hidden></section>
   </div>
   <footer class="found" id="found" aria-label="Shared foundation"></footer>
 </div>
