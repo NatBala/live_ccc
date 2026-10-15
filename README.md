@@ -11,22 +11,16 @@ You type a request as a real role (a wholesaler, a product specialist, a markete
 
 ## Agent Harness (default view on this branch)
 
-`public/index.html` is the **Agent Harness**: the business user's view of the same intelligence, orchestration and shared foundation the classic view runs (`public/classic.html`, linked from the header). Nothing in it is scripted. The run pipeline (`src/pipeline.js`) is shared by both views; the harness only renders what it does, as a conversation:
+`public/index.html` is the **Agent Harness**, an orchestration floor that lets a business leader follow how work moves through the teams. The classic view is at `public/classic.html` (linked from the header). Both run the same pipeline (`src/pipeline.js` over `src/engine.js`): the orchestrator plans from the shared foundation, specialists work from context packets, tools go through the gateway, and the gatekeeper checks every result. Nothing in the harness is scripted.
 
-1. **Intelligence.** What the foundation already knew before the model answered (graph lookup, the foundation context sent to the orchestrator, similar catalogue requests, authority set by rule). Then the orchestrator's decisions stream in, tagged AI or RULE, with what it **assumed instead of asking**, and its interpretation (subject, scope, time, output, constraints, and what is not in the foundation).
-2. **A question only when the foundation can't settle it.** The orchestrator checks the graph, session, memory, episodes, findings and content first. It never asks for logistics (meeting times, attendees, availability), which go to SSC (Schedule Me / Follow Me), or for data a specialist can fetch. When it does ask, it says what it checked and offers options.
-3. **Orchestration.** The plan: which team and person own each step, the sub-agent route, the shared services it reads, the waves and dependencies, and the authority cap.
-4. **Each specialist, live:**
-   - its context packet from the shared foundation, by layer, with the items reused from other teams highlighted and anything withheld by policy;
-   - the steps it builds on;
-   - the system calls it made through MCP or APIs, only for what the foundation didn't already hold;
-   - its output;
-   - the gatekeeper's verdicts (published to knowledge, committed to memory, rejected, waiting for approval).
-5. **What the foundation saved.** Items read, work reused, system calls, results stored back for the next person, and drafts waiting for approval.
+- **Command bar.** Pick who is asking and type a request.
+- **Orchestrator (left).** Live planning status, then the tickets by wave with their status and an approval progress bar. It also shows what was **answered from the foundation instead of asked**, the interpretation, and what the foundation was checked for (graph match, context, authority). It asks a question only when the foundation can't settle something, and never about logistics, which SSC handles.
+- **Team floor (centre).** Every persona with an illustrated avatar, grouped by team: Sales, Product (PRP), Marketing Content Generation (Market Incubator) and Service. As the plan lands, ticket chips fly from the orchestrator to the people who own each step. Each card shows its ticket count, status (new ticket, agents working, waiting for approval, approved) and the agents involved.
+- **Workbench (right).** Click a person to open their ticket. You see the request and why it was routed to them, the agents on it, the tickets it builds on, and the context the foundation attaches (with work reused from other teams and anything withheld by policy). Press **Run agents** to watch the system calls, the result and the gatekeeper verdicts, then **Approve and hand off**. Approval unlocks the next teams' tickets, and the handoff flies across the floor.
+- **Auto-pilot.** Runs ready tickets and approves internal work automatically. It stops at anything client-facing and opens that person's workbench for your approval.
+- **Shared foundation (bottom).** Memory, knowledge, verification, models, feedback, events and graph light up as they're read and written; the system pills light up when called.
 
-The right-hand rail shows the foundation layers lighting up as they are read and written, live reads, calls, handoffs and write-backs, and which systems were used.
-
-With an OpenAI or Azure OpenAI key on the server (see "Run it"), requests are planned and worked live. Without one, the saved AI runs in `src/replay.js` replay through the same foundation, tools and checks. Add `?fast=1` to the address to skip presentation pauses.
+With an OpenAI or Azure OpenAI key on the server (see "Run it"), requests are planned and worked live. Without one, the saved AI runs in `src/replay.js` replay through the same foundation, tools and checks. Add `?fast=1` to the address to speed up presentation pauses.
 
 ## Background
 
