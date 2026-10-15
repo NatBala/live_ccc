@@ -61,8 +61,6 @@ code{font:500 11px var(--mono);color:var(--ink3);background:var(--line2);border-
 .menu button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:7px 8px;border-radius:8px;text-align:left}.menu button:hover,.menu button.on{background:var(--sunk)}
 .menu button span{flex:1;display:flex;flex-direction:column}.menu small{color:var(--ink3);font-size:11.5px}.menu .i{color:var(--pri)}
 .topact{display:flex;align-items:center;gap:4px}
-.env{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:99px;font-size:12px;font-weight:600;color:var(--ink3);background:var(--line2);margin-right:6px;white-space:nowrap}
-.env i{width:7px;height:7px;border-radius:50%;background:var(--mut)}.env.live{background:var(--ok-bg);color:var(--ok)}.env.live i{background:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.2)}.env.replay{background:var(--warn-bg);color:var(--warn)}.env.replay i{background:#f59e0b}
 /* stage */
 .stage{display:grid;grid-template-columns:340px minmax(0,1fr);min-height:0}
 body.benched .stage{grid-template-columns:340px minmax(0,1fr) 540px}
@@ -228,7 +226,7 @@ body.benched .stage{grid-template-columns:340px minmax(0,1fr) 540px}
 /* responsive */
 @media (max-width:1320px){body.benched .stage{grid-template-columns:300px minmax(0,1fr) 480px}.stage{grid-template-columns:300px minmax(0,1fr)}.brand b,.sep{display:none}}
 @media (max-width:1050px){.app{height:auto;min-height:100vh;grid-template-rows:auto 1fr auto}.top{flex-wrap:wrap;padding:8px 12px;gap:8px}.cmd{order:3;flex-basis:100%;max-width:none}.stage,body.benched .stage{grid-template-columns:1fr}.orch{border-right:0;border-bottom:1px solid var(--line)}.bench{position:fixed;inset:0;z-index:30}.found{height:auto;padding:8px 12px;flex-wrap:wrap;white-space:normal}.sys{margin-left:0;flex-wrap:wrap}.lys{flex-wrap:wrap}.metrics{grid-template-columns:repeat(2,1fr)}.fh{top:0;margin:0 -20px 14px}}
-@media (max-width:640px){.floor{padding:12px}.fh{margin:0 -12px 12px;padding:10px 12px;flex-wrap:wrap}.fsub{display:none}.grid,.ots{grid-template-columns:1fr}.topact .btn:last-child,.env{display:none}.cmd kbd{display:none}.brand .prod{display:none}}
+@media (max-width:640px){.floor{padding:12px}.fh{margin:0 -12px 12px;padding:10px 12px;flex-wrap:wrap}.fsub{display:none}.grid,.ots{grid-template-columns:1fr}.topact .btn:last-child{display:none}.cmd kbd{display:none}.brand .prod{display:none}}
 [hidden]{display:none!important}
 .ava b{font-size:calc(var(--s) * .38)!important;font-weight:600!important;line-height:1!important;letter-spacing:.02em!important;color:#fff!important;display:inline!important;margin:0!important}
 .grid{align-items:start}
@@ -366,7 +364,7 @@ body.benched .stage{grid-template-columns:340px minmax(0,1fr) 540px}
       <kbd>↵</kbd>
       <button type="submit" class="btn primary" id="send">Plan</button>
     </form>
-    <div class="topact"><span class="env" id="modeTag">Connecting…</span><button class="btn subtle" id="newChat" type="button">New request</button><a class="btn subtle" href="classic.html">Classic view</a></div>
+    <div class="topact"><button class="btn subtle" id="newChat" type="button">New request</button><a class="btn subtle" href="classic.html">Classic view</a></div>
   </header>
   <div class="stage">
     <aside class="orch" id="orch" aria-label="Orchestrator"></aside>
@@ -3247,8 +3245,6 @@ function paintTop() {
   const E = EMPLOYEES[ME];
   setHTML(el('asker'), `<button type="button" class="askbtn" data-menu title="Asking as ${h(E.name)}">${avatar(E.name, E.team, 24)}<span>${h(first(E.name))}</span>${I('chevron', 12, 'rot')}</button>${ST.menu ? `<div class="menu"><div class="mh">Ask as</div>${Object.entries(EMPLOYEES).map(([id, e]) => `<button type="button" data-me="${id}" class="${id === ME ? 'on' : ''}">${avatar(e.name, e.team, 28)}<span><b>${h(e.name)}</b><small>${h(e.role.split(',')[0])} · ${h(teamName(e.team))}</small></span>${id === ME ? I('check', 14) : ''}</button>`).join('')}</div>` : ''}`);
   el('send').disabled = busyPlanning() || anyRunning();
-  const m = el('modeTag'); m.className = 'env ' + (AI.mode === 'live' ? 'live' : AI.mode === 'checking' ? '' : 'replay');
-  m.innerHTML = `<i></i>${AI.mode === 'live' ? `Live · ${h(AI.provider || 'AI')}` : AI.mode === 'checking' ? 'Connecting' : 'Replay · saved AI runs'}`;
 }
 
 /* left: the orchestrator */
@@ -3279,7 +3275,7 @@ function paintOrch() {
       <div class="kpis"><div><b>${r.tasks.length}</b><small>tickets</small></div><div><b>${teams}</b><small>team${teams > 1 ? 's' : ''}</small></div><div><b>${waves.length}</b><small>wave${waves.length > 1 ? 's' : ''}</small></div><div><b>${done}/${r.tasks.length}</b><small>done</small></div></div>
       <div class="prog"><i style="width:${done / r.tasks.length * 100}%"></i></div>
       ${ST.auto ? `<button type="button" class="btn subtle block" data-stop>${I('pause', 14)} Pause</button>` : ready ? `<button type="button" class="btn primary block lg" data-runall>${I('play', 14)} Run all agents</button><small class="note">Teams hand off through the orchestrator. Client-facing drafts wait for your sign-off.</small>` : ''}</div>`;
-  setHTML(el('orch'), `<div class="ohead"><span class="omark${thinking ? ' pulse' : ''}">${I('branch', 16)}</span><div><b>Orchestrator</b><small>${r.replay ? 'Replaying a saved AI run' : 'Live AI'}</small></div></div>
+  setHTML(el('orch'), `<div class="ohead"><span class="omark${thinking ? ' pulse' : ''}">${I('branch', 16)}</span><div><b>Orchestrator</b><small>${r.replay ? 'Replaying a saved AI run' : 'Intelligence and orchestration'}</small></div></div>
     <div class="reqq">${avatar(EMPLOYEES[r.requester].name, EMPLOYEES[r.requester].team, 26)}<div><small>${h(EMPLOYEES[r.requester].name)}</small><p>${h(r.text.replace(/ \(clarification:.*\)$/, ''))}</p></div></div>
     ${stat}
     ${r.status === 'clarify' ? clarifyHTML(r) : ''}

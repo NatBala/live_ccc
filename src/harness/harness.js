@@ -213,8 +213,6 @@ function paintTop() {
   const E = EMPLOYEES[ME];
   setHTML(el('asker'), `<button type="button" class="askbtn" data-menu title="Asking as ${h(E.name)}">${avatar(E.name, E.team, 24)}<span>${h(first(E.name))}</span>${I('chevron', 12, 'rot')}</button>${ST.menu ? `<div class="menu"><div class="mh">Ask as</div>${Object.entries(EMPLOYEES).map(([id, e]) => `<button type="button" data-me="${id}" class="${id === ME ? 'on' : ''}">${avatar(e.name, e.team, 28)}<span><b>${h(e.name)}</b><small>${h(e.role.split(',')[0])} · ${h(teamName(e.team))}</small></span>${id === ME ? I('check', 14) : ''}</button>`).join('')}</div>` : ''}`);
   el('send').disabled = busyPlanning() || anyRunning();
-  const m = el('modeTag'); m.className = 'env ' + (AI.mode === 'live' ? 'live' : AI.mode === 'checking' ? '' : 'replay');
-  m.innerHTML = `<i></i>${AI.mode === 'live' ? `Live · ${h(AI.provider || 'AI')}` : AI.mode === 'checking' ? 'Connecting' : 'Replay · saved AI runs'}`;
 }
 
 /* left: the orchestrator */
@@ -245,7 +243,7 @@ function paintOrch() {
       <div class="kpis"><div><b>${r.tasks.length}</b><small>tickets</small></div><div><b>${teams}</b><small>team${teams > 1 ? 's' : ''}</small></div><div><b>${waves.length}</b><small>wave${waves.length > 1 ? 's' : ''}</small></div><div><b>${done}/${r.tasks.length}</b><small>done</small></div></div>
       <div class="prog"><i style="width:${done / r.tasks.length * 100}%"></i></div>
       ${ST.auto ? `<button type="button" class="btn subtle block" data-stop>${I('pause', 14)} Pause</button>` : ready ? `<button type="button" class="btn primary block lg" data-runall>${I('play', 14)} Run all agents</button><small class="note">Teams hand off through the orchestrator. Client-facing drafts wait for your sign-off.</small>` : ''}</div>`;
-  setHTML(el('orch'), `<div class="ohead"><span class="omark${thinking ? ' pulse' : ''}">${I('branch', 16)}</span><div><b>Orchestrator</b><small>${r.replay ? 'Replaying a saved AI run' : 'Live AI'}</small></div></div>
+  setHTML(el('orch'), `<div class="ohead"><span class="omark${thinking ? ' pulse' : ''}">${I('branch', 16)}</span><div><b>Orchestrator</b><small>${r.replay ? 'Replaying a saved AI run' : 'Intelligence and orchestration'}</small></div></div>
     <div class="reqq">${avatar(EMPLOYEES[r.requester].name, EMPLOYEES[r.requester].team, 26)}<div><small>${h(EMPLOYEES[r.requester].name)}</small><p>${h(r.text.replace(/ \(clarification:.*\)$/, ''))}</p></div></div>
     ${stat}
     ${r.status === 'clarify' ? clarifyHTML(r) : ''}
