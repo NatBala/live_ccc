@@ -55,6 +55,14 @@ The harness opens in **Always-on** mode. Instead of waiting for someone to type 
 | Jordan | Pre-approved digital journey | Opens without clicks |
 | Alex | Fix first, then Sam's call | A blocked link; coverage moves to Sam on Oct 1 |
 
+**Advisors view.** Pick an advisor (or the Southern California overview, also reachable by clicking a radar row) to see:
+- Their engagement by channel (Digital, Email, Social, Content, Calls, Service, Flows, Practice), with a weekly bar for each channel since Jul 1.
+- Every event, newest first and filterable by channel, with what each one led to.
+- A **takeaway**: the headline, then their interest, how they engage (for example digital-first or relationship-led), momentum, business with us, watch-outs and what's coming up.
+- **What we're doing**: the next best action, plus other actions the pattern of events calls for. These include a fix-first service case, a product explanation (Alex keeps comparing GFA with an index), a platform availability check and a flow diagnosis (Daniel), a what-changed brief (Rachel), a personalized digital follow-up (Sofia), a pre-approved journey (Jordan), and territory-level actions: a fee-transparency LinkedIn post and LA trends.
+
+Each action runs in orchestration on demand, with its outcome and results kept on the card. The view runs its own copy of the engine to today, so it never uses up the live stream.
+
 With live AI, every work order is planned from its own generated request. Without a key, the saved AI run of an equivalent request plays, and the one with no saved run (Luis) is marked as needing live AI.
 
 ## Background

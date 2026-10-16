@@ -104,7 +104,7 @@ const recordedFor = who => RECORDED.filter(r => r.requester === who || (EMPLOYEE
 const suggestions = () => AI.mode === 'live' ? (SUGGESTIONS[EMPLOYEES[ME].team] || []).slice(0, 5) : [...new Set(recordedFor(ME).map(r => r.text))].slice(0, 6);
 function ask(text, clarified, wo) {
   text = String(text || '').trim(); if (!text) return;
-  if (!wo && ST.mode === 'always') { if (AO.active) { toast('A work order is running; ask when it finishes.'); return; } ST.mode = 'ask'; AO.playing = false; AO.viewing = null; }
+  if (!wo && (ST.mode === 'always' || ST.mode === 'advisors')) { if (AO.active) { toast('A work order is running; ask when it finishes.'); return; } ST.mode = 'ask'; AO.playing = false; AO.viewing = null; }
   if (busyPlanning() || anyRunning()) { toast('Still working on the current request.'); return; }
   const rec = RECORDED.find(r => r.text === text && r.requester === ME) || RECORDED.find(r => r.text === text);
   if (AI.mode !== 'live' && !rec) { ST.nokey = text; UI.run = null; paintAll(); return; }

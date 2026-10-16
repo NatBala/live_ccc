@@ -560,6 +560,69 @@ body.aon .brand .prod,body.aon .brand .sep{display:none}
 @media (max-height:820px){.dwy p{-webkit-line-clamp:1}.op .fx{display:none}}
 @media (max-width:1050px){.app{grid-template-rows:auto 1fr}}
 @media (max-width:640px){.dc-foot .fo{flex-basis:100%;order:3}.dc-foot .wtxt{flex-basis:100%;order:3}}
+/* ===== Advisors view ===== */
+body.aoboard .stage{grid-template-columns:minmax(0,1fr)}
+.advx{display:grid;grid-template-columns:250px minmax(0,1fr) 400px;gap:14px;padding:14px;min-height:0;overflow:hidden}
+.rrow{cursor:pointer}.rrow:hover{background:var(--sunk)}
+.axll{flex:1;min-height:0;overflow-y:auto;padding:6px;display:flex;flex-direction:column;gap:2px}
+.axi{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:9px;align-items:center;width:100%;border:0;background:none;text-align:left;padding:8px;border-radius:10px}
+.axi:hover{background:var(--sunk)}.axi.on{background:var(--pri-bg);box-shadow:inset 3px 0 0 var(--pri)}
+.axi.ter{margin-bottom:4px;border-bottom:1px solid var(--line2);border-radius:10px 10px 0 0}
+.axt{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:#fef3c7;color:#b45309}.axt.big{width:46px;height:46px;border-radius:13px}
+.axn{display:flex;flex-direction:column;min-width:0;line-height:1.3}.axn>b{font-weight:600;font-size:13px}.axn>small{font-size:11.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.axk{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;color:#fff;background:var(--c)}
+.axa{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--line2);font:600 11px var(--sans);color:var(--ink3);display:grid;place-items:center}
+.axmain{display:flex;flex-direction:column;gap:12px;min-height:0;min-width:0}
+.axhead{flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--sh1)}
+.axid{display:flex;align-items:center;gap:12px;min-width:0;flex:1}.axid>div{min-width:0}
+.axid small{display:block;font-size:11.5px;color:var(--pri);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.axid h2{margin:1px 0;font:600 18px/1.25 var(--sans);letter-spacing:-.01em}.axid p{margin:0;font-size:12.5px;color:var(--ink3);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.axk2{display:flex;gap:4px;flex:none}
+.axk2>div{display:flex;flex-direction:column;align-items:flex-start;padding:4px 11px;border-left:1px solid var(--line2);max-width:132px}
+.axk2 b{font:600 16px var(--sans)}.axk2 b.sm{font-size:12.5px;line-height:1.3}.axk2 small{font-size:11px;color:var(--ink3);white-space:nowrap}
+.axch{flex:none;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px}
+.chn{display:flex;flex-direction:column;gap:3px;text-align:left;border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px 10px;box-shadow:var(--sh1);transition:border-color .15s,box-shadow .15s}
+.chn:hover{border-color:color-mix(in srgb,var(--c) 45%,#fff)}.chn.on{border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 15%,transparent)}
+.chn.none{opacity:.55}
+.chh{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--c);white-space:nowrap;overflow:hidden}.chh span{overflow:hidden;text-overflow:ellipsis}
+.chn>b{font:600 20px/1.1 var(--sans)}
+.spk{display:flex;align-items:flex-end;gap:2px;height:22px}.spk i{flex:1;border-radius:2px;background:var(--c);opacity:.85}.spk i.z{background:var(--line);opacity:1}
+.chn small{font-size:10.5px;color:var(--mut);white-space:nowrap}
+.axtl{flex:1;min-height:0}
+.tll{flex:1;min-height:0;overflow-y:auto;padding:4px 10px 10px}
+.tld{position:sticky;top:0;z-index:1;background:#fff;font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;padding:9px 4px 5px;border-bottom:1px solid var(--line2)}
+.tle{display:grid;grid-template-columns:62px 22px minmax(0,1fr);gap:9px;padding:8px 4px;border-bottom:1px solid var(--line2)}
+.tle time{font-size:11.5px;color:var(--mut);padding-top:2px;white-space:nowrap}
+.tle p{margin:2px 0 0;font-size:12.5px;color:var(--ink2);line-height:1.45}
+.tle small{display:flex;gap:6px;align-items:center;margin-top:4px;font-size:11px}
+.tlt{font-weight:600;color:var(--ink)!important;font-size:12px!important}
+.tle .src{font-size:11px;color:var(--mut)}
+.tpc{font-size:10.5px!important;padding:0 6px;border-radius:4px;background:var(--line2);color:var(--ink3)!important}
+.axside{display:flex;flex-direction:column;gap:12px;min-height:0;overflow-y:auto}
+.axtk{flex:none}.axtk .sgh .tag{margin-left:auto;text-transform:none}.axtk .sgh .tag+.tag{margin-left:0}
+.tkb{padding:12px 14px}
+.tkh{margin:0 0 10px;font:600 14.5px/1.45 var(--sans);color:var(--ink);letter-spacing:-.005em}
+.tkr{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;padding:6px 0;border-top:1px solid var(--line2)}
+.tkr span{font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.04em;padding-top:2px}
+.tkr p{margin:0;font-size:12.5px;color:var(--ink2);line-height:1.45}
+.axac{flex:none}
+.acl{padding:8px;display:flex;flex-direction:column;gap:8px}
+.acc{border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:#fff;position:relative}
+.acc.pri{border-color:color-mix(in srgb,var(--c) 40%,#fff);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 8%,transparent)}
+.acc header{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:9px;align-items:center}
+.aci{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#fff;background:var(--c)}
+.acc header small{font-size:11px;color:var(--ink3)}.acc header b{display:block;font-weight:600;font-size:13.5px}
+.acv{font:600 13px var(--mono);color:var(--c)}
+.acc>p{margin:7px 0 0;font-size:12.5px;color:var(--ink2);line-height:1.45}
+.acc>p.over{font-size:11.5px;color:var(--ink3);margin-top:3px}
+.acc>p.who{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink3)}
+.ace{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}.ace span{display:inline-flex;align-items:center;gap:5px;height:21px;padding:0 7px;border-radius:6px;background:var(--sunk);border:1px solid var(--line2);font-size:11px;color:var(--ink2)}.ace i{width:6px;height:6px;border-radius:50%}
+.acc footer{display:flex;align-items:center;gap:8px;margin-top:9px;padding-top:9px;border-top:1px solid var(--line2);font-size:12px}
+.acc footer:empty{display:none}
+.acn{flex:1;display:flex;align-items:center;gap:6px;color:var(--ink3);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acc .fo{flex:1;font-size:12px;line-height:1.35}.acc .busy{flex:1;display:inline-flex;align-items:center;gap:8px;color:var(--ink3)}
+@media (max-width:1400px){.advx{grid-template-columns:220px minmax(0,1fr) 360px}.axch{grid-template-columns:repeat(4,minmax(0,1fr))}.axk2>div:nth-child(n+4){display:none}}
+@media (max-width:1180px){.advx{grid-template-columns:200px minmax(0,1fr)}.axside{grid-column:1/-1;flex-direction:row;overflow:visible}.axside>section{flex:1}}
+@media (max-width:1050px){.advx{grid-template-columns:1fr;overflow:visible}.axll{flex-direction:row;overflow-x:auto}.axi{min-width:190px}.axside{flex-direction:column}.axhead{flex-direction:column;align-items:flex-start}.axtl{max-height:520px}.axk2{flex-wrap:wrap}}
 </style>
 </head>
 <body>
@@ -580,6 +643,7 @@ body.aon .brand .prod,body.aon .brand .sep{display:none}
     <aside class="orch" id="orch" aria-label="Orchestrator"></aside>
     <main class="floor" id="floor" aria-label="Orchestration"></main>
     <main class="sig" id="sig" aria-label="Always-on signals" hidden></main>
+    <main class="advx" id="advx" aria-label="Advisors" hidden></main>
     <section class="bench" id="bench" aria-label="Ticket" hidden></section>
   </div>
 </div>
@@ -3258,6 +3322,14 @@ function draftingOf(text) {
 const SIG_TYPES = {
   'web.page': { label: 'Page visit', cat: 'Digital', sys: 'aem', w: 1, strength: 'weak' },
   'web.article': { label: 'Article read', cat: 'Digital', sys: 'aem', w: 2, strength: 'medium' },
+  'web.tool': { label: 'Tool used', cat: 'Digital', sys: 'aem', w: 2.5, strength: 'medium' },
+  'web.download': { label: 'Download', cat: 'Digital', sys: 'aem', w: 2, strength: 'medium' },
+  'web.search': { label: 'Site search', cat: 'Digital', sys: 'aem', w: 1, strength: 'weak' },
+  'web.login': { label: 'Portal login', cat: 'Digital', sys: 'aem', w: 0.5, strength: 'weak' },
+  'ce.course': { label: 'CE course completed', cat: 'Digital', sys: 'aem', w: 2, strength: 'medium' },
+  'social.engage': { label: 'LinkedIn engagement', cat: 'Social', sys: 'social', w: 1, strength: 'weak' },
+  'mc.register': { label: 'Webinar registration', cat: 'Marketing', sys: 'mcloud', w: 1, strength: 'weak' },
+  'mc.noshow': { label: 'Webinar no-show', cat: 'Marketing', sys: 'mcloud', w: 0.3, strength: 'weak' },
   'mc.open': { label: 'Email opened', cat: 'Marketing', sys: 'mcloud', w: 0.5, strength: 'weak' },
   'mc.click': { label: 'Email click', cat: 'Marketing', sys: 'mcloud', w: 1.5, strength: 'medium' },
   'mc.webinar': { label: 'Webinar attended', cat: 'Marketing', sys: 'mcloud', w: 2, strength: 'medium' },
@@ -3301,8 +3373,25 @@ const CAPACITY = {
   'EMP-SAM': { kind: 'call', perWeek: 60, booked: 41 }
 };
 const POLICY = { coolOffDays: 5, trigger: 5, halfLifeDays: 14, plannedDays: 21, visitShare: 0.8, callShare: 0.35, callConnect: 0.9, callMin: 15, digitalMin: 4, dedupeDays: 7 };
-/* activity the existing records do not hold: email engagement and the weekly model runs */
+/* activity the existing records do not hold: web analytics detail, email engagement, LinkedIn and the weekly model runs */
 const SIGNAL_EXTRAS = [
+  { adv: 'ADV-101', at: 'Jul 28, 2026 7:40', type: 'web.download', what: 'GFA quarterly attribution, Q2 (PDF)', src: 'Website analytics' },
+  { adv: 'ADV-101', at: 'Aug 27, 2026 7:55', type: 'web.tool', what: 'Fund comparison tool: GFA vs. VIGAX, 1-, 3- and 5-year returns', src: 'Website analytics' },
+  { adv: 'ADV-101', at: 'Sep 10, 2026 7:35', type: 'web.search', what: 'Searched “GFA vs index fund”', src: 'Website analytics' },
+  { adv: 'ADV-102', at: 'Aug 12, 2026 10:00', type: 'mc.register', what: 'Registered for “Fee transparency for plan committees”', src: 'Marketing Cloud' },
+  { adv: 'ADV-102', at: 'Aug 19, 2026 11:00', type: 'mc.noshow', what: 'Missed “Fee transparency for plan committees”; recording sent', src: 'Marketing Cloud' },
+  { adv: 'ADV-102', at: 'Aug 24, 2026 14:20', type: 'web.tool', what: 'Fee calculator: PLAN-102 lineup costs in dollars', src: 'Website analytics' },
+  { adv: 'ADV-102', at: 'Aug 31, 2026 9:30', type: 'web.download', what: 'Fund expense guide for plan committees (PDF)', src: 'Website analytics' },
+  { adv: 'ADV-103', at: 'Aug 5, 2026 12:00', type: 'mc.noshow', what: 'Registered for “Income in retirement” but did not attend', src: 'Marketing Cloud' },
+  { adv: 'ADV-103', at: 'Sep 5, 2026 8:10', type: 'web.login', what: 'Logged in to the advisor portal for the first time in four months', src: 'Website analytics' },
+  { adv: 'ADV-104', at: 'Sep 2, 2026 20:15', type: 'ce.course', what: 'Completed the CE course “Active ETFs in model portfolios” (1 credit)', src: 'Learning platform' },
+  { adv: 'ADV-104', at: 'Sep 11, 2026 21:05', type: 'web.tool', what: 'Portfolio analyzer: core-satellite blend with CGGR and CGDV', src: 'Website analytics' },
+  { adv: 'ADV-104', at: 'Sep 18, 2026 12:40', type: 'social.engage', what: 'Liked and shared the “Active ETFs in a core” LinkedIn post', src: 'LinkedIn' },
+  { adv: 'ADV-105', at: 'Sep 3, 2026 7:20', type: 'web.search', what: 'Searched “CGGR Wells Fargo platform”', src: 'Website analytics' },
+  { adv: 'ADV-105', at: 'Sep 24, 2026 8:05', type: 'web.download', what: 'CGGR fact sheet (PDF)', src: 'Website analytics' },
+  { adv: 'ADV-106', at: 'Sep 4, 2026 9:00', type: 'mc.register', what: 'Registered for “Retirement income in a higher-rate world”', src: 'Marketing Cloud' },
+  { adv: 'ADV-106', at: 'Sep 20, 2026 19:30', type: 'web.download', what: 'Retirement income playbook (PDF)', src: 'Website analytics' },
+  { adv: 'ADV-107', at: 'Sep 26, 2026 21:10', type: 'web.search', what: 'Searched “SIMPLE IRA vs 401(k) for small businesses”', src: 'Website analytics' },
   { adv: null, at: 'Sep 14, 2026 6:00', type: 'model.refresh', what: 'Sales Alpha and Digital Alpha scored for 7 advisors in Southern California', src: 'Weekly model run' },
   { adv: 'ADV-103', at: 'Sep 15, 2026 9:12', type: 'mc.open', what: 'Opened “Retirement income insights, September”', src: 'Marketing Cloud' },
   { adv: 'ADV-103', at: 'Sep 22, 2026 9:05', type: 'mc.open', what: 'Opened “Dividend payers for retirees”', src: 'Marketing Cloud' },
@@ -3320,11 +3409,30 @@ const SIGNAL_REPLAYS = {
   'ADV-104|campaign': { requester: 'EMP-MARCUS', text: 'Create an ETF email campaign for Sofia' },
   'ADV-106|visit': { requester: 'EMP-PRIYA', text: 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month' },
   'ADV-101|service': { requester: 'EMP-KIM', text: 'Alex says the link in Priya’s email won’t open' },
-  'ADV-101|call': { requester: 'EMP-SAM', text: 'Prep me for my call with Alex tomorrow' }
+  'ADV-101|call': { requester: 'EMP-SAM', text: 'Prep me for my call with Alex tomorrow' },
+  'ADV-101|explain': { requester: 'EMP-DANA', text: 'Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.' },
+  'ADV-105|platform': { requester: 'EMP-PRIYA', text: 'Which CG ETFs are available at Wells Fargo for Daniel?' },
+  'ADV-105|flows': { requester: 'EMP-PRIYA', text: 'Why are Daniel’s overall sales down when his ETF sales are up?' },
+  'ADV-106|changed': { requester: 'EMP-PRIYA', text: 'What has changed since my last meeting with Rachel?' },
+  'territory|social': { requester: 'EMP-MARCUS', text: 'Write a LinkedIn post on fee transparency for advisors' },
+  'territory|trends': { requester: 'EMP-PRIYA', text: 'Identify the growing trends in LA territory' }
 };
-const SIG_START = 'Sep 14, 2026', SIG_HISTORY = 'Sep 1, 2026';
+/* where an event comes from, as a business user groups engagement */
+const SIG_CHANNELS = [
+  ['digital', 'Digital', 'eye', t => /^(web|ce)\./.test(t)],
+  ['email', 'Email', 'mail', t => /^mc\./.test(t)],
+  ['social', 'Social', 'globe', t => /^social\./.test(t)],
+  ['content', 'Content', 'doc', t => /^ls\./.test(t)],
+  ['people', 'Calls', 'users', t => /^crm\.(call|email)$/.test(t)],
+  ['service', 'Service', 'bell', t => /^svc\./.test(t)],
+  ['tx', 'Flows', 'chart', t => /^tx\./.test(t)],
+  ['practice', 'Practice', 'globe', t => /^(crm\.(practice|deadline|coverage)|dealer|news)/.test(t)]
+];
+const channelOf = type => (SIG_CHANNELS.find(c => c[3](type)) || ['other'])[0];
+const SIG_START = 'Sep 14, 2026', SIG_HISTORY = 'Jul 1, 2026';
 
-const SIGNALS = (() => {
+/* one engine instance per use: the live stream, and a separate one the advisor view runs to today */
+function makeSignals() {
   const DAY = 864e5, MON = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
   /* "Sep 24, 2026" plus a clock time, as a local timestamp */
   const ts = (d, hm = '9:00') => { const m = String(d).match(/([A-Z][a-z]{2})\w* (\d{1,2}),? (\d{4})/); if (!m) return NaN; const [hh, mm] = hm.split(':').map(Number); return new Date(+m[3], MON[m[1]], +m[2], hh, mm).getTime(); };
@@ -3506,9 +3614,128 @@ const SIGNALS = (() => {
     if (wo.action === 'service') { p.friction = 0; const next = decide(wo.adv, now, null, { cleared: true }); next.followsUp = wo.id; next.why = 'Friction cleared; ' + next.why.charAt(0).toLowerCase() + next.why.slice(1); book(next); S.wos.push(next); return next; }
     return null;
   }
-  const actName = a => ({ visit: 'In-person visit', call: 'Internal call', campaign: 'Personalized digital follow-up', journey: 'Digital journey', service: 'Fix first', hold: 'Hold' }[a] || a);
-  return { S, reset, step, after, release, decide, intentOf, urgency, actName, fmtK, ts, dstr, DAY };
-})();
+  const ACT_NAMES = { visit: 'In-person visit', call: 'Internal call', campaign: 'Personalized digital follow-up', journey: 'Digital journey', service: 'Fix first', hold: 'Hold',
+    explain: 'Product explanation', platform: 'Platform availability check', flows: 'Flow diagnosis', changed: 'What changed since we last met', social: 'Social post', trends: 'Territory trends' };
+  const actName = a => ACT_NAMES[a] || a;
+
+  /* ---- the advisor view: everything up to today, a takeaway, and the actions ---- */
+  function runToToday() {
+    reset(); let r;
+    while ((r = step())) { if (r.wo && r.wo.action === 'service') after(r.wo, r.e.t + 20 * 60000); if (r.wo && r.wo.action === 'journey') r.wo.status = 'enrolled'; }
+    return S;
+  }
+  const short = adv => ADVISORS[adv].short;
+  const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+  const clip = (x, n = 70) => x.length > n ? x.slice(0, n - 1).replace(/[\s,;:]+\S*$/, '') + '…' : x;
+  function engagement(ev) {
+    const c = t => ev.filter(e => e.type === t).length, web = ev.filter(e => /^(web|ce)\./.test(e.type));
+    const parts = [['web.tool', 'tool'], ['web.download', 'download'], ['web.search', 'search'], ['web.article', 'article'], ['web.page', 'page visit'], ['ce.course', 'CE course'], ['web.login', 'portal login']].map(([t, w]) => c(t) ? plural(c(t), w) : '').filter(Boolean);
+    const opens = c('mc.open'), clicks = c('mc.click'), webinars = c('mc.webinar'), noshow = c('mc.noshow'), social = c('social.engage'), seen = c('ls.open');
+    const calls = ev.filter(e => e.type === 'crm.call'), mails = ev.filter(e => e.type === 'crm.email'), people = [...new Set(calls.concat(mails).map(e => e.by && EMPLOYEES[e.by] ? EMPLOYEES[e.by].name.split(' ')[0] : null).filter(Boolean))];
+    const digital = web.length + clicks + webinars + social + seen, human = calls.length + mails.length + ev.filter(e => /^svc\./.test(e.type)).length;
+    const style = digital >= 6 && digital >= human * 2 ? 'Digital-first' : human > digital ? 'Relationship-led' : digital + human <= 3 ? 'Quiet' : 'Balanced';
+    const bits = [];
+    if (web.length) bits.push(`${plural(web.length, 'web action')} on their own (${parts.join(', ')})`);
+    if (opens || clicks || webinars || noshow) bits.push(`email: ${opens} opened, ${clicks} clicked${webinars ? `, ${plural(webinars, 'webinar')} attended` : ''}${noshow ? `, ${noshow} no-show` : ''}`);
+    if (social) bits.push(`${plural(social, 'LinkedIn engagement')}`);
+    if (seen) bits.push(`opened shared content ${plural(seen, 'time')}`);
+    if (calls.length || mails.length) bits.push(`${plural(calls.length, 'call')} and ${plural(mails.length, 'email')} with ${people.join(' and ') || 'the team'}`);
+    return { style, text: bits.join('; ') || 'Little recorded activity', digital, human, opens, clicks };
+  }
+  function momentum(ev, now) {
+    const w = (a, b) => ev.filter(e => e.t > now - a * DAY && e.t <= now - b * DAY).reduce((m, e) => m + SIG_TYPES[e.type].w, 0);
+    const recent = w(14, 0), before = w(28, 14);
+    const dir = recent > before * 1.5 + 1 ? 'Rising' : before > recent * 1.5 + 1 ? 'Cooling' : 'Steady';
+    return { dir, text: `${dir}: interest weight ${recent.toFixed(1)} in the last two weeks, ${before.toFixed(1)} the two weeks before` };
+  }
+  function takeaway(adv) {
+    const A = ADVISORS[adv], p = S.prof[adv], now = S.now, ev = S.events.filter(e => e.adv === adv);
+    const I = intentOf(p, now), tops = I.topics.filter(x => !['access', 'general'].includes(x.k) && x.v >= 0.5).slice(0, 2);
+    const E = engagement(ev), M = momentum(ev, now);
+    const wos = S.wos.filter(w => w.adv === adv), acts = wos.filter(w => w.action !== 'hold'), main = acts[0] || wos[0] || null;
+    const topicEv = tops.length ? p.hits.filter(h => h.topic === tops[0].k).sort((a, b) => b.w - a.w || b.t - a.t).slice(0, 3).map(h => clip(h.ev.what, 60)) : [];
+    const tx = ev.filter(e => /^tx\./.test(e.type)), buy = tx.filter(e => e.type === 'tx.buy').reduce((m, e) => m + e.usd, 0), sell = tx.filter(e => e.type === 'tx.sell').reduce((m, e) => m + e.usd, 0);
+    const opps = OPPORTUNITIES.filter(o => o.adv === adv && !/lost/i.test(o.stage));
+    const watch = [];
+    if (p.frictionEv.length) watch.push(`${plural(p.frictionEv.length, 'access failure')} (${[...new Set(p.frictionEv.map(e => e.ref).filter(Boolean))].join(', ')})`);
+    if (FIRMS[A.firm].policy) watch.push(FIRMS[A.firm].policy.replace(/ \(.*\)$/, ''));
+    if (p.coverage) watch.push(`Coverage moves to ${EMPLOYEES[p.coverage.to].name} on ${dstr(p.coverage.at)}`);
+    if (p.touch && (now - p.touch.t) / DAY < POLICY.coolOffDays) { const d = Math.floor((now - p.touch.t) / DAY); watch.push(`Contacted ${d < 1 ? 'today' : d === 1 ? 'yesterday' : d + ' days ago'}: avoid piling on`); }
+    const held = wos.filter(w => w.action === 'hold'); held.forEach(w => watch.push(`Held on ${dstr(w.at)}: ${w.why.replace(/^Cool-off: /, 'cool-off, ')}`));
+    const coming = [];
+    if (p.deadline && p.deadline.t > now) coming.push(`${p.deadline.label}: ${dstr(p.deadline.t)}`);
+    COMMITMENTS.filter(c => c.adv === adv && c.status === 'Open').forEach(c => coming.push(`${c.id}: ${c.title} (${c.owner}, ${c.due})`));
+    const topicTxt = tops.length ? tops.map(x => x.name.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())).join(' and ') : 'nothing in particular';
+    const H = {
+      service: () => `${short(adv)} is engaged, but ${FIRMS[A.firm].name} is blocking what we send. Fix that first; the selling conversation comes after.`,
+      visit: () => `${short(adv)} is actively looking at ${topicTxt}${main.U && main.U.x > 1 ? ` (${main.U.why.replace(/^[A-Z]/, c => c.toLowerCase())})` : ''}. An in-person visit is the highest-value next step, worth about ${fmtK(main.value)} in incremental sales.`,
+      campaign: () => `${short(adv)} researches ${topicTxt} online, mostly on their own. A human follow-up is already planned, so the next step is a personal digital follow-up.`,
+      journey: () => `${short(adv)} opens our emails but doesn’t act on them (${E.opens} opens, ${E.clicks} clicks). Keep it light: a pre-approved digital journey, no agents needed.`,
+      call: () => `${short(adv)}’s business is moving (${clip(main.evidence[0] ? main.evidence[0].what : 'new signals', 80)}). ${EMPLOYEES[main.owner].name} should call.`,
+      hold: () => `Nothing worth acting on yet. ${short(adv)}’s profile is updated with every event and Intelligence keeps watching.`
+    };
+    return {
+      headline: main ? H[main.action]() : `Quiet: ${short(adv)} has little recent activity. Intelligence keeps watching.`,
+      style: E.style, momentum: M.dir, interest: I.total,
+      bullets: [
+        ['Interest', tops.length ? `${tops.map(x => `${x.name} (${x.v.toFixed(1)})`).join(', ')}: ${topicEv.join('; ')}` : 'No clear topic in the last 90 days'],
+        ['How they engage', `${E.style}. ${E.text.replace(/^./, c => c.toUpperCase())}`],
+        ['Momentum', M.text],
+        ['Business with us', [buy || sell ? `$${buy.toFixed(1)}M bought${sell ? `, $${sell.toFixed(1)}M redeemed` : ''} since Jul 1 (${[...new Set(tx.map(e => e.what.match(/of (\w+)/)[1]))].join(', ')})` : 'No transactions since Jul 1', opps.length ? opps.map(o => `${o.id} ${o.name} (${o.stage})`).join('; ') : ''].filter(Boolean).join('. ')],
+        ['Watch-outs', watch.join('. ') || 'None'],
+        ['Coming up', coming.join('. ') || 'Nothing scheduled']
+      ]
+    };
+  }
+  /* the next best action(s) from the decisions, plus what else the pattern of events calls for */
+  function actionsFor(adv) {
+    const A = ADVISORS[adv], ev = S.events.filter(e => e.adv === adv), now = S.now, firm = FIRMS[A.firm].name, out = [];
+    S.wos.filter(w => w.adv === adv && w.action !== 'hold').forEach(w => { w.primary = true; out.push(w); });
+    const sup = (action, owner, evs, why, text) => out.push({ id: `REC-${adv.slice(-3)}-${action.toUpperCase().slice(0, 4)}`, adv, action, owner, evidence: evs, why, text, value: null, replay: SIGNAL_REPLAYS[`${adv}|${action}`] || null, needsWork: true, status: 'decided', at: now, supporting: true });
+    const cmp = ev.filter(e => /^(web|ce)\./.test(e.type) && /\bvs\.?\s|attribution|comparison/i.test(e.what));
+    if (cmp.length >= 2) { const f = (cmp.map(e => e.what.match(/\b(GFA|AMBAL|BFA|CGGR|CGDV)\b/)).find(Boolean) || ['the fund'])[0];
+      sup('explain', 'EMP-DANA', cmp.slice().reverse().slice(0, 3), `${short(adv)} keeps comparing ${f} with an index online (${plural(cmp.length, 'time')}). Product writes the explanation once, for every advisor asking.`,
+        `Why has ${f} trailed its index? I need an explanation advisors like ${A.name} can use. What they looked at: ${cmp.map(e => `${dstr(e.t)}: ${e.what}`).join('; ')}.`); }
+    const plat = ev.filter(e => e.type === 'dealer.platform' && now - e.t <= 45 * DAY);
+    if (plat.length) sup('platform', 'EMP-PRIYA', plat.concat(ev.filter(e => /^web\./.test(e.type) && /platform|cggr/i.test(e.what)).slice(-2).reverse()), `${plat[0].what}, and ${short(adv)} has been looking it up. Confirm exactly what is available at ${firm} before anyone pitches it.`,
+      `Which CG ETFs are available at ${firm} for ${A.name}? ${plat[0].what} (${dstr(plat[0].t)}).`);
+    const sells = ev.filter(e => e.type === 'tx.sell' && e.usd >= 4), buys = ev.filter(e => e.type === 'tx.buy' && /CGGR|CGDV|CGCP/.test(e.what));
+    const shift = sells.find(x => buys.some(b => Math.abs(b.t - x.t) <= 30 * DAY));
+    if (shift) { const bs = buys.filter(b => Math.abs(b.t - shift.t) <= 30 * DAY);
+      sup('flows', 'EMP-PRIYA', [shift].concat(bs), `${shift.what} next to ${bs.map(b => b.what.replace(/^Purchase of /, '')).join(', ')} in ETFs: a vehicle shift, not a lost relationship. Explain it before the next meeting.`,
+        `Why are ${A.short}’s overall sales down when ETF sales are up? ${[shift].concat(bs).map(e => `${dstr(e.t)}: ${e.what}`).join('; ')}.`); }
+    const lastCall = ev.filter(e => e.type === 'crm.call').slice(-1)[0], ch = ev.filter(e => e.type === 'crm.practice' && lastCall && e.t > lastCall.t);
+    if (ch.length) sup('changed', 'EMP-PRIYA', ch, `${ch[0].what}, after the last call on ${dstr(lastCall.t)}. Catch up on everything that changed before the visit.`, `What has changed since my last meeting with ${A.short}?`);
+    return out;
+  }
+  function territory() {
+    const advs = Object.keys(ADVISORS), now = S.now, all = S.events.filter(e => e.adv);
+    const topic = {}; advs.forEach(a => intentOf(S.prof[a], now).topics.forEach(x => { if (['access', 'general'].includes(x.k)) return; (topic[x.k] = topic[x.k] || { name: x.name, v: 0, who: [] }); topic[x.k].v += x.v; if (x.v >= 1) topic[x.k].who.push(short(a)); }));
+    const tops = Object.values(topic).sort((a, b) => b.v - a.v).slice(0, 3);
+    const feeEv = all.filter(e => e.topic === 'fees'), F0 = SERVICE_INSIGHTS.fees, post = ENGAGEMENT.fees[1];
+    const la = all.filter(e => TERRITORIES.LA.advisors.includes(e.adv)), laTop = {}; la.forEach(e => { if (SIG_TYPES[e.type].w && !['access', 'general'].includes(e.topic)) laTop[e.topic] = (laTop[e.topic] || 0) + 1; });
+    const laList = Object.entries(laTop).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k, n]) => `${TOPIC_NAME[k]} (${n})`);
+    const byAct = {}; S.wos.forEach(w => { byAct[w.action] = (byAct[w.action] || 0) + 1; });
+    const c = S.cap['EMP-PRIYA'];
+    const actions = [
+      { id: 'REC-TER-SOCI', adv: null, action: 'social', owner: 'EMP-MARCUS', evidence: feeEv.slice().reverse().slice(0, 3), why: `Fee questions to service rose from ${F0.contacts_last_quarter} to ${F0.contacts_this_quarter} this quarter, and advisors are reading fee content. ${post.takeaway}`, text: 'Write a LinkedIn post on fee transparency for advisors: show what a fee costs in dollars, not just percent.', value: null, replay: SIGNAL_REPLAYS['territory|social'], needsWork: true, status: 'decided', at: now, supporting: true },
+      { id: 'REC-TER-TRND', adv: null, action: 'trends', owner: 'EMP-PRIYA', evidence: la.filter(e => SIG_TYPES[e.type].w).slice(-3).reverse(), why: `LA activity clusters on ${laList.join(', ')}. Confirm the trend from recorded conversations before planning the territory.`, text: 'Identify the growing trends in LA territory', value: null, replay: SIGNAL_REPLAYS['territory|trends'], needsWork: true, status: 'decided', at: now, supporting: true }
+    ];
+    return {
+      headline: `Across Southern California, ${tops.map(t => t.name.replace(/^[A-Z](?=[a-z])/, x => x.toLowerCase())).join(', ').replace(/, ([^,]*)$/, ' and $1')} lead what advisors are researching, and fee questions to service are up ${Math.round((F0.contacts_this_quarter / F0.contacts_last_quarter - 1) * 100)}% this quarter.`,
+      bullets: [
+        ['Researching', tops.map(t => `${t.name} (${t.v.toFixed(1)}): ${t.who.join(', ') || 'light'}`).join('; ')],
+        ['Fees', `${plural(feeEv.length, 'fee-related event')} from ${[...new Set(feeEv.map(e => short(e.adv)))].join(', ')}. Service: ${F0.contacts_last_quarter} → ${F0.contacts_this_quarter} fee contacts. ${F0.takeaway}`],
+        ['Los Angeles', `${plural(la.length, 'event')} from ${TERRITORIES.LA.advisors.map(short).join(', ')}; most active topics ${laList.join(', ')}`],
+        ['Decisions so far', Object.entries(byAct).map(([k, n]) => `${actName(k)} ${n}`).join(' · ')],
+        ['Capacity', `Priya: ${c.slots - c.booked} of ${c.slots} visit slots open (${c.window}); cut-off ${fmtK(c.bookedLow[0] ? c.bookedLow[0].value : 0)}. Sam: ${S.cap['EMP-SAM'].perWeek - S.cap['EMP-SAM'].booked} call slots this week`]
+      ],
+      actions
+    };
+  }
+  return { S, reset, step, after, release, decide, intentOf, urgency, actName, fmtK, ts, dstr, DAY, runToToday, takeaway, actionsFor, territory, engagement, momentum };
+}
+const SIGNALS = makeSignals();
 
 /* ===== Agent Harness: the orchestration canvas =====
    A request goes through the real pipeline (pipeline.js over engine.js): the
@@ -3616,7 +3843,7 @@ const recordedFor = who => RECORDED.filter(r => r.requester === who || (EMPLOYEE
 const suggestions = () => AI.mode === 'live' ? (SUGGESTIONS[EMPLOYEES[ME].team] || []).slice(0, 5) : [...new Set(recordedFor(ME).map(r => r.text))].slice(0, 6);
 function ask(text, clarified, wo) {
   text = String(text || '').trim(); if (!text) return;
-  if (!wo && ST.mode === 'always') { if (AO.active) { toast('A work order is running; ask when it finishes.'); return; } ST.mode = 'ask'; AO.playing = false; AO.viewing = null; }
+  if (!wo && (ST.mode === 'always' || ST.mode === 'advisors')) { if (AO.active) { toast('A work order is running; ask when it finishes.'); return; } ST.mode = 'ask'; AO.playing = false; AO.viewing = null; }
   if (busyPlanning() || anyRunning()) { toast('Still working on the current request.'); return; }
   const rec = RECORDED.find(r => r.text === text && r.requester === ME) || RECORDED.find(r => r.text === text);
   if (AI.mode !== 'live' && !rec) { ST.nokey = text; UI.run = null; paintAll(); return; }
@@ -4138,17 +4365,19 @@ el('newChat').onclick = () => { if (busyPlanning() || anyRunning()) return; UI.r
    guardrails). A decision that needs work becomes a work order, and in the demo
    it runs on its own, visibly, through the same orchestration canvas. */
 const AO = { playing: false, speed: 1, auto: true, feed: [], cur: null, phase: 0, active: null, peek: false, done: false, count: 0, wait: null, started: false, base: SLEEP_SCALE, flash: {} };
-ST.mode = QS.get('mode') === 'ask' ? 'ask' : 'always';
+ST.mode = ['ask', 'advisors'].includes(QS.get('mode')) ? QS.get('mode') : 'always';
+const inAO = () => ST.mode === 'always' || ST.mode === 'advisors';
 const SGS = SIGNALS.S;
 SIGNALS.reset();
-const ACT = { visit: ['users', 'In-person visit'], call: ['msg', 'Internal call'], campaign: ['mail', 'Digital follow-up'], journey: ['send', 'Digital journey'], service: ['tool', 'Fix first'], hold: ['pause', 'Hold'] };
+const ACT = { visit: ['users', 'In-person visit'], call: ['msg', 'Internal call'], campaign: ['mail', 'Digital follow-up'], journey: ['send', 'Digital journey'], service: ['tool', 'Fix first'], hold: ['pause', 'Hold'],
+  explain: ['doc', 'Product explanation'], platform: ['layers', 'Platform availability check'], flows: ['chart', 'Flow diagnosis'], changed: ['clock', 'What changed since we last met'], social: ['globe', 'Social post'], trends: ['pulse', 'Territory trends'] };
 const WO_ST = { decided: ['ready', 'Decided'], waiting: ['review', 'Waiting for owner'], running: ['running', 'Running'], done: ['approved', 'Done'], held: ['blocked', 'Held'], enrolled: ['approved', 'Enrolled'], 'needs-ai': ['signoff', 'Needs live AI'], dismissed: ['blocked', 'Dismissed'], failed: ['failed', 'Failed'] };
 const SIG_ICON = { aem: 'eye', mcloud: 'mail', seismic: 'doc', sf: 'users', gen: 'bell', fund: 'chart', news: 'globe' };
 const advShort = a => a ? ADVISORS[a].name.replace(/,.*$/, '') : 'All advisors';
 const simDay = t => new Date(t).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 const simTime = t => new Date(t).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace('AM', 'a.m.').replace('PM', 'p.m.');
 const pace = ms => new Promise(r => setTimeout(r, ms / AO.speed * (AO.base < 1 ? 0.15 : 1)));
-const boardShown = () => ST.mode === 'always' && (!AO.active || AO.peek) && !AO.viewing;
+const boardShown = () => inAO() && (!AO.active || AO.peek) && !AO.viewing;
 const firmShort = f => FIRMS[f].name.replace(/ Wealth Management| Advisors| \(RIA\)/, '');
 const ownerName = wo => wo.owner ? EMPLOYEES[wo.owner].name : 'Intelligence';
 
@@ -4198,6 +4427,17 @@ const until = async (f, ms = 180000) => { const t0 = Date.now(); while (!f()) { 
 async function runWO(wo) {
   const live = AI.mode === 'live', rp = live ? null : wo.replay;
   if (!live && !rp) { wo.status = 'needs-ai'; wo.outcome = 'Work order ready. Running it needs live AI: there is no saved AI run for this one.'; paintAll(); await pace(3200); SIGNALS.after(wo, SGS.now); return; }
+  const r = await execWO(wo, true);
+  wo.run = r; wo.status = r && r.status === 'done' ? 'done' : 'failed';
+  wo.outcome = r ? outcomeOf(r) : 'Did not start';
+  if (r && r.status === 'done') { ST.view = 'results'; ST.open = null; paintAll(); await pace(5200); }
+  ST.view = 'floor'; AO.active = null; paintAll();
+  const next = SIGNALS.after(wo, SGS.now + 20 * 60000);
+  if (next) { AO.feed.unshift({ e: null, outcome: 'decision', wo: next, note: `Looked again after ${wo.id}` }); paintAll(); await handle(next); }
+}
+/* hand a work order to Intelligence: plan it, run every ticket, wait for the result */
+async function execWO(wo, autoSign) {
+  const live = AI.mode === 'live', rp = live ? null : wo.replay;
   wo.status = 'running'; AO.active = wo; AO.peek = false; AO.viewing = null;
   ME = rp ? rp.requester : wo.owner;
   ask(rp ? rp.text : wo.text, null, wo);
@@ -4207,15 +4447,10 @@ async function runWO(wo) {
   if (r && r.status === 'planned') {
     await sleep(1800);
     await runAll();
-    r.tasks.forEach(t => outputsOf(t).filter(o => o.status === 'Waiting for approval').forEach(o => signOff(o, `${EMPLOYEES[ME].name}, auto-approved under the demo policy`)));
+    if (autoSign) r.tasks.forEach(t => outputsOf(t).filter(o => o.status === 'Waiting for approval').forEach(o => signOff(o, `${EMPLOYEES[ME].name}, auto-approved under the demo policy`)));
     await until(() => r.status === 'done' || r.status === 'failed', 30000);
   }
-  wo.run = r; wo.status = r && r.status === 'done' ? 'done' : 'failed';
-  wo.outcome = r ? outcomeOf(r) : 'Did not start';
-  if (r && r.status === 'done') { ST.view = 'results'; ST.open = null; paintAll(); await pace(5200); }
-  ST.view = 'floor'; AO.active = null; paintAll();
-  const next = SIGNALS.after(wo, SGS.now + 20 * 60000);
-  if (next) { AO.feed.unshift({ e: null, outcome: 'decision', wo: next, note: `Looked again after ${wo.id}` }); paintAll(); await handle(next); }
+  return r;
 }
 function outcomeOf(r) {
   const acts = r.tasks.flatMap(t => (t.calls || []).filter(c => c.rw === 'write' && !c.error).map(c => actionTile(c, t))).filter(Boolean);
@@ -4226,26 +4461,28 @@ function outcomeOf(r) {
 
 /* ---- painting ---- */
 function paintAO() {
-  document.body.classList.toggle('aon', ST.mode === 'always');
+  document.body.classList.toggle('aon', inAO());
   document.body.classList.toggle('aoboard', boardShown());
-  el('composer').hidden = ST.mode === 'always';
-  setHTML(el('modes'), `<button type="button" class="${ST.mode === 'always' ? 'on' : ''}" data-mode="always">${I('pulse', 14)} Always-on</button><button type="button" class="${ST.mode === 'ask' ? 'on' : ''}" data-mode="ask">${I('send', 14)} Ask</button>`);
-  el('newChat').hidden = ST.mode === 'always';
+  el('composer').hidden = inAO();
+  setHTML(el('modes'), [['always', 'pulse', 'Live signals'], ['advisors', 'users', 'Advisors'], ['ask', 'send', 'Ask']].map(([m, ic, l]) => `<button type="button" class="${ST.mode === m ? 'on' : ''}" data-mode="${m}">${I(ic, 14)} ${l}</button>`).join(''));
+  el('newChat').hidden = inAO();
   paintCtl();
-  const sig = el('sig'); sig.hidden = !boardShown(); el('orch').hidden = boardShown(); el('floor').hidden = boardShown();
-  if (!boardShown()) return false;
+  const show = boardShown();
+  el('sig').hidden = !(show && ST.mode === 'always'); el('advx').hidden = !(show && ST.mode === 'advisors'); el('orch').hidden = show; el('floor').hidden = show;
+  if (!show) return false;
   el('bench').hidden = true;
-  paintBoard();
+  if (ST.mode === 'always') paintBoard(); else paintAdvisors();
   return true;
 }
 function paintCtl() {
-  const box = el('aoctl'); box.hidden = ST.mode !== 'always'; if (box.hidden) return;
+  const box = el('aoctl'); box.hidden = !inAO(); if (box.hidden) return;
   const n = SGS.events.length - SGS.history, at = Math.max(0, SGS.cursor - SGS.history), wo = AO.active || AO.viewing;
   if (wo && !AO.peek) {
-    const A = ADVISORS[wo.adv], [ic, nm] = ACT[wo.action];
-    setHTML(box, `<div class="aostrip"><span class="aobolt">${I('pulse', 14)}</span><span class="aoct"><small>${AO.viewing ? 'Work order' : 'Running a work order from Always-on'}</small><b><code>${wo.id}</code> ${I(ic, 13)} ${h(nm)} · ${h(advShort(wo.adv))} <span class="muted">(${h(firmShort(A.firm))})</span></b></span>${wo.replay && AI.mode !== 'live' ? `<span class="aorp" title="No live AI here, so the saved AI run of an equivalent request plays">${I('play', 11)} Saved run: “${h(wo.replay.text.slice(0, 48))}${wo.replay.text.length > 48 ? '…' : ''}”</span>` : ''}<button type="button" class="btn sm" data-aoboard>${I('target', 13)} Signals board</button></div>`);
+    const A = wo.adv && ADVISORS[wo.adv], [ic, nm] = ACT[wo.action], back = wo.explorer ? (A ? advShort(wo.adv) : 'Advisors') : 'Signals board';
+    setHTML(box, `<div class="aostrip"><span class="aobolt">${I(wo.explorer ? 'users' : 'pulse', 14)}</span><span class="aoct"><small>${AO.viewing ? 'Work order · done' : wo.explorer ? 'Running an advisor action' : 'Running a work order from Always-on'}</small><b><code>${wo.id}</code> ${I(ic, 13)} ${h(nm)} · ${A ? `${h(advShort(wo.adv))} <span class="muted">(${h(firmShort(A.firm))})</span>` : 'Southern California'}</b></span>${wo.replay && AI.mode !== 'live' ? `<span class="aorp" title="No live AI here, so the saved AI run of an equivalent request plays">${I('play', 11)} Saved run: “${h(wo.replay.text.slice(0, 48))}${wo.replay.text.length > 48 ? '…' : ''}”</span>` : ''}<button type="button" class="btn sm" data-aoboard>${I(wo.explorer ? 'arrow' : 'target', 13)} ${wo.explorer ? 'Back to ' + h(back) : h(back)}</button></div>`);
     return;
   }
+  if (ST.mode === 'advisors') { setHTML(box, `<div class="aoclock"><span class="aolive">${I('users', 12)} Advisor view</span><b>As of ${h(simDay(AOX().S.now))}</b><span>${h(AOX().S.events.filter(e => e.adv).length)} events since Jul 1 from ${new Set(AOX().S.events.map(e => SIG_TYPES[e.type].sys)).size} sources</span></div>`); return; }
   setHTML(box, `<div class="aoclock"><span class="aolive${AO.playing ? ' on' : ''}"><i></i>${AO.playing ? 'Listening' : AO.done ? 'Caught up' : 'Paused'}</span><b>${h(simDay(SGS.now))}</b><span>${h(simTime(SGS.now))}</span><span class="aoprog"><i style="width:${n ? at / n * 100 : 0}%"></i></span><small>${at}/${n} events</small></div>
     <div class="aobtns">${AO.playing ? `<button type="button" class="btn sm" data-aopause>${I('pause', 13)} Pause</button>` : `<button type="button" class="btn primary sm" data-aoplay>${I('play', 13)} ${AO.done ? 'Replay' : AO.started ? 'Resume' : 'Start listening'}</button>`}
       <div class="seg sm">${[1, 2, 4].map(x => `<button type="button" class="${AO.speed === x ? 'on' : ''}" data-aospeed="${x}">${x}×</button>`).join('')}</div>
@@ -4288,7 +4525,7 @@ function paintRadar() {
   const box = el('radar');
   if (!box._init) {
     box.innerHTML = `<div class="rh"><span>Advisor</span><span title="Weighted signals; each halves every 14 days. A decision is considered at 5.">Interest <small>threshold 5</small></span><span title="Sales Alpha: incremental sales from one in-person visit">Sales α/visit</span><span title="Digital Alpha: incremental sales from one digital engagement">Digital α</span><span>Last contact</span><span>State</span></div>` +
-      Object.keys(ADVISORS).map(a => `<div class="rrow" data-adv="${a}"><span class="rname">${avatar(ADVISORS[a].name, 'sales', 28)}<span class="rnt"><b>${h(advShort(a))}</b><small>${h(firmShort(ADVISORS[a].firm))} · ${h(TERRITORIES[ADVISORS[a].territory].name)}</small></span></span><span class="rint"><span class="ibar"><i class="fill"></i><i class="thr"></i></span><span class="rtps"></span></span><span class="rsa"></span><span class="rda"></span><span class="rlt"></span><span class="rsb"></span></div>`).join('');
+      Object.keys(ADVISORS).map(a => `<div class="rrow" data-adv="${a}" title="Open ${h(advShort(a))}’s full picture"><span class="rname">${avatar(ADVISORS[a].name, 'sales', 28)}<span class="rnt"><b>${h(advShort(a))}</b><small>${h(firmShort(ADVISORS[a].firm))} · ${h(TERRITORIES[ADVISORS[a].territory].name)}</small></span></span><span class="rint"><span class="ibar"><i class="fill"></i><i class="thr"></i></span><span class="rtps"></span></span><span class="rsa"></span><span class="rda"></span><span class="rlt"></span><span class="rsb"></span></div>`).join('');
     box._init = 1;
     /* a finished highlight must not replay when the board is shown again */
     box.addEventListener('animationend', e => e.target.classList.remove('ping'));
@@ -4367,7 +4604,12 @@ setInterval(() => { if (boardShown() && AO.started) paintRadar(); }, 400);
 /* ---- controls ---- */
 document.addEventListener('click', e => {
   const q = s => e.target.closest(s); let x;
-  if ((x = q('[data-mode]'))) { if (AO.active && x.dataset.mode === 'ask') { toast('A work order is running; switch when it finishes.'); return; } ST.mode = x.dataset.mode; if (ST.mode === 'always') AO.viewing = null; else { pause(); if (!AO.active) { UI.run = null; ST.msgs = []; } } paintAll(); return; }
+  if ((x = q('[data-mode]'))) { if (AO.active && x.dataset.mode !== ST.mode) { toast('A work order is running; switch when it finishes.'); return; } ST.mode = x.dataset.mode; AO.viewing = null; if (ST.mode !== 'always') pause(); if (ST.mode === 'ask' && !AO.active) { UI.run = null; ST.msgs = []; } paintAll(); return; }
+  if ((x = q('.rrow[data-adv]'))) { pause(); ST.mode = 'advisors'; AX.sel = x.dataset.adv; AX.filter = null; paintAll(); return; }
+  if ((x = q('[data-axsel]'))) { AX.sel = x.dataset.axsel; AX.filter = null; paintAll(); return; }
+  if ((x = q('[data-axch]'))) { AX.filter = AX.filter === x.dataset.axch ? null : x.dataset.axch; paintAll(); return; }
+  if ((x = q('[data-axrun]'))) { const a = axActions(AX.sel).find(y => y.id === x.dataset.axrun); if (a) runAction(a); return; }
+  if ((x = q('[data-axres]'))) { const a = axActions(AX.sel).find(y => y.id === x.dataset.axres); if (a && a.run && !AO.active) { UI.run = a.run; ST.view = 'results'; AO.viewing = a; ST.msgs = []; ST.approved = new Set(a.run.tasks.map(t => t.id)); paintAll(); } return; }
   if (q('[data-aoplay]')) { play(); return; }
   if (q('[data-aopause]')) { pause(); return; }
   if (q('[data-aoreset]')) { resetAO(); return; }
@@ -4380,6 +4622,87 @@ document.addEventListener('click', e => {
   if ((x = q('[data-aoview]'))) { const w = SGS.wos.find(y => y.id === x.dataset.aoview); if (w && w.run && !AO.active) { UI.run = w.run; ST.view = 'results'; AO.viewing = w; ST.msgs = []; ST.approved = new Set(w.run.tasks.map(t => t.id)); paintAll(); } return; }
   if ((x = q('[data-aowo]'))) { const w = SGS.wos.find(y => y.id === x.dataset.aowo); if (w && !AO.wait && !AO.count && (!AO.cur || AO.phase >= 5)) { AO.cur = w; AO.phase = 5; paintAll(); } return; }
 });
+
+/* ---------- Advisors: pick one, see every event, the takeaway, and what we are doing ---------- */
+const AX = { sel: QS.get('adv') || 'ADV-104', filter: null, X: null, acts: {}, ter: null };
+/* a separate engine run to today, so this view never consumes the live stream */
+function AOX() { if (!AX.X) { AX.X = makeSignals(); AX.X.runToToday(); } return AX.X; }
+function axActions(sel) {
+  if (sel === 'territory') { AX.ter = AX.ter || AOX().territory(); return AX.ter.actions; }
+  return (AX.acts[sel] = AX.acts[sel] || AOX().actionsFor(sel));
+}
+const CH = SIG_CHANNELS.map(([k, label, icon]) => ({ k, label, icon }));
+const CH_COL = { digital: '#9333ea', email: '#0284c7', social: '#0a66c2', content: '#e0482f', people: '#2563eb', service: '#ea580c', tx: '#059669', practice: '#b45309' };
+const ACT_COL = { visit: '#2f5bea', call: '#7c3aed', campaign: '#d97706', journey: '#0d9488', service: '#ea580c', hold: '#94a3b8', explain: '#059669', platform: '#0891b2', flows: '#16a34a', changed: '#64748b', social: '#0a66c2', trends: '#b45309' };
+function paintAdvisors() {
+  const box = el('advx'), X = AOX(), sel = AX.sel;
+  if (!box._init) { box.innerHTML = `<section class="sgcol axlist" id="axl"></section><section class="axmain"><div class="axhead" id="axh"></div><div class="axch" id="axc"></div><section class="sgcol axtl" id="axt"></section></section><section class="axside" id="axs"></section>`; box._init = 1; }
+  const all = X.S.events.filter(e => e.adv), evs = sel === 'territory' ? all : all.filter(e => e.adv === sel);
+  /* list */
+  setHTML(el('axl'), `<div class="sgh">${I('users', 14)}<b>Advisors</b><small>pick one</small></div><div class="axll">` + ['territory'].concat(Object.keys(ADVISORS)).map(a => {
+    if (a === 'territory') { const n = axActions('territory').length; return `<button type="button" class="axi ter${sel === a ? ' on' : ''}" data-axsel="territory"><span class="axt">${I('globe', 16)}</span><span class="axn"><b>Southern California</b><small>Territory overview · ${all.length} events</small></span><span class="axa">${n}</span></button>`; }
+    const T = X.takeaway(a), acts = axActions(a), m = acts[0];
+    return `<button type="button" class="axi${sel === a ? ' on' : ''}" data-axsel="${a}">${avatar(ADVISORS[a].name, 'sales', 30)}<span class="axn"><b>${h(advShort(a))}</b><small>${h(T.style)} · ${h(T.momentum.toLowerCase())}</small></span>${m ? `<span class="axk" style="--c:${ACT_COL[m.action]}" title="${h(ACT[m.action][1])}">${I(ACT[m.action][0], 13)}</span>` : ''}${acts.length > 1 ? `<span class="axa">${acts.length}</span>` : ''}</button>`;
+  }).join('') + `</div>`);
+  /* header */
+  if (sel === 'territory') {
+    const c = X.S.cap['EMP-PRIYA'];
+    setHTML(el('axh'), `<div class="axid"><span class="axt big">${I('globe', 22)}</span><div><small>Territory</small><h2>Southern California</h2><p>Los Angeles, Orange County and San Diego · ${Object.keys(ADVISORS).length} advisors · Priya Shah (external) and Sam Lee (internal)</p></div></div>
+      <div class="axk2"><div><b>${all.length}</b><small>events since Jul 1</small></div><div><b>${X.S.wos.filter(w => w.action !== 'hold').length}</b><small>decisions</small></div><div><b>${c.slots - c.booked}/${c.slots}</b><small>visit slots open</small></div><div><b>+${Math.round((SERVICE_INSIGHTS.fees.contacts_this_quarter / SERVICE_INSIGHTS.fees.contacts_last_quarter - 1) * 100)}%</b><small>fee questions</small></div></div>`);
+  } else {
+    const A = ADVISORS[sel], p = X.S.prof[sel], al = VISIT_ALPHA[sel], I0 = X.intentOf(p, X.S.now), cov = EMPLOYEES['EMP-PRIYA'].covers.includes(sel) ? 'Priya Shah and Sam Lee' : 'Sam Lee (internal only)';
+    setHTML(el('axh'), `<div class="axid">${avatar(A.name, 'sales', 46)}<div><small>${h(firmShort(A.firm))} · ${h(A.office)}</small><h2>${h(A.name)}</h2><p>${h(A.title)} · ${h(A.practice)}</p></div></div>
+      <div class="axk2"><div title="Incremental sales from one in-person visit"><b>${SIGNALS.fmtK(al.sales)}</b><small>Sales α / visit</small></div><div title="Incremental sales from one digital engagement"><b>${SIGNALS.fmtK(al.digital)}</b><small>Digital α</small></div><div><b>${I0.total.toFixed(1)}</b><small>interest now</small></div><div><b>${p.touch ? simDay(p.touch.t).replace(/^\w+, /, '') : '–'}</b><small>last contact${p.touch && p.touch.by ? ' · ' + h(first(EMPLOYEES[p.touch.by].name)) : ''}</small></div><div><b class="sm">${h(cov)}</b><small>coverage</small></div></div>`);
+  }
+  /* channels, with a weekly bar for each of the 13 weeks since Jul 1 */
+  const t0 = X.ts('Jul 1, 2026', '0:00'), wk = e => Math.min(12, Math.floor((e.t - t0) / (7 * X.DAY)));
+  setHTML(el('axc'), CH.map(c => { const xs = evs.filter(e => channelOf(e.type) === c.k), bars = Array(13).fill(0); xs.forEach(e => bars[wk(e)]++); const mx = Math.max(1, ...bars), last = xs[xs.length - 1];
+    return `<button type="button" class="chn${AX.filter === c.k ? ' on' : ''}${xs.length ? '' : ' none'}" data-axch="${c.k}" style="--c:${CH_COL[c.k]}"><span class="chh">${I(c.icon, 13)}<span>${h(c.label)}</span></span><b>${xs.length}</b><span class="spk">${bars.map(n => `<i style="height:${n ? 18 + n / mx * 82 : 6}%"${n ? '' : ' class="z"'}></i>`).join('')}</span><small>${last ? 'Last ' + h(SIGNALS.dstr(last.t)) : 'No activity'}</small></button>`; }).join(''));
+  /* timeline: what happened, and what it led to */
+  const res = new Map(); X.S.log.forEach(r => { if (r.e) res.set(r.e.id, r); });
+  const list = evs.filter(e => !AX.filter || channelOf(e.type) === AX.filter).slice().reverse();
+  let day = '';
+  setHTML(el('axt'), `<div class="sgh">${I('clock', 14)}<b>Activity</b><small>${list.length} event${list.length === 1 ? '' : 's'}${AX.filter ? ` · ${h(CH.find(c => c.k === AX.filter).label)} <button type="button" class="link" data-axch="${AX.filter}">clear</button>` : ' · newest first'}</small></div><div class="tll">${list.map(e => {
+    const T = SIG_TYPES[e.type], c = channelOf(e.type), r = res.get(e.id), d = simDay(e.t), head = d !== day ? `<div class="tld">${h(d)}</div>` : ''; day = d;
+    const led = r && r.wo ? `<span class="otag od">${I('arrow', 10)} ${h(r.wo.id)} · ${h(SIGNALS.actName(r.wo.action))}</span>` : r && r.outcome === 'covered' ? `<span class="otag oc">${h(r.note)}</span>` : '';
+    return `${head}<div class="tle"><time>${h(simTime(e.t))}</time><span class="evs sm" style="--c:${CH_COL[c] || '#64748b'}">${I((CH.find(x => x.k === c) || { icon: 'db' }).icon, 11)}</span><div><div class="evh">${sel === 'territory' ? `<b>${h(advShort(e.adv))}</b>` : ''}<span class="tlt">${h(T.label)}</span><span class="src">${h(e.src)}</span>${e.topic && !['general', 'access'].includes(e.topic) ? `<span class="tpc">${h(TOPIC_NAME[e.topic])}</span>` : ''}</div><p>${h(e.what)}</p>${led || T.strength === 'strong' ? `<small><span class="str ${T.strength}">${h(T.strength === 'info' ? 'context' : T.strength)}</span>${led}</small>` : ''}</div></div>`;
+  }).join('') || '<p class="muted sm">No events in this channel.</p>'}</div>`);
+  /* takeaway and actions */
+  const TK = sel === 'territory' ? (AX.ter = AX.ter || X.territory()) : X.takeaway(sel), acts = axActions(sel);
+  setHTML(el('axs'), `<section class="sgcol axtk"><div class="sgh">${I('sparkles', 14)}<b>Takeaway</b>${TK.style ? `<span class="tag rule">${h(TK.style)}</span><span class="tag ${TK.momentum === 'Rising' ? '' : 'rule'}">${h(TK.momentum)}</span>` : ''}</div><div class="tkb"><p class="tkh">${h(TK.headline)}</p>${TK.bullets.map(([k, v]) => `<div class="tkr"><span>${h(k)}</span><p>${h(v)}</p></div>`).join('')}</div></section>
+    <section class="sgcol axac"><div class="sgh">${I('target', 14)}<b>What we’re doing</b><small>${acts.length} action${acts.length === 1 ? '' : 's'}</small></div><div class="acl">${acts.map(a => actionCard(a)).join('') || '<p class="muted sm">Nothing to do yet: Intelligence keeps watching.</p>'}</div></section>`);
+}
+function actionCard(a) {
+  const [ic, nm] = ACT[a.action], E = a.owner && EMPLOYEES[a.owner], live = AI.mode === 'live';
+  const over = a.options ? a.options.filter(o => !o.chosen && o.value != null && o.action !== 'hold').map(o => `${o.label.replace('Personalized digital follow-up', 'Digital')} ${SIGNALS.fmtK(o.value)}`).join(' · ') : '';
+  const ev = (a.evidence || []).slice(0, 3);
+  let foot;
+  if (a.status === 'enrolled') foot = `<span class="fo ok">${I('check', 13)} Enrolled automatically: pre-approved journey, no agents needed</span>`;
+  else if (a.status === 'running') foot = `<span class="busy"><span class="spin"></span> Running in orchestration</span>`;
+  else if (a.status === 'done' || a.status === 'failed') foot = `<span class="fo ${a.status === 'done' ? 'ok' : 'warn'}">${I(a.status === 'done' ? 'check' : 'alert', 13)} ${h(a.outcome || 'Done')}</span>${a.run ? `<button type="button" class="btn sm" data-axres="${h(a.id)}">${I('doc', 12)} Results</button>` : ''}`;
+  else if (!live && !a.replay && a.needsWork) foot = `<span class="fo warn" title="Without an AI key, only actions with a saved AI run can play">${I('alert', 13)} Needs live AI to run</span>`;
+  else if (a.needsWork) foot = `<span class="acn">${E ? `${avatar(E.name, E.team, 20)} ${h(E.name)} · ${h(teamName(E.team))}${a.due && a.primary ? ' · by ' + h(SIGNALS.dstr(a.due)) : ''}` : ''}</span><button type="button" class="btn primary sm" data-axrun="${h(a.id)}">${I('play', 12)} Run in orchestration</button>`;
+  else foot = '';
+  return `<article class="acc${a.primary ? ' pri' : ''}" style="--c:${ACT_COL[a.action]}"><header><span class="aci">${I(ic, 15)}</span><div><small>${a.primary ? `Next best action · <code>${h(a.id)}</code>` : 'Also recommended'}${a.at && a.primary ? ' · ' + h(SIGNALS.dstr(a.at)) : ''}</small><b>${h(nm)}</b></div>${a.value ? `<span class="acv">${SIGNALS.fmtK(a.value)}</span>` : ''}</header>
+    <p>${h(a.primary ? primaryWhy(a) : a.why)}</p>${over ? `<p class="over">Chosen over ${h(over)}</p>` : ''}
+    ${ev.length ? `<div class="ace">${ev.map(e => `<span title="${h(e.what)}"><i style="background:${CH_COL[channelOf(e.type)] || '#64748b'}"></i>${h(SIGNALS.dstr(e.t))} · ${h(SIG_TYPES[e.type].label)}</span>`).join('')}</div>` : ''}
+    <footer>${foot}</footer></article>`;
+}
+/* a decision, said through what triggered it rather than the rule's name */
+function primaryWhy(a) {
+  const X = AOX(), e = a.trigger && X.S.events.find(x => x.id === a.trigger);
+  const lead = e ? `${SIG_TYPES[e.type].label} on ${SIGNALS.dstr(e.t)}: ${e.what.length > 110 ? e.what.slice(0, 108) + '…' : e.what}.` : a.followsUp ? `After ${a.followsUp} cleared the access problem.` : '';
+  return [lead, a.U && a.U.x > 1 ? a.U.why + '.' : '', a.why.replace(/^[^:]+: /, '').replace(/^./, c => c.toUpperCase()) + '.'].filter(Boolean).join(' ');
+}
+async function runAction(a) {
+  if (AO.active || busyPlanning() || anyRunning()) { toast('Something is already running.'); return; }
+  if (AI.mode !== 'live' && !a.replay) { toast('This one needs live AI: there is no saved AI run for it.'); return; }
+  a.explorer = true;
+  const r = await execWO(a, false);
+  a.run = r; a.status = r && r.status === 'done' ? 'done' : 'failed'; a.outcome = r ? outcomeOf(r) : 'Did not start';
+  AO.active = null; if (r) { AO.viewing = a; ST.view = r.status === 'done' ? 'results' : 'floor'; }
+  paintAll();
+}
 
 
 UI.requester = ME; paintAll();

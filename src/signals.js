@@ -13,6 +13,14 @@
 const SIG_TYPES = {
   'web.page': { label: 'Page visit', cat: 'Digital', sys: 'aem', w: 1, strength: 'weak' },
   'web.article': { label: 'Article read', cat: 'Digital', sys: 'aem', w: 2, strength: 'medium' },
+  'web.tool': { label: 'Tool used', cat: 'Digital', sys: 'aem', w: 2.5, strength: 'medium' },
+  'web.download': { label: 'Download', cat: 'Digital', sys: 'aem', w: 2, strength: 'medium' },
+  'web.search': { label: 'Site search', cat: 'Digital', sys: 'aem', w: 1, strength: 'weak' },
+  'web.login': { label: 'Portal login', cat: 'Digital', sys: 'aem', w: 0.5, strength: 'weak' },
+  'ce.course': { label: 'CE course completed', cat: 'Digital', sys: 'aem', w: 2, strength: 'medium' },
+  'social.engage': { label: 'LinkedIn engagement', cat: 'Social', sys: 'social', w: 1, strength: 'weak' },
+  'mc.register': { label: 'Webinar registration', cat: 'Marketing', sys: 'mcloud', w: 1, strength: 'weak' },
+  'mc.noshow': { label: 'Webinar no-show', cat: 'Marketing', sys: 'mcloud', w: 0.3, strength: 'weak' },
   'mc.open': { label: 'Email opened', cat: 'Marketing', sys: 'mcloud', w: 0.5, strength: 'weak' },
   'mc.click': { label: 'Email click', cat: 'Marketing', sys: 'mcloud', w: 1.5, strength: 'medium' },
   'mc.webinar': { label: 'Webinar attended', cat: 'Marketing', sys: 'mcloud', w: 2, strength: 'medium' },
@@ -56,8 +64,25 @@ const CAPACITY = {
   'EMP-SAM': { kind: 'call', perWeek: 60, booked: 41 }
 };
 const POLICY = { coolOffDays: 5, trigger: 5, halfLifeDays: 14, plannedDays: 21, visitShare: 0.8, callShare: 0.35, callConnect: 0.9, callMin: 15, digitalMin: 4, dedupeDays: 7 };
-/* activity the existing records do not hold: email engagement and the weekly model runs */
+/* activity the existing records do not hold: web analytics detail, email engagement, LinkedIn and the weekly model runs */
 const SIGNAL_EXTRAS = [
+  { adv: 'ADV-101', at: 'Jul 28, 2026 7:40', type: 'web.download', what: 'GFA quarterly attribution, Q2 (PDF)', src: 'Website analytics' },
+  { adv: 'ADV-101', at: 'Aug 27, 2026 7:55', type: 'web.tool', what: 'Fund comparison tool: GFA vs. VIGAX, 1-, 3- and 5-year returns', src: 'Website analytics' },
+  { adv: 'ADV-101', at: 'Sep 10, 2026 7:35', type: 'web.search', what: 'Searched “GFA vs index fund”', src: 'Website analytics' },
+  { adv: 'ADV-102', at: 'Aug 12, 2026 10:00', type: 'mc.register', what: 'Registered for “Fee transparency for plan committees”', src: 'Marketing Cloud' },
+  { adv: 'ADV-102', at: 'Aug 19, 2026 11:00', type: 'mc.noshow', what: 'Missed “Fee transparency for plan committees”; recording sent', src: 'Marketing Cloud' },
+  { adv: 'ADV-102', at: 'Aug 24, 2026 14:20', type: 'web.tool', what: 'Fee calculator: PLAN-102 lineup costs in dollars', src: 'Website analytics' },
+  { adv: 'ADV-102', at: 'Aug 31, 2026 9:30', type: 'web.download', what: 'Fund expense guide for plan committees (PDF)', src: 'Website analytics' },
+  { adv: 'ADV-103', at: 'Aug 5, 2026 12:00', type: 'mc.noshow', what: 'Registered for “Income in retirement” but did not attend', src: 'Marketing Cloud' },
+  { adv: 'ADV-103', at: 'Sep 5, 2026 8:10', type: 'web.login', what: 'Logged in to the advisor portal for the first time in four months', src: 'Website analytics' },
+  { adv: 'ADV-104', at: 'Sep 2, 2026 20:15', type: 'ce.course', what: 'Completed the CE course “Active ETFs in model portfolios” (1 credit)', src: 'Learning platform' },
+  { adv: 'ADV-104', at: 'Sep 11, 2026 21:05', type: 'web.tool', what: 'Portfolio analyzer: core-satellite blend with CGGR and CGDV', src: 'Website analytics' },
+  { adv: 'ADV-104', at: 'Sep 18, 2026 12:40', type: 'social.engage', what: 'Liked and shared the “Active ETFs in a core” LinkedIn post', src: 'LinkedIn' },
+  { adv: 'ADV-105', at: 'Sep 3, 2026 7:20', type: 'web.search', what: 'Searched “CGGR Wells Fargo platform”', src: 'Website analytics' },
+  { adv: 'ADV-105', at: 'Sep 24, 2026 8:05', type: 'web.download', what: 'CGGR fact sheet (PDF)', src: 'Website analytics' },
+  { adv: 'ADV-106', at: 'Sep 4, 2026 9:00', type: 'mc.register', what: 'Registered for “Retirement income in a higher-rate world”', src: 'Marketing Cloud' },
+  { adv: 'ADV-106', at: 'Sep 20, 2026 19:30', type: 'web.download', what: 'Retirement income playbook (PDF)', src: 'Website analytics' },
+  { adv: 'ADV-107', at: 'Sep 26, 2026 21:10', type: 'web.search', what: 'Searched “SIMPLE IRA vs 401(k) for small businesses”', src: 'Website analytics' },
   { adv: null, at: 'Sep 14, 2026 6:00', type: 'model.refresh', what: 'Sales Alpha and Digital Alpha scored for 7 advisors in Southern California', src: 'Weekly model run' },
   { adv: 'ADV-103', at: 'Sep 15, 2026 9:12', type: 'mc.open', what: 'Opened “Retirement income insights, September”', src: 'Marketing Cloud' },
   { adv: 'ADV-103', at: 'Sep 22, 2026 9:05', type: 'mc.open', what: 'Opened “Dividend payers for retirees”', src: 'Marketing Cloud' },
@@ -75,11 +100,30 @@ const SIGNAL_REPLAYS = {
   'ADV-104|campaign': { requester: 'EMP-MARCUS', text: 'Create an ETF email campaign for Sofia' },
   'ADV-106|visit': { requester: 'EMP-PRIYA', text: 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month' },
   'ADV-101|service': { requester: 'EMP-KIM', text: 'Alex says the link in Priya’s email won’t open' },
-  'ADV-101|call': { requester: 'EMP-SAM', text: 'Prep me for my call with Alex tomorrow' }
+  'ADV-101|call': { requester: 'EMP-SAM', text: 'Prep me for my call with Alex tomorrow' },
+  'ADV-101|explain': { requester: 'EMP-DANA', text: 'Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.' },
+  'ADV-105|platform': { requester: 'EMP-PRIYA', text: 'Which CG ETFs are available at Wells Fargo for Daniel?' },
+  'ADV-105|flows': { requester: 'EMP-PRIYA', text: 'Why are Daniel’s overall sales down when his ETF sales are up?' },
+  'ADV-106|changed': { requester: 'EMP-PRIYA', text: 'What has changed since my last meeting with Rachel?' },
+  'territory|social': { requester: 'EMP-MARCUS', text: 'Write a LinkedIn post on fee transparency for advisors' },
+  'territory|trends': { requester: 'EMP-PRIYA', text: 'Identify the growing trends in LA territory' }
 };
-const SIG_START = 'Sep 14, 2026', SIG_HISTORY = 'Sep 1, 2026';
+/* where an event comes from, as a business user groups engagement */
+const SIG_CHANNELS = [
+  ['digital', 'Digital', 'eye', t => /^(web|ce)\./.test(t)],
+  ['email', 'Email', 'mail', t => /^mc\./.test(t)],
+  ['social', 'Social', 'globe', t => /^social\./.test(t)],
+  ['content', 'Content', 'doc', t => /^ls\./.test(t)],
+  ['people', 'Calls', 'users', t => /^crm\.(call|email)$/.test(t)],
+  ['service', 'Service', 'bell', t => /^svc\./.test(t)],
+  ['tx', 'Flows', 'chart', t => /^tx\./.test(t)],
+  ['practice', 'Practice', 'globe', t => /^(crm\.(practice|deadline|coverage)|dealer|news)/.test(t)]
+];
+const channelOf = type => (SIG_CHANNELS.find(c => c[3](type)) || ['other'])[0];
+const SIG_START = 'Sep 14, 2026', SIG_HISTORY = 'Jul 1, 2026';
 
-const SIGNALS = (() => {
+/* one engine instance per use: the live stream, and a separate one the advisor view runs to today */
+function makeSignals() {
   const DAY = 864e5, MON = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
   /* "Sep 24, 2026" plus a clock time, as a local timestamp */
   const ts = (d, hm = '9:00') => { const m = String(d).match(/([A-Z][a-z]{2})\w* (\d{1,2}),? (\d{4})/); if (!m) return NaN; const [hh, mm] = hm.split(':').map(Number); return new Date(+m[3], MON[m[1]], +m[2], hh, mm).getTime(); };
@@ -261,6 +305,125 @@ const SIGNALS = (() => {
     if (wo.action === 'service') { p.friction = 0; const next = decide(wo.adv, now, null, { cleared: true }); next.followsUp = wo.id; next.why = 'Friction cleared; ' + next.why.charAt(0).toLowerCase() + next.why.slice(1); book(next); S.wos.push(next); return next; }
     return null;
   }
-  const actName = a => ({ visit: 'In-person visit', call: 'Internal call', campaign: 'Personalized digital follow-up', journey: 'Digital journey', service: 'Fix first', hold: 'Hold' }[a] || a);
-  return { S, reset, step, after, release, decide, intentOf, urgency, actName, fmtK, ts, dstr, DAY };
-})();
+  const ACT_NAMES = { visit: 'In-person visit', call: 'Internal call', campaign: 'Personalized digital follow-up', journey: 'Digital journey', service: 'Fix first', hold: 'Hold',
+    explain: 'Product explanation', platform: 'Platform availability check', flows: 'Flow diagnosis', changed: 'What changed since we last met', social: 'Social post', trends: 'Territory trends' };
+  const actName = a => ACT_NAMES[a] || a;
+
+  /* ---- the advisor view: everything up to today, a takeaway, and the actions ---- */
+  function runToToday() {
+    reset(); let r;
+    while ((r = step())) { if (r.wo && r.wo.action === 'service') after(r.wo, r.e.t + 20 * 60000); if (r.wo && r.wo.action === 'journey') r.wo.status = 'enrolled'; }
+    return S;
+  }
+  const short = adv => ADVISORS[adv].short;
+  const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+  const clip = (x, n = 70) => x.length > n ? x.slice(0, n - 1).replace(/[\s,;:]+\S*$/, '') + '…' : x;
+  function engagement(ev) {
+    const c = t => ev.filter(e => e.type === t).length, web = ev.filter(e => /^(web|ce)\./.test(e.type));
+    const parts = [['web.tool', 'tool'], ['web.download', 'download'], ['web.search', 'search'], ['web.article', 'article'], ['web.page', 'page visit'], ['ce.course', 'CE course'], ['web.login', 'portal login']].map(([t, w]) => c(t) ? plural(c(t), w) : '').filter(Boolean);
+    const opens = c('mc.open'), clicks = c('mc.click'), webinars = c('mc.webinar'), noshow = c('mc.noshow'), social = c('social.engage'), seen = c('ls.open');
+    const calls = ev.filter(e => e.type === 'crm.call'), mails = ev.filter(e => e.type === 'crm.email'), people = [...new Set(calls.concat(mails).map(e => e.by && EMPLOYEES[e.by] ? EMPLOYEES[e.by].name.split(' ')[0] : null).filter(Boolean))];
+    const digital = web.length + clicks + webinars + social + seen, human = calls.length + mails.length + ev.filter(e => /^svc\./.test(e.type)).length;
+    const style = digital >= 6 && digital >= human * 2 ? 'Digital-first' : human > digital ? 'Relationship-led' : digital + human <= 3 ? 'Quiet' : 'Balanced';
+    const bits = [];
+    if (web.length) bits.push(`${plural(web.length, 'web action')} on their own (${parts.join(', ')})`);
+    if (opens || clicks || webinars || noshow) bits.push(`email: ${opens} opened, ${clicks} clicked${webinars ? `, ${plural(webinars, 'webinar')} attended` : ''}${noshow ? `, ${noshow} no-show` : ''}`);
+    if (social) bits.push(`${plural(social, 'LinkedIn engagement')}`);
+    if (seen) bits.push(`opened shared content ${plural(seen, 'time')}`);
+    if (calls.length || mails.length) bits.push(`${plural(calls.length, 'call')} and ${plural(mails.length, 'email')} with ${people.join(' and ') || 'the team'}`);
+    return { style, text: bits.join('; ') || 'Little recorded activity', digital, human, opens, clicks };
+  }
+  function momentum(ev, now) {
+    const w = (a, b) => ev.filter(e => e.t > now - a * DAY && e.t <= now - b * DAY).reduce((m, e) => m + SIG_TYPES[e.type].w, 0);
+    const recent = w(14, 0), before = w(28, 14);
+    const dir = recent > before * 1.5 + 1 ? 'Rising' : before > recent * 1.5 + 1 ? 'Cooling' : 'Steady';
+    return { dir, text: `${dir}: interest weight ${recent.toFixed(1)} in the last two weeks, ${before.toFixed(1)} the two weeks before` };
+  }
+  function takeaway(adv) {
+    const A = ADVISORS[adv], p = S.prof[adv], now = S.now, ev = S.events.filter(e => e.adv === adv);
+    const I = intentOf(p, now), tops = I.topics.filter(x => !['access', 'general'].includes(x.k) && x.v >= 0.5).slice(0, 2);
+    const E = engagement(ev), M = momentum(ev, now);
+    const wos = S.wos.filter(w => w.adv === adv), acts = wos.filter(w => w.action !== 'hold'), main = acts[0] || wos[0] || null;
+    const topicEv = tops.length ? p.hits.filter(h => h.topic === tops[0].k).sort((a, b) => b.w - a.w || b.t - a.t).slice(0, 3).map(h => clip(h.ev.what, 60)) : [];
+    const tx = ev.filter(e => /^tx\./.test(e.type)), buy = tx.filter(e => e.type === 'tx.buy').reduce((m, e) => m + e.usd, 0), sell = tx.filter(e => e.type === 'tx.sell').reduce((m, e) => m + e.usd, 0);
+    const opps = OPPORTUNITIES.filter(o => o.adv === adv && !/lost/i.test(o.stage));
+    const watch = [];
+    if (p.frictionEv.length) watch.push(`${plural(p.frictionEv.length, 'access failure')} (${[...new Set(p.frictionEv.map(e => e.ref).filter(Boolean))].join(', ')})`);
+    if (FIRMS[A.firm].policy) watch.push(FIRMS[A.firm].policy.replace(/ \(.*\)$/, ''));
+    if (p.coverage) watch.push(`Coverage moves to ${EMPLOYEES[p.coverage.to].name} on ${dstr(p.coverage.at)}`);
+    if (p.touch && (now - p.touch.t) / DAY < POLICY.coolOffDays) { const d = Math.floor((now - p.touch.t) / DAY); watch.push(`Contacted ${d < 1 ? 'today' : d === 1 ? 'yesterday' : d + ' days ago'}: avoid piling on`); }
+    const held = wos.filter(w => w.action === 'hold'); held.forEach(w => watch.push(`Held on ${dstr(w.at)}: ${w.why.replace(/^Cool-off: /, 'cool-off, ')}`));
+    const coming = [];
+    if (p.deadline && p.deadline.t > now) coming.push(`${p.deadline.label}: ${dstr(p.deadline.t)}`);
+    COMMITMENTS.filter(c => c.adv === adv && c.status === 'Open').forEach(c => coming.push(`${c.id}: ${c.title} (${c.owner}, ${c.due})`));
+    const topicTxt = tops.length ? tops.map(x => x.name.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())).join(' and ') : 'nothing in particular';
+    const H = {
+      service: () => `${short(adv)} is engaged, but ${FIRMS[A.firm].name} is blocking what we send. Fix that first; the selling conversation comes after.`,
+      visit: () => `${short(adv)} is actively looking at ${topicTxt}${main.U && main.U.x > 1 ? ` (${main.U.why.replace(/^[A-Z]/, c => c.toLowerCase())})` : ''}. An in-person visit is the highest-value next step, worth about ${fmtK(main.value)} in incremental sales.`,
+      campaign: () => `${short(adv)} researches ${topicTxt} online, mostly on their own. A human follow-up is already planned, so the next step is a personal digital follow-up.`,
+      journey: () => `${short(adv)} opens our emails but doesn’t act on them (${E.opens} opens, ${E.clicks} clicks). Keep it light: a pre-approved digital journey, no agents needed.`,
+      call: () => `${short(adv)}’s business is moving (${clip(main.evidence[0] ? main.evidence[0].what : 'new signals', 80)}). ${EMPLOYEES[main.owner].name} should call.`,
+      hold: () => `Nothing worth acting on yet. ${short(adv)}’s profile is updated with every event and Intelligence keeps watching.`
+    };
+    return {
+      headline: main ? H[main.action]() : `Quiet: ${short(adv)} has little recent activity. Intelligence keeps watching.`,
+      style: E.style, momentum: M.dir, interest: I.total,
+      bullets: [
+        ['Interest', tops.length ? `${tops.map(x => `${x.name} (${x.v.toFixed(1)})`).join(', ')}: ${topicEv.join('; ')}` : 'No clear topic in the last 90 days'],
+        ['How they engage', `${E.style}. ${E.text.replace(/^./, c => c.toUpperCase())}`],
+        ['Momentum', M.text],
+        ['Business with us', [buy || sell ? `$${buy.toFixed(1)}M bought${sell ? `, $${sell.toFixed(1)}M redeemed` : ''} since Jul 1 (${[...new Set(tx.map(e => e.what.match(/of (\w+)/)[1]))].join(', ')})` : 'No transactions since Jul 1', opps.length ? opps.map(o => `${o.id} ${o.name} (${o.stage})`).join('; ') : ''].filter(Boolean).join('. ')],
+        ['Watch-outs', watch.join('. ') || 'None'],
+        ['Coming up', coming.join('. ') || 'Nothing scheduled']
+      ]
+    };
+  }
+  /* the next best action(s) from the decisions, plus what else the pattern of events calls for */
+  function actionsFor(adv) {
+    const A = ADVISORS[adv], ev = S.events.filter(e => e.adv === adv), now = S.now, firm = FIRMS[A.firm].name, out = [];
+    S.wos.filter(w => w.adv === adv && w.action !== 'hold').forEach(w => { w.primary = true; out.push(w); });
+    const sup = (action, owner, evs, why, text) => out.push({ id: `REC-${adv.slice(-3)}-${action.toUpperCase().slice(0, 4)}`, adv, action, owner, evidence: evs, why, text, value: null, replay: SIGNAL_REPLAYS[`${adv}|${action}`] || null, needsWork: true, status: 'decided', at: now, supporting: true });
+    const cmp = ev.filter(e => /^(web|ce)\./.test(e.type) && /\bvs\.?\s|attribution|comparison/i.test(e.what));
+    if (cmp.length >= 2) { const f = (cmp.map(e => e.what.match(/\b(GFA|AMBAL|BFA|CGGR|CGDV)\b/)).find(Boolean) || ['the fund'])[0];
+      sup('explain', 'EMP-DANA', cmp.slice().reverse().slice(0, 3), `${short(adv)} keeps comparing ${f} with an index online (${plural(cmp.length, 'time')}). Product writes the explanation once, for every advisor asking.`,
+        `Why has ${f} trailed its index? I need an explanation advisors like ${A.name} can use. What they looked at: ${cmp.map(e => `${dstr(e.t)}: ${e.what}`).join('; ')}.`); }
+    const plat = ev.filter(e => e.type === 'dealer.platform' && now - e.t <= 45 * DAY);
+    if (plat.length) sup('platform', 'EMP-PRIYA', plat.concat(ev.filter(e => /^web\./.test(e.type) && /platform|cggr/i.test(e.what)).slice(-2).reverse()), `${plat[0].what}, and ${short(adv)} has been looking it up. Confirm exactly what is available at ${firm} before anyone pitches it.`,
+      `Which CG ETFs are available at ${firm} for ${A.name}? ${plat[0].what} (${dstr(plat[0].t)}).`);
+    const sells = ev.filter(e => e.type === 'tx.sell' && e.usd >= 4), buys = ev.filter(e => e.type === 'tx.buy' && /CGGR|CGDV|CGCP/.test(e.what));
+    const shift = sells.find(x => buys.some(b => Math.abs(b.t - x.t) <= 30 * DAY));
+    if (shift) { const bs = buys.filter(b => Math.abs(b.t - shift.t) <= 30 * DAY);
+      sup('flows', 'EMP-PRIYA', [shift].concat(bs), `${shift.what} next to ${bs.map(b => b.what.replace(/^Purchase of /, '')).join(', ')} in ETFs: a vehicle shift, not a lost relationship. Explain it before the next meeting.`,
+        `Why are ${A.short}’s overall sales down when ETF sales are up? ${[shift].concat(bs).map(e => `${dstr(e.t)}: ${e.what}`).join('; ')}.`); }
+    const lastCall = ev.filter(e => e.type === 'crm.call').slice(-1)[0], ch = ev.filter(e => e.type === 'crm.practice' && lastCall && e.t > lastCall.t);
+    if (ch.length) sup('changed', 'EMP-PRIYA', ch, `${ch[0].what}, after the last call on ${dstr(lastCall.t)}. Catch up on everything that changed before the visit.`, `What has changed since my last meeting with ${A.short}?`);
+    return out;
+  }
+  function territory() {
+    const advs = Object.keys(ADVISORS), now = S.now, all = S.events.filter(e => e.adv);
+    const topic = {}; advs.forEach(a => intentOf(S.prof[a], now).topics.forEach(x => { if (['access', 'general'].includes(x.k)) return; (topic[x.k] = topic[x.k] || { name: x.name, v: 0, who: [] }); topic[x.k].v += x.v; if (x.v >= 1) topic[x.k].who.push(short(a)); }));
+    const tops = Object.values(topic).sort((a, b) => b.v - a.v).slice(0, 3);
+    const feeEv = all.filter(e => e.topic === 'fees'), F0 = SERVICE_INSIGHTS.fees, post = ENGAGEMENT.fees[1];
+    const la = all.filter(e => TERRITORIES.LA.advisors.includes(e.adv)), laTop = {}; la.forEach(e => { if (SIG_TYPES[e.type].w && !['access', 'general'].includes(e.topic)) laTop[e.topic] = (laTop[e.topic] || 0) + 1; });
+    const laList = Object.entries(laTop).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k, n]) => `${TOPIC_NAME[k]} (${n})`);
+    const byAct = {}; S.wos.forEach(w => { byAct[w.action] = (byAct[w.action] || 0) + 1; });
+    const c = S.cap['EMP-PRIYA'];
+    const actions = [
+      { id: 'REC-TER-SOCI', adv: null, action: 'social', owner: 'EMP-MARCUS', evidence: feeEv.slice().reverse().slice(0, 3), why: `Fee questions to service rose from ${F0.contacts_last_quarter} to ${F0.contacts_this_quarter} this quarter, and advisors are reading fee content. ${post.takeaway}`, text: 'Write a LinkedIn post on fee transparency for advisors: show what a fee costs in dollars, not just percent.', value: null, replay: SIGNAL_REPLAYS['territory|social'], needsWork: true, status: 'decided', at: now, supporting: true },
+      { id: 'REC-TER-TRND', adv: null, action: 'trends', owner: 'EMP-PRIYA', evidence: la.filter(e => SIG_TYPES[e.type].w).slice(-3).reverse(), why: `LA activity clusters on ${laList.join(', ')}. Confirm the trend from recorded conversations before planning the territory.`, text: 'Identify the growing trends in LA territory', value: null, replay: SIGNAL_REPLAYS['territory|trends'], needsWork: true, status: 'decided', at: now, supporting: true }
+    ];
+    return {
+      headline: `Across Southern California, ${tops.map(t => t.name.replace(/^[A-Z](?=[a-z])/, x => x.toLowerCase())).join(', ').replace(/, ([^,]*)$/, ' and $1')} lead what advisors are researching, and fee questions to service are up ${Math.round((F0.contacts_this_quarter / F0.contacts_last_quarter - 1) * 100)}% this quarter.`,
+      bullets: [
+        ['Researching', tops.map(t => `${t.name} (${t.v.toFixed(1)}): ${t.who.join(', ') || 'light'}`).join('; ')],
+        ['Fees', `${plural(feeEv.length, 'fee-related event')} from ${[...new Set(feeEv.map(e => short(e.adv)))].join(', ')}. Service: ${F0.contacts_last_quarter} → ${F0.contacts_this_quarter} fee contacts. ${F0.takeaway}`],
+        ['Los Angeles', `${plural(la.length, 'event')} from ${TERRITORIES.LA.advisors.map(short).join(', ')}; most active topics ${laList.join(', ')}`],
+        ['Decisions so far', Object.entries(byAct).map(([k, n]) => `${actName(k)} ${n}`).join(' · ')],
+        ['Capacity', `Priya: ${c.slots - c.booked} of ${c.slots} visit slots open (${c.window}); cut-off ${fmtK(c.bookedLow[0] ? c.bookedLow[0].value : 0)}. Sam: ${S.cap['EMP-SAM'].perWeek - S.cap['EMP-SAM'].booked} call slots this week`]
+      ],
+      actions
+    };
+  }
+  return { S, reset, step, after, release, decide, intentOf, urgency, actName, fmtK, ts, dstr, DAY, runToToday, takeaway, actionsFor, territory, engagement, momentum };
+}
+const SIGNALS = makeSignals();

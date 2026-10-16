@@ -6,17 +6,19 @@
    guardrails). A decision that needs work becomes a work order, and in the demo
    it runs on its own, visibly, through the same orchestration canvas. */
 const AO = { playing: false, speed: 1, auto: true, feed: [], cur: null, phase: 0, active: null, peek: false, done: false, count: 0, wait: null, started: false, base: SLEEP_SCALE, flash: {} };
-ST.mode = QS.get('mode') === 'ask' ? 'ask' : 'always';
+ST.mode = ['ask', 'advisors'].includes(QS.get('mode')) ? QS.get('mode') : 'always';
+const inAO = () => ST.mode === 'always' || ST.mode === 'advisors';
 const SGS = SIGNALS.S;
 SIGNALS.reset();
-const ACT = { visit: ['users', 'In-person visit'], call: ['msg', 'Internal call'], campaign: ['mail', 'Digital follow-up'], journey: ['send', 'Digital journey'], service: ['tool', 'Fix first'], hold: ['pause', 'Hold'] };
+const ACT = { visit: ['users', 'In-person visit'], call: ['msg', 'Internal call'], campaign: ['mail', 'Digital follow-up'], journey: ['send', 'Digital journey'], service: ['tool', 'Fix first'], hold: ['pause', 'Hold'],
+  explain: ['doc', 'Product explanation'], platform: ['layers', 'Platform availability check'], flows: ['chart', 'Flow diagnosis'], changed: ['clock', 'What changed since we last met'], social: ['globe', 'Social post'], trends: ['pulse', 'Territory trends'] };
 const WO_ST = { decided: ['ready', 'Decided'], waiting: ['review', 'Waiting for owner'], running: ['running', 'Running'], done: ['approved', 'Done'], held: ['blocked', 'Held'], enrolled: ['approved', 'Enrolled'], 'needs-ai': ['signoff', 'Needs live AI'], dismissed: ['blocked', 'Dismissed'], failed: ['failed', 'Failed'] };
 const SIG_ICON = { aem: 'eye', mcloud: 'mail', seismic: 'doc', sf: 'users', gen: 'bell', fund: 'chart', news: 'globe' };
 const advShort = a => a ? ADVISORS[a].name.replace(/,.*$/, '') : 'All advisors';
 const simDay = t => new Date(t).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 const simTime = t => new Date(t).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace('AM', 'a.m.').replace('PM', 'p.m.');
 const pace = ms => new Promise(r => setTimeout(r, ms / AO.speed * (AO.base < 1 ? 0.15 : 1)));
-const boardShown = () => ST.mode === 'always' && (!AO.active || AO.peek) && !AO.viewing;
+const boardShown = () => inAO() && (!AO.active || AO.peek) && !AO.viewing;
 const firmShort = f => FIRMS[f].name.replace(/ Wealth Management| Advisors| \(RIA\)/, '');
 const ownerName = wo => wo.owner ? EMPLOYEES[wo.owner].name : 'Intelligence';
 
@@ -66,6 +68,17 @@ const until = async (f, ms = 180000) => { const t0 = Date.now(); while (!f()) { 
 async function runWO(wo) {
   const live = AI.mode === 'live', rp = live ? null : wo.replay;
   if (!live && !rp) { wo.status = 'needs-ai'; wo.outcome = 'Work order ready. Running it needs live AI: there is no saved AI run for this one.'; paintAll(); await pace(3200); SIGNALS.after(wo, SGS.now); return; }
+  const r = await execWO(wo, true);
+  wo.run = r; wo.status = r && r.status === 'done' ? 'done' : 'failed';
+  wo.outcome = r ? outcomeOf(r) : 'Did not start';
+  if (r && r.status === 'done') { ST.view = 'results'; ST.open = null; paintAll(); await pace(5200); }
+  ST.view = 'floor'; AO.active = null; paintAll();
+  const next = SIGNALS.after(wo, SGS.now + 20 * 60000);
+  if (next) { AO.feed.unshift({ e: null, outcome: 'decision', wo: next, note: `Looked again after ${wo.id}` }); paintAll(); await handle(next); }
+}
+/* hand a work order to Intelligence: plan it, run every ticket, wait for the result */
+async function execWO(wo, autoSign) {
+  const live = AI.mode === 'live', rp = live ? null : wo.replay;
   wo.status = 'running'; AO.active = wo; AO.peek = false; AO.viewing = null;
   ME = rp ? rp.requester : wo.owner;
   ask(rp ? rp.text : wo.text, null, wo);
@@ -75,15 +88,10 @@ async function runWO(wo) {
   if (r && r.status === 'planned') {
     await sleep(1800);
     await runAll();
-    r.tasks.forEach(t => outputsOf(t).filter(o => o.status === 'Waiting for approval').forEach(o => signOff(o, `${EMPLOYEES[ME].name}, auto-approved under the demo policy`)));
+    if (autoSign) r.tasks.forEach(t => outputsOf(t).filter(o => o.status === 'Waiting for approval').forEach(o => signOff(o, `${EMPLOYEES[ME].name}, auto-approved under the demo policy`)));
     await until(() => r.status === 'done' || r.status === 'failed', 30000);
   }
-  wo.run = r; wo.status = r && r.status === 'done' ? 'done' : 'failed';
-  wo.outcome = r ? outcomeOf(r) : 'Did not start';
-  if (r && r.status === 'done') { ST.view = 'results'; ST.open = null; paintAll(); await pace(5200); }
-  ST.view = 'floor'; AO.active = null; paintAll();
-  const next = SIGNALS.after(wo, SGS.now + 20 * 60000);
-  if (next) { AO.feed.unshift({ e: null, outcome: 'decision', wo: next, note: `Looked again after ${wo.id}` }); paintAll(); await handle(next); }
+  return r;
 }
 function outcomeOf(r) {
   const acts = r.tasks.flatMap(t => (t.calls || []).filter(c => c.rw === 'write' && !c.error).map(c => actionTile(c, t))).filter(Boolean);
@@ -94,26 +102,28 @@ function outcomeOf(r) {
 
 /* ---- painting ---- */
 function paintAO() {
-  document.body.classList.toggle('aon', ST.mode === 'always');
+  document.body.classList.toggle('aon', inAO());
   document.body.classList.toggle('aoboard', boardShown());
-  el('composer').hidden = ST.mode === 'always';
-  setHTML(el('modes'), `<button type="button" class="${ST.mode === 'always' ? 'on' : ''}" data-mode="always">${I('pulse', 14)} Always-on</button><button type="button" class="${ST.mode === 'ask' ? 'on' : ''}" data-mode="ask">${I('send', 14)} Ask</button>`);
-  el('newChat').hidden = ST.mode === 'always';
+  el('composer').hidden = inAO();
+  setHTML(el('modes'), [['always', 'pulse', 'Live signals'], ['advisors', 'users', 'Advisors'], ['ask', 'send', 'Ask']].map(([m, ic, l]) => `<button type="button" class="${ST.mode === m ? 'on' : ''}" data-mode="${m}">${I(ic, 14)} ${l}</button>`).join(''));
+  el('newChat').hidden = inAO();
   paintCtl();
-  const sig = el('sig'); sig.hidden = !boardShown(); el('orch').hidden = boardShown(); el('floor').hidden = boardShown();
-  if (!boardShown()) return false;
+  const show = boardShown();
+  el('sig').hidden = !(show && ST.mode === 'always'); el('advx').hidden = !(show && ST.mode === 'advisors'); el('orch').hidden = show; el('floor').hidden = show;
+  if (!show) return false;
   el('bench').hidden = true;
-  paintBoard();
+  if (ST.mode === 'always') paintBoard(); else paintAdvisors();
   return true;
 }
 function paintCtl() {
-  const box = el('aoctl'); box.hidden = ST.mode !== 'always'; if (box.hidden) return;
+  const box = el('aoctl'); box.hidden = !inAO(); if (box.hidden) return;
   const n = SGS.events.length - SGS.history, at = Math.max(0, SGS.cursor - SGS.history), wo = AO.active || AO.viewing;
   if (wo && !AO.peek) {
-    const A = ADVISORS[wo.adv], [ic, nm] = ACT[wo.action];
-    setHTML(box, `<div class="aostrip"><span class="aobolt">${I('pulse', 14)}</span><span class="aoct"><small>${AO.viewing ? 'Work order' : 'Running a work order from Always-on'}</small><b><code>${wo.id}</code> ${I(ic, 13)} ${h(nm)} · ${h(advShort(wo.adv))} <span class="muted">(${h(firmShort(A.firm))})</span></b></span>${wo.replay && AI.mode !== 'live' ? `<span class="aorp" title="No live AI here, so the saved AI run of an equivalent request plays">${I('play', 11)} Saved run: “${h(wo.replay.text.slice(0, 48))}${wo.replay.text.length > 48 ? '…' : ''}”</span>` : ''}<button type="button" class="btn sm" data-aoboard>${I('target', 13)} Signals board</button></div>`);
+    const A = wo.adv && ADVISORS[wo.adv], [ic, nm] = ACT[wo.action], back = wo.explorer ? (A ? advShort(wo.adv) : 'Advisors') : 'Signals board';
+    setHTML(box, `<div class="aostrip"><span class="aobolt">${I(wo.explorer ? 'users' : 'pulse', 14)}</span><span class="aoct"><small>${AO.viewing ? 'Work order · done' : wo.explorer ? 'Running an advisor action' : 'Running a work order from Always-on'}</small><b><code>${wo.id}</code> ${I(ic, 13)} ${h(nm)} · ${A ? `${h(advShort(wo.adv))} <span class="muted">(${h(firmShort(A.firm))})</span>` : 'Southern California'}</b></span>${wo.replay && AI.mode !== 'live' ? `<span class="aorp" title="No live AI here, so the saved AI run of an equivalent request plays">${I('play', 11)} Saved run: “${h(wo.replay.text.slice(0, 48))}${wo.replay.text.length > 48 ? '…' : ''}”</span>` : ''}<button type="button" class="btn sm" data-aoboard>${I(wo.explorer ? 'arrow' : 'target', 13)} ${wo.explorer ? 'Back to ' + h(back) : h(back)}</button></div>`);
     return;
   }
+  if (ST.mode === 'advisors') { setHTML(box, `<div class="aoclock"><span class="aolive">${I('users', 12)} Advisor view</span><b>As of ${h(simDay(AOX().S.now))}</b><span>${h(AOX().S.events.filter(e => e.adv).length)} events since Jul 1 from ${new Set(AOX().S.events.map(e => SIG_TYPES[e.type].sys)).size} sources</span></div>`); return; }
   setHTML(box, `<div class="aoclock"><span class="aolive${AO.playing ? ' on' : ''}"><i></i>${AO.playing ? 'Listening' : AO.done ? 'Caught up' : 'Paused'}</span><b>${h(simDay(SGS.now))}</b><span>${h(simTime(SGS.now))}</span><span class="aoprog"><i style="width:${n ? at / n * 100 : 0}%"></i></span><small>${at}/${n} events</small></div>
     <div class="aobtns">${AO.playing ? `<button type="button" class="btn sm" data-aopause>${I('pause', 13)} Pause</button>` : `<button type="button" class="btn primary sm" data-aoplay>${I('play', 13)} ${AO.done ? 'Replay' : AO.started ? 'Resume' : 'Start listening'}</button>`}
       <div class="seg sm">${[1, 2, 4].map(x => `<button type="button" class="${AO.speed === x ? 'on' : ''}" data-aospeed="${x}">${x}×</button>`).join('')}</div>
@@ -156,7 +166,7 @@ function paintRadar() {
   const box = el('radar');
   if (!box._init) {
     box.innerHTML = `<div class="rh"><span>Advisor</span><span title="Weighted signals; each halves every 14 days. A decision is considered at 5.">Interest <small>threshold 5</small></span><span title="Sales Alpha: incremental sales from one in-person visit">Sales α/visit</span><span title="Digital Alpha: incremental sales from one digital engagement">Digital α</span><span>Last contact</span><span>State</span></div>` +
-      Object.keys(ADVISORS).map(a => `<div class="rrow" data-adv="${a}"><span class="rname">${avatar(ADVISORS[a].name, 'sales', 28)}<span class="rnt"><b>${h(advShort(a))}</b><small>${h(firmShort(ADVISORS[a].firm))} · ${h(TERRITORIES[ADVISORS[a].territory].name)}</small></span></span><span class="rint"><span class="ibar"><i class="fill"></i><i class="thr"></i></span><span class="rtps"></span></span><span class="rsa"></span><span class="rda"></span><span class="rlt"></span><span class="rsb"></span></div>`).join('');
+      Object.keys(ADVISORS).map(a => `<div class="rrow" data-adv="${a}" title="Open ${h(advShort(a))}’s full picture"><span class="rname">${avatar(ADVISORS[a].name, 'sales', 28)}<span class="rnt"><b>${h(advShort(a))}</b><small>${h(firmShort(ADVISORS[a].firm))} · ${h(TERRITORIES[ADVISORS[a].territory].name)}</small></span></span><span class="rint"><span class="ibar"><i class="fill"></i><i class="thr"></i></span><span class="rtps"></span></span><span class="rsa"></span><span class="rda"></span><span class="rlt"></span><span class="rsb"></span></div>`).join('');
     box._init = 1;
     /* a finished highlight must not replay when the board is shown again */
     box.addEventListener('animationend', e => e.target.classList.remove('ping'));
@@ -235,7 +245,12 @@ setInterval(() => { if (boardShown() && AO.started) paintRadar(); }, 400);
 /* ---- controls ---- */
 document.addEventListener('click', e => {
   const q = s => e.target.closest(s); let x;
-  if ((x = q('[data-mode]'))) { if (AO.active && x.dataset.mode === 'ask') { toast('A work order is running; switch when it finishes.'); return; } ST.mode = x.dataset.mode; if (ST.mode === 'always') AO.viewing = null; else { pause(); if (!AO.active) { UI.run = null; ST.msgs = []; } } paintAll(); return; }
+  if ((x = q('[data-mode]'))) { if (AO.active && x.dataset.mode !== ST.mode) { toast('A work order is running; switch when it finishes.'); return; } ST.mode = x.dataset.mode; AO.viewing = null; if (ST.mode !== 'always') pause(); if (ST.mode === 'ask' && !AO.active) { UI.run = null; ST.msgs = []; } paintAll(); return; }
+  if ((x = q('.rrow[data-adv]'))) { pause(); ST.mode = 'advisors'; AX.sel = x.dataset.adv; AX.filter = null; paintAll(); return; }
+  if ((x = q('[data-axsel]'))) { AX.sel = x.dataset.axsel; AX.filter = null; paintAll(); return; }
+  if ((x = q('[data-axch]'))) { AX.filter = AX.filter === x.dataset.axch ? null : x.dataset.axch; paintAll(); return; }
+  if ((x = q('[data-axrun]'))) { const a = axActions(AX.sel).find(y => y.id === x.dataset.axrun); if (a) runAction(a); return; }
+  if ((x = q('[data-axres]'))) { const a = axActions(AX.sel).find(y => y.id === x.dataset.axres); if (a && a.run && !AO.active) { UI.run = a.run; ST.view = 'results'; AO.viewing = a; ST.msgs = []; ST.approved = new Set(a.run.tasks.map(t => t.id)); paintAll(); } return; }
   if (q('[data-aoplay]')) { play(); return; }
   if (q('[data-aopause]')) { pause(); return; }
   if (q('[data-aoreset]')) { resetAO(); return; }
@@ -248,3 +263,84 @@ document.addEventListener('click', e => {
   if ((x = q('[data-aoview]'))) { const w = SGS.wos.find(y => y.id === x.dataset.aoview); if (w && w.run && !AO.active) { UI.run = w.run; ST.view = 'results'; AO.viewing = w; ST.msgs = []; ST.approved = new Set(w.run.tasks.map(t => t.id)); paintAll(); } return; }
   if ((x = q('[data-aowo]'))) { const w = SGS.wos.find(y => y.id === x.dataset.aowo); if (w && !AO.wait && !AO.count && (!AO.cur || AO.phase >= 5)) { AO.cur = w; AO.phase = 5; paintAll(); } return; }
 });
+
+/* ---------- Advisors: pick one, see every event, the takeaway, and what we are doing ---------- */
+const AX = { sel: QS.get('adv') || 'ADV-104', filter: null, X: null, acts: {}, ter: null };
+/* a separate engine run to today, so this view never consumes the live stream */
+function AOX() { if (!AX.X) { AX.X = makeSignals(); AX.X.runToToday(); } return AX.X; }
+function axActions(sel) {
+  if (sel === 'territory') { AX.ter = AX.ter || AOX().territory(); return AX.ter.actions; }
+  return (AX.acts[sel] = AX.acts[sel] || AOX().actionsFor(sel));
+}
+const CH = SIG_CHANNELS.map(([k, label, icon]) => ({ k, label, icon }));
+const CH_COL = { digital: '#9333ea', email: '#0284c7', social: '#0a66c2', content: '#e0482f', people: '#2563eb', service: '#ea580c', tx: '#059669', practice: '#b45309' };
+const ACT_COL = { visit: '#2f5bea', call: '#7c3aed', campaign: '#d97706', journey: '#0d9488', service: '#ea580c', hold: '#94a3b8', explain: '#059669', platform: '#0891b2', flows: '#16a34a', changed: '#64748b', social: '#0a66c2', trends: '#b45309' };
+function paintAdvisors() {
+  const box = el('advx'), X = AOX(), sel = AX.sel;
+  if (!box._init) { box.innerHTML = `<section class="sgcol axlist" id="axl"></section><section class="axmain"><div class="axhead" id="axh"></div><div class="axch" id="axc"></div><section class="sgcol axtl" id="axt"></section></section><section class="axside" id="axs"></section>`; box._init = 1; }
+  const all = X.S.events.filter(e => e.adv), evs = sel === 'territory' ? all : all.filter(e => e.adv === sel);
+  /* list */
+  setHTML(el('axl'), `<div class="sgh">${I('users', 14)}<b>Advisors</b><small>pick one</small></div><div class="axll">` + ['territory'].concat(Object.keys(ADVISORS)).map(a => {
+    if (a === 'territory') { const n = axActions('territory').length; return `<button type="button" class="axi ter${sel === a ? ' on' : ''}" data-axsel="territory"><span class="axt">${I('globe', 16)}</span><span class="axn"><b>Southern California</b><small>Territory overview · ${all.length} events</small></span><span class="axa">${n}</span></button>`; }
+    const T = X.takeaway(a), acts = axActions(a), m = acts[0];
+    return `<button type="button" class="axi${sel === a ? ' on' : ''}" data-axsel="${a}">${avatar(ADVISORS[a].name, 'sales', 30)}<span class="axn"><b>${h(advShort(a))}</b><small>${h(T.style)} · ${h(T.momentum.toLowerCase())}</small></span>${m ? `<span class="axk" style="--c:${ACT_COL[m.action]}" title="${h(ACT[m.action][1])}">${I(ACT[m.action][0], 13)}</span>` : ''}${acts.length > 1 ? `<span class="axa">${acts.length}</span>` : ''}</button>`;
+  }).join('') + `</div>`);
+  /* header */
+  if (sel === 'territory') {
+    const c = X.S.cap['EMP-PRIYA'];
+    setHTML(el('axh'), `<div class="axid"><span class="axt big">${I('globe', 22)}</span><div><small>Territory</small><h2>Southern California</h2><p>Los Angeles, Orange County and San Diego · ${Object.keys(ADVISORS).length} advisors · Priya Shah (external) and Sam Lee (internal)</p></div></div>
+      <div class="axk2"><div><b>${all.length}</b><small>events since Jul 1</small></div><div><b>${X.S.wos.filter(w => w.action !== 'hold').length}</b><small>decisions</small></div><div><b>${c.slots - c.booked}/${c.slots}</b><small>visit slots open</small></div><div><b>+${Math.round((SERVICE_INSIGHTS.fees.contacts_this_quarter / SERVICE_INSIGHTS.fees.contacts_last_quarter - 1) * 100)}%</b><small>fee questions</small></div></div>`);
+  } else {
+    const A = ADVISORS[sel], p = X.S.prof[sel], al = VISIT_ALPHA[sel], I0 = X.intentOf(p, X.S.now), cov = EMPLOYEES['EMP-PRIYA'].covers.includes(sel) ? 'Priya Shah and Sam Lee' : 'Sam Lee (internal only)';
+    setHTML(el('axh'), `<div class="axid">${avatar(A.name, 'sales', 46)}<div><small>${h(firmShort(A.firm))} · ${h(A.office)}</small><h2>${h(A.name)}</h2><p>${h(A.title)} · ${h(A.practice)}</p></div></div>
+      <div class="axk2"><div title="Incremental sales from one in-person visit"><b>${SIGNALS.fmtK(al.sales)}</b><small>Sales α / visit</small></div><div title="Incremental sales from one digital engagement"><b>${SIGNALS.fmtK(al.digital)}</b><small>Digital α</small></div><div><b>${I0.total.toFixed(1)}</b><small>interest now</small></div><div><b>${p.touch ? simDay(p.touch.t).replace(/^\w+, /, '') : '–'}</b><small>last contact${p.touch && p.touch.by ? ' · ' + h(first(EMPLOYEES[p.touch.by].name)) : ''}</small></div><div><b class="sm">${h(cov)}</b><small>coverage</small></div></div>`);
+  }
+  /* channels, with a weekly bar for each of the 13 weeks since Jul 1 */
+  const t0 = X.ts('Jul 1, 2026', '0:00'), wk = e => Math.min(12, Math.floor((e.t - t0) / (7 * X.DAY)));
+  setHTML(el('axc'), CH.map(c => { const xs = evs.filter(e => channelOf(e.type) === c.k), bars = Array(13).fill(0); xs.forEach(e => bars[wk(e)]++); const mx = Math.max(1, ...bars), last = xs[xs.length - 1];
+    return `<button type="button" class="chn${AX.filter === c.k ? ' on' : ''}${xs.length ? '' : ' none'}" data-axch="${c.k}" style="--c:${CH_COL[c.k]}"><span class="chh">${I(c.icon, 13)}<span>${h(c.label)}</span></span><b>${xs.length}</b><span class="spk">${bars.map(n => `<i style="height:${n ? 18 + n / mx * 82 : 6}%"${n ? '' : ' class="z"'}></i>`).join('')}</span><small>${last ? 'Last ' + h(SIGNALS.dstr(last.t)) : 'No activity'}</small></button>`; }).join(''));
+  /* timeline: what happened, and what it led to */
+  const res = new Map(); X.S.log.forEach(r => { if (r.e) res.set(r.e.id, r); });
+  const list = evs.filter(e => !AX.filter || channelOf(e.type) === AX.filter).slice().reverse();
+  let day = '';
+  setHTML(el('axt'), `<div class="sgh">${I('clock', 14)}<b>Activity</b><small>${list.length} event${list.length === 1 ? '' : 's'}${AX.filter ? ` · ${h(CH.find(c => c.k === AX.filter).label)} <button type="button" class="link" data-axch="${AX.filter}">clear</button>` : ' · newest first'}</small></div><div class="tll">${list.map(e => {
+    const T = SIG_TYPES[e.type], c = channelOf(e.type), r = res.get(e.id), d = simDay(e.t), head = d !== day ? `<div class="tld">${h(d)}</div>` : ''; day = d;
+    const led = r && r.wo ? `<span class="otag od">${I('arrow', 10)} ${h(r.wo.id)} · ${h(SIGNALS.actName(r.wo.action))}</span>` : r && r.outcome === 'covered' ? `<span class="otag oc">${h(r.note)}</span>` : '';
+    return `${head}<div class="tle"><time>${h(simTime(e.t))}</time><span class="evs sm" style="--c:${CH_COL[c] || '#64748b'}">${I((CH.find(x => x.k === c) || { icon: 'db' }).icon, 11)}</span><div><div class="evh">${sel === 'territory' ? `<b>${h(advShort(e.adv))}</b>` : ''}<span class="tlt">${h(T.label)}</span><span class="src">${h(e.src)}</span>${e.topic && !['general', 'access'].includes(e.topic) ? `<span class="tpc">${h(TOPIC_NAME[e.topic])}</span>` : ''}</div><p>${h(e.what)}</p>${led || T.strength === 'strong' ? `<small><span class="str ${T.strength}">${h(T.strength === 'info' ? 'context' : T.strength)}</span>${led}</small>` : ''}</div></div>`;
+  }).join('') || '<p class="muted sm">No events in this channel.</p>'}</div>`);
+  /* takeaway and actions */
+  const TK = sel === 'territory' ? (AX.ter = AX.ter || X.territory()) : X.takeaway(sel), acts = axActions(sel);
+  setHTML(el('axs'), `<section class="sgcol axtk"><div class="sgh">${I('sparkles', 14)}<b>Takeaway</b>${TK.style ? `<span class="tag rule">${h(TK.style)}</span><span class="tag ${TK.momentum === 'Rising' ? '' : 'rule'}">${h(TK.momentum)}</span>` : ''}</div><div class="tkb"><p class="tkh">${h(TK.headline)}</p>${TK.bullets.map(([k, v]) => `<div class="tkr"><span>${h(k)}</span><p>${h(v)}</p></div>`).join('')}</div></section>
+    <section class="sgcol axac"><div class="sgh">${I('target', 14)}<b>What we’re doing</b><small>${acts.length} action${acts.length === 1 ? '' : 's'}</small></div><div class="acl">${acts.map(a => actionCard(a)).join('') || '<p class="muted sm">Nothing to do yet: Intelligence keeps watching.</p>'}</div></section>`);
+}
+function actionCard(a) {
+  const [ic, nm] = ACT[a.action], E = a.owner && EMPLOYEES[a.owner], live = AI.mode === 'live';
+  const over = a.options ? a.options.filter(o => !o.chosen && o.value != null && o.action !== 'hold').map(o => `${o.label.replace('Personalized digital follow-up', 'Digital')} ${SIGNALS.fmtK(o.value)}`).join(' · ') : '';
+  const ev = (a.evidence || []).slice(0, 3);
+  let foot;
+  if (a.status === 'enrolled') foot = `<span class="fo ok">${I('check', 13)} Enrolled automatically: pre-approved journey, no agents needed</span>`;
+  else if (a.status === 'running') foot = `<span class="busy"><span class="spin"></span> Running in orchestration</span>`;
+  else if (a.status === 'done' || a.status === 'failed') foot = `<span class="fo ${a.status === 'done' ? 'ok' : 'warn'}">${I(a.status === 'done' ? 'check' : 'alert', 13)} ${h(a.outcome || 'Done')}</span>${a.run ? `<button type="button" class="btn sm" data-axres="${h(a.id)}">${I('doc', 12)} Results</button>` : ''}`;
+  else if (!live && !a.replay && a.needsWork) foot = `<span class="fo warn" title="Without an AI key, only actions with a saved AI run can play">${I('alert', 13)} Needs live AI to run</span>`;
+  else if (a.needsWork) foot = `<span class="acn">${E ? `${avatar(E.name, E.team, 20)} ${h(E.name)} · ${h(teamName(E.team))}${a.due && a.primary ? ' · by ' + h(SIGNALS.dstr(a.due)) : ''}` : ''}</span><button type="button" class="btn primary sm" data-axrun="${h(a.id)}">${I('play', 12)} Run in orchestration</button>`;
+  else foot = '';
+  return `<article class="acc${a.primary ? ' pri' : ''}" style="--c:${ACT_COL[a.action]}"><header><span class="aci">${I(ic, 15)}</span><div><small>${a.primary ? `Next best action · <code>${h(a.id)}</code>` : 'Also recommended'}${a.at && a.primary ? ' · ' + h(SIGNALS.dstr(a.at)) : ''}</small><b>${h(nm)}</b></div>${a.value ? `<span class="acv">${SIGNALS.fmtK(a.value)}</span>` : ''}</header>
+    <p>${h(a.primary ? primaryWhy(a) : a.why)}</p>${over ? `<p class="over">Chosen over ${h(over)}</p>` : ''}
+    ${ev.length ? `<div class="ace">${ev.map(e => `<span title="${h(e.what)}"><i style="background:${CH_COL[channelOf(e.type)] || '#64748b'}"></i>${h(SIGNALS.dstr(e.t))} · ${h(SIG_TYPES[e.type].label)}</span>`).join('')}</div>` : ''}
+    <footer>${foot}</footer></article>`;
+}
+/* a decision, said through what triggered it rather than the rule's name */
+function primaryWhy(a) {
+  const X = AOX(), e = a.trigger && X.S.events.find(x => x.id === a.trigger);
+  const lead = e ? `${SIG_TYPES[e.type].label} on ${SIGNALS.dstr(e.t)}: ${e.what.length > 110 ? e.what.slice(0, 108) + '…' : e.what}.` : a.followsUp ? `After ${a.followsUp} cleared the access problem.` : '';
+  return [lead, a.U && a.U.x > 1 ? a.U.why + '.' : '', a.why.replace(/^[^:]+: /, '').replace(/^./, c => c.toUpperCase()) + '.'].filter(Boolean).join(' ');
+}
+async function runAction(a) {
+  if (AO.active || busyPlanning() || anyRunning()) { toast('Something is already running.'); return; }
+  if (AI.mode !== 'live' && !a.replay) { toast('This one needs live AI: there is no saved AI run for it.'); return; }
+  a.explorer = true;
+  const r = await execWO(a, false);
+  a.run = r; a.status = r && r.status === 'done' ? 'done' : 'failed'; a.outcome = r ? outcomeOf(r) : 'Did not start';
+  AO.active = null; if (r) { AO.viewing = a; ST.view = r.status === 'done' ? 'results' : 'floor'; }
+  paintAll();
+}
