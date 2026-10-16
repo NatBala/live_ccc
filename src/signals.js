@@ -61,16 +61,16 @@ const ALPHA_MODELS = {
 };
 /* per advisor, in $K over 90 days; band is the model's uncertainty (±%) */
 const VISIT_ALPHA = {
-  'ADV-101': { sales: 140, digital: 12, band: 35 }, 'ADV-102': { sales: 85, digital: 9, band: 25 }, 'ADV-103': { sales: 28, digital: 11, band: 45 }, 'ADV-104': { sales: 120, digital: 95, band: 30 },
-  'ADV-105': { sales: 110, digital: 14, band: 20 }, 'ADV-106': { sales: 72, digital: 10, band: 30 }, 'ADV-107': { sales: 55, digital: 8, band: 50 }
+  'ADV-101': { sales: 340, digital: 12, band: 35 }, 'ADV-102': { sales: 230, digital: 9, band: 25 }, 'ADV-103': { sales: 150, digital: 11, band: 45 }, 'ADV-104': { sales: 300, digital: 240, band: 30 },
+  'ADV-105': { sales: 280, digital: 14, band: 20 }, 'ADV-106': { sales: 190, digital: 10, band: 30 }, 'ADV-107': { sales: 175, digital: 8, band: 50 }
 };
 /* field capacity: visits are the scarce resource, so a new visit has to beat the least valuable one already booked */
 const CAPACITY = {
   'EMP-PRIYA': { kind: 'visit', perQuarter: 200, perWeek: 15, window: 'Oct 5 to Oct 16', slots: 30, booked: 28,
-    bookedLow: [{ id: 'VIS-2241', what: 'Routine check-in, Torrance branch', value: 45, gain: 40 }, { id: 'VIS-2236', what: 'Quarterly review, Irvine office', value: 58, gain: 50 }] },
+    bookedLow: [{ id: 'VIS-2241', what: 'Routine check-in, Torrance branch', value: 160, gain: 110 }, { id: 'VIS-2236', what: 'Quarterly review, Irvine office', value: 185, gain: 130 }] },
   'EMP-SAM': { kind: 'call', perWeek: 60, booked: 41 }
 };
-const POLICY = { coolOffDays: 5, trigger: 5, halfLifeDays: 14, plannedDays: 21, callShare: 0.35, callMin: 15, digitalMin: 4, visitGainMin: 20, dedupeDays: 7 };
+const POLICY = { coolOffDays: 5, trigger: 5, halfLifeDays: 14, plannedDays: 21, callShare: 0.35, callMin: 55, digitalMin: 4, visitGainMin: 50, dedupeDays: 7 };
 /* nurture steps already queued in Marketing Cloud */
 const QUEUED_NURTURE = { 'ADV-102': { name: 'Fee transparency nurture', step: 'Step 2, “What a fee costs in dollars”', at: 'Sep 30, 2026' } };
 /* a what-if for leadership: the same research from three advisors, one visit slot left */

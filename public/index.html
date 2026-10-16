@@ -3398,16 +3398,16 @@ const ALPHA_MODELS = {
 };
 /* per advisor, in $K over 90 days; band is the model's uncertainty (±%) */
 const VISIT_ALPHA = {
-  'ADV-101': { sales: 140, digital: 12, band: 35 }, 'ADV-102': { sales: 85, digital: 9, band: 25 }, 'ADV-103': { sales: 28, digital: 11, band: 45 }, 'ADV-104': { sales: 120, digital: 95, band: 30 },
-  'ADV-105': { sales: 110, digital: 14, band: 20 }, 'ADV-106': { sales: 72, digital: 10, band: 30 }, 'ADV-107': { sales: 55, digital: 8, band: 50 }
+  'ADV-101': { sales: 340, digital: 12, band: 35 }, 'ADV-102': { sales: 230, digital: 9, band: 25 }, 'ADV-103': { sales: 150, digital: 11, band: 45 }, 'ADV-104': { sales: 300, digital: 240, band: 30 },
+  'ADV-105': { sales: 280, digital: 14, band: 20 }, 'ADV-106': { sales: 190, digital: 10, band: 30 }, 'ADV-107': { sales: 175, digital: 8, band: 50 }
 };
 /* field capacity: visits are the scarce resource, so a new visit has to beat the least valuable one already booked */
 const CAPACITY = {
   'EMP-PRIYA': { kind: 'visit', perQuarter: 200, perWeek: 15, window: 'Oct 5 to Oct 16', slots: 30, booked: 28,
-    bookedLow: [{ id: 'VIS-2241', what: 'Routine check-in, Torrance branch', value: 45, gain: 40 }, { id: 'VIS-2236', what: 'Quarterly review, Irvine office', value: 58, gain: 50 }] },
+    bookedLow: [{ id: 'VIS-2241', what: 'Routine check-in, Torrance branch', value: 160, gain: 110 }, { id: 'VIS-2236', what: 'Quarterly review, Irvine office', value: 185, gain: 130 }] },
   'EMP-SAM': { kind: 'call', perWeek: 60, booked: 41 }
 };
-const POLICY = { coolOffDays: 5, trigger: 5, halfLifeDays: 14, plannedDays: 21, callShare: 0.35, callMin: 15, digitalMin: 4, visitGainMin: 20, dedupeDays: 7 };
+const POLICY = { coolOffDays: 5, trigger: 5, halfLifeDays: 14, plannedDays: 21, callShare: 0.35, callMin: 55, digitalMin: 4, visitGainMin: 50, dedupeDays: 7 };
 /* nurture steps already queued in Marketing Cloud */
 const QUEUED_NURTURE = { 'ADV-102': { name: 'Fee transparency nurture', step: 'Step 2, “What a fee costs in dollars”', at: 'Sep 30, 2026' } };
 /* a what-if for leadership: the same research from three advisors, one visit slot left */
@@ -4849,7 +4849,7 @@ function compareHTML() {
   const row = d => { const v = d.options.find(o => o.action === 'visit'), dg = d.options.find(o => ['campaign', 'journey'].includes(o.action)); return { v: v.value, dg: dg.value, gain: v.gain }; };
   return `<section class="cmph"><div><small>What-if · ${h(simDay(SAME.at))}</small><h2>Same signal, three outcomes</h2><p>The same fixed-income ETF research arrives from three advisors, and Priya has one visit slot left. Each decision uses that advisor’s real profile: models, coverage, recent contact and commitments.</p></div>
       <div class="cmpe">${SAME.events.map(e => `<span><i style="background:${CH_COL[channelOf(e.type)]}"></i>${h(simTime(e.t))} · ${h(SIG_TYPES[e.type].label)}: ${h(e.what)}</span>`).join('')}</div></section>
-    <section class="cmpt"><table><thead><tr><th>Advisor</th><th title="Sales Alpha: 90-day incremental net sales from an assigned visit">Visit (Sales α)</th><th title="Digital Alpha: 90-day incremental net sales from sending an approved follow-up">Digital (Digital α)</th><th>A visit adds over the next best</th><th>Decision</th></tr></thead><tbody>${ds.map(d => { const r = row(d), [ic, nm] = ACT[d.action]; return `<tr><td>${avatar(ADVISORS[d.adv].name, 'sales', 22)} ${h(advShort(d.adv))}</td><td>${SIGNALS.fmtK(r.v)}</td><td>${SIGNALS.fmtK(r.dg)}</td>${(() => { const v = d.options.find(o => o.action === 'visit'); return /^Adds|^Requested/.test(v.note) ? `<td class="${r.gain > 40 ? 'pos' : 'low'}">+${SIGNALS.fmtK(r.gain)}</td>` : `<td class="muted">Not eligible: ${h(v.note.replace(/:.*$/, '').toLowerCase())}</td>`; })()}<td><span class="dchip" style="--c:${ACT_COL[d.action]}">${I(ic, 12)} ${h(nm)}</span></td></tr>`; }).join('')}</tbody></table>
+    <section class="cmpt"><table><thead><tr><th>Advisor</th><th title="Sales Alpha: 90-day incremental net sales from an assigned visit">Visit (Sales α)</th><th title="Digital Alpha: 90-day incremental net sales from sending an approved follow-up">Digital (Digital α)</th><th>A visit adds over the next best</th><th>Decision</th></tr></thead><tbody>${ds.map(d => { const r = row(d), [ic, nm] = ACT[d.action]; return `<tr><td>${avatar(ADVISORS[d.adv].name, 'sales', 22)} ${h(advShort(d.adv))}</td><td>${SIGNALS.fmtK(r.v)}</td><td>${SIGNALS.fmtK(r.dg)}</td>${(() => { const v = d.options.find(o => o.action === 'visit'); return /^Adds|^Requested/.test(v.note) ? `<td class="${r.gain > 100 ? 'pos' : 'low'}">+${SIGNALS.fmtK(r.gain)}</td>` : `<td class="muted">Not eligible: ${h(v.note.replace(/:.*$/, '').toLowerCase())}</td>`; })()}<td><span class="dchip" style="--c:${ACT_COL[d.action]}">${I(ic, 12)} ${h(nm)}</span></td></tr>`; }).join('')}</tbody></table>
       <p class="muted">Sofia has the highest Sales Alpha, yet the slot goes to Daniel: a visit adds far more for him than his digital alternative does. With every slot taken, a new visit must add more than +${SIGNALS.fmtK(c.bookedLow[0] ? c.bookedLow[0].gain : 0)}.</p></section>
     <div class="cmpg">${ds.map(d => { const A = ADVISORS[d.adv], [ic, nm] = ACT[d.action], max = Math.max(1, ...d.options.map(o => o.value || 0)), p = Y.S.prof[d.adv];
       return `<article class="cmpc" style="--c:${ACT_COL[d.action]}"><header>${avatar(A.name, 'sales', 34)}<div><b>${h(A.name.replace(/,.*$/, ''))}</b><small>${h(firmShort(A.firm))} · ${EMPLOYEES['EMP-PRIYA'].covers.includes(d.adv) ? 'Priya and Sam' : 'Sam only'}</small></div></header>

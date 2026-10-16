@@ -47,7 +47,7 @@ The harness opens in **Always-on** mode. Instead of waiting for someone to type 
 1. Permissions and the advisor's own words come first. A reply asking to meet, to get details by email only, or to wait is honored before any scoring.
 2. Service problems are fixed before selling, and existing work is updated rather than duplicated. Maya's meeting request attaches to her visit and pauses a queued nurture email.
 3. Only then are the permitted options compared, using the models' own numbers on one basis:
-   - Sales Alpha v3.2: 90-day incremental net sales from an assigned visit, against business as usual.
+   - Sales Alpha v3.2: 90-day incremental net sales from an assigned visit, against business as usual. Per advisor it ranges from $150K to $350K.
    - Digital Alpha v1.4: the effect of sending a follow-up, not of the advisor engaging.
    - Internal calls have no model, so they're an explicit 35% assumption.
 4. Urgency and interest set priority and timing; they never change the value.
@@ -56,8 +56,8 @@ The harness opens in **Always-on** mode. Instead of waiting for someone to type 
 Each decision has a **decision record**: trigger, evidence quality (including bot-filtered clicks), model versions and data date, the rejected alternatives, when it will be re-evaluated, and its authority ("Proposed: nothing sent to the advisor").
 
 **Same signal, three outcomes** (Advisors → what-if): the same fixed-income ETF research arrives from Daniel, Sofia and Jordan with one visit slot left.
-- Daniel gets the visit, because it adds $72K over his alternative.
-- Sofia gets a digital follow-up, despite the higher Sales Alpha, because a visit adds only $25K over her strong digital alternative.
+- Daniel gets the visit, because it adds $182K over his alternative.
+- Sofia gets a digital follow-up, despite the higher Sales Alpha, because a visit adds only $60K over her strong digital alternative ($300K vs $240K).
 - Jordan gets no additional outreach (cool-off, and no external coverage).
 
 **The scenarios in the data:**
