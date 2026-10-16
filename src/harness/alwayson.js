@@ -11,8 +11,8 @@ const inAO = () => ST.mode === 'always' || ST.mode === 'advisors';
 const SGS = SIGNALS.S;
 SIGNALS.reset();
 const ACT = { visit: ['users', 'In-person visit'], call: ['msg', 'Internal call'], campaign: ['mail', 'Digital follow-up'], journey: ['send', 'Digital journey'], service: ['tool', 'Fix first'], hold: ['pause', 'Hold'],
-  explain: ['doc', 'Product explanation'], platform: ['layers', 'Platform availability check'], flows: ['chart', 'Flow diagnosis'], changed: ['clock', 'What changed since we last met'], social: ['globe', 'Social post'], trends: ['pulse', 'Territory trends'] };
-const WO_ST = { decided: ['ready', 'Decided'], waiting: ['review', 'Waiting for owner'], running: ['running', 'Running'], done: ['approved', 'Done'], held: ['blocked', 'Held'], enrolled: ['approved', 'Enrolled'], 'needs-ai': ['signoff', 'Needs live AI'], dismissed: ['blocked', 'Dismissed'], failed: ['failed', 'Failed'] };
+  explain: ['doc', 'Product explanation'], platform: ['layers', 'Platform availability check'], review: ['chart', 'Relationship review'], defer: ['clock', 'Defer'], changed: ['clock', 'What changed since we last met'], social: ['globe', 'Social post'], trends: ['pulse', 'Territory trends'] };
+const WO_ST = { paused: ['blocked', 'Paused'], deferred: ['blocked', 'Deferred'], decided: ['ready', 'Decided'], waiting: ['review', 'Waiting for owner'], running: ['running', 'Running'], done: ['approved', 'Done'], held: ['blocked', 'Held'], enrolled: ['approved', 'Enrolled'], 'needs-ai': ['signoff', 'Needs live AI'], dismissed: ['blocked', 'Dismissed'], failed: ['failed', 'Failed'] };
 const SIG_ICON = { aem: 'eye', mcloud: 'mail', seismic: 'doc', sf: 'users', gen: 'bell', fund: 'chart', news: 'globe' };
 const advShort = a => a ? ADVISORS[a].name.replace(/,.*$/, '') : 'All advisors';
 const simDay = t => new Date(t).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
@@ -48,10 +48,11 @@ function resetAO() {
 }
 /* how Intelligence reached it, one step at a time, then what happens next */
 async function handle(wo) {
-  AO.cur = wo; AO.phase = 0; paintAll();
+  AO.cur = wo; AO.phase = 0; AO.rec = false; paintAll();
   for (let k = 1; k <= 5; k++) { await pace(420); if (AO.cur !== wo) return; AO.phase = k; paintAll(); }
   logEvent('nba.decided', `${wo.id} ${SIGNALS.actName(wo.action)} for ${advShort(wo.adv)}`, 'always-on', wo.adv);
   if (wo.action === 'hold') { wo.status = 'held'; paintAll(); await pace(2600); return; }
+  if (wo.action === 'defer') { wo.status = 'deferred'; paintAll(); await pace(3000); return; }
   if (wo.action === 'journey') { wo.status = 'enrolled'; wo.outcome = `Enrolled in the ${(wo.I.topics[0] || { name: 'general' }).name.toLowerCase()} nurture track (pre-approved)`; paintAll(); await pace(2800); return; }
   if (!AO.auto) {
     wo.status = 'waiting'; paintAll();
@@ -142,7 +143,7 @@ function paintBoard() {
   paintFeedAO(); paintRadar(); paintDecision(); paintSide();
 }
 function evIcon(e) { return SIG_ICON[SIG_TYPES[e.type].sys] || 'db'; }
-const OUT_TAG = { profile: ['', 'Profile updated'], decision: ['od', 'Decision'], held: ['oh', 'Held'], covered: ['oc', 'Already covered'] };
+const OUT_TAG = { profile: ['', 'Profile updated'], decision: ['od', 'Decision'], held: ['oh', 'Held'], covered: ['oc', 'Already covered'], attached: ['oc', 'Added'], filtered: ['oh', 'Filtered'] };
 function paintFeedAO() {
   const items = AO.feed.slice(0, 18);
   el('sgn').textContent = AO.feed.length ? `${AO.feed.length} events` : '';
@@ -158,6 +159,7 @@ function advState(adv) {
   if (w && w.status === 'running') return ['running', 'Running ' + w.id];
   if (w && AO.cur === w && !['done', 'held', 'enrolled', 'dismissed', 'needs-ai', 'failed'].includes(w.status)) return ['review', 'Deciding'];
   if (w && w.status === 'held') return ['blocked', 'Held'];
+  if (w && ['deferred', 'paused'].includes(w.status)) return ['blocked', 'Deferred'];
   if (w && ['done', 'enrolled', 'needs-ai', 'waiting', 'decided'].includes(w.status)) return [w.status === 'needs-ai' ? 'signoff' : 'approved', ACT[w.action][1]];
   if (I0.total >= 3) return ['ready', 'Warming'];
   return ['idle', 'Watching'];
@@ -198,17 +200,18 @@ function paintDecision() {
   const A = ADVISORS[wo.adv], [ic, nm] = ACT[wo.action], ph = AO.phase, max = Math.max(1, ...wo.options.map(o => o.value || 0));
   box.className = `dec a-${wo.action} ph${ph}`;
   const ev = wo.evidence.slice(0, 4);
-  setHTML(main, `<header class="dch"><span class="dci">${I(ic, 20)}</span><div class="dct"><small><code>${h(wo.id)}</code> · ${h(simDay(wo.at))}, ${h(simTime(wo.at))}${wo.followsUp ? ` · after ${h(wo.followsUp)}` : ''}</small><h3>${ph >= 5 ? h(nm) : 'Deciding…'} <span>· ${h(advShort(wo.adv))}</span></h3><p>${ph >= 5 ? h(wo.why) : `${h(A.title)}, ${h(FIRMS[A.firm].name)}`}</p></div>
+  setHTML(main, `<header class="dch"><span class="dci">${I(ic, 20)}</span><div class="dct"><small><code>${h(wo.id)}</code> · ${h(simDay(wo.at))}, ${h(simTime(wo.at))}${wo.followsUp ? ` · after ${h(wo.followsUp)}` : ''}${wo.priority && ph >= 5 ? ` · <span class="prio ${wo.priority.toLowerCase()}">${h(wo.priority)} priority</span>` : ''}${ph >= 5 ? ` · <button type="button" class="link" data-aorec>${AO.rec ? 'Back to the decision' : 'Decision record'}</button>` : ''}</small><h3>${ph >= 5 ? h(nm) : 'Deciding…'} <span>· ${h(advShort(wo.adv))}</span></h3><p>${ph >= 5 ? h(wo.why) : `${h(A.title)}, ${h(FIRMS[A.firm].name)}`}</p></div>
       <ol class="steps">${STEPS.map((s, i) => `<li class="${ph > i ? 'ok' : ph === i ? 'now' : ''}"><i>${ph > i ? I('check', 10) : ph === i ? '<span class="spin"></span>' : ''}</i>${h(s)}</li>`).join('')}</ol></header>
-    <div class="dcb">
+    ${AO.rec && ph >= 5 ? `<div class="dcb rec1">${recHTML(SIGNALS.record(wo))}</div>` : `<div class="dcb">
       <div class="dwhy"><div class="sh">Why now</div>${ev.map(e => `<div class="dwy"><span class="evs sm" style="--c:${SYS_COL[SIG_TYPES[e.type].sys] || '#64748b'}">${I(evIcon(e), 11)}</span><div><b>${h(SIG_TYPES[e.type].label)}</b> <time>${h(SIGNALS.dstr(e.t))}</time><p>${h(e.what)}</p></div></div>`).join('')}
         <div class="dctx">${wo.options.some(o => o.action === 'hold' && !o.chosen) ? '<span class="tag rule">Hold: $0, also weighed</span>' : ''}<span class="tag">${h(wo.U.why)}</span>${wo.I.topics.slice(0, 2).map(x => `<span class="tag rule">${h(x.name)} ${x.v.toFixed(1)}</span>`).join('')}</div></div>
-      <div class="opts${ph >= 3 ? ' on' : ''}${ph === 3 ? ' grow' : ''}"><div class="sh">Options weighed <small>incremental sales, $K</small></div>${wo.options.filter(o => o.action !== 'hold' || o.chosen).map(o => `<div class="op${o.chosen && ph >= 5 ? ' win' : ''}${o.ok ? '' : ' no'}"><div class="oph"><b>${I(ACT[o.action][0], 12)} ${h(o.label)}</b><span>${o.value == null ? '' : SIGNALS.fmtK(o.value)}</span></div><div class="obar"><i style="width:${o.value == null ? 100 : Math.max(2, o.value / max * 100)}%"></i>${o.action === 'visit' && o.cutoff != null && o.cutoff <= max ? `<em style="left:${o.cutoff / max * 100}%" title="Capacity cut-off ${SIGNALS.fmtK(o.cutoff)}: the least valuable booked visit"></em>` : ''}</div><small>${h(o.note)}</small>${o.formula && o.chosen && ph >= 5 ? `<small class="fx">${h(o.formula)}</small>` : ''}</div>`).join('')}</div>
-    </div>
+      <div class="opts${ph >= 3 ? ' on' : ''}${ph === 3 ? ' grow' : ''}"><div class="sh">Options weighed <small>incremental sales, $K</small></div>${wo.options.filter(o => o.action !== 'hold' || o.chosen).map(o => `<div class="op${o.chosen && ph >= 5 ? ' win' : ''}${o.ok ? '' : ' no'}"><div class="oph"><b>${I(ACT[o.action][0], 12)} ${h(o.label)}</b><span>${o.value == null ? '' : SIGNALS.fmtK(o.value)}</span></div><div class="obar"><i style="width:${o.value == null ? 100 : Math.max(2, o.value / max * 100)}%"></i>${o.action === 'visit' && o.cutoffValue != null && o.cutoffValue <= max ? `<em style="left:${o.cutoffValue / max * 100}%" title="To earn a slot, a visit must reach ${SIGNALS.fmtK(o.cutoffValue)}: the best alternative plus the gain of the least valuable booked visit"></em>` : ''}</div><small>${h(o.note)}</small>${o.formula && (o.chosen || o.action === 'visit') && ph >= 5 ? `<small class="fx">${h(o.formula)}</small>` : ''}</div>`).join('')}</div>
+    </div>`}
     <div class="grd${ph >= 4 ? ' on' : ''}">${wo.guards.map(g => `<span class="gd ${g.ok ? 'ok' : 'no'}" title="${h(g.note)}">${I(g.ok ? 'check' : 'x', 11)}<b>${h(g.k)}</b><small>${h(g.note)}</small></span>`).join('')}</div>`);
   /* the footer changes every second during the countdown, so it is painted on its own */
   let f = '';
   if (ph < 5) f = `<span class="busy"><span class="spin"></span> ${h(STEPS[Math.min(ph, 4)])}…</span>`;
+  else if (wo.status === 'deferred') f = `<span class="fo held">${I('clock', 14)}<b>Deferred.</b> ${h(wo.why)}</span>`;
   else if (wo.status === 'held') f = `<span class="fo held">${I('pause', 14)}<b>Held.</b> ${h(HUB)} keeps watching ${h(advShort(wo.adv))}; the next strong signal is looked at again.</span>`;
   else if (wo.status === 'enrolled') f = `<span class="fo ok">${I('check', 14)}<b>Done.</b> ${h(wo.outcome)}. No agents needed.</span>`;
   else if (wo.status === 'needs-ai') f = `<span class="fo warn">${I('alert', 14)}<b>${h(wo.outcome)}</b></span>${woOwner(wo)}`;
@@ -220,6 +223,7 @@ function paintDecision() {
   foot.className = 'dc-foot' + (ph >= 5 ? ' on' : '');
   setHTML(foot, f);
 }
+function recHTML(rows) { return `<div class="recs">${rows.map(([k, v]) => `<div class="rcr"><span>${h(k)}</span><p>${h(v)}</p></div>`).join('')}</div>`; }
 function woOwner(wo) {
   if (!wo.owner) return '';
   const E = EMPLOYEES[wo.owner];
@@ -232,10 +236,10 @@ function paintSide() {
   setHTML(el('cap'), `<div class="capc"><div class="caph">${avatar('Priya Shah', 'sales', 26)}<div><b>Priya Shah · visits</b><small>${c.perQuarter} a quarter ≈ ${c.perWeek} a week · ${h(c.window)}</small></div><span class="capn"><b>${open}</b><small>open</small></span></div>
       <div class="slots">${segs.map(x => `<i class="${x}"></i>`).join('')}</div>
       <div class="capl"><span><i class="b"></i>Booked</span><span><i class="n"></i>Booked by ${h(HUB)}</span><span><i class="o"></i>Open</span></div>
-      <p class="cut">${open > 0 ? `${open} slot${open > 1 ? 's' : ''} left. When full, a new visit must beat <b>${SIGNALS.fmtK(c.bookedLow[0].value)}</b>, the least valuable booked visit.` : `Full. Cut-off now <b>${SIGNALS.fmtK(c.bookedLow[0] ? c.bookedLow[0].value : 0)}</b>${mine.some(w => w.bumped) ? `; ${mine.filter(w => w.bumped).map(w => `${h(w.bumped.what)} moved to digital`).join(', ')}` : ''}.`}</p></div>
-    <div class="capc sm"><div class="caph">${avatar('Sam Lee', 'sales', 22)}<div><b>Sam Lee · internal desk</b><small>${sam.perWeek - sam.booked} call slots this week · no internal model yet, so a call is valued at 35% of a visit</small></div></div></div>`);
+      <p class="cut">Slots go where a visit adds the most over the advisor’s next best option. ${open > 0 ? `${open} left; when full, a new visit must add more than <b>+${SIGNALS.fmtK(c.bookedLow[0].gain)}</b>, the smallest gain among booked visits.` : `Full: a new visit must add more than <b>+${SIGNALS.fmtK(c.bookedLow[0] ? c.bookedLow[0].gain : 0)}</b>${mine.some(w => w.bumped) ? `. ${mine.filter(w => w.bumped).map(w => `${h(w.bumped.what)} moved to digital`).join(', ')}` : ''}.`}</p></div>
+    <div class="capc sm"><div class="caph">${avatar('Sam Lee', 'sales', 22)}<div><b>Sam Lee · internal desk</b><small>${sam.perWeek - sam.booked} call slots this week · no internal-call model yet: a call is assumed at 35% of Sales Alpha</small></div></div></div>`);
   el('won').textContent = SGS.wos.length ? `${SGS.wos.filter(w => w.action !== 'hold').length} decided · ${SGS.wos.filter(w => w.action === 'hold').length} held` : '';
-  setHTML(el('wol'), SGS.wos.length ? SGS.wos.slice().reverse().map(w => { const [ic, nm] = ACT[w.action], [bc, bl] = WO_ST[w.status] || WO_ST.decided; return `<button type="button" class="wo${AO.cur === w ? ' sel' : ''}" data-aowo="${h(w.id)}"><span class="woi a-${w.action}">${I(ic, 13)}</span><span class="wob"><b>${h(nm)} · ${h(advShort(w.adv))}</b><small><code>${h(w.id)}</code> ${w.owner ? h(first(EMPLOYEES[w.owner].name)) : h(HUB)}${w.value ? ' · ' + SIGNALS.fmtK(w.value) : ''}${w.outcome && ['done', 'enrolled'].includes(w.status) ? ' · ' + h(w.outcome.slice(0, 46)) + (w.outcome.length > 46 ? '…' : '') : ''}</small></span><span class="badge ${bc}">${h(bl)}</span></button>`; }).join('') : `<p class="muted sm">Decisions that need work become work orders here: an owner, a deadline, and the request ${h(HUB)} plans and runs.</p>`);
+  setHTML(el('wol'), SGS.wos.length ? SGS.wos.slice().reverse().map(w => { const [ic, nm] = ACT[w.action], [bc, bl] = WO_ST[w.status] || WO_ST.decided; return `<button type="button" class="wo${AO.cur === w ? ' sel' : ''}" data-aowo="${h(w.id)}"><span class="woi a-${w.action}">${I(ic, 13)}</span><span class="wob"><b>${h(nm)} · ${h(advShort(w.adv))}</b><small><code>${h(w.id)}</code> ${w.owner ? h(first(EMPLOYEES[w.owner].name)) : h(HUB)}${w.value ? ' · ' + SIGNALS.fmtK(w.value) : ''}${w.outcome && ['done', 'enrolled', 'paused'].includes(w.status) ? ' · ' + h(w.outcome.slice(0, 46)) + (w.outcome.length > 46 ? '…' : '') : ''}</small></span><span class="badge ${bc}">${h(bl)}</span></button>`; }).join('') : `<p class="muted sm">Decisions that need work become work orders here: an owner, a deadline, and the request ${h(HUB)} plans and runs.</p>`);
   const cnt = {}; AO.feed.forEach(r => { if (r.e) { const k = SIG_TYPES[r.e.type].sys; cnt[k] = (cnt[k] || 0) + 1; } });
   const sys = ['aem', 'mcloud', 'seismic', 'sf', 'gen', 'fund', 'news'];
   setHTML(el('lis'), `<div class="sgh">${I('db', 14)}<b>Listening to</b></div><div class="lis">${sys.map(k => `<span style="--c:${SYS_COL[k]}"><i></i>${h(k === 'fund' ? 'Transactions & models' : k === 'aem' ? 'Website' : SYS_SHORT[k])}<b>${cnt[k] || 0}</b></span>`).join('')}</div>`);
@@ -255,6 +259,7 @@ document.addEventListener('click', e => {
   if (q('[data-aopause]')) { pause(); return; }
   if (q('[data-aoreset]')) { resetAO(); return; }
   if ((x = q('[data-aospeed]'))) { AO.speed = +x.dataset.aospeed; SLEEP_SCALE = AO.base / AO.speed; paintAll(); return; }
+  if (q('[data-aorec]')) { AO.rec = !AO.rec; paintAll(); return; }
   if (q('[data-aoauto]')) { AO.auto = !AO.auto; paintAll(); return; }
   if (q('[data-aoboard]')) { if (AO.active) AO.peek = true; AO.viewing = null; ST.open = null; paintAll(); return; }
   if (q('[data-aorun]')) { AO.peek = false; AO.viewing = null; paintAll(); return; }
@@ -274,17 +279,21 @@ function axActions(sel) {
 }
 const CH = SIG_CHANNELS.map(([k, label, icon]) => ({ k, label, icon }));
 const CH_COL = { digital: '#9333ea', email: '#0284c7', social: '#0a66c2', content: '#e0482f', people: '#2563eb', service: '#ea580c', tx: '#059669', practice: '#b45309' };
-const ACT_COL = { visit: '#2f5bea', call: '#7c3aed', campaign: '#d97706', journey: '#0d9488', service: '#ea580c', hold: '#94a3b8', explain: '#059669', platform: '#0891b2', flows: '#16a34a', changed: '#64748b', social: '#0a66c2', trends: '#b45309' };
+const ACT_COL = { visit: '#2f5bea', call: '#7c3aed', campaign: '#d97706', journey: '#0d9488', service: '#ea580c', hold: '#94a3b8', explain: '#059669', platform: '#0891b2', review: '#16a34a', defer: '#64748b', changed: '#64748b', social: '#0a66c2', trends: '#b45309' };
 function paintAdvisors() {
   const box = el('advx'), X = AOX(), sel = AX.sel;
-  if (!box._init) { box.innerHTML = `<section class="sgcol axlist" id="axl"></section><section class="axmain"><div class="axhead" id="axh"></div><div class="axch" id="axc"></div><section class="sgcol axtl" id="axt"></section></section><section class="axside" id="axs"></section>`; box._init = 1; }
+  if (!box._init) { box.innerHTML = `<section class="sgcol axlist" id="axl"></section><section class="axmain"><div class="axhead" id="axh"></div><div class="axch" id="axc"></div><section class="sgcol axtl" id="axt"></section></section><section class="axside" id="axs"></section><section class="axcmp" id="axcmp" hidden></section>`; box._init = 1; }
   const all = X.S.events.filter(e => e.adv), evs = sel === 'territory' ? all : all.filter(e => e.adv === sel);
   /* list */
-  setHTML(el('axl'), `<div class="sgh">${I('users', 14)}<b>Advisors</b><small>pick one</small></div><div class="axll">` + ['territory'].concat(Object.keys(ADVISORS)).map(a => {
+  setHTML(el('axl'), `<div class="sgh">${I('users', 14)}<b>Advisors</b><small>pick one</small></div><div class="axll">` + ['territory', 'compare'].concat(Object.keys(ADVISORS)).map(a => {
+    if (a === 'compare') return `<button type="button" class="axi cmp${sel === a ? ' on' : ''}" data-axsel="compare"><span class="axt cmpi">${I('target', 16)}</span><span class="axn"><b>Same signal, three outcomes</b><small>What-if: one visit slot left</small></span></button>`;
     if (a === 'territory') { const n = axActions('territory').length; return `<button type="button" class="axi ter${sel === a ? ' on' : ''}" data-axsel="territory"><span class="axt">${I('globe', 16)}</span><span class="axn"><b>Southern California</b><small>Territory overview · ${all.length} events</small></span><span class="axa">${n}</span></button>`; }
     const T = X.takeaway(a), acts = axActions(a), m = acts[0];
     return `<button type="button" class="axi${sel === a ? ' on' : ''}" data-axsel="${a}">${avatar(ADVISORS[a].name, 'sales', 30)}<span class="axn"><b>${h(advShort(a))}</b><small>${h(T.style)} · ${h(T.momentum.toLowerCase())}</small></span>${m ? `<span class="axk" style="--c:${ACT_COL[m.action]}" title="${h(ACT[m.action][1])}">${I(ACT[m.action][0], 13)}</span>` : ''}${acts.length > 1 ? `<span class="axa">${acts.length}</span>` : ''}</button>`;
   }).join('') + `</div>`);
+  const cmp = sel === 'compare';
+  el('axcmp').hidden = !cmp; box.querySelector('.axmain').hidden = cmp; el('axs').hidden = cmp;
+  if (cmp) { setHTML(el('axcmp'), compareHTML()); return; }
   /* header */
   if (sel === 'territory') {
     const c = X.S.cap['EMP-PRIYA'];
@@ -305,7 +314,7 @@ function paintAdvisors() {
   let day = '';
   setHTML(el('axt'), `<div class="sgh">${I('clock', 14)}<b>Activity</b><small>${list.length} event${list.length === 1 ? '' : 's'}${AX.filter ? ` · ${h(CH.find(c => c.k === AX.filter).label)} <button type="button" class="link" data-axch="${AX.filter}">clear</button>` : ' · newest first'}</small></div><div class="tll">${list.map(e => {
     const T = SIG_TYPES[e.type], c = channelOf(e.type), r = res.get(e.id), d = simDay(e.t), head = d !== day ? `<div class="tld">${h(d)}</div>` : ''; day = d;
-    const led = r && r.wo ? `<span class="otag od">${I('arrow', 10)} ${h(r.wo.id)} · ${h(SIGNALS.actName(r.wo.action))}</span>` : r && r.outcome === 'covered' ? `<span class="otag oc">${h(r.note)}</span>` : '';
+    const led = r && r.wo ? `<span class="otag od">${I('arrow', 10)} ${h(r.wo.id)} · ${h(SIGNALS.actName(r.wo.action))}</span>` : r && ['covered', 'attached'].includes(r.outcome) ? `<span class="otag oc">${h(r.note)}</span>` : r && r.outcome === 'filtered' ? `<span class="otag oh">${h(r.note)}</span>` : '';
     return `${head}<div class="tle"><time>${h(simTime(e.t))}</time><span class="evs sm" style="--c:${CH_COL[c] || '#64748b'}">${I((CH.find(x => x.k === c) || { icon: 'db' }).icon, 11)}</span><div><div class="evh">${sel === 'territory' ? `<b>${h(advShort(e.adv))}</b>` : ''}<span class="tlt">${h(T.label)}</span><span class="src">${h(e.src)}</span>${e.topic && !['general', 'access'].includes(e.topic) ? `<span class="tpc">${h(TOPIC_NAME[e.topic])}</span>` : ''}</div><p>${h(e.what)}</p>${led || T.strength === 'strong' ? `<small><span class="str ${T.strength}">${h(T.strength === 'info' ? 'context' : T.strength)}</span>${led}</small>` : ''}</div></div>`;
   }).join('') || '<p class="muted sm">No events in this channel.</p>'}</div>`);
   /* takeaway and actions */
@@ -318,7 +327,9 @@ function actionCard(a) {
   const over = a.options ? a.options.filter(o => !o.chosen && o.value != null && o.action !== 'hold').map(o => `${o.label.replace('Personalized digital follow-up', 'Digital')} ${SIGNALS.fmtK(o.value)}`).join(' · ') : '';
   const ev = (a.evidence || []).slice(0, 3);
   let foot;
-  if (a.status === 'enrolled') foot = `<span class="fo ok">${I('check', 13)} Enrolled automatically: pre-approved journey, no agents needed</span>`;
+  if (a.status === 'deferred') foot = `<span class="fo held">${I('clock', 13)} No discretionary contact until the requested date</span>`;
+  else if (a.status === 'paused') foot = `<span class="fo held">${I('pause', 13)} ${h(a.outcome)}</span>`;
+  else if (a.status === 'enrolled') foot = `<span class="fo ok">${I('check', 13)} Enrolled automatically: pre-approved journey, no agents needed</span>`;
   else if (a.status === 'running') foot = `<span class="busy"><span class="spin"></span> Running in orchestration</span>`;
   else if (a.status === 'done' || a.status === 'failed') foot = `<span class="fo ${a.status === 'done' ? 'ok' : 'warn'}">${I(a.status === 'done' ? 'check' : 'alert', 13)} ${h(a.outcome || 'Done')}</span>${a.run ? `<button type="button" class="btn sm" data-axres="${h(a.id)}">${I('doc', 12)} Results</button>` : ''}`;
   else if (!live && !a.replay && a.needsWork) foot = `<span class="fo warn" title="Without an AI key, only actions with a saved AI run can play">${I('alert', 13)} Needs live AI to run</span>`;
@@ -327,13 +338,14 @@ function actionCard(a) {
   return `<article class="acc${a.primary ? ' pri' : ''}" style="--c:${ACT_COL[a.action]}"><header><span class="aci">${I(ic, 15)}</span><div><small>${a.primary ? `Next best action · <code>${h(a.id)}</code>` : 'Also recommended'}${a.at && a.primary ? ' · ' + h(SIGNALS.dstr(a.at)) : ''}</small><b>${h(nm)}</b></div>${a.value ? `<span class="acv">${SIGNALS.fmtK(a.value)}</span>` : ''}</header>
     <p>${h(a.primary ? primaryWhy(a) : a.why)}</p>${over ? `<p class="over">Chosen over ${h(over)}</p>` : ''}
     ${ev.length ? `<div class="ace">${ev.map(e => `<span title="${h(e.what)}"><i style="background:${CH_COL[channelOf(e.type)] || '#64748b'}"></i>${h(SIGNALS.dstr(e.t))} · ${h(SIG_TYPES[e.type].label)}</span>`).join('')}</div>` : ''}
+    <details class="recd"><summary>${I('shield', 12)} Decision record</summary>${recHTML(AOX().record(a))}</details>
     <footer>${foot}</footer></article>`;
 }
 /* a decision, said through what triggered it rather than the rule's name */
 function primaryWhy(a) {
   const X = AOX(), e = a.trigger && X.S.events.find(x => x.id === a.trigger);
   const lead = e ? `${SIG_TYPES[e.type].label} on ${SIGNALS.dstr(e.t)}: ${e.what.length > 110 ? e.what.slice(0, 108) + '…' : e.what}.` : a.followsUp ? `After ${a.followsUp} cleared the access problem.` : '';
-  return [lead, a.U && a.U.x > 1 ? a.U.why + '.' : '', a.why.replace(/^[^:]+: /, '').replace(/^./, c => c.toUpperCase()) + '.'].filter(Boolean).join(' ');
+  return [lead, a.U && a.U.x > 1 ? a.U.why + '.' : '', a.why.replace(/^[^:]+: /, '').replace(/^./, c => c.toUpperCase()) + '.'].filter(Boolean).join(' ').replace(/\.(”?)\./g, '.$1');
 }
 async function runAction(a) {
   if (AO.active || busyPlanning() || anyRunning()) { toast('Something is already running.'); return; }
@@ -343,4 +355,24 @@ async function runAction(a) {
   a.run = r; a.status = r && r.status === 'done' ? 'done' : 'failed'; a.outcome = r ? outcomeOf(r) : 'Did not start';
   AO.active = null; if (r) { AO.viewing = a; ST.view = r.status === 'done' ? 'results' : 'floor'; }
   paintAll();
+}
+
+/* ---------- the leadership what-if: the same research, three different right answers ---------- */
+let SAME = null;
+function compareHTML() {
+  SAME = SAME || sameSignal();
+  const Y = SAME.engine, ds = SAME.decisions, c = Y.S.cap['EMP-PRIYA'];
+  const row = d => { const v = d.options.find(o => o.action === 'visit'), dg = d.options.find(o => ['campaign', 'journey'].includes(o.action)); return { v: v.value, dg: dg.value, gain: v.gain }; };
+  return `<section class="cmph"><div><small>What-if · ${h(simDay(SAME.at))}</small><h2>Same signal, three outcomes</h2><p>The same fixed-income ETF research arrives from three advisors, and Priya has one visit slot left. Each decision uses that advisor’s real profile: models, coverage, recent contact and commitments.</p></div>
+      <div class="cmpe">${SAME.events.map(e => `<span><i style="background:${CH_COL[channelOf(e.type)]}"></i>${h(simTime(e.t))} · ${h(SIG_TYPES[e.type].label)}: ${h(e.what)}</span>`).join('')}</div></section>
+    <section class="cmpt"><table><thead><tr><th>Advisor</th><th title="Sales Alpha: 90-day incremental net sales from an assigned visit">Visit (Sales α)</th><th title="Digital Alpha: 90-day incremental net sales from sending an approved follow-up">Digital (Digital α)</th><th>A visit adds over the next best</th><th>Decision</th></tr></thead><tbody>${ds.map(d => { const r = row(d), [ic, nm] = ACT[d.action]; return `<tr><td>${avatar(ADVISORS[d.adv].name, 'sales', 22)} ${h(advShort(d.adv))}</td><td>${SIGNALS.fmtK(r.v)}</td><td>${SIGNALS.fmtK(r.dg)}</td>${(() => { const v = d.options.find(o => o.action === 'visit'); return /^Adds|^Requested/.test(v.note) ? `<td class="${r.gain > 40 ? 'pos' : 'low'}">+${SIGNALS.fmtK(r.gain)}</td>` : `<td class="muted">Not eligible: ${h(v.note.replace(/:.*$/, '').toLowerCase())}</td>`; })()}<td><span class="dchip" style="--c:${ACT_COL[d.action]}">${I(ic, 12)} ${h(nm)}</span></td></tr>`; }).join('')}</tbody></table>
+      <p class="muted">Sofia has the highest Sales Alpha, yet the slot goes to Daniel: a visit adds far more for him than his digital alternative does. With every slot taken, a new visit must add more than +${SIGNALS.fmtK(c.bookedLow[0] ? c.bookedLow[0].gain : 0)}.</p></section>
+    <div class="cmpg">${ds.map(d => { const A = ADVISORS[d.adv], [ic, nm] = ACT[d.action], max = Math.max(1, ...d.options.map(o => o.value || 0)), p = Y.S.prof[d.adv];
+      return `<article class="cmpc" style="--c:${ACT_COL[d.action]}"><header>${avatar(A.name, 'sales', 34)}<div><b>${h(A.name.replace(/,.*$/, ''))}</b><small>${h(firmShort(A.firm))} · ${EMPLOYEES['EMP-PRIYA'].covers.includes(d.adv) ? 'Priya and Sam' : 'Sam only'}</small></div></header>
+        <div class="cmpd"><span class="aci">${I(ic, 16)}</span><div><small>Decision</small><b>${h(nm)}</b></div>${d.value ? `<span class="acv">${SIGNALS.fmtK(d.value)}</span>` : ''}</div>
+        <p class="cmpw">${h(d.why)}</p>
+        <div class="opts on">${d.options.filter(o => o.action !== 'hold' || o.chosen).map(o => `<div class="op${o.chosen ? ' win' : ''}${o.ok ? '' : ' no'}"><div class="oph"><b>${I(ACT[o.action][0], 12)} ${h(o.label)}</b><span>${o.value == null ? '' : SIGNALS.fmtK(o.value)}</span></div><div class="obar"><i style="width:${o.value == null ? 100 : Math.max(2, o.value / max * 100)}%"></i></div><small>${h(o.note)}</small></div>`).join('')}</div>
+        <div class="cmpx">${d.guards.filter(g => !g.ok || g.k === 'Capacity').map(g => `<span class="gd ${g.ok ? 'ok' : 'no'}">${I(g.ok ? 'check' : 'x', 11)}<b>${h(g.k)}</b><small>${h(g.note)}</small></span>`).join('')}</div>
+        <p class="cmpctx">${p.touch ? `Last contact ${h(SIGNALS.dstr(p.touch.t))}${p.touch.by ? ' (' + h(first(EMPLOYEES[p.touch.by].name)) + ')' : ''}` : 'No recent contact'} · Sales α ±${d.model.band}%</p>
+        <details class="recd"><summary>${I('shield', 12)} Decision record</summary>${recHTML(Y.record(d))}</details></article>`; }).join('')}</div>`;
 }

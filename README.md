@@ -43,23 +43,40 @@ The harness opens in **Always-on** mode. Instead of waiting for someone to type 
 - **Capacity and work orders (right).** Priya has 200 visits a quarter (about 15 a week). When her slots are full, a new visit has to beat the least valuable visit already booked, which moves to digital. Sam's internal desk has no model yet, so a call is valued at 35% of a visit. Each decision that needs work becomes a work order with an owner, a due date and the request written for them.
 - **Auto-run.** In the demo, work orders run on their own after a three-second countdown. The top bar shows which work order is running, and the same orchestration canvas, results and foundation views follow. The board comes back when it finishes. Turn Auto-run off for production behaviour: each decision waits for its owner to accept or dismiss it, and a dismissed visit gives its slot back.
 
+**How a decision is made.**
+1. Permissions and the advisor's own words come first. A reply asking to meet, to get details by email only, or to wait is honored before any scoring.
+2. Service problems are fixed before selling, and existing work is updated rather than duplicated. Maya's meeting request attaches to her visit and pauses a queued nurture email.
+3. Only then are the permitted options compared, using the models' own numbers on one basis:
+   - Sales Alpha v3.2: 90-day incremental net sales from an assigned visit, against business as usual.
+   - Digital Alpha v1.4: the effect of sending a follow-up, not of the advisor engaging.
+   - Internal calls have no model, so they're an explicit 35% assumption.
+4. Urgency and interest set priority and timing; they never change the value.
+5. Visit slots go where a visit adds the most over the advisor's next best option.
+
+Each decision has a **decision record**: trigger, evidence quality (including bot-filtered clicks), model versions and data date, the rejected alternatives, when it will be re-evaluated, and its authority ("Proposed: nothing sent to the advisor").
+
+**Same signal, three outcomes** (Advisors → what-if): the same fixed-income ETF research arrives from Daniel, Sofia and Jordan with one visit slot left.
+- Daniel gets the visit, because it adds $72K over his alternative.
+- Sofia gets a digital follow-up, despite the higher Sales Alpha, because a visit adds only $25K over her strong digital alternative.
+- Jordan gets no additional outreach (cool-off, and no external coverage).
+
 **The scenarios in the data:**
 
 | Advisor | Decision | Why |
 |---|---|---|
-| Maya | In-person visit | Committee fee review, then a service question |
+| Maya | Held, then an in-person visit | Held for cool-off; then a service question. Her later reply ("walk our committee through this") attaches to the visit and pauses the queued nurture email |
 | Daniel | In-person visit | CGGR added to his platform |
-| Sofia | Digital follow-up | ETF interest, but Priya's follow-up (TASK-303) is already planned |
+| Sofia | Digital follow-up | She replied asking for details by email with no meeting, so Sales Alpha doesn't push a visit |
 | Luis | Internal call | Client news; no external coverage |
-| Rachel | Held, then an in-person visit | Held for cool-off; then new households arrived, and the visit bumped a $45K check-in |
-| Jordan | Pre-approved digital journey | Opens without clicks |
+| Rachel | In-person visit | Driven by digital research (webinar, playbook download); a bot click is filtered out, and her practice change adds to the visit |
+| Jordan | Pre-approved digital journey, then deferred | Opens without clicks; then "check back after the new year" pauses the journey |
 | Alex | Fix first, then Sam's call | A blocked link; coverage moves to Sam on Oct 1 |
 
 **Advisors view.** Pick an advisor (or the Southern California overview, also reachable by clicking a radar row) to see:
 - Their engagement by channel (Digital, Email, Social, Content, Calls, Service, Flows, Practice), with a weekly bar for each channel since Jul 1.
 - Every event, newest first and filterable by channel, with what each one led to.
 - A **takeaway**: the headline, then their interest, how they engage (for example digital-first or relationship-led), momentum, business with us, watch-outs and what's coming up.
-- **What we're doing**: the next best action, plus other actions the pattern of events calls for. These include a fix-first service case, a product explanation (Alex keeps comparing GFA with an index), a platform availability check and a flow diagnosis (Daniel), a what-changed brief (Rachel), a personalized digital follow-up (Sofia), a pre-approved journey (Jordan), and territory-level actions: a fee-transparency LinkedIn post and LA trends.
+- **What we're doing**: the next best action, plus other actions the pattern of events calls for. These include a fix-first service case, a product explanation (Alex keeps comparing GFA with an index), a platform availability check and a relationship review of a posted redemption (Daniel), a what-changed brief (Rachel), a personalized digital follow-up (Sofia), a pre-approved journey (Jordan), and territory-level actions: a fee-transparency LinkedIn post and LA trends.
 
 Each action runs in orchestration on demand, with its outcome and results kept on the card. The view runs its own copy of the engine to today, so it never uses up the live stream.
 

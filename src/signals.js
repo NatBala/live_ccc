@@ -24,6 +24,7 @@ const SIG_TYPES = {
   'mc.open': { label: 'Email opened', cat: 'Marketing', sys: 'mcloud', w: 0.5, strength: 'weak' },
   'mc.click': { label: 'Email click', cat: 'Marketing', sys: 'mcloud', w: 1.5, strength: 'medium' },
   'mc.webinar': { label: 'Webinar attended', cat: 'Marketing', sys: 'mcloud', w: 2, strength: 'medium' },
+  'mc.reply': { label: 'Email reply', cat: 'Marketing', sys: 'mcloud', w: 3, strength: 'strong', explicit: true },
   'ls.sent': { label: 'Content sent', cat: 'Sales', sys: 'seismic', w: 0, strength: 'info', touch: true },
   'ls.open': { label: 'Content opened', cat: 'Content', sys: 'seismic', w: 1.5, strength: 'medium' },
   'ls.blocked': { label: 'Link blocked', cat: 'Content', sys: 'seismic', w: 0, strength: 'medium', friction: 1 },
@@ -43,6 +44,7 @@ const SIG_TYPES = {
 const SIG_TOPICS = [
   ['plans', 'Retirement plans', /401\(k\)|recordkeeper|plan sponsor|\bcfo\b|simple ira/i],
   ['fees', 'Fees', /fee|expense|cost/i],
+  ['fixed', 'Fixed income', /fixed income|cgcp|duration|core plus/i],
   ['income', 'Retirement income', /income|retire|balanced|bond|abnfx|ambfx|dividend/i],
   ['etf', 'ETFs', /\betfs?\b|cggr|cgdv|cgcp/i],
   ['models', 'Model portfolios', /model|core-satellite|uma\b/i],
@@ -52,18 +54,27 @@ const SIG_TOPICS = [
 const topicOfText = s => (SIG_TOPICS.find(([, , re]) => re.test(s)) || ['general'])[0];
 const TOPIC_NAME = Object.fromEntries(SIG_TOPICS.map(([k, n]) => [k, n]).concat([['general', 'General']]));
 
-/* Sales Alpha and Digital Alpha, refreshed weekly by the model platform, in $K of incremental sales */
+/* what each Alpha model estimates, so the two can be compared on one basis */
+const ALPHA_MODELS = {
+  sales: { name: 'Sales Alpha', version: 'v3.2', data: 'Sep 13, 2026', treatment: 'An in-person visit assigned to the covering wholesaler', outcome: 'incremental net sales', horizon: '90 days', baseline: 'business as usual (no extra discretionary contact)', basis: 'assignment-level, so it already reflects visits that don’t happen' },
+  digital: { name: 'Digital Alpha', version: 'v1.4', data: 'Sep 13, 2026', treatment: 'An approved digital follow-up sent to the advisor', outcome: 'incremental net sales', horizon: '90 days', baseline: 'business as usual', basis: 'the effect of sending, not of the advisor engaging' }
+};
+/* per advisor, in $K over 90 days; band is the model's uncertainty (±%) */
 const VISIT_ALPHA = {
-  'ADV-101': { sales: 140, digital: 12 }, 'ADV-102': { sales: 85, digital: 9 }, 'ADV-103': { sales: 28, digital: 11 }, 'ADV-104': { sales: 120, digital: 26 },
-  'ADV-105': { sales: 110, digital: 14 }, 'ADV-106': { sales: 72, digital: 10 }, 'ADV-107': { sales: 55, digital: 8 }
+  'ADV-101': { sales: 140, digital: 12, band: 35 }, 'ADV-102': { sales: 85, digital: 9, band: 25 }, 'ADV-103': { sales: 28, digital: 11, band: 45 }, 'ADV-104': { sales: 120, digital: 95, band: 30 },
+  'ADV-105': { sales: 110, digital: 14, band: 20 }, 'ADV-106': { sales: 72, digital: 10, band: 30 }, 'ADV-107': { sales: 55, digital: 8, band: 50 }
 };
 /* field capacity: visits are the scarce resource, so a new visit has to beat the least valuable one already booked */
 const CAPACITY = {
   'EMP-PRIYA': { kind: 'visit', perQuarter: 200, perWeek: 15, window: 'Oct 5 to Oct 16', slots: 30, booked: 28,
-    bookedLow: [{ id: 'VIS-2241', what: 'Routine check-in, Torrance branch', value: 45 }, { id: 'VIS-2236', what: 'Quarterly review, Irvine office', value: 58 }] },
+    bookedLow: [{ id: 'VIS-2241', what: 'Routine check-in, Torrance branch', value: 45, gain: 40 }, { id: 'VIS-2236', what: 'Quarterly review, Irvine office', value: 58, gain: 50 }] },
   'EMP-SAM': { kind: 'call', perWeek: 60, booked: 41 }
 };
-const POLICY = { coolOffDays: 5, trigger: 5, halfLifeDays: 14, plannedDays: 21, visitShare: 0.8, callShare: 0.35, callConnect: 0.9, callMin: 15, digitalMin: 4, dedupeDays: 7 };
+const POLICY = { coolOffDays: 5, trigger: 5, halfLifeDays: 14, plannedDays: 21, callShare: 0.35, callMin: 15, digitalMin: 4, visitGainMin: 20, dedupeDays: 7 };
+/* nurture steps already queued in Marketing Cloud */
+const QUEUED_NURTURE = { 'ADV-102': { name: 'Fee transparency nurture', step: 'Step 2, “What a fee costs in dollars”', at: 'Sep 30, 2026' } };
+/* a what-if for leadership: the same research from three advisors, one visit slot left */
+const SAME_SIGNAL = { at: 'Sep 14, 2026', advisors: ['ADV-105', 'ADV-104', 'ADV-103'], events: [['web.page', 'Core Plus Income ETF (CGCP) page', '8:20'], ['web.page', 'CGCP portfolio: duration and credit quality', '8:26'], ['web.download', 'CGCP fact sheet (PDF)', '8:31'], ['web.article', 'Where a fixed income ETF fits in a core allocation', '8:40']] };
 /* activity the existing records do not hold: web analytics detail, email engagement, LinkedIn and the weekly model runs */
 const SIGNAL_EXTRAS = [
   { adv: 'ADV-101', at: 'Jul 28, 2026 7:40', type: 'web.download', what: 'GFA quarterly attribution, Q2 (PDF)', src: 'Website analytics' },
@@ -82,6 +93,10 @@ const SIGNAL_EXTRAS = [
   { adv: 'ADV-105', at: 'Sep 24, 2026 8:05', type: 'web.download', what: 'CGGR fact sheet (PDF)', src: 'Website analytics' },
   { adv: 'ADV-106', at: 'Sep 4, 2026 9:00', type: 'mc.register', what: 'Registered for “Retirement income in a higher-rate world”', src: 'Marketing Cloud' },
   { adv: 'ADV-106', at: 'Sep 20, 2026 19:30', type: 'web.download', what: 'Retirement income playbook (PDF)', src: 'Website analytics' },
+  { adv: 'ADV-104', at: 'Sep 19, 2026 8:45', type: 'mc.reply', intent: 'info', what: 'Replied to the September ETF email: “Please send me the details on active ETFs in a core allocation. No need for a meeting.”', src: 'Outlook' },
+  { adv: 'ADV-106', at: 'Sep 21, 2026 3:02', type: 'mc.click', bot: true, what: 'Clicked all 6 links in the income email within 2 seconds', src: 'Marketing Cloud' },
+  { adv: 'ADV-102', at: 'Sep 25, 2026 16:40', type: 'mc.reply', intent: 'meeting', what: 'Replied to the fee transparency email: “I’d like to walk our committee through this next week.”', src: 'Outlook' },
+  { adv: 'ADV-103', at: 'Sep 29, 2026 10:20', type: 'mc.reply', intent: 'defer', until: 'Jan 4, 2027', what: 'Replied: “We’re mid-transition on our platform. Please check back after the new year.”', src: 'Outlook' },
   { adv: 'ADV-107', at: 'Sep 26, 2026 21:10', type: 'web.search', what: 'Searched “SIMPLE IRA vs 401(k) for small businesses”', src: 'Website analytics' },
   { adv: null, at: 'Sep 14, 2026 6:00', type: 'model.refresh', what: 'Sales Alpha and Digital Alpha scored for 7 advisors in Southern California', src: 'Weekly model run' },
   { adv: 'ADV-103', at: 'Sep 15, 2026 9:12', type: 'mc.open', what: 'Opened “Retirement income insights, September”', src: 'Marketing Cloud' },
@@ -103,7 +118,7 @@ const SIGNAL_REPLAYS = {
   'ADV-101|call': { requester: 'EMP-SAM', text: 'Prep me for my call with Alex tomorrow' },
   'ADV-101|explain': { requester: 'EMP-DANA', text: 'Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.' },
   'ADV-105|platform': { requester: 'EMP-PRIYA', text: 'Which CG ETFs are available at Wells Fargo for Daniel?' },
-  'ADV-105|flows': { requester: 'EMP-PRIYA', text: 'Why are Daniel’s overall sales down when his ETF sales are up?' },
+  'ADV-105|review': { requester: 'EMP-PRIYA', text: 'Why are Daniel’s overall sales down when his ETF sales are up?' },
   'ADV-106|changed': { requester: 'EMP-PRIYA', text: 'What has changed since my last meeting with Rachel?' },
   'territory|social': { requester: 'EMP-MARCUS', text: 'Write a LinkedIn post on fee transparency for advisors' },
   'territory|trends': { requester: 'EMP-PRIYA', text: 'Identify the growing trends in LA territory' }
@@ -153,13 +168,13 @@ function makeSignals() {
     EPISODES.forEach((e, i) => { if (!/Call|Email/.test(e.kind)) return; push(e.adv, ts(e.date, e.kind === 'Email' ? '15:' + String(10 + i % 40).padStart(2, '0') : '10:' + String(10 + i % 40).padStart(2, '0')), e.kind === 'Email' ? 'crm.email' : 'crm.call', `${e.kind === 'Email' ? 'Email' : 'Call'} with ${e.with} logged (${e.id})`, 'Salesforce', e.id, { by: empOf(e.with) || null }); });
     FUND_TRANSACTIONS.forEach(([adv, d, fund, kind, m], i) => push(adv, ts(d, hmFor('tx', i)), kind === 'Purchase' ? 'tx.buy' : 'tx.sell', `${kind} of ${fund}: $${m.toFixed(1)}M`, 'Daily transactions', null, { usd: m }));
     HANDOVERS.forEach(x => { const d = x.src.match(/([A-Z][a-z]{2} \d{1,2}, \d{4})/); push(x.adv, ts(d ? d[1] : x.effective, '17:00'), 'crm.coverage', `Coverage moves to ${EMPLOYEES[x.to].name} on ${x.effective}`, 'Salesforce', x.id, { to: x.to, effective: ts(x.effective, '0:00') }); });
-    SIGNAL_EXTRAS.forEach(x => { const [d, hm] = x.at.split(/ (?=\d{1,2}:\d{2}$)/); push(x.adv, ts(d, hm), x.type, x.what, x.src); });
+    SIGNAL_EXTRAS.forEach(x => { const [d, hm] = x.at.split(/ (?=\d{1,2}:\d{2}$)/); push(x.adv, ts(d, hm), x.type, x.what, x.src, null, { intent: x.intent || null, until: x.until || null, bot: !!x.bot }); });
     return out.filter(e => !isNaN(e.t) && e.t >= ts(SIG_HISTORY, '0:00') && e.t <= ts(TODAY.replace(/^\w+, /, ''), '23:59')).sort((a, b) => a.t - b.t);
   }
 
   /* ---- advisor profiles ---- */
   const S = { events: [], cursor: 0, now: 0, prof: {}, wos: [], seq: 0, cap: JSON.parse(JSON.stringify(CAPACITY)), log: [] };
-  const fresh = adv => ({ adv, hits: [], touch: null, friction: 0, frictionEv: [], deadline: null, assetsAt: null, coverage: null, opens: [], clicks: 0, last: null });
+  const fresh = adv => ({ adv, hits: [], touch: null, friction: 0, frictionEv: [], deadline: null, assetsAt: null, coverage: null, opens: [], clicks: 0, last: null, pref: null, deferUntil: null, queued: QUEUED_NURTURE[adv] ? Object.assign({ status: 'queued' }, QUEUED_NURTURE[adv]) : null });
   function reset() {
     S.events = build(); S.prof = {}; Object.keys(ADVISORS).forEach(a => { S.prof[a] = fresh(a); }); S.wos = []; S.seq = 0; S.cap = JSON.parse(JSON.stringify(CAPACITY)); S.log = [];
     const start = ts(SIG_START, '0:00'); S.cursor = 0; S.now = start;
@@ -177,6 +192,7 @@ function makeSignals() {
   function apply(e) {
     S.now = Math.max(S.now, e.t); if (!e.adv) return;
     const p = S.prof[e.adv], T = SIG_TYPES[e.type];
+    if (e.bot) return;
     p.last = e;
     if (T.w) p.hits.push({ t: e.t, w: T.w, topic: e.topic, ev: e });
     if (T.touch) p.touch = { t: e.t, by: e.by, what: e.what };
@@ -208,47 +224,63 @@ function makeSignals() {
     return { yes: false, why: T.w ? `Interest ${I.total.toFixed(1)} of ${POLICY.trigger}` : T.touch ? 'Contact recorded' : T.friction ? `Friction ${p.friction}` : 'Profile updated' };
   }
   function decide(adv, now, e, opts = {}) {
-    const p = S.prof[adv], A = ADVISORS[adv], a = VISIT_ALPHA[adv], I = intentOf(p, now), U = urgency(p, now), im = intentMult(I.total);
+    const p = S.prof[adv], A = ADVISORS[adv], a = VISIT_ALPHA[adv], I = intentOf(p, now), U = urgency(p, now), explicit = opts.explicit || null;
     const strong = !!(e && SIG_TYPES[e.type].strength === 'strong') || !!opts.cleared;
-    const ext = 'EMP-PRIYA', int = 'EMP-SAM';
-    const guards = [];
+    const ext = 'EMP-PRIYA', int = 'EMP-SAM', guards = [];
+    /* urgency and interest set priority and timing; they never change the model's value */
+    const base = { I, U, priority: U.x >= 1.6 ? 'Urgent' : U.x > 1 || strong ? 'High' : 'Normal', model: a };
     /* 1. friction comes first: fix it before any selling */
     if (p.friction >= 2 && !opts.cleared) {
       guards.push({ k: 'Friction', ok: false, note: `${p.frictionEv.length} access failures, ${p.frictionEv.map(x => x.ref).filter(Boolean).filter((x, i, s) => s.indexOf(x) === i).join(', ')}` });
-      return mk(adv, now, e, { action: 'service', owner: 'EMP-KIM', value: null, I, U, im, guards, options: [{ action: 'service', label: 'Fix the problem first', value: null, ok: true, chosen: true, note: 'An open access issue: selling now would backfire' }], why: 'Service friction outranks any sales action' });
+      return mk(adv, now, e, Object.assign({ action: 'service', owner: 'EMP-KIM', value: null, guards, options: [{ action: 'service', label: 'Fix the problem first', value: null, ok: true, chosen: true, note: 'An open access issue: selling now would backfire' }], why: 'Service friction outranks any sales action' }, base));
+    }
+    /* 2. an advisor's own request to wait is honored */
+    if (p.deferUntil && p.deferUntil.t > now && !explicit) {
+      guards.push({ k: 'Advisor asked to wait', ok: false, note: `Until ${dstr(p.deferUntil.t)}` });
+      return mk(adv, now, e, Object.assign({ action: 'hold', owner: null, value: 0, guards, options: [{ action: 'hold', label: 'Hold and keep watching', value: 0, ok: true, chosen: true, note: `Deferred at the advisor’s request until ${dstr(p.deferUntil.t)}` }], why: `Deferred at ${A.short}’s request until ${dstr(p.deferUntil.t)}` }, base));
     }
     const handing = p.coverage && p.coverage.at > now && days(now, p.coverage.at) <= 7 && covers(ext, adv) && p.coverage.to !== ext;
     const lastDays = p.touch ? days(p.touch.t, now) : 99;
-    const cool = lastDays < POLICY.coolOffDays && !strong;
+    const cool = lastDays < POLICY.coolOffDays && !strong && !explicit;
     const planned = COMMITMENTS.find(c => c.adv === adv && c.status === 'Open' && /Priya|Sam/.test(c.owner) && !isNaN(ts(c.due)) && ts(c.due) > now && days(now, ts(c.due)) <= POLICY.plannedDays);
-    const firm = FIRMS[A.firm];
-    guards.push({ k: 'Contact cool-off', ok: !cool, note: p.touch ? `Last contact ${Math.floor(lastDays)} day${Math.floor(lastDays) === 1 ? '' : 's'} ago${strong && lastDays < POLICY.coolOffDays ? '; strong signal overrides' : ''}` : 'No recent contact' });
+    const noMeet = p.pref && p.pref.noMeeting, firm = FIRMS[A.firm];
+    if (explicit) guards.push({ k: 'Explicit request', ok: true, note: explicit === 'info' ? 'Details by email; no meeting' : 'Asked to meet' });
+    guards.push({ k: 'Contact cool-off', ok: !cool, note: p.touch ? `Last contact ${Math.floor(lastDays)} day${Math.floor(lastDays) === 1 ? '' : 's'} ago${(strong || explicit) && lastDays < POLICY.coolOffDays ? '; overridden by a strong signal' : ''}` : 'No recent contact' });
     guards.push({ k: 'Follow-up already planned', ok: !planned, note: planned ? `${planned.id}: ${planned.owner}, due ${planned.due}` : 'None open' });
     if (firm.policy) guards.push({ k: 'Firm rules', ok: true, note: firm.policy.replace(/ \(.*\)$/, '') + ': send PDFs, not links' });
     guards.push({ k: 'Approved content only', ok: true, note: 'Seismic-approved pieces and disclosures' });
-    /* 2. value each option */
+    /* 3. each option's value is the model's own estimate, on one basis */
     const cap = S.cap[ext], open = cap.slots - cap.booked, low = cap.bookedLow[0];
-    const vVisit = a.sales * POLICY.visitShare * U.x * im, vCall = a.sales * POLICY.callShare * POLICY.callConnect * U.x * im, vDig = a.digital * Math.min(1.6, 0.6 + 0.1 * I.total);
+    const vVisit = a.sales, vCall = a.sales * POLICY.callShare, vDig = a.digital;
+    const callBlock = !covers(int, adv) ? 'No internal coverage' : noMeet ? `${A.short} asked for no meeting` : planned ? `Already planned: ${planned.id}` : cool ? 'Cool-off' : null;
+    const callOK = !callBlock && vCall >= POLICY.callMin, digOK = !cool && vDig >= POLICY.digitalMin;
+    const top = I.topics.find(x => !['access', 'general'].includes(x.k)), personal = explicit === 'info' || (top && top.v >= 2 && OPPORTUNITIES.some(o => o.adv === adv && !/lost/i.test(o.stage)));
+    /* a scarce visit goes where it adds the most over what the advisor would get anyway */
+    const alt = Math.max(callOK ? vCall : 0, digOK ? vDig : 0), altName = callOK && vCall >= (digOK ? vDig : 0) ? 'an internal call' : 'digital', gain = vVisit - alt;
+    const visitBlock = !covers(ext, adv) ? 'No external wholesaler covers this advisor' : noMeet ? `Asked for details by email, no meeting (${dstr(p.pref.at)})` : handing ? `Coverage moves to ${EMPLOYEES[p.coverage.to].name} on ${dstr(p.coverage.at)}` : planned ? `Already planned: ${planned.id}` : cool ? `Cool-off: contact ${Math.floor(lastDays) < 1 ? 'today' : Math.floor(lastDays) === 1 ? 'yesterday' : Math.floor(lastDays) + ' days ago'}` : null;
+    const cutGain = open > 0 ? POLICY.visitGainMin : low ? low.gain : Infinity;
+    const visitOK = !visitBlock && (explicit === 'meeting' || gain > cutGain || (open > 0 && gain >= cutGain));
     const options = [];
-    const visitBlock = !covers(ext, adv) ? 'No external wholesaler covers this advisor' : handing ? `Coverage moves to ${EMPLOYEES[p.coverage.to].name} on ${new Date(p.coverage.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : planned ? `Already planned: ${planned.id}` : cool ? `Cool-off: contact ${Math.floor(lastDays)} days ago` : null;
-    const cutoff = open > 0 ? null : low ? low.value : Infinity;
-    const visitOK = !visitBlock && (cutoff == null || vVisit > cutoff);
-    options.push({ action: 'visit', label: 'In-person visit', owner: ext, value: vVisit, ok: visitOK, cutoff: cutoff == null ? (low ? low.value : null) : cutoff, open,
-      formula: `Sales Alpha ${fmtK(a.sales)} × ${POLICY.visitShare * 100}% meeting likelihood × ${U.x} urgency × ${im.toFixed(2)} interest`,
-      note: visitBlock || (open > 0 ? `${open} open slot${open > 1 ? 's' : ''} ${cap.window}` : vVisit > cutoff ? `Bumps ${low.what} (${fmtK(low.value)}), offered digitally instead` : `Below the capacity cut-off of ${fmtK(cutoff)}`) });
-    const callBlock = !covers(int, adv) ? 'No internal coverage' : planned ? `Already planned: ${planned.id}` : cool ? 'Cool-off' : null;
-    options.push({ action: 'call', label: 'Internal call', owner: int, value: vCall, ok: !callBlock && vCall >= POLICY.callMin,
-      formula: `Sales Alpha ${fmtK(a.sales)} × ${POLICY.callShare * 100}% of a visit (assumed; no internal model yet) × ${POLICY.callConnect * 100}% connect × ${U.x} × ${im.toFixed(2)}`,
-      note: callBlock || (vCall >= POLICY.callMin ? `${S.cap[int].perWeek - S.cap[int].booked} call slots this week` : `Below the ${fmtK(POLICY.callMin)} minimum`) });
-    const top = I.topics[0], personal = top && top.v >= 2 && OPPORTUNITIES.some(o => o.adv === adv && !/lost/i.test(o.stage));
-    options.push({ action: personal ? 'campaign' : 'journey', label: personal ? 'Personalized digital follow-up' : 'Digital journey', owner: personal ? 'EMP-MARCUS' : null, value: vDig, ok: !cool && vDig >= POLICY.digitalMin,
-      formula: `Digital Alpha ${fmtK(a.digital)} × ${Math.min(1.6, 0.6 + 0.1 * I.total).toFixed(2)} interest`,
-      note: cool ? 'Cool-off applies to all outreach' : personal ? `Built by Marketing from approved Seismic content on ${lc(top.name)}` : 'Pre-approved nurture track; no agents needed' });
+    options.push({ action: 'visit', label: 'In-person visit', owner: ext, value: vVisit, gain, alt, ok: visitOK, cutoffValue: isFinite(cutGain) ? alt + cutGain : null, open,
+      formula: `${ALPHA_MODELS.sales.name} ${ALPHA_MODELS.sales.version}: ${fmtK(a.sales)} ${ALPHA_MODELS.sales.outcome} over ${ALPHA_MODELS.sales.horizon} vs business as usual (±${a.band}%)`,
+      note: visitBlock || (explicit === 'meeting' ? 'Requested by the advisor: honored, Alpha only sets priority' : `Adds ${fmtK(gain)} over ${altName}; ` + (open > 0 ? (gain >= POLICY.visitGainMin ? `${open} slot${open > 1 ? 's' : ''} open, ${cap.window}` : `below the ${fmtK(POLICY.visitGainMin)} minimum gain`) : low && gain > low.gain ? `bumps ${low.what} (adds ${fmtK(low.gain)})` : `slots full; must add more than ${fmtK(low ? low.gain : 0)}`)) });
+    options.push({ action: 'call', label: 'Internal call', owner: int, value: vCall, ok: callOK,
+      formula: `No internal-call model yet: assumed ${POLICY.callShare * 100}% of Sales Alpha`,
+      note: callBlock || (callOK ? `Assumption, not a model · ${S.cap[int].perWeek - S.cap[int].booked} call slots this week` : `Below the ${fmtK(POLICY.callMin)} minimum`) });
+    options.push({ action: personal ? 'campaign' : 'journey', label: personal ? 'Personalized digital follow-up' : 'Digital journey', owner: personal ? 'EMP-MARCUS' : null, value: vDig, ok: digOK || explicit === 'info',
+      formula: `${ALPHA_MODELS.digital.name} ${ALPHA_MODELS.digital.version}: ${fmtK(a.digital)} for sending an approved follow-up (±${a.band}%)`,
+      note: cool ? 'Cool-off applies to all outreach' : explicit === 'info' ? 'Fulfils the request with approved Seismic content' : personal ? `Built by Marketing from approved Seismic content on ${lc(top.name)}` : 'Pre-approved nurture track; no agents needed' });
     options.push({ action: 'hold', label: 'Hold and keep watching', owner: null, value: 0, ok: true, note: 'Doing nothing is a valid choice' });
-    const chosen = options.filter(o => o.ok && o.action !== 'hold').sort((x, y) => y.value - x.value)[0] || options.find(o => o.action === 'hold');
+    const chosen = explicit === 'info' ? options[2] : visitOK ? options[0] : options.slice(1, 3).filter(o => o.ok).sort((x, y) => y.value - x.value)[0] || options[3];
     chosen.chosen = true;
-    guards.push({ k: 'Capacity', ok: chosen.action !== 'visit' || open > 0 || vVisit > cutoff, note: chosen.action === 'visit' ? (open > 0 ? `${open} of ${cap.slots} visit slots open, ${cap.window}` : `Full; bumps ${low.what}`) : `${Math.max(0, open)} of ${cap.slots} visit slots open` });
-    return mk(adv, now, e, { action: chosen.action, owner: chosen.owner, value: chosen.value, I, U, im, guards, options, why: chosen.action === 'hold' ? (cool ? `Cool-off: ${p.touch.by ? EMPLOYEES[p.touch.by].name : 'the team'} was in touch ${Math.floor(lastDays) || 'less than 1'} day${Math.floor(lastDays) === 1 ? '' : 's'} ago` : 'No option clears its threshold') : `${chosen.label}: highest incremental value that passes the guardrails` });
+    guards.push({ k: 'Capacity', ok: chosen.action !== 'visit' || open > 0 || gain > cutGain, note: chosen.action === 'visit' ? (explicit === 'meeting' ? 'Requested meeting: booked regardless' : open > 0 ? `${open} of ${cap.slots} visit slots open, ${cap.window}` : `Full; bumps ${low.what}`) : `${Math.max(0, open)} of ${cap.slots} visit slots open` });
+    const why = explicit === 'info' ? `${A.short} asked for the details by email and said no meeting is needed. Requests come before scoring, so Sales Alpha (${fmtK(a.sales)}) is not used to push a visit.`
+      : explicit === 'meeting' ? `${A.short} asked to meet. Requests are honored before scoring; Alpha only sets the priority.`
+      : chosen.action === 'visit' ? `A visit adds ${fmtK(gain)} over the best alternative (${altName}, ${fmtK(alt)}) and passes the guardrails`
+      : chosen.action === 'hold' ? (cool ? `Cool-off: ${p.touch.by ? EMPLOYEES[p.touch.by].name : 'the team'} was in touch ${Math.floor(lastDays) || 'less than 1'} day${Math.floor(lastDays) === 1 ? '' : 's'} ago` : 'No option clears its threshold')
+      : !visitBlock && ['campaign', 'journey', 'call'].includes(chosen.action) ? `A visit would add only ${fmtK(gain)} over ${altName}${open > 0 ? '' : ' with every slot taken'}: ${chosen.label.toLowerCase()} is the better use of a scarce visit`
+      : `${chosen.label}: highest incremental value that passes the guardrails`;
+    return mk(adv, now, e, Object.assign({ action: chosen.action, owner: chosen.owner, value: chosen.value, gain, guards, options, why }, base));
   }
   function mk(adv, now, e, d) {
     const p = S.prof[adv], A = ADVISORS[adv];
@@ -279,15 +311,35 @@ function makeSignals() {
     const e = S.events[S.cursor++]; apply(e);
     const res = { e, outcome: 'profile', note: SIG_TYPES[e.type].label };
     if (!e.adv) { res.note = 'All advisors re-scored'; S.log.push(res); return res; }
+    if (e.bot) { res.outcome = 'filtered'; res.note = 'Filtered: likely an email security scanner, not counted'; S.log.push(res); return res; }
+    if (SIG_TYPES[e.type].explicit) { explicitReply(e, S.prof[e.adv], res); S.prof[e.adv].lastIntentTrig = intentOf(S.prof[e.adv], e.t).total; S.log.push(res); return res; }
     const p = S.prof[e.adv], tr = trigger(e, p, e.t); res.note = tr.why;
     if (tr.yes) {
       const I = intentOf(p, e.t); p.lastIntentTrig = I.total;
-      const open = S.wos.find(w => w.adv === e.adv && !['dismissed', 'held'].includes(w.status) && days(w.at, e.t) <= POLICY.dedupeDays && w.action !== 'hold');
+      const open = S.wos.find(w => w.adv === e.adv && !['dismissed', 'held'].includes(w.status) && days(w.at, e.t) <= POLICY.dedupeDays && !['hold', 'defer'].includes(w.action));
       const newFriction = SIG_TYPES[e.type].friction && !(open && open.action === 'service');
-      if (open && !newFriction) { res.outcome = 'covered'; res.note = `Already handled by ${open.id} (${actName(open.action)})`; open.evidence.unshift(e); open.evidence = open.evidence.slice(0, 6); }
+      if (open && !newFriction) { res.outcome = 'covered'; res.note = `Added to ${open.id} (${actName(open.action)})`; open.evidence.unshift(e); open.evidence = open.evidence.slice(0, 6); }
       else { const wo = decide(e.adv, e.t, e); book(wo); S.wos.push(wo); res.outcome = wo.action === 'hold' ? 'held' : 'decision'; res.wo = wo; res.note = tr.why; }
     } else p.lastIntentTrig = intentOf(p, e.t).total;
     S.log.push(res); return res;
+  }
+  /* an advisor's own words outrank every score: meet, send details, or wait */
+  function explicitReply(e, p, res) {
+    const A = ADVISORS[e.adv], open = S.wos.find(w => w.adv === e.adv && ['visit', 'call'].includes(w.action) && w.status !== 'dismissed' && days(w.at, e.t) <= 14);
+    const take = wo => { book(wo); S.wos.push(wo); res.outcome = 'decision'; res.wo = wo; };
+    if (e.intent === 'meeting') {
+      if (p.queued && p.queued.status === 'queued') { p.queued.status = 'paused'; p.queued.reason = `${A.short} asked to meet on ${dstr(e.t)}`; }
+      if (open) { open.evidence.unshift(e); open.attached = (open.attached || []).concat(e); res.outcome = 'attached'; res.note = `Added to ${open.id}: ${A.short} asked to meet${p.queued ? '; queued nurture paused' : ''}`; return; }
+      take(decide(e.adv, e.t, e, { explicit: 'meeting' })); res.note = 'Explicit request, honored before scoring'; return;
+    }
+    if (e.intent === 'info') { p.pref = { noMeeting: true, at: e.t, what: e.what }; take(decide(e.adv, e.t, e, { explicit: 'info' })); res.note = 'Explicit request: details by email, no meeting'; return; }
+    if (e.intent === 'defer') {
+      p.deferUntil = { t: ts(e.until, '0:00'), at: e.t };
+      S.wos.filter(w => w.adv === e.adv && ['journey', 'campaign'].includes(w.action) && w.status !== 'dismissed').forEach(w => { w.status = 'paused'; w.outcome = `Paused on ${dstr(e.t)} at ${A.short}’s request`; });
+      const wo = mk(e.adv, e.t, e, { action: 'defer', owner: null, value: null, I: intentOf(p, e.t), U: urgency(p, e.t), priority: 'Normal', model: VISIT_ALPHA[e.adv], guards: [{ k: 'Explicit request', ok: true, note: `Check back after ${e.until}` }],
+        options: [{ action: 'defer', label: 'Defer until the requested date', value: null, ok: true, chosen: true, note: `No discretionary contact until ${e.until}; service and explicit requests still go through` }], why: `${A.short} asked us to check back after the new year. Any journey is paused and discretionary contact waits until ${e.until}.` });
+      S.wos.push(wo); res.outcome = 'decision'; res.wo = wo; res.note = `Explicit request: wait until ${e.until}`;
+    }
   }
   /* after a work order finishes, the advisor is looked at again (a fix can unblock a sale) */
   /* a visit takes a slot (or bumps the least valuable booked visit); a call takes desk time */
@@ -306,7 +358,7 @@ function makeSignals() {
     return null;
   }
   const ACT_NAMES = { visit: 'In-person visit', call: 'Internal call', campaign: 'Personalized digital follow-up', journey: 'Digital journey', service: 'Fix first', hold: 'Hold',
-    explain: 'Product explanation', platform: 'Platform availability check', flows: 'Flow diagnosis', changed: 'What changed since we last met', social: 'Social post', trends: 'Territory trends' };
+    explain: 'Product explanation', platform: 'Platform availability check', review: 'Relationship review', defer: 'Defer at the advisor’s request', changed: 'What changed since we last met', social: 'Social post', trends: 'Territory trends' };
   const actName = a => ACT_NAMES[a] || a;
 
   /* ---- the advisor view: everything up to today, a takeaway, and the actions ---- */
@@ -340,10 +392,10 @@ function makeSignals() {
     return { dir, text: `${dir}: interest weight ${recent.toFixed(1)} in the last two weeks, ${before.toFixed(1)} the two weeks before` };
   }
   function takeaway(adv) {
-    const A = ADVISORS[adv], p = S.prof[adv], now = S.now, ev = S.events.filter(e => e.adv === adv);
+    const A = ADVISORS[adv], p = S.prof[adv], now = S.now, ev = S.events.filter(e => e.adv === adv && !e.bot);
     const I = intentOf(p, now), tops = I.topics.filter(x => !['access', 'general'].includes(x.k) && x.v >= 0.5).slice(0, 2);
     const E = engagement(ev), M = momentum(ev, now);
-    const wos = S.wos.filter(w => w.adv === adv), acts = wos.filter(w => w.action !== 'hold'), main = acts[0] || wos[0] || null;
+    const wos = S.wos.filter(w => w.adv === adv), acts = wos.filter(w => w.action !== 'hold'), main = acts.find(w => w.action === 'defer') || acts[0] || wos[0] || null;
     const topicEv = tops.length ? p.hits.filter(h => h.topic === tops[0].k).sort((a, b) => b.w - a.w || b.t - a.t).slice(0, 3).map(h => clip(h.ev.what, 60)) : [];
     const tx = ev.filter(e => /^tx\./.test(e.type)), buy = tx.filter(e => e.type === 'tx.buy').reduce((m, e) => m + e.usd, 0), sell = tx.filter(e => e.type === 'tx.sell').reduce((m, e) => m + e.usd, 0);
     const opps = OPPORTUNITIES.filter(o => o.adv === adv && !/lost/i.test(o.stage));
@@ -352,17 +404,22 @@ function makeSignals() {
     if (FIRMS[A.firm].policy) watch.push(FIRMS[A.firm].policy.replace(/ \(.*\)$/, ''));
     if (p.coverage) watch.push(`Coverage moves to ${EMPLOYEES[p.coverage.to].name} on ${dstr(p.coverage.at)}`);
     if (p.touch && (now - p.touch.t) / DAY < POLICY.coolOffDays) { const d = Math.floor((now - p.touch.t) / DAY); watch.push(`Contacted ${d < 1 ? 'today' : d === 1 ? 'yesterday' : d + ' days ago'}: avoid piling on`); }
+    if (p.pref && p.pref.noMeeting) watch.push(`Asked for details by email, no meeting (${dstr(p.pref.at)}): Sales Alpha won’t push a visit`);
+    if (p.deferUntil) watch.push(`Asked us to wait until ${dstr(p.deferUntil.t)}: discretionary contact deferred`);
     const held = wos.filter(w => w.action === 'hold'); held.forEach(w => watch.push(`Held on ${dstr(w.at)}: ${w.why.replace(/^Cool-off: /, 'cool-off, ')}`));
     const coming = [];
     if (p.deadline && p.deadline.t > now) coming.push(`${p.deadline.label}: ${dstr(p.deadline.t)}`);
     COMMITMENTS.filter(c => c.adv === adv && c.status === 'Open').forEach(c => coming.push(`${c.id}: ${c.title} (${c.owner}, ${c.due})`));
+    if (p.queued) coming.push(`${p.queued.name}: ${p.queued.step}, queued for ${p.queued.at}${p.queued.status === 'paused' ? `: paused, ${p.queued.reason}` : ''}`);
+    wos.filter(w => w.status === 'paused').forEach(w => coming.push(`${actName(w.action)} ${w.id} ${w.outcome.charAt(0).toLowerCase() + w.outcome.slice(1)}`));
     const topicTxt = tops.length ? tops.map(x => x.name.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())).join(' and ') : 'nothing in particular';
     const H = {
       service: () => `${short(adv)} is engaged, but ${FIRMS[A.firm].name} is blocking what we send. Fix that first; the selling conversation comes after.`,
       visit: () => `${short(adv)} is actively looking at ${topicTxt}${main.U && main.U.x > 1 ? ` (${main.U.why.replace(/^[A-Z]/, c => c.toLowerCase())})` : ''}. An in-person visit is the highest-value next step, worth about ${fmtK(main.value)} in incremental sales.`,
-      campaign: () => `${short(adv)} researches ${topicTxt} online, mostly on their own. A human follow-up is already planned, so the next step is a personal digital follow-up.`,
+      campaign: () => p.pref && p.pref.noMeeting ? `${short(adv)} researches ${topicTxt} online and asked for details by email, with no meeting. That request comes first, so the next step is a personal digital follow-up.` : `${short(adv)} researches ${topicTxt} online, mostly on their own. A visit would add little over digital, so the next step is a personal digital follow-up.`,
       journey: () => `${short(adv)} opens our emails but doesn’t act on them (${E.opens} opens, ${E.clicks} clicks). Keep it light: a pre-approved digital journey, no agents needed.`,
       call: () => `${short(adv)}’s business is moving (${clip(main.evidence[0] ? main.evidence[0].what : 'new signals', 80)}). ${EMPLOYEES[main.owner].name} should call.`,
+      defer: () => `${short(adv)} asked us to check back after the new year, so the journey is paused and discretionary contact waits until ${dstr(p.deferUntil.t)}. Service and explicit requests still go through.`,
       hold: () => `Nothing worth acting on yet. ${short(adv)}’s profile is updated with every event and Intelligence keeps watching.`
     };
     return {
@@ -381,7 +438,8 @@ function makeSignals() {
   /* the next best action(s) from the decisions, plus what else the pattern of events calls for */
   function actionsFor(adv) {
     const A = ADVISORS[adv], ev = S.events.filter(e => e.adv === adv), now = S.now, firm = FIRMS[A.firm].name, out = [];
-    S.wos.filter(w => w.adv === adv && w.action !== 'hold').forEach(w => { w.primary = true; out.push(w); });
+    /* an advisor's own request to wait leads; otherwise decisions in the order they were made */
+    S.wos.filter(w => w.adv === adv && w.action !== 'hold').sort((x, y) => (y.action === 'defer') - (x.action === 'defer')).forEach(w => { w.primary = true; out.push(w); });
     const sup = (action, owner, evs, why, text) => out.push({ id: `REC-${adv.slice(-3)}-${action.toUpperCase().slice(0, 4)}`, adv, action, owner, evidence: evs, why, text, value: null, replay: SIGNAL_REPLAYS[`${adv}|${action}`] || null, needsWork: true, status: 'decided', at: now, supporting: true });
     const cmp = ev.filter(e => /^(web|ce)\./.test(e.type) && /\bvs\.?\s|attribution|comparison/i.test(e.what));
     if (cmp.length >= 2) { const f = (cmp.map(e => e.what.match(/\b(GFA|AMBAL|BFA|CGGR|CGDV)\b/)).find(Boolean) || ['the fund'])[0];
@@ -393,8 +451,8 @@ function makeSignals() {
     const sells = ev.filter(e => e.type === 'tx.sell' && e.usd >= 4), buys = ev.filter(e => e.type === 'tx.buy' && /CGGR|CGDV|CGCP/.test(e.what));
     const shift = sells.find(x => buys.some(b => Math.abs(b.t - x.t) <= 30 * DAY));
     if (shift) { const bs = buys.filter(b => Math.abs(b.t - shift.t) <= 30 * DAY);
-      sup('flows', 'EMP-PRIYA', [shift].concat(bs), `${shift.what} next to ${bs.map(b => b.what.replace(/^Purchase of /, '')).join(', ')} in ETFs: a vehicle shift, not a lost relationship. Explain it before the next meeting.`,
-        `Why are ${A.short}’s overall sales down when ETF sales are up? ${[shift].concat(bs).map(e => `${dstr(e.t)}: ${e.what}`).join('; ')}.`); }
+      sup('review', 'EMP-PRIYA', [shift].concat(bs), `${shift.what} is posted, next to ${bs.map(b => b.what.replace(/^Purchase of /, '')).join(', ')} in ETFs. The reason isn’t known: it may be a switch of vehicle, a rebalance or a liquidity need. Clarify it in a review; this isn’t a save pitch, and a risk score wouldn’t prove the money is recoverable.`,
+        `Why are ${A.short}’s overall sales down when ETF sales are up? ${[shift].concat(bs).map(e => `${dstr(e.t)}: ${e.what}`).join('; ')}. Explain the change without assuming why it happened.`); }
     const lastCall = ev.filter(e => e.type === 'crm.call').slice(-1)[0], ch = ev.filter(e => e.type === 'crm.practice' && lastCall && e.t > lastCall.t);
     if (ch.length) sup('changed', 'EMP-PRIYA', ch, `${ch[0].what}, after the last call on ${dstr(lastCall.t)}. Catch up on everything that changed before the visit.`, `What has changed since my last meeting with ${A.short}?`);
     return out;
@@ -424,6 +482,45 @@ function makeSignals() {
       actions
     };
   }
-  return { S, reset, step, after, release, decide, intentOf, urgency, actName, fmtK, ts, dstr, DAY, runToToday, takeaway, actionsFor, territory, engagement, momentum };
+  /* the record behind a decision: what was known, which models, what was rejected, what happens next */
+  const QUALITY = t => /^(web|ce)\./.test(t) ? 'named portal login' : /^mc\./.test(t) ? 'tracked email, bot check passed' : /^ls\./.test(t) ? 'recipient-specific link' : /^social/.test(t) ? 'matched LinkedIn profile' : /^tx\./.test(t) ? 'posted transaction' : 'system of record';
+  const REEVAL = {
+    visit: w => [`${short(w.adv)} replies or asks for something else`, 'The owner declines or no slot fits', 'A service issue opens', `The proposal expires on ${dstr(w.due)}`],
+    call: w => ['The call happens or goes unanswered', 'A coverage change takes effect', `Not done by ${dstr(w.due)}`],
+    campaign: () => ['The advisor replies or asks to meet: queued steps pause and the owner takes over', 'Opt-out or bounce', '14 days with no verified response'],
+    journey: () => ['A reply pauses the journey and hands it to the owner', 'Opt-out', 'The journey ends'],
+    service: () => ['The case is resolved: the advisor is looked at again', 'Another access failure'],
+    hold: () => ['The next strong signal', 'The cool-off or deferral ends'],
+    defer: w => [`On ${dstr(S.prof[w.adv].deferUntil.t)}`, 'An explicit request from the advisor', 'A service issue'],
+    other: () => ['The owner reviews the deliverable', 'New evidence changes the question']
+  };
+  const AUTHORITY = { visit: 'Proposed. Nothing has been sent to the advisor; the owner books it.', call: 'Proposed. Sam decides when to call.', campaign: 'Draft for review. Nothing is sent until Compliance and the owner approve it.', journey: 'Pre-approved journey: approved content within contact limits.', service: 'Internal case work; Service tells the advisor.', hold: 'No contact.', defer: 'No discretionary contact. Service and explicit requests still go through.', other: 'Internal work; nothing goes to the advisor.' };
+  function record(w) {
+    const ev = w.evidence || [], trig = (w.trigger && S.events.find(x => x.id === w.trigger)) || ev[0], rows = [];
+    const rev = w.adv ? S.events.filter(x => x.adv === w.adv && x.t <= w.at).length : S.events.filter(x => x.t <= w.at).length;
+    const filtered = w.adv ? S.events.filter(x => x.adv === w.adv && x.bot && x.t <= w.at).length : 0;
+    rows.push(['Decision', `${w.id} · ${dstr(w.at)}, ${new Date(w.at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} · context revision ${rev}${w.priority ? ` · priority ${w.priority.toLowerCase()}` : ''}`]);
+    if (trig) rows.push(['Trigger', `${SIG_TYPES[trig.type].label} (${trig.src}): ${trig.what}`]);
+    if (ev.length) rows.push(['Evidence quality', `${ev.length} event${ev.length > 1 ? 's' : ''}: ${[...new Set(ev.map(x => QUALITY(x.type)))].join(', ')}${filtered ? `; ${filtered} filtered as a likely bot` : ''}`]);
+    if (w.model) rows.push(['Models', `${ALPHA_MODELS.sales.name} ${ALPHA_MODELS.sales.version} ${fmtK(w.model.sales)}, ${ALPHA_MODELS.digital.name} ${ALPHA_MODELS.digital.version} ${fmtK(w.model.digital)} (±${w.model.band}%), data as of ${ALPHA_MODELS.sales.data}. Both estimate ${ALPHA_MODELS.sales.outcome} over ${ALPHA_MODELS.sales.horizon} vs ${ALPHA_MODELS.sales.baseline}; Sales Alpha is ${ALPHA_MODELS.sales.basis}; Digital Alpha is ${ALPHA_MODELS.digital.basis}. Internal calls have no model.`]);
+    if (w.U && w.U.x > 1) rows.push(['Timing', `${w.U.why}: sets priority, not value`]);
+    const alts = (w.options || []).filter(o => !o.chosen);
+    if (alts.length) rows.push(['Alternatives', alts.map(o => `${o.label}${o.value != null ? ' ' + fmtK(o.value) : ''}: ${o.note}`).join(' · ')]);
+    rows.push(['Re-evaluate when', (REEVAL[w.action] || REEVAL.other)(w).join(' · ')]);
+    rows.push(['Authority', AUTHORITY[w.action] || AUTHORITY.other]);
+    return rows;
+  }
+  /* what-if: the same events arrive from several advisors, and they compete for the visit slots left */
+  function whatIf(cfg, slotsLeft = 1) {
+    const c = S.cap['EMP-PRIYA']; c.booked = c.slots - slotsLeft;
+    const evs = cfg.advisors.map(adv => cfg.events.map(([type, what, hm], i) => { const e = { id: `WHATIF-${adv.slice(-3)}-${i}`, adv, t: ts(cfg.at, hm), type, what, src: 'Website analytics', ref: null, topic: topicOfText(what) }; apply(e); return e; }));
+    const gainOf = a => VISIT_ALPHA[a].sales - Math.max(VISIT_ALPHA[a].digital, VISIT_ALPHA[a].sales * POLICY.callShare);
+    const out = {};
+    cfg.advisors.slice().sort((x, y) => gainOf(y) - gainOf(x)).forEach(adv => { const last = evs[cfg.advisors.indexOf(adv)].slice(-1)[0]; const wo = decide(adv, last.t + 60000, last); book(wo); out[adv] = wo; });
+    return { at: ts(cfg.at, '9:00'), events: evs[0], decisions: cfg.advisors.map(a => out[a]) };
+  }
+  return { S, reset, step, after, release, decide, record, whatIf, intentOf, urgency, actName, fmtK, ts, dstr, DAY, runToToday, takeaway, actionsFor, territory, engagement, momentum };
 }
 const SIGNALS = makeSignals();
+/* the leadership what-if on its own engine, as of the start of the stream */
+function sameSignal() { const Y = makeSignals(); Y.reset(); const r = Y.whatIf(SAME_SIGNAL, 1); r.engine = Y; return r; }
