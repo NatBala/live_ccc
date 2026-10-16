@@ -76,9 +76,14 @@ Each decision has a **decision record**: trigger, evidence quality (including bo
 - Their engagement by channel (Digital, Email, Social, Content, Calls, Service, Flows, Practice), with a weekly bar for each channel since Jul 1.
 - Every event, newest first and filterable by channel, with what each one led to.
 - A **takeaway**: the headline, then their interest, how they engage (for example digital-first or relationship-led), momentum, business with us, watch-outs and what's coming up.
-- **What we're doing**: the next best action, plus other actions the pattern of events calls for. These include a fix-first service case, a product explanation (Alex keeps comparing GFA with an index), a platform availability check and a relationship review of a posted redemption (Daniel), a what-changed brief (Rachel), a personalized digital follow-up (Sofia), a pre-approved journey (Jordan), and territory-level actions: a fee-transparency LinkedIn post and LA trends.
-
-Each action runs in orchestration on demand, with its outcome and results kept on the card. The view runs its own copy of the engine to today, so it never uses up the live stream.
+- **What we're doing: one plan, inferred by Intelligence.** The decision service decides *what* to do: visit, call, digital follow-up, fix first, hold or defer. Intelligence then infers *how*, in real time.
+  - **The brief it receives:** the advisor's decisions, their evidence, and what the pattern of events says the plan must also cover. For example, check Daniel's Wells Fargo platform availability and review his GFFFX redemption, both feeding into the visit brief.
+  - **What it returns:** one plan of up to eight steps with owners and dependencies, streaming into the panel as it's drafted.
+  - **Before approving:** you can remove a step.
+  - **One approval:** "Approve and run plan" runs everything on the orchestration canvas. Client-facing drafts still wait for sign-off.
+  - **Plans in the data:** Alex (fix first, then Sam's call, plus Product's shared GFA explanation, 7 steps), Daniel (7), Rachel (6), Maya (3), Sofia (3) and the Southern California territory plan (6). Jordan has no steps: he asked us to wait.
+  - **With live AI:** every plan comes from the decision brief.
+  - **Without an AI key:** the saved plan plays, assembled from steps of saved AI runs. Luis has no saved plan, so his needs live AI.
 
 With live AI, every work order is planned from its own generated request. Without a key, the saved AI run of an equivalent request plays, and the one with no saved run (Luis) is marked as needing live AI.
 

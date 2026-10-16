@@ -42,7 +42,7 @@ async function runRequestInner(text, replay, opts = {}) {
   if (!replay && AI.mode !== 'live') { toast(AI.mode === 'checking' ? 'Connecting to the AI… try again in a moment.' : 'Live AI isn’t available here. Run it on claude.ai or with the deployment package.'); return; }
   const requester = replay ? replay.requester : UI.requester;
   if (replay) { UI.requester = requester; buildStaticWho(); }
-  const run = { id: 'RUN-' + (++RUNSEQ), requester, text, planOnly: !!opts.planOnly, clarified: opts.clarified || null, territory: null, t0: Date.now(), decisions: [], tasks: [], status: 'thinking', advisor: null, unit: null, stats: { reused: 0, reads: 0, calls: 0, mcp: 0, committed: 0, pending: 0, blocked: 0, rejected: 0, task: 0, ai: 0 }, orchText: '', record: { name: text.slice(0, 60), requester, text, orch: '', agents: {} }, replay };
+  const run = { id: 'RUN-' + (++RUNSEQ), requester, text, maxTasks: opts.maxTasks || 6, planOnly: !!opts.planOnly, clarified: opts.clarified || null, territory: null, t0: Date.now(), decisions: [], tasks: [], status: 'thinking', advisor: null, unit: null, stats: { reused: 0, reads: 0, calls: 0, mcp: 0, committed: 0, pending: 0, blocked: 0, rejected: 0, task: 0, ai: 0 }, orchText: '', record: { name: text.slice(0, 60), requester, text, orch: '', agents: {} }, replay };
   UI.run = run; UI.ctl = new AbortController(); F.runs.push(run); UI.totals.runs++;
   $('runBtn').disabled = true; $('planBtn').disabled = true; $('stopBtn').hidden = false; $('cmdIn').value = ''; $('cmdIn').blur();
   setTab('updates');
@@ -186,7 +186,7 @@ function handleOrch(run, o) {
     if (o.type === 'interpretation') run.interp = normInterp(o);
     if (o.type === 'asks' && Array.isArray(o.asks)) run.asks = o.asks.map(String).filter(Boolean).slice(0, 5).map(text => ({ text, tasks: [] }));
   } else if (o.k === 'task') {
-    if (run.tasks.length >= 6) return;
+    if (run.tasks.length >= (run.maxTasks || 6)) return;
     const arr = x => Array.isArray(x) ? x : x ? [x] : [];
     let id = String(o.id || 'T' + (run.tasks.length + 1)); if (run.tasks.some(x => x.id === id)) id = 'T' + (run.tasks.length + 1);
     const ri = routeInfo(o.route);

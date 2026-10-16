@@ -519,8 +519,69 @@ function makeSignals() {
     cfg.advisors.slice().sort((x, y) => gainOf(y) - gainOf(x)).forEach(adv => { const last = evs[cfg.advisors.indexOf(adv)].slice(-1)[0]; const wo = decide(adv, last.t + 60000, last); book(wo); out[adv] = wo; });
     return { at: ts(cfg.at, '9:00'), events: evs[0], decisions: cfg.advisors.map(a => out[a]) };
   }
-  return { S, reset, step, after, release, decide, record, whatIf, intentOf, urgency, actName, fmtK, ts, dstr, DAY, runToToday, takeaway, actionsFor, territory, engagement, momentum };
+  /* one plan per advisor: the decisions that need work, plus what the evidence says the plan must also cover */
+  function planInputs(key) {
+    if (key === 'territory') {
+      const T = territory();
+      return { key, adv: null, title: 'Southern California: fee post and LA trends', requester: 'EMP-MARCUS', action: 'social', decisions: [], hints: T.actions,
+        text: `Territory plan for Southern California. Intelligence found: ${T.actions.map((a, i) => `(${i + 1}) ${actName(a.action).toLowerCase()}: ${a.why}`).join(' ')} Plan the steps: draft the fee-transparency LinkedIn post from approved inputs with a compliance review, and confirm the LA trends from recorded conversations. Draft only; nothing goes out without approval.` };
+    }
+    const A = ADVISORS[key], firm = FIRMS[A.firm], all = actionsFor(key);
+    const decs = all.filter(a => a.primary && a.needsWork), hints = all.filter(a => a.supporting), others = all.filter(a => a.primary && !a.needsWork);
+    if (!decs.length) return { key, adv: key, title: '', requester: null, action: others[0] ? others[0].action : 'hold', decisions: [], others, hints, text: '' };
+    const owner = (decs.filter(d => d.action !== 'service').slice(-1)[0] || decs[0]).owner;
+    const HOW = { visit: 'schedule it through SSC and prepare the visit brief', call: 'prepare the call brief', campaign: 'draft the follow-up from approved Seismic content with a compliance review', service: 'fix the access problem and resend in a format the firm allows' };
+    const text = `Relationship plan for ${A.name} (${firm.name}). Intelligence decided ${decs.map((d, i) => `${i ? 'then ' : ''}${d.id}, ${actName(d.action).toLowerCase()} owned by ${EMPLOYEES[d.owner].name} by ${dstr(d.due)} (${d.why.replace(/\.$/, '')}; evidence: ${(d.evidence || []).slice(0, 2).map(e => `${dstr(e.t)} ${e.what}`).join('; ') || 'decision record'})`).join('; ')}. To carry it out: ${decs.map(d => HOW[d.action]).join(', then ')}.${hints.length ? ` Also needed, from the evidence: ${hints.map(x => `${actName(x.action).toLowerCase()} (${x.why.split('. ')[0].replace(/\.$/, '')})`).join('; ')}.` : ''} Rules: no client contact beyond the decided actions; build on existing work; approved Seismic content only${firm.policy ? `; ${firm.policy.replace(/ \(.*\)$/, '').toLowerCase()}` : ''}. Plan the fewest steps, each citing the evidence that requires it.`;
+    return { key, adv: key, title: `${A.name.replace(/,.*$/, '')}: ${decs.map(d => actName(d.action).toLowerCase()).join(', then ')}`, requester: owner, action: decs[0].action, decisions: decs, others, hints, text };
+  }
+  return { S, reset, step, after, release, decide, record, whatIf, planInputs, intentOf, urgency, actName, fmtK, ts, dstr, DAY, runToToday, takeaway, actionsFor, territory, engagement, momentum };
 }
 const SIGNALS = makeSignals();
+/* Without live AI, a plan plays as saved AI work: steps taken from saved runs, joined into one plan with the
+   dependencies the decision needs. With live AI, Intelligence plans it from the decision brief instead. */
+const PLAN_REPLAYS = {
+  'ADV-105': { requester: 'EMP-PRIYA', parts: [
+    { text: 'Which CG ETFs are available at Wells Fargo for Daniel?', tasks: ['T2', 'T3'], ask: 'Confirm which CG ETFs Daniel can use at Wells Fargo' },
+    { text: 'Why are Daniel’s overall sales down when his ETF sales are up?', tasks: ['T1', 'T3'], ask: 'Explain the GFFFX-to-CGGR shift without assuming why' },
+    { text: 'Prepare me for tomorrow’s meeting with Daniel’s team', tasks: ['T2', 'T4', 'T5'], ask: 'Prepare the visit' }],
+    links: { P3T4: ['P1T3'], P3T5: ['P1T3', 'P2T3'] } },
+  'ADV-101': { requester: 'EMP-SAM', parts: [
+    { text: 'Alex says the link in Priya’s email won’t open', requester: 'EMP-KIM', tasks: ['T1', 'T2'], ask: 'Fix the blocked link first' },
+    { text: 'Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.', tasks: ['T2', 'T3'], ask: 'Explain why GFA trailed its index (shared Product work)' },
+    { text: 'Prep me for my call with Alex tomorrow', requester: 'EMP-SAM', tasks: ['T1', 'T2', 'T3'], ask: 'Prepare Sam’s call before the Oct 1 committee' }],
+    links: { P3T3: ['P1T2', 'P2T3'] } },
+  'ADV-106': { requester: 'EMP-PRIYA', parts: [
+    { text: 'What has changed since my last meeting with Rachel?', tasks: ['T1', 'T2', 'T3'], ask: 'Catch up on what changed since Sep 23' },
+    { text: 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month', tasks: ['T1', 'T2', 'T3'], ask: 'Compare BFA and AMBAL for her income plan and schedule the visit' }],
+    links: { P2T2: ['P1T3'] } },
+  'ADV-102': { requester: 'EMP-PRIYA', parts: [{ text: 'Prepare Maya’s retirement committee fee comparison review', tasks: ['T1', 'T2', 'T3'], ask: 'Prepare the committee fee review Maya asked to walk through' }], links: {} },
+  'ADV-104': { requester: 'EMP-MARCUS', parts: [{ text: 'Create an ETF email campaign for Sofia', tasks: ['T1', 'T2', 'T3'], ask: 'Draft the details Sofia asked for' }], links: {} },
+  territory: { requester: 'EMP-MARCUS', parts: [
+    { text: 'Write a LinkedIn post on fee transparency for advisors', tasks: ['T1', 'T2', 'T3', 'T4'], ask: 'Draft the fee-transparency LinkedIn post' },
+    { text: 'Identify the growing trends in LA territory', tasks: ['T1', 'T3'], ask: 'Confirm the LA territory trends' }], links: {} }
+};
+function composePlanReplay(plan) {
+  const spec = PLAN_REPLAYS[plan.key]; if (!spec || typeof RECORDED === 'undefined') return null;
+  const J = o => JSON.stringify(o), lines = [], tasks = [], agents = {}, auths = [], E = EMPLOYEES[spec.requester];
+  lines.push(J({ k: 'decision', type: 'requester', title: `${E.name}, ${TEAMS[E.team].name}`, detail: 'Owner of this relationship plan' }));
+  lines.push(J({ k: 'decision', type: 'asks', title: `${spec.parts.length} part${spec.parts.length > 1 ? 's' : ''} of one plan`, detail: spec.parts.map((p, i) => `${i + 1}. ${p.ask}`).join(' · '), asks: spec.parts.map(p => p.ask) }));
+  if (plan.adv) lines.push(J({ k: 'decision', type: 'entity', title: `${ADVISORS[plan.adv].short} → ${ADVISORS[plan.adv].name.replace(/,.*$/, '')}, ${FIRMS[ADVISORS[plan.adv].firm].name}`, detail: 'From the decision record', advisor: plan.adv }));
+  spec.parts.forEach((part, c) => {
+    const rec = RECORDED.find(r => r.text === part.text && (!part.requester || r.requester === part.requester)); if (!rec) return;
+    const objs = rec.orch.split('\n').filter(Boolean).map(l => JSON.parse(l)), keep = new Set(part.tasks), nid = id => `P${c + 1}${id}`;
+    const it = objs.find(o => o.type === 'interpretation'); auths.push(it && it.authority ? it.authority : authorityFromText(rec.text, EMPLOYEES[rec.requester].team).authority);
+    objs.filter(o => o.k === 'decision' && ['known', 'controls'].includes(o.type)).slice(0, 1).forEach(o => lines.push(J(o)));
+    objs.filter(o => o.k === 'task' && keep.has(o.id)).forEach(o => {
+      const t = Object.assign({}, o, { id: nid(o.id), ask: c + 1, depends_on: (o.depends_on || []).filter(d => keep.has(d)).map(nid) });
+      (spec.links[t.id] || []).forEach(d => { if (!t.depends_on.includes(d)) t.depends_on.push(d); });
+      tasks.push(t); agents[t.id] = rec.agents[o.id];
+    });
+  });
+  const auth = auths.sort((a, b) => authN(b) - authN(a))[0] || 'read_only';
+  lines.push(J({ k: 'decision', type: 'interpretation', title: plan.title, detail: 'One plan for the decisions Intelligence made', intent: 'prepare', subject: plan.adv ? { kind: 'advisor', id: plan.adv, label: ADVISORS[plan.adv].name } : null, output: 'One plan, run as tickets across the teams', constraints: ['No client contact beyond the decided actions', 'Approved content only'], missing: [], authority: auth }));
+  tasks.forEach(t => lines.push(J(t)));
+  lines.push(J({ k: 'end' }));
+  return { name: plan.title, requester: spec.requester, text: plan.text, orch: lines.join('\n'), agents, composed: true };
+}
 /* the leadership what-if on its own engine, as of the start of the stream */
 function sameSignal() { const Y = makeSignals(); Y.reset(); const r = Y.whatIf(SAME_SIGNAL, 1); r.engine = Y; return r; }

@@ -111,12 +111,12 @@ function ask(text, clarified, wo) {
   Object.assign(ST, { nokey: null, approved: new Set(), open: null, openTask: null, auto: false, announced: null, view: 'floor', msgs: [], type: {}, recent: [] });
   if (rec && AI.mode !== 'live' && rec.requester !== ME) ME = rec.requester;
   UI.requester = ME; UI.run = null;
-  runRequest(text, AI.mode === 'live' ? null : rec, Object.assign({ planOnly: true }, clarified ? { clarified } : {}));
+  runRequest(text, AI.mode === 'live' ? null : rec, Object.assign({ planOnly: true }, clarified ? { clarified } : {}, wo && wo.maxTasks ? { maxTasks: wo.maxTasks } : {}));
   setTimeout(() => comm('req', 'hub', `Request: “${text.replace(/ \(clarification:.*\)$/, '').slice(0, 60)}${text.length > 60 ? '…' : ''}”`, 'request'), 80);
 }
 function answer(v) {
   const r = run(); if (!r || r.status !== 'clarify' || !v) return;
-  ask(`${r.text.replace(/ \(clarification:.*\)$/, '')} (clarification: ${v})`, { question: r.clarify, answer: v }, AO.active);
+  ask(`${r.text.replace(/ \(clarification:.*\)$/, '')} (clarification: ${v})`, { question: r.clarify, answer: v }, AO.active || AO.planning);
 }
 
 /* ---------- running tickets ---------- */
@@ -431,7 +431,7 @@ function resultsHTML(r) {
   const secs = Math.max(1, Math.round(((r.t1 || Date.now()) - r.t0) / 1000));
   const tiles = acts.map(a => `<div class="ot ${a.tone}"><span class="oti">${I(a.icon, 18)}</span><div class="otb"><small>${h(a.kind)}</small>${a.big ? `<b>${h(a.big)}</b>` : ''}<span>${h(a.title || '')}</span>${a.lines.filter(Boolean).map(l => `<em>${h(l)}</em>`).join('')}<footer>${avatar(a.who, a.team, 18)}${h(a.who)}${a.id ? `<code>${h(a.id)}</code>` : ''}</footer></div></div>`)
     .concat(docs.map(t => { const o = t.result.output, rec = outputsOf(t)[0]; return `<a class="ot doc" href="#doc-${t.id}"><span class="oti">${I('doc', 18)}</span><div class="otb"><small>${h(kindName(o.kind))}</small><b>${h(o.title || t.title)}</b>${rec ? `<em class="${rec.status === 'Waiting for approval' ? 'w' : 'ok'}">${rec.status === 'Waiting for approval' ? 'Awaiting sign-off' : h(rec.status)}</em>` : ''}<footer>${avatar(personOf(t), roleOfT(t).team, 18)}${h(personOf(t))} · ${h(roleOfT(t).name)}</footer></div></a>`; }));
-  return `<section class="hero"><div class="hl"><span class="st ${doneAll ? 'ok' : ''}">${I(doneAll ? 'check' : 'clock', 13)}${doneAll ? 'Complete' : 'In progress'}</span><h1>${h(r.text.replace(/ \(clarification:.*\)$/, ''))}</h1><p>Requested by ${h(E.name)} · ${r.tasks.length} tickets across ${teams.size} team${teams.size > 1 ? 's' : ''} · ${secs} s · ${ST.msgs.length} orchestration messages</p></div>
+  return `<section class="hero"><div class="hl"><span class="st ${doneAll ? 'ok' : ''}">${I(doneAll ? 'check' : 'clock', 13)}${doneAll ? 'Complete' : 'In progress'}</span><h1>${h((r.title || r.text).replace(/ \(clarification:.*\)$/, ''))}</h1><p>Requested by ${h(E.name)} · ${r.tasks.length} tickets across ${teams.size} team${teams.size > 1 ? 's' : ''} · ${secs} s · ${ST.msgs.length} orchestration messages</p></div>
       <div class="metrics"><div class="mlink" data-view="found"><b>${S.reads}</b><small>Foundation items read ${I('arrow', 11)}</small></div><div><b>${S.reused}</b><small>Reused from other teams</small></div><div><b>${S.calls}</b><small>System reads and writes</small></div><div><b>${S.committed}</b><small>Stored back</small></div></div></section>
     ${waiting.length ? `<section class="signbox"><header>${I('alert', 16)}<div><b>Awaiting your sign-off</b><small>Client-facing. Nothing is sent until you approve.</small></div></header>${waiting.map(({ o, t }) => `<div class="sr">${avatar(personOf(t), roleOfT(t).team, 28)}<div><b>${h(o.title)}</b><small>${h(kindName(o.kind))} · ${h(personOf(t))}, ${h(roleOfT(t).name)}</small></div><a class="btn subtle sm" href="#doc-${t.id}">${I('eye', 13)} Review</a><button type="button" class="btn primary sm" data-signoff="${h(o.id)}">${I('check', 13)} Approve</button></div>`).join('')}</section>` : ''}
     <div class="sh2">Outcomes</div><div class="ots">${tiles.join('') || '<p class="muted">Nothing finished yet.</p>'}</div>

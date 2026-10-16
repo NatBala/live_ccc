@@ -121,7 +121,7 @@ function paintCtl() {
   const n = SGS.events.length - SGS.history, at = Math.max(0, SGS.cursor - SGS.history), wo = AO.active || AO.viewing;
   if (wo && !AO.peek) {
     const A = wo.adv && ADVISORS[wo.adv], [ic, nm] = ACT[wo.action], back = wo.explorer ? (A ? advShort(wo.adv) : 'Advisors') : 'Signals board';
-    setHTML(box, `<div class="aostrip"><span class="aobolt">${I(wo.explorer ? 'users' : 'pulse', 14)}</span><span class="aoct"><small>${AO.viewing ? 'Work order · done' : wo.explorer ? 'Running an advisor action' : 'Running a work order from Always-on'}</small><b><code>${wo.id}</code> ${I(ic, 13)} ${h(nm)} · ${A ? `${h(advShort(wo.adv))} <span class="muted">(${h(firmShort(A.firm))})</span>` : 'Southern California'}</b></span>${wo.replay && AI.mode !== 'live' ? `<span class="aorp" title="No live AI here, so the saved AI run of an equivalent request plays">${I('play', 11)} Saved run: “${h(wo.replay.text.slice(0, 48))}${wo.replay.text.length > 48 ? '…' : ''}”</span>` : ''}<button type="button" class="btn sm" data-aoboard>${I(wo.explorer ? 'arrow' : 'target', 13)} ${wo.explorer ? 'Back to ' + h(back) : h(back)}</button></div>`);
+    setHTML(box, `<div class="aostrip"><span class="aobolt">${I(wo.explorer ? 'users' : 'pulse', 14)}</span><span class="aoct"><small>${AO.viewing ? (wo.isPlan ? 'Plan · done' : 'Work order · done') : wo.isPlan ? 'Running an approved plan' : wo.explorer ? 'Running an advisor action' : 'Running a work order from Always-on'}</small><b><code>${wo.id}</code> ${I(ic, 13)} ${wo.isPlan ? h(wo.title.replace(/^[^:]+: /, '')) : h(nm)} · ${A ? `${h(advShort(wo.adv))} <span class="muted">(${h(firmShort(A.firm))})</span>` : 'Southern California'}</b></span>${wo.replay && AI.mode !== 'live' ? `<span class="aorp" title="No live AI here, so saved AI work plays">${I('play', 11)} ${wo.isPlan ? 'Saved plan: steps from saved AI runs' : `Saved run: “${h(wo.replay.text.slice(0, 48))}${wo.replay.text.length > 48 ? '…' : ''}”`}</span>` : ''}<button type="button" class="btn sm" data-aoboard>${I(wo.explorer ? 'arrow' : 'target', 13)} ${wo.explorer ? 'Back to ' + h(back) : h(back)}</button></div>`);
     return;
   }
   if (ST.mode === 'advisors') { setHTML(box, `<div class="aoclock"><span class="aolive">${I('users', 12)} Advisor view</span><b>As of ${h(simDay(AOX().S.now))}</b><span>${h(AOX().S.events.filter(e => e.adv).length)} events since Jul 1 from ${new Set(AOX().S.events.map(e => SIG_TYPES[e.type].sys)).size} sources</span></div>`); return; }
@@ -319,8 +319,8 @@ function paintAdvisors() {
   }).join('') || '<p class="muted sm">No events in this channel.</p>'}</div>`);
   /* takeaway and actions */
   const TK = sel === 'territory' ? (AX.ter = AX.ter || X.territory()) : X.takeaway(sel), acts = axActions(sel);
-  setHTML(el('axs'), `<section class="sgcol axtk"><div class="sgh">${I('sparkles', 14)}<b>Takeaway</b>${TK.style ? `<span class="tag rule">${h(TK.style)}</span><span class="tag ${TK.momentum === 'Rising' ? '' : 'rule'}">${h(TK.momentum)}</span>` : ''}</div><div class="tkb"><p class="tkh">${h(TK.headline)}</p>${TK.bullets.map(([k, v]) => `<div class="tkr"><span>${h(k)}</span><p>${h(v)}</p></div>`).join('')}</div></section>
-    <section class="sgcol axac"><div class="sgh">${I('target', 14)}<b>What we’re doing</b><small>${acts.length} action${acts.length === 1 ? '' : 's'}</small></div><div class="acl">${acts.map(a => actionCard(a)).join('') || '<p class="muted sm">Nothing to do yet: Intelligence keeps watching.</p>'}</div></section>`);
+  setHTML(el('axs'), `<section class="sgcol axtk"><div class="sgh">${I('sparkles', 14)}<b>Takeaway</b>${TK.style ? `<span class="tag rule">${h(TK.style)}</span><span class="tag ${TK.momentum === 'Rising' ? '' : 'rule'}">${h(TK.momentum)}</span>` : ''}</div><div class="tkb"><p class="tkh">${h(TK.headline)}</p>${TK.bullets.slice(0, 2).map(([k, v]) => `<div class="tkr"><span>${h(k)}</span><p>${h(v)}</p></div>`).join('')}<details class="tkmore"><summary>More: ${TK.bullets.slice(2).map(([k]) => h(k.toLowerCase())).join(', ')}</summary>${TK.bullets.slice(2).map(([k, v]) => `<div class="tkr"><span>${h(k)}</span><p>${h(v)}</p></div>`).join('')}</details></div></section>
+    ${planHTML(sel)}`);
 }
 function actionCard(a) {
   const [ic, nm] = ACT[a.action], E = a.owner && EMPLOYEES[a.owner], live = AI.mode === 'live';
@@ -376,3 +376,107 @@ function compareHTML() {
         <p class="cmpctx">${p.touch ? `Last contact ${h(SIGNALS.dstr(p.touch.t))}${p.touch.by ? ' (' + h(first(EMPLOYEES[p.touch.by].name)) + ')' : ''}` : 'No recent contact'} · Sales α ±${d.model.band}%</p>
         <details class="recd"><summary>${I('shield', 12)} Decision record</summary>${recHTML(Y.record(d))}</details></article>`; }).join('')}</div>`;
 }
+
+/* ---------- What we're doing: one plan per advisor, inferred by Intelligence ----------
+   The decision service decides what to do; Intelligence plans how, from a decision brief
+   (live AI), or plays the saved plan when there is no AI key. One approval runs it. */
+AX.plans = {};
+function planOf(sel) {
+  if (!sel || sel === 'compare') return null;
+  if (!AX.plans[sel]) {
+    const P = AOX().planInputs(sel);
+    const plan = Object.assign({ id: 'PLAN-' + (sel === 'territory' ? 'TER' : sel.slice(-3)), status: P.text ? 'idle' : 'none', removed: new Set(), explorer: true, isPlan: true, maxTasks: 8 }, P);
+    plan.replay = P.text ? composePlanReplay(plan) : null;
+    AX.plans[sel] = plan;
+  }
+  return AX.plans[sel];
+}
+async function startPlan(p) {
+  if (AI.mode !== 'live' && !p.replay) { p.status = 'needs-ai'; paintAll(); return; }
+  if (p.replay && !RECORDED.includes(p.replay)) RECORDED.push(p.replay);
+  p.status = 'planning'; AO.planning = p; ME = p.requester; UI.requester = ME;
+  ask(p.text, null, p);
+  p.run = UI.run && UI.run.text === p.text ? UI.run : null;
+  if (!p.run) { p.status = 'failed'; AO.planning = null; paintAll(); return; }
+  p.run.title = p.title; ST.announced = p.run.id; /* assignments are announced when the plan runs, not while it is drafted */
+  await until(() => ['planned', 'clarify', 'failed', 'done'].includes(p.run.status), 120000);
+  if (p.run.status === 'clarify' && AI.mode === 'live') {
+    answer('Make your best assumption and continue'); await new Promise(r => setTimeout(r, 60));
+    p.run = UI.run; p.run.title = p.title; ST.announced = p.run.id;
+    await until(() => ['planned', 'failed', 'done'].includes(p.run.status), 120000);
+  }
+  p.status = p.run.status === 'planned' ? 'ready' : 'failed';
+  AO.planning = null; paintAll();
+}
+/* plan the selected advisor whenever Intelligence is free */
+setInterval(() => {
+  if (ST.mode !== 'advisors' || !boardShown() || busyPlanning() || anyRunning() || AO.active || AO.planning) return;
+  const p = planOf(AX.sel); if (p && p.status === 'idle') startPlan(p);
+}, 400);
+function rewave(r) {
+  r.tasks.forEach(t => { t.wave = 0; });
+  const waveOf = t => t.wave || (t.wave = 1 + Math.max(0, ...t.depends_on.map(d => r.tasks.find(x => x.id === d)).filter(Boolean).map(waveOf)));
+  r.tasks.forEach(waveOf);
+  const order = [], seen = new Set(), visit = t => { if (seen.has(t.id)) return; seen.add(t.id); t.depends_on.forEach(d => { const x = r.tasks.find(y => y.id === d); if (x) visit(x); }); order.push(t); };
+  r.tasks.forEach(visit); order.forEach((t, k) => { t.step = k + 1; }); r.tasks.sort((a, b) => a.step - b.step);
+}
+async function runPlan(p) {
+  const r = p.run;
+  if (!r || p.status !== 'ready') return;
+  if (AO.active || busyPlanning() || anyRunning()) { toast('Something is already running.'); return; }
+  if (p.removed.size) { r.tasks = r.tasks.filter(t => !p.removed.has(t.id)); r.tasks.forEach(t => { t.depends_on = t.depends_on.filter(d => r.tasks.some(x => x.id === d)); }); rewave(r); }
+  if (!r.tasks.length) { toast('Every step was removed.'); return; }
+  UI.run = r; ME = r.requester; UI.requester = ME;
+  Object.assign(ST, { approved: new Set(), open: null, openTask: null, auto: false, announced: null, view: 'floor', msgs: [], type: {}, recent: [] });
+  if (!UI.ctl || UI.ctl.signal.aborted) UI.ctl = new AbortController();
+  p.status = 'running'; AO.active = p; AO.peek = false; AO.viewing = null; paintAll();
+  comm('req', 'hub', `Approved plan: ${r.tasks.length} steps`, 'request');
+  await sleep(1800);
+  await runAll();
+  const bad = r.tasks.find(t => t.state === 'failed');
+  if (bad && r.status !== 'done') finishRun(r, `Step “${bad.title}” failed: ${bad.error || 'no result'}`);
+  await until(() => r.status === 'done' || r.status === 'failed', 30000);
+  p.status = r.status === 'done' ? 'done' : 'failed'; p.outcome = r.status === 'done' ? outcomeOf(r) : r.error || 'Stopped before every step finished';
+  logEvent('plan.completed', `${p.id} ${p.title}`, 'always-on', p.adv);
+  AO.active = null; AO.viewing = p; ST.view = r.status === 'done' ? 'results' : 'floor'; paintAll();
+}
+function planHTML(sel) {
+  const p = planOf(sel); if (!p) return '';
+  const live = AI.mode === 'live', r = p.run, tasks = r ? r.tasks : [], X = AOX();
+  const heads = p.decisions.length ? p.decisions.map((d, i) => { const E = EMPLOYEES[d.owner]; return `${i ? `<span class="parr">${I('arrow', 12)}</span>` : ''}<span class="pdc" style="--c:${ACT_COL[d.action]}">${I(ACT[d.action][0], 12)}<b>${h(ACT[d.action][1])}</b><code>${h(d.id)}</code>${avatar(E.name, E.team, 18)}<small>${h(first(E.name))}</small></span>`; }).join('')
+    : sel === 'territory' ? p.hints.map(x => `<span class="pdc" style="--c:${ACT_COL[x.action]}">${I(ACT[x.action][0], 12)}<b>${h(ACT[x.action][1])}</b></span>`).join('') : '';
+  const lead = p.decisions[0] ? primaryWhy(p.decisions[0]) : sel === 'territory' ? (AX.ter || X.territory()).headline : '';
+  if (p.status === 'none') {
+    const o = (p.others || [])[0];
+    return `<section class="sgcol axac"><div class="sgh">${I('target', 14)}<b>What we’re doing</b></div><div class="pl">${o ? `<div class="pdh"><span class="pdc" style="--c:${ACT_COL[o.action]}">${I(ACT[o.action][0], 12)}<b>${h(ACT[o.action][1])}</b><code>${h(o.id)}</code></span></div><p class="plw">${h(primaryWhy(o))}</p>` : ''}
+      <div class="pnone">${I('check', 14)}<span><b>No steps for the teams.</b> ${o && o.action === 'defer' ? 'The advisor asked us to wait, so there is nothing to orchestrate.' : o && o.action === 'journey' ? 'A pre-approved journey runs on its own.' : 'Intelligence keeps watching.'}</span></div>
+      ${o ? `<details class="recd"><summary>${I('shield', 12)} Decision record</summary>${recHTML(X.record(o))}</details>` : ''}</div></section>`;
+  }
+  const busy = p.status === 'planning', ready = p.status === 'ready';
+  const waves = [...new Set(tasks.map(t => t.wave).filter(Boolean))];
+  const rows = tasks.map((t, i) => { const R = roleOfT(t), who = personOf(t), off = p.removed.has(t.id), deps = t.depends_on.map(d => tasks.findIndex(x => x.id === d) + 1).filter(n => n > 0);
+    return `<div class="pst${off ? ' off' : ''}${busy && i === tasks.length - 1 ? ' fresh' : ''}" style="--c:${TCOL(R.team)}"><span class="psn">${i + 1}</span>${avatar(who, R.team, 26)}<div><b>${h(t.title)}</b><small>${h(who)} · ${h(R.name)}${deps.length ? ` · after ${deps.map(n => 'step ' + n).join(', ')}` : t.wave ? ' · starts right away' : ''}</small>${t.why || t.objective ? `<p>${h(String(t.why && !/^Catalogue/.test(t.why) ? t.why : t.objective).slice(0, 150))}</p>` : ''}</div>${ready ? `<button type="button" class="x" data-plrm="${h(t.id)}" title="${off ? 'Put this step back' : 'Remove this step before approving'}">${I(off ? 'undo' : 'x', 13)}</button>` : ''}</div>`; }).join('');
+  const D = r && r.bts ? (DRAFTING[r.bts.drafting] || 'Planning') : 'Waiting for Intelligence';
+  const src = live ? 'Live: Intelligence plans from the decision brief' : p.replay ? 'Saved plan: steps from saved AI runs (no AI key here)' : 'Needs live AI';
+  let foot = '';
+  if (p.status === 'needs-ai') foot = `<span class="fo warn">${I('alert', 13)} Planning this one needs live AI: there is no saved plan for it.</span>`;
+  else if (p.status === 'idle') foot = `<span class="busy"><span class="spin"></span> Queued: Intelligence plans it when it’s free</span>`;
+  else if (busy) foot = `<span class="busy"><span class="spin"></span> ${h(D)}…</span>`;
+  else if (ready) { const n = tasks.length - p.removed.size; foot = `<span class="acn">${avatar(EMPLOYEES[p.requester].name, EMPLOYEES[p.requester].team, 20)} ${h(first(EMPLOYEES[p.requester].name))} approves</span><button type="button" class="btn primary" data-plrun="${h(sel)}">${I('play', 13)} Approve and run plan · ${n} step${n === 1 ? '' : 's'}</button>`; }
+  else if (p.status === 'running') foot = `<span class="busy"><span class="spin"></span> Running on the orchestration canvas</span><button type="button" class="btn sm" data-aorun>${I('branch', 12)} Watch</button>`;
+  else if (p.status === 'done' || p.status === 'failed') foot = `<span class="fo ${p.status === 'done' ? 'ok' : 'warn'}">${I(p.status === 'done' ? 'check' : 'alert', 13)} ${h(p.outcome || (p.status === 'failed' ? 'Planning failed' : 'Done'))}</span>${r && r.status === 'done' ? `<button type="button" class="btn sm" data-plres="${h(sel)}">${I('doc', 12)} Results</button>` : ''}`;
+  return `<section class="sgcol axac"><div class="sgh">${I('target', 14)}<b>What we’re doing</b><small>${h(src)}</small></div><div class="pl">
+    ${heads ? `<div class="pdh">${heads}</div>` : ''}${lead ? `<p class="plw">${h(lead)}</p>` : ''}
+    <div class="psh"><span>${busy ? `${I('sparkles', 12)} ${h(HUB)} is planning the steps` : tasks.length ? `${tasks.length - p.removed.size} steps · ${waves.length} wave${waves.length === 1 ? '' : 's'} · ${new Set(tasks.map(t => roleOfT(t).team)).size} teams` : 'Steps'}</span>${p.removed.size && ready ? `<small>${p.removed.size} removed</small>` : ''}</div>
+    <div class="psl">${rows || (busy || p.status === 'idle' ? '<div class="pst sk"><span class="psn"></span><i></i></div><div class="pst sk"><span class="psn"></span><i></i></div><div class="pst sk"><span class="psn"></span><i></i></div>' : '')}${busy && rows ? '<div class="pst sk"><span class="psn"></span><i></i></div>' : ''}</div>
+    ${p.hints && p.hints.length && sel !== 'territory' ? `<div class="pin"><small>Evidence Intelligence was told to cover</small>${p.hints.map(x => `<span title="${h(x.why)}" style="--c:${ACT_COL[x.action]}"><i></i>${h(ACT[x.action][1])}</span>`).join('')}</div>` : ''}
+    <details class="recd"><summary>${I('send', 12)} Decision brief sent to ${h(HUB)}</summary><p class="brief">${h(p.text)}</p></details>
+    ${p.decisions[0] ? `<details class="recd"><summary>${I('shield', 12)} Decision record</summary>${recHTML(X.record(p.decisions[0]))}</details>` : ''}
+    <footer class="pfoot">${foot}</footer></div></section>`;
+}
+document.addEventListener('click', e => {
+  const q = s => e.target.closest(s); let x;
+  if ((x = q('[data-plrm]'))) { const p = planOf(AX.sel); if (p && p.status === 'ready') { const id = x.dataset.plrm; p.removed.has(id) ? p.removed.delete(id) : p.removed.add(id); paintAll(); } return; }
+  if ((x = q('[data-plrun]'))) { const p = planOf(x.dataset.plrun); if (p) runPlan(p); return; }
+  if ((x = q('[data-plres]'))) { const p = planOf(x.dataset.plres); if (p && p.run && !AO.active) { UI.run = p.run; ST.view = 'results'; AO.viewing = p; ST.msgs = []; ST.approved = new Set(p.run.tasks.map(t => t.id)); paintAll(); } return; }
+});

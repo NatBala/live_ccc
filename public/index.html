@@ -651,6 +651,33 @@ body.aoboard .stage{grid-template-columns:minmax(0,1fr)}
 .cmpx{display:flex;flex-wrap:wrap;gap:5px}.cmpx .gd small{max-width:200px}
 .cmpctx{margin:0;font-size:11.5px;color:var(--ink3)}
 @media (max-width:1180px){.axcmp{grid-column:1/-1}.cmpg{grid-template-columns:1fr}.cmph{flex-direction:column}}
+/* ===== What we're doing: the plan ===== */
+.pl{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.pdh{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.pdc{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 9px 0 7px;border-radius:8px;background:color-mix(in srgb,var(--c) 10%,#fff);border:1px solid color-mix(in srgb,var(--c) 30%,#fff);color:var(--c);font-size:12px}
+.pdc b{font-weight:600}.pdc code{font-size:10.5px}.pdc small{color:var(--ink2);font-size:11.5px}
+.parr{color:var(--mut);display:inline-flex}
+.plw{margin:0;font-size:12.5px;color:var(--ink2);line-height:1.45}
+.psh{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;border-top:1px solid var(--line2);padding-top:9px}
+.psh span{display:inline-flex;align-items:center;gap:5px}.psh small{text-transform:none;letter-spacing:0;color:var(--warn)}
+.psl{display:flex;flex-direction:column;gap:6px}
+.pst{display:grid;grid-template-columns:20px auto minmax(0,1fr) auto;gap:9px;align-items:start;padding:8px 9px;border:1px solid var(--line);border-left:3px solid var(--c);border-radius:10px;background:#fff}
+.pst.fresh{animation:evin .45s ease}
+.pst .psn{width:20px;height:20px;border-radius:6px;background:var(--line2);display:grid;place-items:center;font:600 11px var(--sans);color:var(--ink3);margin-top:3px}
+.pst b{display:block;font-weight:600;font-size:12.5px}.pst small{display:block;font-size:11px;color:var(--ink3)}.pst p{margin:3px 0 0;font-size:11.5px;color:var(--ink2);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pst .x{border:0;background:none;color:var(--mut);padding:2px;border-radius:6px}.pst .x:hover{background:var(--line2);color:var(--bad)}
+.pst.off{opacity:.5}.pst.off b{text-decoration:line-through}
+.pst.sk{border-left-color:var(--line);grid-template-columns:20px 1fr;align-items:center}.pst.sk i{height:12px;border-radius:6px;background:linear-gradient(90deg,var(--line2),#f8fafc,var(--line2));background-size:200% 100%;animation:shim 1.2s linear infinite}
+@keyframes shim{from{background-position:200% 0}to{background-position:-200% 0}}
+.pin{display:flex;flex-wrap:wrap;align-items:center;gap:5px}.pin small{width:100%;font-size:11px;color:var(--ink3)}
+.pin span{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:6px;background:var(--sunk);border:1px solid var(--line2);font-size:11px;color:var(--ink2)}.pin i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+.brief{margin:6px 0 0;font-size:12px;color:var(--ink2);line-height:1.5;background:var(--sunk);border:1px solid var(--line2);border-radius:8px;padding:8px 10px}
+.pfoot{display:flex;align-items:center;gap:8px;padding-top:10px;border-top:1px solid var(--line2);font-size:12px}
+.pfoot .btn.primary{margin-left:auto}.pfoot .fo{flex:1;font-size:12px;line-height:1.35}.pfoot .busy{flex:1;display:inline-flex;align-items:center;gap:8px;color:var(--ink3)}
+.pnone{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--ink2);background:var(--sunk);border:1px solid var(--line2);border-radius:10px;padding:9px 11px}.pnone .i{color:var(--ok);margin-top:2px}
+.tkmore{border-top:1px solid var(--line2);padding-top:6px;margin-top:2px}.tkmore summary{cursor:pointer;font-size:12px;font-weight:600;color:var(--pri);list-style:none}.tkmore summary::-webkit-details-marker{display:none}
+.tkb{padding:12px 14px 10px}
+.topact{flex:none}.aoctl{overflow:hidden}.aoct{overflow:hidden;flex:0 1 auto}.aostrip{max-width:100%}
 </style>
 </head>
 <body>
@@ -2998,7 +3025,7 @@ async function runRequestInner(text, replay, opts = {}) {
   if (!replay && AI.mode !== 'live') { toast(AI.mode === 'checking' ? 'Connecting to the AI… try again in a moment.' : 'Live AI isn’t available here. Run it on claude.ai or with the deployment package.'); return; }
   const requester = replay ? replay.requester : UI.requester;
   if (replay) { UI.requester = requester; buildStaticWho(); }
-  const run = { id: 'RUN-' + (++RUNSEQ), requester, text, planOnly: !!opts.planOnly, clarified: opts.clarified || null, territory: null, t0: Date.now(), decisions: [], tasks: [], status: 'thinking', advisor: null, unit: null, stats: { reused: 0, reads: 0, calls: 0, mcp: 0, committed: 0, pending: 0, blocked: 0, rejected: 0, task: 0, ai: 0 }, orchText: '', record: { name: text.slice(0, 60), requester, text, orch: '', agents: {} }, replay };
+  const run = { id: 'RUN-' + (++RUNSEQ), requester, text, maxTasks: opts.maxTasks || 6, planOnly: !!opts.planOnly, clarified: opts.clarified || null, territory: null, t0: Date.now(), decisions: [], tasks: [], status: 'thinking', advisor: null, unit: null, stats: { reused: 0, reads: 0, calls: 0, mcp: 0, committed: 0, pending: 0, blocked: 0, rejected: 0, task: 0, ai: 0 }, orchText: '', record: { name: text.slice(0, 60), requester, text, orch: '', agents: {} }, replay };
   UI.run = run; UI.ctl = new AbortController(); F.runs.push(run); UI.totals.runs++;
   $('runBtn').disabled = true; $('planBtn').disabled = true; $('stopBtn').hidden = false; $('cmdIn').value = ''; $('cmdIn').blur();
   setTab('updates');
@@ -3142,7 +3169,7 @@ function handleOrch(run, o) {
     if (o.type === 'interpretation') run.interp = normInterp(o);
     if (o.type === 'asks' && Array.isArray(o.asks)) run.asks = o.asks.map(String).filter(Boolean).slice(0, 5).map(text => ({ text, tasks: [] }));
   } else if (o.k === 'task') {
-    if (run.tasks.length >= 6) return;
+    if (run.tasks.length >= (run.maxTasks || 6)) return;
     const arr = x => Array.isArray(x) ? x : x ? [x] : [];
     let id = String(o.id || 'T' + (run.tasks.length + 1)); if (run.tasks.some(x => x.id === id)) id = 'T' + (run.tasks.length + 1);
     const ri = routeInfo(o.route);
@@ -3856,9 +3883,70 @@ function makeSignals() {
     cfg.advisors.slice().sort((x, y) => gainOf(y) - gainOf(x)).forEach(adv => { const last = evs[cfg.advisors.indexOf(adv)].slice(-1)[0]; const wo = decide(adv, last.t + 60000, last); book(wo); out[adv] = wo; });
     return { at: ts(cfg.at, '9:00'), events: evs[0], decisions: cfg.advisors.map(a => out[a]) };
   }
-  return { S, reset, step, after, release, decide, record, whatIf, intentOf, urgency, actName, fmtK, ts, dstr, DAY, runToToday, takeaway, actionsFor, territory, engagement, momentum };
+  /* one plan per advisor: the decisions that need work, plus what the evidence says the plan must also cover */
+  function planInputs(key) {
+    if (key === 'territory') {
+      const T = territory();
+      return { key, adv: null, title: 'Southern California: fee post and LA trends', requester: 'EMP-MARCUS', action: 'social', decisions: [], hints: T.actions,
+        text: `Territory plan for Southern California. Intelligence found: ${T.actions.map((a, i) => `(${i + 1}) ${actName(a.action).toLowerCase()}: ${a.why}`).join(' ')} Plan the steps: draft the fee-transparency LinkedIn post from approved inputs with a compliance review, and confirm the LA trends from recorded conversations. Draft only; nothing goes out without approval.` };
+    }
+    const A = ADVISORS[key], firm = FIRMS[A.firm], all = actionsFor(key);
+    const decs = all.filter(a => a.primary && a.needsWork), hints = all.filter(a => a.supporting), others = all.filter(a => a.primary && !a.needsWork);
+    if (!decs.length) return { key, adv: key, title: '', requester: null, action: others[0] ? others[0].action : 'hold', decisions: [], others, hints, text: '' };
+    const owner = (decs.filter(d => d.action !== 'service').slice(-1)[0] || decs[0]).owner;
+    const HOW = { visit: 'schedule it through SSC and prepare the visit brief', call: 'prepare the call brief', campaign: 'draft the follow-up from approved Seismic content with a compliance review', service: 'fix the access problem and resend in a format the firm allows' };
+    const text = `Relationship plan for ${A.name} (${firm.name}). Intelligence decided ${decs.map((d, i) => `${i ? 'then ' : ''}${d.id}, ${actName(d.action).toLowerCase()} owned by ${EMPLOYEES[d.owner].name} by ${dstr(d.due)} (${d.why.replace(/\.$/, '')}; evidence: ${(d.evidence || []).slice(0, 2).map(e => `${dstr(e.t)} ${e.what}`).join('; ') || 'decision record'})`).join('; ')}. To carry it out: ${decs.map(d => HOW[d.action]).join(', then ')}.${hints.length ? ` Also needed, from the evidence: ${hints.map(x => `${actName(x.action).toLowerCase()} (${x.why.split('. ')[0].replace(/\.$/, '')})`).join('; ')}.` : ''} Rules: no client contact beyond the decided actions; build on existing work; approved Seismic content only${firm.policy ? `; ${firm.policy.replace(/ \(.*\)$/, '').toLowerCase()}` : ''}. Plan the fewest steps, each citing the evidence that requires it.`;
+    return { key, adv: key, title: `${A.name.replace(/,.*$/, '')}: ${decs.map(d => actName(d.action).toLowerCase()).join(', then ')}`, requester: owner, action: decs[0].action, decisions: decs, others, hints, text };
+  }
+  return { S, reset, step, after, release, decide, record, whatIf, planInputs, intentOf, urgency, actName, fmtK, ts, dstr, DAY, runToToday, takeaway, actionsFor, territory, engagement, momentum };
 }
 const SIGNALS = makeSignals();
+/* Without live AI, a plan plays as saved AI work: steps taken from saved runs, joined into one plan with the
+   dependencies the decision needs. With live AI, Intelligence plans it from the decision brief instead. */
+const PLAN_REPLAYS = {
+  'ADV-105': { requester: 'EMP-PRIYA', parts: [
+    { text: 'Which CG ETFs are available at Wells Fargo for Daniel?', tasks: ['T2', 'T3'], ask: 'Confirm which CG ETFs Daniel can use at Wells Fargo' },
+    { text: 'Why are Daniel’s overall sales down when his ETF sales are up?', tasks: ['T1', 'T3'], ask: 'Explain the GFFFX-to-CGGR shift without assuming why' },
+    { text: 'Prepare me for tomorrow’s meeting with Daniel’s team', tasks: ['T2', 'T4', 'T5'], ask: 'Prepare the visit' }],
+    links: { P3T4: ['P1T3'], P3T5: ['P1T3', 'P2T3'] } },
+  'ADV-101': { requester: 'EMP-SAM', parts: [
+    { text: 'Alex says the link in Priya’s email won’t open', requester: 'EMP-KIM', tasks: ['T1', 'T2'], ask: 'Fix the blocked link first' },
+    { text: 'Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.', tasks: ['T2', 'T3'], ask: 'Explain why GFA trailed its index (shared Product work)' },
+    { text: 'Prep me for my call with Alex tomorrow', requester: 'EMP-SAM', tasks: ['T1', 'T2', 'T3'], ask: 'Prepare Sam’s call before the Oct 1 committee' }],
+    links: { P3T3: ['P1T2', 'P2T3'] } },
+  'ADV-106': { requester: 'EMP-PRIYA', parts: [
+    { text: 'What has changed since my last meeting with Rachel?', tasks: ['T1', 'T2', 'T3'], ask: 'Catch up on what changed since Sep 23' },
+    { text: 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month', tasks: ['T1', 'T2', 'T3'], ask: 'Compare BFA and AMBAL for her income plan and schedule the visit' }],
+    links: { P2T2: ['P1T3'] } },
+  'ADV-102': { requester: 'EMP-PRIYA', parts: [{ text: 'Prepare Maya’s retirement committee fee comparison review', tasks: ['T1', 'T2', 'T3'], ask: 'Prepare the committee fee review Maya asked to walk through' }], links: {} },
+  'ADV-104': { requester: 'EMP-MARCUS', parts: [{ text: 'Create an ETF email campaign for Sofia', tasks: ['T1', 'T2', 'T3'], ask: 'Draft the details Sofia asked for' }], links: {} },
+  territory: { requester: 'EMP-MARCUS', parts: [
+    { text: 'Write a LinkedIn post on fee transparency for advisors', tasks: ['T1', 'T2', 'T3', 'T4'], ask: 'Draft the fee-transparency LinkedIn post' },
+    { text: 'Identify the growing trends in LA territory', tasks: ['T1', 'T3'], ask: 'Confirm the LA territory trends' }], links: {} }
+};
+function composePlanReplay(plan) {
+  const spec = PLAN_REPLAYS[plan.key]; if (!spec || typeof RECORDED === 'undefined') return null;
+  const J = o => JSON.stringify(o), lines = [], tasks = [], agents = {}, auths = [], E = EMPLOYEES[spec.requester];
+  lines.push(J({ k: 'decision', type: 'requester', title: `${E.name}, ${TEAMS[E.team].name}`, detail: 'Owner of this relationship plan' }));
+  lines.push(J({ k: 'decision', type: 'asks', title: `${spec.parts.length} part${spec.parts.length > 1 ? 's' : ''} of one plan`, detail: spec.parts.map((p, i) => `${i + 1}. ${p.ask}`).join(' · '), asks: spec.parts.map(p => p.ask) }));
+  if (plan.adv) lines.push(J({ k: 'decision', type: 'entity', title: `${ADVISORS[plan.adv].short} → ${ADVISORS[plan.adv].name.replace(/,.*$/, '')}, ${FIRMS[ADVISORS[plan.adv].firm].name}`, detail: 'From the decision record', advisor: plan.adv }));
+  spec.parts.forEach((part, c) => {
+    const rec = RECORDED.find(r => r.text === part.text && (!part.requester || r.requester === part.requester)); if (!rec) return;
+    const objs = rec.orch.split('\n').filter(Boolean).map(l => JSON.parse(l)), keep = new Set(part.tasks), nid = id => `P${c + 1}${id}`;
+    const it = objs.find(o => o.type === 'interpretation'); auths.push(it && it.authority ? it.authority : authorityFromText(rec.text, EMPLOYEES[rec.requester].team).authority);
+    objs.filter(o => o.k === 'decision' && ['known', 'controls'].includes(o.type)).slice(0, 1).forEach(o => lines.push(J(o)));
+    objs.filter(o => o.k === 'task' && keep.has(o.id)).forEach(o => {
+      const t = Object.assign({}, o, { id: nid(o.id), ask: c + 1, depends_on: (o.depends_on || []).filter(d => keep.has(d)).map(nid) });
+      (spec.links[t.id] || []).forEach(d => { if (!t.depends_on.includes(d)) t.depends_on.push(d); });
+      tasks.push(t); agents[t.id] = rec.agents[o.id];
+    });
+  });
+  const auth = auths.sort((a, b) => authN(b) - authN(a))[0] || 'read_only';
+  lines.push(J({ k: 'decision', type: 'interpretation', title: plan.title, detail: 'One plan for the decisions Intelligence made', intent: 'prepare', subject: plan.adv ? { kind: 'advisor', id: plan.adv, label: ADVISORS[plan.adv].name } : null, output: 'One plan, run as tickets across the teams', constraints: ['No client contact beyond the decided actions', 'Approved content only'], missing: [], authority: auth }));
+  tasks.forEach(t => lines.push(J(t)));
+  lines.push(J({ k: 'end' }));
+  return { name: plan.title, requester: spec.requester, text: plan.text, orch: lines.join('\n'), agents, composed: true };
+}
 /* the leadership what-if on its own engine, as of the start of the stream */
 function sameSignal() { const Y = makeSignals(); Y.reset(); const r = Y.whatIf(SAME_SIGNAL, 1); r.engine = Y; return r; }
 
@@ -3975,12 +4063,12 @@ function ask(text, clarified, wo) {
   Object.assign(ST, { nokey: null, approved: new Set(), open: null, openTask: null, auto: false, announced: null, view: 'floor', msgs: [], type: {}, recent: [] });
   if (rec && AI.mode !== 'live' && rec.requester !== ME) ME = rec.requester;
   UI.requester = ME; UI.run = null;
-  runRequest(text, AI.mode === 'live' ? null : rec, Object.assign({ planOnly: true }, clarified ? { clarified } : {}));
+  runRequest(text, AI.mode === 'live' ? null : rec, Object.assign({ planOnly: true }, clarified ? { clarified } : {}, wo && wo.maxTasks ? { maxTasks: wo.maxTasks } : {}));
   setTimeout(() => comm('req', 'hub', `Request: “${text.replace(/ \(clarification:.*\)$/, '').slice(0, 60)}${text.length > 60 ? '…' : ''}”`, 'request'), 80);
 }
 function answer(v) {
   const r = run(); if (!r || r.status !== 'clarify' || !v) return;
-  ask(`${r.text.replace(/ \(clarification:.*\)$/, '')} (clarification: ${v})`, { question: r.clarify, answer: v }, AO.active);
+  ask(`${r.text.replace(/ \(clarification:.*\)$/, '')} (clarification: ${v})`, { question: r.clarify, answer: v }, AO.active || AO.planning);
 }
 
 /* ---------- running tickets ---------- */
@@ -4295,7 +4383,7 @@ function resultsHTML(r) {
   const secs = Math.max(1, Math.round(((r.t1 || Date.now()) - r.t0) / 1000));
   const tiles = acts.map(a => `<div class="ot ${a.tone}"><span class="oti">${I(a.icon, 18)}</span><div class="otb"><small>${h(a.kind)}</small>${a.big ? `<b>${h(a.big)}</b>` : ''}<span>${h(a.title || '')}</span>${a.lines.filter(Boolean).map(l => `<em>${h(l)}</em>`).join('')}<footer>${avatar(a.who, a.team, 18)}${h(a.who)}${a.id ? `<code>${h(a.id)}</code>` : ''}</footer></div></div>`)
     .concat(docs.map(t => { const o = t.result.output, rec = outputsOf(t)[0]; return `<a class="ot doc" href="#doc-${t.id}"><span class="oti">${I('doc', 18)}</span><div class="otb"><small>${h(kindName(o.kind))}</small><b>${h(o.title || t.title)}</b>${rec ? `<em class="${rec.status === 'Waiting for approval' ? 'w' : 'ok'}">${rec.status === 'Waiting for approval' ? 'Awaiting sign-off' : h(rec.status)}</em>` : ''}<footer>${avatar(personOf(t), roleOfT(t).team, 18)}${h(personOf(t))} · ${h(roleOfT(t).name)}</footer></div></a>`; }));
-  return `<section class="hero"><div class="hl"><span class="st ${doneAll ? 'ok' : ''}">${I(doneAll ? 'check' : 'clock', 13)}${doneAll ? 'Complete' : 'In progress'}</span><h1>${h(r.text.replace(/ \(clarification:.*\)$/, ''))}</h1><p>Requested by ${h(E.name)} · ${r.tasks.length} tickets across ${teams.size} team${teams.size > 1 ? 's' : ''} · ${secs} s · ${ST.msgs.length} orchestration messages</p></div>
+  return `<section class="hero"><div class="hl"><span class="st ${doneAll ? 'ok' : ''}">${I(doneAll ? 'check' : 'clock', 13)}${doneAll ? 'Complete' : 'In progress'}</span><h1>${h((r.title || r.text).replace(/ \(clarification:.*\)$/, ''))}</h1><p>Requested by ${h(E.name)} · ${r.tasks.length} tickets across ${teams.size} team${teams.size > 1 ? 's' : ''} · ${secs} s · ${ST.msgs.length} orchestration messages</p></div>
       <div class="metrics"><div class="mlink" data-view="found"><b>${S.reads}</b><small>Foundation items read ${I('arrow', 11)}</small></div><div><b>${S.reused}</b><small>Reused from other teams</small></div><div><b>${S.calls}</b><small>System reads and writes</small></div><div><b>${S.committed}</b><small>Stored back</small></div></div></section>
     ${waiting.length ? `<section class="signbox"><header>${I('alert', 16)}<div><b>Awaiting your sign-off</b><small>Client-facing. Nothing is sent until you approve.</small></div></header>${waiting.map(({ o, t }) => `<div class="sr">${avatar(personOf(t), roleOfT(t).team, 28)}<div><b>${h(o.title)}</b><small>${h(kindName(o.kind))} · ${h(personOf(t))}, ${h(roleOfT(t).name)}</small></div><a class="btn subtle sm" href="#doc-${t.id}">${I('eye', 13)} Review</a><button type="button" class="btn primary sm" data-signoff="${h(o.id)}">${I('check', 13)} Approve</button></div>`).join('')}</section>` : ''}
     <div class="sh2">Outcomes</div><div class="ots">${tiles.join('') || '<p class="muted">Nothing finished yet.</p>'}</div>
@@ -4605,7 +4693,7 @@ function paintCtl() {
   const n = SGS.events.length - SGS.history, at = Math.max(0, SGS.cursor - SGS.history), wo = AO.active || AO.viewing;
   if (wo && !AO.peek) {
     const A = wo.adv && ADVISORS[wo.adv], [ic, nm] = ACT[wo.action], back = wo.explorer ? (A ? advShort(wo.adv) : 'Advisors') : 'Signals board';
-    setHTML(box, `<div class="aostrip"><span class="aobolt">${I(wo.explorer ? 'users' : 'pulse', 14)}</span><span class="aoct"><small>${AO.viewing ? 'Work order · done' : wo.explorer ? 'Running an advisor action' : 'Running a work order from Always-on'}</small><b><code>${wo.id}</code> ${I(ic, 13)} ${h(nm)} · ${A ? `${h(advShort(wo.adv))} <span class="muted">(${h(firmShort(A.firm))})</span>` : 'Southern California'}</b></span>${wo.replay && AI.mode !== 'live' ? `<span class="aorp" title="No live AI here, so the saved AI run of an equivalent request plays">${I('play', 11)} Saved run: “${h(wo.replay.text.slice(0, 48))}${wo.replay.text.length > 48 ? '…' : ''}”</span>` : ''}<button type="button" class="btn sm" data-aoboard>${I(wo.explorer ? 'arrow' : 'target', 13)} ${wo.explorer ? 'Back to ' + h(back) : h(back)}</button></div>`);
+    setHTML(box, `<div class="aostrip"><span class="aobolt">${I(wo.explorer ? 'users' : 'pulse', 14)}</span><span class="aoct"><small>${AO.viewing ? (wo.isPlan ? 'Plan · done' : 'Work order · done') : wo.isPlan ? 'Running an approved plan' : wo.explorer ? 'Running an advisor action' : 'Running a work order from Always-on'}</small><b><code>${wo.id}</code> ${I(ic, 13)} ${wo.isPlan ? h(wo.title.replace(/^[^:]+: /, '')) : h(nm)} · ${A ? `${h(advShort(wo.adv))} <span class="muted">(${h(firmShort(A.firm))})</span>` : 'Southern California'}</b></span>${wo.replay && AI.mode !== 'live' ? `<span class="aorp" title="No live AI here, so saved AI work plays">${I('play', 11)} ${wo.isPlan ? 'Saved plan: steps from saved AI runs' : `Saved run: “${h(wo.replay.text.slice(0, 48))}${wo.replay.text.length > 48 ? '…' : ''}”`}</span>` : ''}<button type="button" class="btn sm" data-aoboard>${I(wo.explorer ? 'arrow' : 'target', 13)} ${wo.explorer ? 'Back to ' + h(back) : h(back)}</button></div>`);
     return;
   }
   if (ST.mode === 'advisors') { setHTML(box, `<div class="aoclock"><span class="aolive">${I('users', 12)} Advisor view</span><b>As of ${h(simDay(AOX().S.now))}</b><span>${h(AOX().S.events.filter(e => e.adv).length)} events since Jul 1 from ${new Set(AOX().S.events.map(e => SIG_TYPES[e.type].sys)).size} sources</span></div>`); return; }
@@ -4803,8 +4891,8 @@ function paintAdvisors() {
   }).join('') || '<p class="muted sm">No events in this channel.</p>'}</div>`);
   /* takeaway and actions */
   const TK = sel === 'territory' ? (AX.ter = AX.ter || X.territory()) : X.takeaway(sel), acts = axActions(sel);
-  setHTML(el('axs'), `<section class="sgcol axtk"><div class="sgh">${I('sparkles', 14)}<b>Takeaway</b>${TK.style ? `<span class="tag rule">${h(TK.style)}</span><span class="tag ${TK.momentum === 'Rising' ? '' : 'rule'}">${h(TK.momentum)}</span>` : ''}</div><div class="tkb"><p class="tkh">${h(TK.headline)}</p>${TK.bullets.map(([k, v]) => `<div class="tkr"><span>${h(k)}</span><p>${h(v)}</p></div>`).join('')}</div></section>
-    <section class="sgcol axac"><div class="sgh">${I('target', 14)}<b>What we’re doing</b><small>${acts.length} action${acts.length === 1 ? '' : 's'}</small></div><div class="acl">${acts.map(a => actionCard(a)).join('') || '<p class="muted sm">Nothing to do yet: Intelligence keeps watching.</p>'}</div></section>`);
+  setHTML(el('axs'), `<section class="sgcol axtk"><div class="sgh">${I('sparkles', 14)}<b>Takeaway</b>${TK.style ? `<span class="tag rule">${h(TK.style)}</span><span class="tag ${TK.momentum === 'Rising' ? '' : 'rule'}">${h(TK.momentum)}</span>` : ''}</div><div class="tkb"><p class="tkh">${h(TK.headline)}</p>${TK.bullets.slice(0, 2).map(([k, v]) => `<div class="tkr"><span>${h(k)}</span><p>${h(v)}</p></div>`).join('')}<details class="tkmore"><summary>More: ${TK.bullets.slice(2).map(([k]) => h(k.toLowerCase())).join(', ')}</summary>${TK.bullets.slice(2).map(([k, v]) => `<div class="tkr"><span>${h(k)}</span><p>${h(v)}</p></div>`).join('')}</details></div></section>
+    ${planHTML(sel)}`);
 }
 function actionCard(a) {
   const [ic, nm] = ACT[a.action], E = a.owner && EMPLOYEES[a.owner], live = AI.mode === 'live';
@@ -4860,6 +4948,110 @@ function compareHTML() {
         <p class="cmpctx">${p.touch ? `Last contact ${h(SIGNALS.dstr(p.touch.t))}${p.touch.by ? ' (' + h(first(EMPLOYEES[p.touch.by].name)) + ')' : ''}` : 'No recent contact'} · Sales α ±${d.model.band}%</p>
         <details class="recd"><summary>${I('shield', 12)} Decision record</summary>${recHTML(Y.record(d))}</details></article>`; }).join('')}</div>`;
 }
+
+/* ---------- What we're doing: one plan per advisor, inferred by Intelligence ----------
+   The decision service decides what to do; Intelligence plans how, from a decision brief
+   (live AI), or plays the saved plan when there is no AI key. One approval runs it. */
+AX.plans = {};
+function planOf(sel) {
+  if (!sel || sel === 'compare') return null;
+  if (!AX.plans[sel]) {
+    const P = AOX().planInputs(sel);
+    const plan = Object.assign({ id: 'PLAN-' + (sel === 'territory' ? 'TER' : sel.slice(-3)), status: P.text ? 'idle' : 'none', removed: new Set(), explorer: true, isPlan: true, maxTasks: 8 }, P);
+    plan.replay = P.text ? composePlanReplay(plan) : null;
+    AX.plans[sel] = plan;
+  }
+  return AX.plans[sel];
+}
+async function startPlan(p) {
+  if (AI.mode !== 'live' && !p.replay) { p.status = 'needs-ai'; paintAll(); return; }
+  if (p.replay && !RECORDED.includes(p.replay)) RECORDED.push(p.replay);
+  p.status = 'planning'; AO.planning = p; ME = p.requester; UI.requester = ME;
+  ask(p.text, null, p);
+  p.run = UI.run && UI.run.text === p.text ? UI.run : null;
+  if (!p.run) { p.status = 'failed'; AO.planning = null; paintAll(); return; }
+  p.run.title = p.title; ST.announced = p.run.id; /* assignments are announced when the plan runs, not while it is drafted */
+  await until(() => ['planned', 'clarify', 'failed', 'done'].includes(p.run.status), 120000);
+  if (p.run.status === 'clarify' && AI.mode === 'live') {
+    answer('Make your best assumption and continue'); await new Promise(r => setTimeout(r, 60));
+    p.run = UI.run; p.run.title = p.title; ST.announced = p.run.id;
+    await until(() => ['planned', 'failed', 'done'].includes(p.run.status), 120000);
+  }
+  p.status = p.run.status === 'planned' ? 'ready' : 'failed';
+  AO.planning = null; paintAll();
+}
+/* plan the selected advisor whenever Intelligence is free */
+setInterval(() => {
+  if (ST.mode !== 'advisors' || !boardShown() || busyPlanning() || anyRunning() || AO.active || AO.planning) return;
+  const p = planOf(AX.sel); if (p && p.status === 'idle') startPlan(p);
+}, 400);
+function rewave(r) {
+  r.tasks.forEach(t => { t.wave = 0; });
+  const waveOf = t => t.wave || (t.wave = 1 + Math.max(0, ...t.depends_on.map(d => r.tasks.find(x => x.id === d)).filter(Boolean).map(waveOf)));
+  r.tasks.forEach(waveOf);
+  const order = [], seen = new Set(), visit = t => { if (seen.has(t.id)) return; seen.add(t.id); t.depends_on.forEach(d => { const x = r.tasks.find(y => y.id === d); if (x) visit(x); }); order.push(t); };
+  r.tasks.forEach(visit); order.forEach((t, k) => { t.step = k + 1; }); r.tasks.sort((a, b) => a.step - b.step);
+}
+async function runPlan(p) {
+  const r = p.run;
+  if (!r || p.status !== 'ready') return;
+  if (AO.active || busyPlanning() || anyRunning()) { toast('Something is already running.'); return; }
+  if (p.removed.size) { r.tasks = r.tasks.filter(t => !p.removed.has(t.id)); r.tasks.forEach(t => { t.depends_on = t.depends_on.filter(d => r.tasks.some(x => x.id === d)); }); rewave(r); }
+  if (!r.tasks.length) { toast('Every step was removed.'); return; }
+  UI.run = r; ME = r.requester; UI.requester = ME;
+  Object.assign(ST, { approved: new Set(), open: null, openTask: null, auto: false, announced: null, view: 'floor', msgs: [], type: {}, recent: [] });
+  if (!UI.ctl || UI.ctl.signal.aborted) UI.ctl = new AbortController();
+  p.status = 'running'; AO.active = p; AO.peek = false; AO.viewing = null; paintAll();
+  comm('req', 'hub', `Approved plan: ${r.tasks.length} steps`, 'request');
+  await sleep(1800);
+  await runAll();
+  const bad = r.tasks.find(t => t.state === 'failed');
+  if (bad && r.status !== 'done') finishRun(r, `Step “${bad.title}” failed: ${bad.error || 'no result'}`);
+  await until(() => r.status === 'done' || r.status === 'failed', 30000);
+  p.status = r.status === 'done' ? 'done' : 'failed'; p.outcome = r.status === 'done' ? outcomeOf(r) : r.error || 'Stopped before every step finished';
+  logEvent('plan.completed', `${p.id} ${p.title}`, 'always-on', p.adv);
+  AO.active = null; AO.viewing = p; ST.view = r.status === 'done' ? 'results' : 'floor'; paintAll();
+}
+function planHTML(sel) {
+  const p = planOf(sel); if (!p) return '';
+  const live = AI.mode === 'live', r = p.run, tasks = r ? r.tasks : [], X = AOX();
+  const heads = p.decisions.length ? p.decisions.map((d, i) => { const E = EMPLOYEES[d.owner]; return `${i ? `<span class="parr">${I('arrow', 12)}</span>` : ''}<span class="pdc" style="--c:${ACT_COL[d.action]}">${I(ACT[d.action][0], 12)}<b>${h(ACT[d.action][1])}</b><code>${h(d.id)}</code>${avatar(E.name, E.team, 18)}<small>${h(first(E.name))}</small></span>`; }).join('')
+    : sel === 'territory' ? p.hints.map(x => `<span class="pdc" style="--c:${ACT_COL[x.action]}">${I(ACT[x.action][0], 12)}<b>${h(ACT[x.action][1])}</b></span>`).join('') : '';
+  const lead = p.decisions[0] ? primaryWhy(p.decisions[0]) : sel === 'territory' ? (AX.ter || X.territory()).headline : '';
+  if (p.status === 'none') {
+    const o = (p.others || [])[0];
+    return `<section class="sgcol axac"><div class="sgh">${I('target', 14)}<b>What we’re doing</b></div><div class="pl">${o ? `<div class="pdh"><span class="pdc" style="--c:${ACT_COL[o.action]}">${I(ACT[o.action][0], 12)}<b>${h(ACT[o.action][1])}</b><code>${h(o.id)}</code></span></div><p class="plw">${h(primaryWhy(o))}</p>` : ''}
+      <div class="pnone">${I('check', 14)}<span><b>No steps for the teams.</b> ${o && o.action === 'defer' ? 'The advisor asked us to wait, so there is nothing to orchestrate.' : o && o.action === 'journey' ? 'A pre-approved journey runs on its own.' : 'Intelligence keeps watching.'}</span></div>
+      ${o ? `<details class="recd"><summary>${I('shield', 12)} Decision record</summary>${recHTML(X.record(o))}</details>` : ''}</div></section>`;
+  }
+  const busy = p.status === 'planning', ready = p.status === 'ready';
+  const waves = [...new Set(tasks.map(t => t.wave).filter(Boolean))];
+  const rows = tasks.map((t, i) => { const R = roleOfT(t), who = personOf(t), off = p.removed.has(t.id), deps = t.depends_on.map(d => tasks.findIndex(x => x.id === d) + 1).filter(n => n > 0);
+    return `<div class="pst${off ? ' off' : ''}${busy && i === tasks.length - 1 ? ' fresh' : ''}" style="--c:${TCOL(R.team)}"><span class="psn">${i + 1}</span>${avatar(who, R.team, 26)}<div><b>${h(t.title)}</b><small>${h(who)} · ${h(R.name)}${deps.length ? ` · after ${deps.map(n => 'step ' + n).join(', ')}` : t.wave ? ' · starts right away' : ''}</small>${t.why || t.objective ? `<p>${h(String(t.why && !/^Catalogue/.test(t.why) ? t.why : t.objective).slice(0, 150))}</p>` : ''}</div>${ready ? `<button type="button" class="x" data-plrm="${h(t.id)}" title="${off ? 'Put this step back' : 'Remove this step before approving'}">${I(off ? 'undo' : 'x', 13)}</button>` : ''}</div>`; }).join('');
+  const D = r && r.bts ? (DRAFTING[r.bts.drafting] || 'Planning') : 'Waiting for Intelligence';
+  const src = live ? 'Live: Intelligence plans from the decision brief' : p.replay ? 'Saved plan: steps from saved AI runs (no AI key here)' : 'Needs live AI';
+  let foot = '';
+  if (p.status === 'needs-ai') foot = `<span class="fo warn">${I('alert', 13)} Planning this one needs live AI: there is no saved plan for it.</span>`;
+  else if (p.status === 'idle') foot = `<span class="busy"><span class="spin"></span> Queued: Intelligence plans it when it’s free</span>`;
+  else if (busy) foot = `<span class="busy"><span class="spin"></span> ${h(D)}…</span>`;
+  else if (ready) { const n = tasks.length - p.removed.size; foot = `<span class="acn">${avatar(EMPLOYEES[p.requester].name, EMPLOYEES[p.requester].team, 20)} ${h(first(EMPLOYEES[p.requester].name))} approves</span><button type="button" class="btn primary" data-plrun="${h(sel)}">${I('play', 13)} Approve and run plan · ${n} step${n === 1 ? '' : 's'}</button>`; }
+  else if (p.status === 'running') foot = `<span class="busy"><span class="spin"></span> Running on the orchestration canvas</span><button type="button" class="btn sm" data-aorun>${I('branch', 12)} Watch</button>`;
+  else if (p.status === 'done' || p.status === 'failed') foot = `<span class="fo ${p.status === 'done' ? 'ok' : 'warn'}">${I(p.status === 'done' ? 'check' : 'alert', 13)} ${h(p.outcome || (p.status === 'failed' ? 'Planning failed' : 'Done'))}</span>${r && r.status === 'done' ? `<button type="button" class="btn sm" data-plres="${h(sel)}">${I('doc', 12)} Results</button>` : ''}`;
+  return `<section class="sgcol axac"><div class="sgh">${I('target', 14)}<b>What we’re doing</b><small>${h(src)}</small></div><div class="pl">
+    ${heads ? `<div class="pdh">${heads}</div>` : ''}${lead ? `<p class="plw">${h(lead)}</p>` : ''}
+    <div class="psh"><span>${busy ? `${I('sparkles', 12)} ${h(HUB)} is planning the steps` : tasks.length ? `${tasks.length - p.removed.size} steps · ${waves.length} wave${waves.length === 1 ? '' : 's'} · ${new Set(tasks.map(t => roleOfT(t).team)).size} teams` : 'Steps'}</span>${p.removed.size && ready ? `<small>${p.removed.size} removed</small>` : ''}</div>
+    <div class="psl">${rows || (busy || p.status === 'idle' ? '<div class="pst sk"><span class="psn"></span><i></i></div><div class="pst sk"><span class="psn"></span><i></i></div><div class="pst sk"><span class="psn"></span><i></i></div>' : '')}${busy && rows ? '<div class="pst sk"><span class="psn"></span><i></i></div>' : ''}</div>
+    ${p.hints && p.hints.length && sel !== 'territory' ? `<div class="pin"><small>Evidence Intelligence was told to cover</small>${p.hints.map(x => `<span title="${h(x.why)}" style="--c:${ACT_COL[x.action]}"><i></i>${h(ACT[x.action][1])}</span>`).join('')}</div>` : ''}
+    <details class="recd"><summary>${I('send', 12)} Decision brief sent to ${h(HUB)}</summary><p class="brief">${h(p.text)}</p></details>
+    ${p.decisions[0] ? `<details class="recd"><summary>${I('shield', 12)} Decision record</summary>${recHTML(X.record(p.decisions[0]))}</details>` : ''}
+    <footer class="pfoot">${foot}</footer></div></section>`;
+}
+document.addEventListener('click', e => {
+  const q = s => e.target.closest(s); let x;
+  if ((x = q('[data-plrm]'))) { const p = planOf(AX.sel); if (p && p.status === 'ready') { const id = x.dataset.plrm; p.removed.has(id) ? p.removed.delete(id) : p.removed.add(id); paintAll(); } return; }
+  if ((x = q('[data-plrun]'))) { const p = planOf(x.dataset.plrun); if (p) runPlan(p); return; }
+  if ((x = q('[data-plres]'))) { const p = planOf(x.dataset.plres); if (p && p.run && !AO.active) { UI.run = p.run; ST.view = 'results'; AO.viewing = p; ST.msgs = []; ST.approved = new Set(p.run.tasks.map(t => t.id)); paintAll(); } return; }
+});
 
 
 UI.requester = ME; paintAll();
