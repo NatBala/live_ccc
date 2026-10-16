@@ -13,17 +13,20 @@
 <div class="app">
   <header class="top">
     <div class="brand"><span class="logo"></span><b>Connected Client Experience</b><span class="sep"></span><span class="prod">Agent Harness</span></div>
+    <div class="seg modes" id="modes"></div>
     <form class="cmd" id="composer" autocomplete="off">
       <span class="asker" id="asker"></span>
       <input id="ask" type="text" placeholder="Describe the outcome you need…" aria-label="Your request">
       <kbd>↵</kbd>
       <button type="submit" class="btn primary" id="send">Plan</button>
     </form>
+    <div class="aoctl" id="aoctl" hidden></div>
     <div class="topact"><button class="btn subtle" id="newChat" type="button">New request</button><a class="btn subtle" href="classic.html">Classic view</a></div>
   </header>
   <div class="stage">
     <aside class="orch" id="orch" aria-label="Orchestrator"></aside>
     <main class="floor" id="floor" aria-label="Orchestration"></main>
+    <main class="sig" id="sig" aria-label="Always-on signals" hidden></main>
     <section class="bench" id="bench" aria-label="Ticket" hidden></section>
   </div>
 </div>
@@ -34,6 +37,7 @@
 /*ENGINE*/
 /*REPLAY*/
 /*PIPELINE*/
+/*SIGNALS*/
 /*HARNESS*/
 </script>
 </body>

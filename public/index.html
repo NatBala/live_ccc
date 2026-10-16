@@ -418,23 +418,168 @@ body.benched .stage{grid-template-columns:340px minmax(0,1fr) 540px}
 .wvh b{display:inline-flex;align-items:center;gap:5px;color:var(--pri);font-weight:600}.wvh b i{width:7px;height:7px;border-radius:50%;background:var(--pri);animation:hal 1s ease-in-out infinite;box-shadow:0 0 0 3px rgba(47,91,234,.2)}
 .pbr{position:absolute;width:5px;border:2px solid #d5dbe5;border-right:0;border-radius:6px 0 0 6px;transition:border-color .3s}
 .pbr.on{border-color:var(--pri);box-shadow:-3px 0 10px rgba(47,91,234,.25)}
+
+/* ===== Always-on: the signals board ===== */
+.modes{flex:none}.modes button{height:28px;font-size:12.5px}
+.aoctl{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:14px}
+.aoclock{display:flex;align-items:center;gap:8px;white-space:nowrap;font-size:12.5px;color:var(--ink3)}
+.aoclock b{color:var(--ink);font-weight:600;font-size:13px}
+.aolive{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:999px;background:var(--line2);color:var(--ink3);font-weight:600;font-size:11.5px}
+.aolive i{width:7px;height:7px;border-radius:50%;background:#94a3b8}
+.aolive.on{background:#ecfdf5;color:var(--ok)}.aolive.on i{background:#10b981;box-shadow:0 0 0 0 rgba(16,185,129,.5);animation:beat 1.4s infinite}
+@keyframes beat{0%{box-shadow:0 0 0 0 rgba(16,185,129,.45)}70%{box-shadow:0 0 0 7px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+.aoprog{width:90px;height:5px;border-radius:3px;background:var(--line);overflow:hidden}.aoprog i{display:block;height:100%;background:var(--pri);transition:width .4s}
+.aoclock small{font-size:11.5px}
+.aobtns{display:flex;align-items:center;gap:6px}
+.seg.sm{padding:2px}.seg.sm button{height:24px;padding:0 8px;font-size:12px}
+.tgl{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:600;font-size:12px;color:var(--ink2)}
+.tgl i{position:relative;width:26px;height:15px;border-radius:999px;background:#cbd5e1;transition:background .2s}
+.tgl i::after{content:"";position:absolute;top:2px;left:2px;width:11px;height:11px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .2s}
+.tgl.on i{background:var(--pri)}.tgl.on i::after{left:13px}
+.aostrip{display:flex;align-items:center;gap:10px;min-width:0;flex:0 1 860px;height:40px;padding:0 4px 0 10px;border-radius:12px;background:var(--pri-bg);border:1px solid #c7d2fe}
+.aobolt{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;background:var(--pri);color:#fff;flex:none}
+.aoct{display:flex;flex-direction:column;min-width:0;line-height:1.25}.aoct small{font-size:10.5px;font-weight:600;color:var(--pri);text-transform:uppercase;letter-spacing:.05em}.aoct b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aorp{font-size:11.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;display:inline-flex;align-items:center;gap:4px}
+body.aoboard .stage,body.aoboard.benched .stage{grid-template-columns:minmax(0,1fr)}
+.sig{display:grid;grid-template-columns:330px minmax(0,1fr) 312px;gap:14px;padding:14px;min-height:0;overflow:hidden}
+.sgcol,.radar,.dec{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh1)}
+.sgcol{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.sgh{display:flex;align-items:center;gap:7px;padding:11px 14px;border-bottom:1px solid var(--line2);color:var(--ink2);flex:none}.sgh b{font-weight:600;font-size:13px;color:var(--ink)}.sgh small{margin-left:auto;color:var(--mut);font-size:11.5px}
+/* feed */
+.evl{flex:1;min-height:0;overflow:hidden;padding:6px;display:flex;flex-direction:column;gap:2px;-webkit-mask-image:linear-gradient(#000 85%,transparent)}
+.ev{display:grid;grid-template-columns:28px minmax(0,1fr);gap:9px;padding:8px;border-radius:10px;flex:none}
+.ev.new{animation:evin .5s ease}
+@keyframes evin{from{opacity:0;transform:translateY(-8px);background:var(--pri-bg)}to{opacity:1;transform:none}}
+.ev:has(.otag.od){background:linear-gradient(90deg,var(--pri-bg),#fff)}
+.ev.re{background:#f5f3ff}
+.evs{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 12%,#fff);color:var(--c)}
+.evs.sm{width:22px;height:22px;border-radius:6px}
+.evh{display:flex;align-items:baseline;gap:6px;min-width:0}.evh b{font-weight:600;font-size:12.5px;white-space:nowrap;flex:none}.evh span{font-size:11.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.evh time{margin-left:auto;font-size:11px;color:var(--mut);white-space:nowrap;flex:none}
+.ev p{margin:1px 0 4px;font-size:12px;color:var(--ink2);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ev small{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11px}
+.ev .src{color:var(--mut)}
+.str{height:17px;padding:0 6px;border-radius:5px;font-weight:600;font-size:10.5px;display:inline-flex;align-items:center;text-transform:uppercase;letter-spacing:.04em}
+.str.weak{background:var(--line2);color:var(--ink3)}.str.medium{background:var(--warn-bg);color:var(--warn)}.str.strong{background:#fef2f2;color:#b91c1c}.str.info{background:#fff;color:var(--mut);border:1px solid var(--line)}
+.otag{color:var(--ink3);display:inline-flex;align-items:center;gap:3px}.otag.od{color:var(--pri);font-weight:600}.otag.oh{color:#475569;font-weight:600}.otag.oc{color:var(--ok);font-weight:600}
+.evempty{margin:auto;text-align:center;max-width:250px;color:var(--ink3);display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px}.evempty b{color:var(--ink);font-weight:600}.evempty span{font-size:12.5px}
+/* middle */
+.sgmid{display:flex;flex-direction:column;gap:14px;min-height:0;min-width:0}
+.radar{flex:none;padding:4px 0}
+.rh,.rrow{display:grid;grid-template-columns:minmax(150px,1.25fr) minmax(170px,1.7fr) 82px 64px 86px 124px;gap:10px;align-items:center;padding:0 14px}
+.rh{height:30px;font-size:11.5px;font-weight:600;color:var(--ink3);border-bottom:1px solid var(--line2);white-space:nowrap}.rh small{font-weight:500;margin-left:4px;color:var(--mut)}
+.rrow{height:40px;border-bottom:1px solid var(--line2);position:relative;transition:background .3s}.rrow:last-child{border-bottom:0}
+.rrow.cur{background:linear-gradient(90deg,var(--pri-bg),#fff 60%)}.rrow.cur::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:3px;border-radius:0 3px 3px 0;background:var(--pri)}
+.rrow.ping{animation:ping2 1.1s ease}
+@keyframes ping2{0%{background:#dbeafe}100%{background:transparent}}
+.rname{display:flex;align-items:center;gap:9px;min-width:0}.rnt{display:flex;flex-direction:column;min-width:0;line-height:1.25}.rnt>b{font-weight:600;font-size:12.5px}.rnt>small{font-size:11px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rint{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ibar{position:relative;height:7px;border-radius:4px;background:var(--line2)}
+.ibar .fill{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:#94a3b8;transition:width .7s cubic-bezier(.2,.8,.2,1),background .4s}
+.ibar .fill.warm{background:#f59e0b}.ibar .fill.hot{background:linear-gradient(90deg,#2f5bea,#7c3aed)}
+.ibar .thr{position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;border-radius:1px;background:#0f172a;opacity:.55}
+.rtps{display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--ink3);min-width:0;white-space:nowrap;overflow:hidden}.rtps span{padding:0 5px;border-radius:4px;background:var(--line2)}.rtps b{margin-left:auto;font:600 11px var(--mono);color:var(--ink2)}
+.rsa b{font:600 13px var(--sans)}.rda{font-size:12.5px;color:var(--ink2)}.rlt{font-size:12px;color:var(--ink2);white-space:nowrap}
+.rsb .badge{max-width:124px;overflow:hidden;text-overflow:ellipsis}.badge.idle{background:#fff;border-color:var(--line);color:var(--mut)}
+/* decision */
+.dec{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.dc-main{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.dempty{margin:auto;text-align:center;max-width:620px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.dempty h3{margin:6px 0 0;font:600 18px/1.3 var(--sans);letter-spacing:-.01em}.dempty p{margin:0;color:var(--ink3);font-size:13px}
+.dorb{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;color:#fff;background:linear-gradient(140deg,#2f5bea,#7c3aed);box-shadow:0 8px 24px rgba(47,91,234,.3)}
+.dlegend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 6px;text-align:left;width:100%}
+.dlegend div{border:1px solid var(--line2);background:var(--sunk);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column}.dlegend b{font-size:12.5px;font-weight:600}.dlegend span{font-size:12px;color:var(--ink3)}
+.dch{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 18px 12px;border-bottom:1px solid var(--line2)}
+.dci{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:#fff;background:var(--pri);box-shadow:0 6px 16px rgba(47,91,234,.25)}
+.dec.a-call .dci{background:#7c3aed}.dec.a-campaign .dci{background:#d97706}.dec.a-journey .dci{background:#0d9488}.dec.a-service .dci{background:#ea580c}.dec.a-hold .dci{background:#64748b;box-shadow:none}
+.dec:not(.ph5) .dci{background:#94a3b8;box-shadow:none}
+.dct{min-width:0}.dct small{font-size:11.5px;color:var(--ink3)}.dct h3{margin:1px 0 0;font:600 17px/1.3 var(--sans);letter-spacing:-.01em}.dct h3 span{color:var(--ink3);font-weight:500}.dct p{margin:2px 0 0;font-size:12.5px;color:var(--ink2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.steps{list-style:none;margin:0;padding:0;display:flex;gap:4px}
+.steps li{display:flex;align-items:center;gap:5px;height:24px;padding:0 8px 0 4px;border-radius:999px;background:var(--line2);font-size:11px;font-weight:600;color:var(--mut);white-space:nowrap}
+.steps li i{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--pri)}.steps li i .spin{width:10px;height:10px}
+.steps li.ok{background:var(--pri-bg);color:var(--pri)}.steps li.ok i{background:var(--pri);color:#fff}.steps li.now{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px #c7d2fe}
+.dcb{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:20px;padding:12px 18px 6px;flex:1;min-height:0;overflow:hidden}
+.dcb .sh{margin:0 0 8px}.dcb .sh small{font-weight:500;text-transform:none;letter-spacing:0;margin-left:4px;color:var(--mut)}
+.dwy{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;margin-bottom:7px}
+.dwy b{font-size:12px;font-weight:600}.dwy time{font-size:11px;color:var(--mut)}.dwy p{margin:0;font-size:12px;color:var(--ink2);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dctx{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.dctx .tag{text-transform:none}
+.opts{opacity:.25;transition:opacity .3s}.opts.on{opacity:1}
+.op{margin-bottom:7px}.oph{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px}.oph b{font-weight:600;display:inline-flex;align-items:center;gap:5px}.oph span{font:600 12.5px var(--mono);color:var(--ink2)}
+.obar{position:relative;height:9px;border-radius:5px;background:var(--line2);margin:4px 0 3px}
+.obar i{display:block;height:100%;border-radius:5px;background:#94a3b8}
+.opts.grow .obar i{animation:grow .8s cubic-bezier(.2,.8,.2,1)}
+@keyframes grow{from{width:0}}
+.obar em{position:absolute;top:-4px;bottom:-4px;width:2px;background:#0f172a;border-radius:1px}
+.op small{display:block;font-size:11.5px;color:var(--ink3);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.op.no .obar i{background:repeating-linear-gradient(135deg,#cbd5e1 0 5px,#e2e8f0 5px 10px)}.op.no .oph b,.op.no .oph span{color:var(--mut)}.op.no small{color:#b45309}
+.op.win .obar i{background:linear-gradient(90deg,#2f5bea,#7c3aed)}.op.win .oph b{color:var(--pri)}.op.win .oph span{color:var(--pri)}
+.op .fx{font:500 10.5px/1.4 var(--mono);color:var(--mut);margin-top:2px;white-space:normal}
+.grd{display:flex;flex-wrap:wrap;gap:6px;padding:4px 18px 12px;opacity:.25;transition:opacity .3s}.grd.on{opacity:1}
+.gd{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border-radius:7px;font-size:11.5px;max-width:100%;border:1px solid var(--line)}
+.gd b{font-weight:600;white-space:nowrap}.gd small{color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
+.gd.ok{background:#fff}.gd.ok .i{color:var(--ok)}.gd.no{background:#fff7ed;border-color:#fed7aa}.gd.no .i{color:#c2410c}
+.dc-foot{flex:none;display:flex;align-items:center;gap:12px;min-height:60px;padding:10px 18px;border-top:1px solid var(--line2);background:var(--sunk);font-size:12.5px}
+.dc-foot:empty{display:none}
+.own{display:flex;align-items:center;gap:8px;flex:none}.ownt{display:flex;flex-direction:column;line-height:1.25}.ownt>small{font-size:11px;color:var(--ink3)}.ownt>b{font-weight:600;font-size:12.5px}
+.wtxt{flex:1;min-width:0;font-size:12px;color:var(--ink2);border-left:2px solid #c7d2fe;padding-left:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cd{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex:none;position:relative;padding-bottom:5px}.cd b{font-weight:600;color:var(--pri)}.cd small{font-size:10.5px;color:var(--mut)}
+.cd i{position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:2px;background:var(--pri);transform-origin:left;animation:drain 1s linear forwards}
+@keyframes drain{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.fo{display:inline-flex;align-items:center;gap:6px;flex:1;min-width:0}.fo b{font-weight:600}.fo.ok{color:var(--ok)}.fo.ok .i{flex:none}.fo.warn{color:var(--warn)}.fo.held{color:#475569}
+.dc-foot .busy{flex:1;display:inline-flex;align-items:center;gap:8px;color:var(--ink3)}
+/* right */
+.capc{padding:12px 14px;border-bottom:1px solid var(--line2)}
+.caph{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:9px;align-items:center}.caph>div>b{display:block;font-weight:600;font-size:12.5px}.caph>div>small{display:block;font-size:11.5px;color:var(--ink3);line-height:1.35}
+.capn{display:flex;flex-direction:column;align-items:center;line-height:1}.capn b{font:600 22px var(--sans);color:var(--pri)}.capn small{font-size:10.5px;color:var(--mut)}
+.slots{display:grid;grid-template-columns:repeat(15,1fr);gap:3px;margin:10px 0 6px}
+.slots i{height:10px;border-radius:3px;background:#cbd5e1}.slots i.n{background:var(--pri);animation:rise .4s ease}.slots i.o{background:#fff;box-shadow:inset 0 0 0 1px #cbd5e1}
+.capl{display:flex;gap:10px;font-size:11px;color:var(--ink3)}.capl span{display:inline-flex;align-items:center;gap:4px}.capl i{width:9px;height:9px;border-radius:2px;background:#cbd5e1}.capl i.n{background:var(--pri)}.capl i.o{background:#fff;box-shadow:inset 0 0 0 1px #cbd5e1}
+.cut{margin:7px 0 0;font-size:12px;color:var(--ink2);line-height:1.45}
+.capc.sm{padding:10px 14px}
+.wol{flex:1;min-height:0;overflow-y:auto;padding:6px}
+.wol .muted.sm{font-size:12.5px;padding:8px}
+.wo{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:9px;align-items:center;width:100%;border:0;background:none;text-align:left;padding:7px 8px;border-radius:10px}
+.wo:hover{background:var(--sunk)}.wo.sel{background:var(--pri-bg)}
+.woi{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;color:#fff;background:var(--pri)}
+.woi.a-call{background:#7c3aed}.woi.a-campaign{background:#d97706}.woi.a-journey{background:#0d9488}.woi.a-service{background:#ea580c}.woi.a-hold{background:#94a3b8}
+.wob{display:flex;flex-direction:column;min-width:0;line-height:1.3}.wob b{font-weight:600;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wob small{font-size:11px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wo .badge{height:20px;font-size:10.5px;padding:0 6px}
+.lis{display:flex;flex-wrap:wrap;gap:5px;padding:10px 12px 12px}
+.lis span{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 8px;border-radius:7px;background:var(--sunk);border:1px solid var(--line2);font-size:11.5px;color:var(--ink2)}
+.lis i{width:7px;height:7px;border-radius:50%;background:var(--c)}.lis b{font:600 11px var(--mono);color:var(--ink3)}
+#lis{border-top:1px solid var(--line2);flex:none}
+@media (max-width:1400px){.sig{grid-template-columns:300px minmax(0,1fr) 284px}.rh,.rrow{grid-template-columns:minmax(130px,1.2fr) minmax(140px,1.5fr) 70px 58px 74px 112px;gap:8px}.steps li{padding:0 6px 0 3px;font-size:10.5px}.aoclock small,.aoprog{display:none}}
+@media (max-width:1180px){.sig{grid-template-columns:280px minmax(0,1fr)}.sgside{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto}.sgside>.sgh{display:none}.steps{display:none}.rda,.rh span:nth-child(4){display:none}.rh,.rrow{grid-template-columns:minmax(130px,1.2fr) minmax(140px,1.5fr) 70px 74px 112px}}
+@media (max-width:1050px){.aoctl{order:3;flex-basis:100%;flex-wrap:wrap}.sig{grid-template-columns:1fr;overflow:visible}.sgfeed{max-height:420px}.dcb{grid-template-columns:1fr}.sgside{display:flex}.radar{overflow-x:auto}.rh,.rrow{min-width:640px}.dec{min-height:520px}}
+@media (max-width:640px){.modes button{padding:0 8px}.aostrip{height:auto;padding:6px 8px;flex-wrap:wrap}.aorp{display:none}.dc-foot{flex-wrap:wrap}.dlegend{grid-template-columns:1fr}}
+.dwhy{min-width:0}
+.dct small{white-space:nowrap}
+.dch{grid-template-columns:44px minmax(0,1fr) auto}
+.dct h3{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.aon .brand .prod,body.aon .brand .sep{display:none}
+@media (max-width:1400px){.gd small{display:none}.gd{height:24px}}
+@media (max-height:820px){.dwy p{-webkit-line-clamp:1}.op .fx{display:none}}
+@media (max-width:1050px){.app{grid-template-rows:auto 1fr}}
+@media (max-width:640px){.dc-foot .fo{flex-basis:100%;order:3}.dc-foot .wtxt{flex-basis:100%;order:3}}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="top">
     <div class="brand"><span class="logo"></span><b>Connected Client Experience</b><span class="sep"></span><span class="prod">Agent Harness</span></div>
+    <div class="seg modes" id="modes"></div>
     <form class="cmd" id="composer" autocomplete="off">
       <span class="asker" id="asker"></span>
       <input id="ask" type="text" placeholder="Describe the outcome you need…" aria-label="Your request">
       <kbd>↵</kbd>
       <button type="submit" class="btn primary" id="send">Plan</button>
     </form>
+    <div class="aoctl" id="aoctl" hidden></div>
     <div class="topact"><button class="btn subtle" id="newChat" type="button">New request</button><a class="btn subtle" href="classic.html">Classic view</a></div>
   </header>
   <div class="stage">
     <aside class="orch" id="orch" aria-label="Orchestrator"></aside>
     <main class="floor" id="floor" aria-label="Orchestration"></main>
+    <main class="sig" id="sig" aria-label="Always-on signals" hidden></main>
     <section class="bench" id="bench" aria-label="Ticket" hidden></section>
   </div>
 </div>
@@ -3098,6 +3243,273 @@ function draftingOf(text) {
   const m = tail.match(/"type"\s*:\s*"(\w+)"/); return m ? m[1] : objs.length ? 'next' : 'start';
 }
 
+/* ===== Always-on Intelligence: listen, decide, hand off =====
+   Advisor activity from every connected system arrives as events. Each event
+   updates the advisor's profile: interest by topic (decaying over time),
+   friction, deadlines, new assets in motion and the last person-to-person touch.
+   Most events stop there. A strong event, or enough weaker ones together, asks
+   for a decision: the next best action is the option with the most incremental
+   value, using Sales Alpha (incremental sales from one in-person visit to this
+   advisor) and Digital Alpha (from one digital engagement), under capacity and
+   contact guardrails. A decision that needs work becomes a work order that
+   Intelligence plans and runs like any request. No DOM here, so it runs in Node. */
+
+/* what each kind of event means; w is its weight toward intent */
+const SIG_TYPES = {
+  'web.page': { label: 'Page visit', cat: 'Digital', sys: 'aem', w: 1, strength: 'weak' },
+  'web.article': { label: 'Article read', cat: 'Digital', sys: 'aem', w: 2, strength: 'medium' },
+  'mc.open': { label: 'Email opened', cat: 'Marketing', sys: 'mcloud', w: 0.5, strength: 'weak' },
+  'mc.click': { label: 'Email click', cat: 'Marketing', sys: 'mcloud', w: 1.5, strength: 'medium' },
+  'mc.webinar': { label: 'Webinar attended', cat: 'Marketing', sys: 'mcloud', w: 2, strength: 'medium' },
+  'ls.sent': { label: 'Content sent', cat: 'Sales', sys: 'seismic', w: 0, strength: 'info', touch: true },
+  'ls.open': { label: 'Content opened', cat: 'Content', sys: 'seismic', w: 1.5, strength: 'medium' },
+  'ls.blocked': { label: 'Link blocked', cat: 'Content', sys: 'seismic', w: 0, strength: 'medium', friction: 1 },
+  'crm.call': { label: 'Call logged', cat: 'Sales', sys: 'sf', w: 0, strength: 'info', touch: true },
+  'crm.email': { label: 'Email logged', cat: 'Sales', sys: 'sf', w: 0, strength: 'info', touch: true },
+  'crm.coverage': { label: 'Coverage change', cat: 'Sales', sys: 'sf', w: 0, strength: 'info' },
+  'crm.deadline': { label: 'Decision date set', cat: 'Practice', sys: 'sf', w: 2, strength: 'medium' },
+  'crm.practice': { label: 'Practice change', cat: 'Practice', sys: 'sf', w: 3, strength: 'strong', assets: true },
+  'svc.question': { label: 'Service contact', cat: 'Service', sys: 'gen', w: 3, strength: 'strong' },
+  'svc.issue': { label: 'Service issue', cat: 'Service', sys: 'gen', w: 0, strength: 'strong', friction: 2 },
+  'tx.buy': { label: 'Purchase', cat: 'Transactions', sys: 'fund', w: 2, strength: 'medium' },
+  'tx.sell': { label: 'Redemption', cat: 'Transactions', sys: 'fund', w: 0, strength: 'strong', risk: true },
+  'dealer.platform': { label: 'Platform change', cat: 'Dealer', sys: 'fund', w: 3, strength: 'strong', assets: true },
+  'news.client': { label: 'Client news', cat: 'News', sys: 'news', w: 3, strength: 'strong', assets: true },
+  'model.refresh': { label: 'Alpha models refreshed', cat: 'Models', sys: 'fund', w: 0, strength: 'info' }
+};
+const SIG_TOPICS = [
+  ['plans', 'Retirement plans', /401\(k\)|recordkeeper|plan sponsor|\bcfo\b|simple ira/i],
+  ['fees', 'Fees', /fee|expense|cost/i],
+  ['income', 'Retirement income', /income|retire|balanced|bond|abnfx|ambfx|dividend/i],
+  ['etf', 'ETFs', /\betfs?\b|cggr|cgdv|cgcp/i],
+  ['models', 'Model portfolios', /model|core-satellite|uma\b/i],
+  ['growth', 'Growth (GFA)', /\bgfa\b|growth|attribution|gfffx/i],
+  ['access', 'Access', /link|blocked|gateway|open/i]
+];
+const topicOfText = s => (SIG_TOPICS.find(([, , re]) => re.test(s)) || ['general'])[0];
+const TOPIC_NAME = Object.fromEntries(SIG_TOPICS.map(([k, n]) => [k, n]).concat([['general', 'General']]));
+
+/* Sales Alpha and Digital Alpha, refreshed weekly by the model platform, in $K of incremental sales */
+const VISIT_ALPHA = {
+  'ADV-101': { sales: 140, digital: 12 }, 'ADV-102': { sales: 85, digital: 9 }, 'ADV-103': { sales: 28, digital: 11 }, 'ADV-104': { sales: 120, digital: 26 },
+  'ADV-105': { sales: 110, digital: 14 }, 'ADV-106': { sales: 72, digital: 10 }, 'ADV-107': { sales: 55, digital: 8 }
+};
+/* field capacity: visits are the scarce resource, so a new visit has to beat the least valuable one already booked */
+const CAPACITY = {
+  'EMP-PRIYA': { kind: 'visit', perQuarter: 200, perWeek: 15, window: 'Oct 5 to Oct 16', slots: 30, booked: 28,
+    bookedLow: [{ id: 'VIS-2241', what: 'Routine check-in, Torrance branch', value: 45 }, { id: 'VIS-2236', what: 'Quarterly review, Irvine office', value: 58 }] },
+  'EMP-SAM': { kind: 'call', perWeek: 60, booked: 41 }
+};
+const POLICY = { coolOffDays: 5, trigger: 5, halfLifeDays: 14, plannedDays: 21, visitShare: 0.8, callShare: 0.35, callConnect: 0.9, callMin: 15, digitalMin: 4, dedupeDays: 7 };
+/* activity the existing records do not hold: email engagement and the weekly model runs */
+const SIGNAL_EXTRAS = [
+  { adv: null, at: 'Sep 14, 2026 6:00', type: 'model.refresh', what: 'Sales Alpha and Digital Alpha scored for 7 advisors in Southern California', src: 'Weekly model run' },
+  { adv: 'ADV-103', at: 'Sep 15, 2026 9:12', type: 'mc.open', what: 'Opened “Retirement income insights, September”', src: 'Marketing Cloud' },
+  { adv: 'ADV-103', at: 'Sep 22, 2026 9:05', type: 'mc.open', what: 'Opened “Dividend payers for retirees”', src: 'Marketing Cloud' },
+  { adv: null, at: 'Sep 21, 2026 6:00', type: 'model.refresh', what: 'Weekly refresh: no advisor moved more than one decile', src: 'Weekly model run' },
+  { adv: 'ADV-104', at: 'Sep 23, 2026 12:20', type: 'web.page', what: 'Active ETFs in a core allocation (CGGR, CGDV)', src: 'Website analytics' },
+  { adv: 'ADV-104', at: 'Sep 23, 2026 12:31', type: 'mc.click', what: 'Clicked “ETF model portfolios” in the September ETF email', src: 'Marketing Cloud' },
+  { adv: 'ADV-103', at: 'Sep 28, 2026 9:40', type: 'mc.open', what: 'Opened “Income in a higher-rate world” (third open, no clicks)', src: 'Marketing Cloud' }
+];
+/* details a record states in words, made explicit for the engine */
+const SIGNAL_NOTES = { 'INT-7731': { deadline: 'Oct 1, 2026', deadlineLabel: 'Rivera Group committee meets Thursday' } };
+/* the work a decision hands to Intelligence, when there is no live AI: a saved AI run of an equivalent request */
+const SIGNAL_REPLAYS = {
+  'ADV-102|visit': { requester: 'EMP-PRIYA', text: 'Prepare Maya’s retirement committee fee comparison review' },
+  'ADV-105|visit': { requester: 'EMP-PRIYA', text: 'Prepare me for tomorrow’s meeting with Daniel’s team' },
+  'ADV-104|campaign': { requester: 'EMP-MARCUS', text: 'Create an ETF email campaign for Sofia' },
+  'ADV-106|visit': { requester: 'EMP-PRIYA', text: 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month' },
+  'ADV-101|service': { requester: 'EMP-KIM', text: 'Alex says the link in Priya’s email won’t open' },
+  'ADV-101|call': { requester: 'EMP-SAM', text: 'Prep me for my call with Alex tomorrow' }
+};
+const SIG_START = 'Sep 14, 2026', SIG_HISTORY = 'Sep 1, 2026';
+
+const SIGNALS = (() => {
+  const DAY = 864e5, MON = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+  /* "Sep 24, 2026" plus a clock time, as a local timestamp */
+  const ts = (d, hm = '9:00') => { const m = String(d).match(/([A-Z][a-z]{2})\w* (\d{1,2}),? (\d{4})/); if (!m) return NaN; const [hh, mm] = hm.split(':').map(Number); return new Date(+m[3], MON[m[1]], +m[2], hh, mm).getTime(); };
+  const clock12 = s => { const m = String(s).match(/(\d{1,2}):(\d{2})\s*([ap])\.?m/i); if (!m) return null; let hh = +m[1] % 12; if (/p/i.test(m[3])) hh += 12; return `${hh}:${m[2]}`; };
+  const DEFAULT_HM = { web: '11:', mc: '9:', crm: '10:', svc: '14:', tx: '18:', dealer: '7:', news: '6:', model: '6:', ls: '13:' };
+  const hmFor = (type, k) => DEFAULT_HM[type.split('.')[0]] + String(10 + (k * 7) % 45).padStart(2, '0');
+  const empOf = name => Object.keys(EMPLOYEES).find(e => EMPLOYEES[e].name === name);
+
+  /* every event, built from the records the foundation already holds */
+  function build() {
+    const out = []; let k = 0;
+    const push = (adv, at, type, what, src, ref, extra) => out.push(Object.assign({ id: 'SIG-' + (++k), adv, t: at, type, what, src, ref: ref || null, topic: topicOfText(what) }, extra || {}));
+    DIGITAL.forEach(([adv, d, kind, item], i) => push(adv, ts(d, hmFor('web', i)), kind === 'Webinar' ? 'mc.webinar' : kind === 'Article open' ? 'web.article' : 'web.page', item, kind === 'Webinar' ? 'Marketing Cloud' : 'Website analytics'));
+    CHANGE_EVENTS.forEach(([adv, d, what, src], i) => {
+      const type = /news/i.test(src) ? 'news.client' : /dealer/i.test(src) ? 'dealer.platform' : /committee set|meeting set|review set/i.test(what) ? 'crm.deadline' : 'crm.practice';
+      const dl = what.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2})/);
+      push(adv, ts(d, type === 'crm.practice' ? '16:00' : type === 'crm.deadline' ? '16:30' : hmFor(type, i)), type, what, src, null, type === 'crm.deadline' && dl ? { deadline: ts(`${dl[1]} ${dl[2]}, 2026`), deadlineLabel: what } : null);
+    });
+    INTERACTIONS.forEach(x => { const c = CASES.find(y => y.id === x.case), open = c && c.status === 'Open', n = SIGNAL_NOTES[x.id] || {};
+      push(x.adv, ts(x.when, clock12(x.when) || '14:00'), open ? 'svc.issue' : 'svc.question', `${x.caller}: ${x.summary}`, x.channel.replace(/,.*/, ''), x.id, Object.assign({ case: x.case }, n.deadline ? { deadline: ts(n.deadline), deadlineLabel: n.deadlineLabel } : {})); });
+    DELIVERIES.forEach(d => {
+      push(d.adv, ts(d.sent, clock12(d.sent) || '9:00'), 'ls.sent', `${d.from} sent “${d.title}” (${d.asset})`, 'Seismic LiveSend', d.id, { by: empOf(d.from) });
+      d.link_events.forEach(le => { const m = le.match(/^([A-Z][a-z]{2} \d{1,2}), ([^:]+:\d{2} [ap]\.m\.):\s*(.*)$/); if (!m) return;
+        const at = ts(`${m[1]}, 2026`, clock12(m[2])), body = m[3] === 'same' ? 'click stopped at the firm’s web gateway' : m[3];
+        push(d.adv, at, /stopped|blocked/i.test(body) ? 'ls.blocked' : 'ls.open', `“${d.title}”: ${body}`, 'Seismic LiveSend', d.id); });
+    });
+    EPISODES.forEach((e, i) => { if (!/Call|Email/.test(e.kind)) return; push(e.adv, ts(e.date, e.kind === 'Email' ? '15:' + String(10 + i % 40).padStart(2, '0') : '10:' + String(10 + i % 40).padStart(2, '0')), e.kind === 'Email' ? 'crm.email' : 'crm.call', `${e.kind === 'Email' ? 'Email' : 'Call'} with ${e.with} logged (${e.id})`, 'Salesforce', e.id, { by: empOf(e.with) || null }); });
+    FUND_TRANSACTIONS.forEach(([adv, d, fund, kind, m], i) => push(adv, ts(d, hmFor('tx', i)), kind === 'Purchase' ? 'tx.buy' : 'tx.sell', `${kind} of ${fund}: $${m.toFixed(1)}M`, 'Daily transactions', null, { usd: m }));
+    HANDOVERS.forEach(x => { const d = x.src.match(/([A-Z][a-z]{2} \d{1,2}, \d{4})/); push(x.adv, ts(d ? d[1] : x.effective, '17:00'), 'crm.coverage', `Coverage moves to ${EMPLOYEES[x.to].name} on ${x.effective}`, 'Salesforce', x.id, { to: x.to, effective: ts(x.effective, '0:00') }); });
+    SIGNAL_EXTRAS.forEach(x => { const [d, hm] = x.at.split(/ (?=\d{1,2}:\d{2}$)/); push(x.adv, ts(d, hm), x.type, x.what, x.src); });
+    return out.filter(e => !isNaN(e.t) && e.t >= ts(SIG_HISTORY, '0:00') && e.t <= ts(TODAY.replace(/^\w+, /, ''), '23:59')).sort((a, b) => a.t - b.t);
+  }
+
+  /* ---- advisor profiles ---- */
+  const S = { events: [], cursor: 0, now: 0, prof: {}, wos: [], seq: 0, cap: JSON.parse(JSON.stringify(CAPACITY)), log: [] };
+  const fresh = adv => ({ adv, hits: [], touch: null, friction: 0, frictionEv: [], deadline: null, assetsAt: null, coverage: null, opens: [], clicks: 0, last: null });
+  function reset() {
+    S.events = build(); S.prof = {}; Object.keys(ADVISORS).forEach(a => { S.prof[a] = fresh(a); }); S.wos = []; S.seq = 0; S.cap = JSON.parse(JSON.stringify(CAPACITY)); S.log = [];
+    const start = ts(SIG_START, '0:00'); S.cursor = 0; S.now = start;
+    while (S.cursor < S.events.length && S.events[S.cursor].t < start) { apply(S.events[S.cursor]); S.cursor++; }
+    S.history = S.cursor;
+    return S;
+  }
+  const decay = (w, t, now) => w * Math.pow(0.5, (now - t) / (POLICY.halfLifeDays * DAY));
+  function intentOf(p, now) {
+    const by = {}; let total = 0;
+    p.hits.forEach(h => { const v = decay(h.w, h.t, now); if (v < 0.05) return; by[h.topic] = (by[h.topic] || 0) + v; total += v; });
+    const topics = Object.entries(by).sort((a, b) => b[1] - a[1]).map(([k, v]) => ({ k, name: TOPIC_NAME[k] || k, v }));
+    return { total, topics };
+  }
+  function apply(e) {
+    S.now = Math.max(S.now, e.t); if (!e.adv) return;
+    const p = S.prof[e.adv], T = SIG_TYPES[e.type];
+    p.last = e;
+    if (T.w) p.hits.push({ t: e.t, w: T.w, topic: e.topic, ev: e });
+    if (T.touch) p.touch = { t: e.t, by: e.by, what: e.what };
+    if (T.friction) { p.friction += T.friction; p.frictionEv.push(e); }
+    if (T.assets) p.assetsAt = e.t;
+    if (e.deadline) p.deadline = { t: e.deadline, label: e.deadlineLabel };
+    if (e.type === 'crm.coverage') p.coverage = { to: e.to, at: e.effective };
+    if (e.type === 'mc.open') p.opens.push(e.t);
+    if (e.type === 'mc.click') p.clicks++;
+  }
+
+  /* ---- the decision ---- */
+  const days = (a, b) => (b - a) / DAY;
+  const covers = (emp, adv) => EMPLOYEES[emp].covers.includes(adv);
+  function urgency(p, now) {
+    if (p.deadline && p.deadline.t > now) { const d = days(now, p.deadline.t); if (d <= 14) return { x: 1.6, why: `${p.deadline.label} in ${Math.ceil(d)} days` }; if (d <= 60) return { x: 1.3, why: `${p.deadline.label}: ${Math.ceil(d)} days out` }; }
+    if (p.assetsAt && days(p.assetsAt, now) <= 14) return { x: 1.4, why: 'Assets in motion now' };
+    return { x: 1, why: 'No deadline' };
+  }
+  const intentMult = total => Math.min(1.3, 0.7 + 0.06 * total);
+  const fmtK = v => v == null ? '–' : '$' + Math.round(v) + 'K';
+  /* whether this event asks for a decision; most only update the profile */
+  function trigger(e, p, now) {
+    const T = SIG_TYPES[e.type], I = intentOf(p, now);
+    if (T.strength === 'strong') return { yes: true, why: `${T.label}: a strong signal` };
+    const recentOpens = p.opens.filter(t => days(t, now) <= 21).length;
+    if (e.type === 'mc.open' && recentOpens >= 3 && !p.clicks) return { yes: true, why: `${recentOpens} opens in 3 weeks, no clicks` };
+    if (T.w && I.total >= POLICY.trigger && (p.lastIntentTrig == null || p.lastIntentTrig < POLICY.trigger)) return { yes: true, why: `Interest reached ${I.total.toFixed(1)} (threshold ${POLICY.trigger})` };
+    return { yes: false, why: T.w ? `Interest ${I.total.toFixed(1)} of ${POLICY.trigger}` : T.touch ? 'Contact recorded' : T.friction ? `Friction ${p.friction}` : 'Profile updated' };
+  }
+  function decide(adv, now, e, opts = {}) {
+    const p = S.prof[adv], A = ADVISORS[adv], a = VISIT_ALPHA[adv], I = intentOf(p, now), U = urgency(p, now), im = intentMult(I.total);
+    const strong = !!(e && SIG_TYPES[e.type].strength === 'strong') || !!opts.cleared;
+    const ext = 'EMP-PRIYA', int = 'EMP-SAM';
+    const guards = [];
+    /* 1. friction comes first: fix it before any selling */
+    if (p.friction >= 2 && !opts.cleared) {
+      guards.push({ k: 'Friction', ok: false, note: `${p.frictionEv.length} access failures, ${p.frictionEv.map(x => x.ref).filter(Boolean).filter((x, i, s) => s.indexOf(x) === i).join(', ')}` });
+      return mk(adv, now, e, { action: 'service', owner: 'EMP-KIM', value: null, I, U, im, guards, options: [{ action: 'service', label: 'Fix the problem first', value: null, ok: true, chosen: true, note: 'An open access issue: selling now would backfire' }], why: 'Service friction outranks any sales action' });
+    }
+    const handing = p.coverage && p.coverage.at > now && days(now, p.coverage.at) <= 7 && covers(ext, adv) && p.coverage.to !== ext;
+    const lastDays = p.touch ? days(p.touch.t, now) : 99;
+    const cool = lastDays < POLICY.coolOffDays && !strong;
+    const planned = COMMITMENTS.find(c => c.adv === adv && c.status === 'Open' && /Priya|Sam/.test(c.owner) && !isNaN(ts(c.due)) && ts(c.due) > now && days(now, ts(c.due)) <= POLICY.plannedDays);
+    const firm = FIRMS[A.firm];
+    guards.push({ k: 'Contact cool-off', ok: !cool, note: p.touch ? `Last contact ${Math.floor(lastDays)} day${Math.floor(lastDays) === 1 ? '' : 's'} ago${strong && lastDays < POLICY.coolOffDays ? '; strong signal overrides' : ''}` : 'No recent contact' });
+    guards.push({ k: 'Follow-up already planned', ok: !planned, note: planned ? `${planned.id}: ${planned.owner}, due ${planned.due}` : 'None open' });
+    if (firm.policy) guards.push({ k: 'Firm rules', ok: true, note: firm.policy.replace(/ \(.*\)$/, '') + ': send PDFs, not links' });
+    guards.push({ k: 'Approved content only', ok: true, note: 'Seismic-approved pieces and disclosures' });
+    /* 2. value each option */
+    const cap = S.cap[ext], open = cap.slots - cap.booked, low = cap.bookedLow[0];
+    const vVisit = a.sales * POLICY.visitShare * U.x * im, vCall = a.sales * POLICY.callShare * POLICY.callConnect * U.x * im, vDig = a.digital * Math.min(1.6, 0.6 + 0.1 * I.total);
+    const options = [];
+    const visitBlock = !covers(ext, adv) ? 'No external wholesaler covers this advisor' : handing ? `Coverage moves to ${EMPLOYEES[p.coverage.to].name} on ${new Date(p.coverage.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : planned ? `Already planned: ${planned.id}` : cool ? `Cool-off: contact ${Math.floor(lastDays)} days ago` : null;
+    const cutoff = open > 0 ? null : low ? low.value : Infinity;
+    const visitOK = !visitBlock && (cutoff == null || vVisit > cutoff);
+    options.push({ action: 'visit', label: 'In-person visit', owner: ext, value: vVisit, ok: visitOK, cutoff: cutoff == null ? (low ? low.value : null) : cutoff, open,
+      formula: `Sales Alpha ${fmtK(a.sales)} × ${POLICY.visitShare * 100}% meeting likelihood × ${U.x} urgency × ${im.toFixed(2)} interest`,
+      note: visitBlock || (open > 0 ? `${open} open slot${open > 1 ? 's' : ''} ${cap.window}` : vVisit > cutoff ? `Bumps ${low.what} (${fmtK(low.value)}), offered digitally instead` : `Below the capacity cut-off of ${fmtK(cutoff)}`) });
+    const callBlock = !covers(int, adv) ? 'No internal coverage' : planned ? `Already planned: ${planned.id}` : cool ? 'Cool-off' : null;
+    options.push({ action: 'call', label: 'Internal call', owner: int, value: vCall, ok: !callBlock && vCall >= POLICY.callMin,
+      formula: `Sales Alpha ${fmtK(a.sales)} × ${POLICY.callShare * 100}% of a visit (assumed; no internal model yet) × ${POLICY.callConnect * 100}% connect × ${U.x} × ${im.toFixed(2)}`,
+      note: callBlock || (vCall >= POLICY.callMin ? `${S.cap[int].perWeek - S.cap[int].booked} call slots this week` : `Below the ${fmtK(POLICY.callMin)} minimum`) });
+    const top = I.topics[0], personal = top && top.v >= 2 && OPPORTUNITIES.some(o => o.adv === adv && !/lost/i.test(o.stage));
+    options.push({ action: personal ? 'campaign' : 'journey', label: personal ? 'Personalized digital follow-up' : 'Digital journey', owner: personal ? 'EMP-MARCUS' : null, value: vDig, ok: !cool && vDig >= POLICY.digitalMin,
+      formula: `Digital Alpha ${fmtK(a.digital)} × ${Math.min(1.6, 0.6 + 0.1 * I.total).toFixed(2)} interest`,
+      note: cool ? 'Cool-off applies to all outreach' : personal ? `Built by Marketing from approved Seismic content on ${lc(top.name)}` : 'Pre-approved nurture track; no agents needed' });
+    options.push({ action: 'hold', label: 'Hold and keep watching', owner: null, value: 0, ok: true, note: 'Doing nothing is a valid choice' });
+    const chosen = options.filter(o => o.ok && o.action !== 'hold').sort((x, y) => y.value - x.value)[0] || options.find(o => o.action === 'hold');
+    chosen.chosen = true;
+    guards.push({ k: 'Capacity', ok: chosen.action !== 'visit' || open > 0 || vVisit > cutoff, note: chosen.action === 'visit' ? (open > 0 ? `${open} of ${cap.slots} visit slots open, ${cap.window}` : `Full; bumps ${low.what}`) : `${Math.max(0, open)} of ${cap.slots} visit slots open` });
+    return mk(adv, now, e, { action: chosen.action, owner: chosen.owner, value: chosen.value, I, U, im, guards, options, why: chosen.action === 'hold' ? (cool ? `Cool-off: ${p.touch.by ? EMPLOYEES[p.touch.by].name : 'the team'} was in touch ${Math.floor(lastDays) || 'less than 1'} day${Math.floor(lastDays) === 1 ? '' : 's'} ago` : 'No option clears its threshold') : `${chosen.label}: highest incremental value that passes the guardrails` });
+  }
+  function mk(adv, now, e, d) {
+    const p = S.prof[adv], A = ADVISORS[adv];
+    const evidence = p.hits.concat(p.frictionEv.map(x => ({ ev: x, t: x.t, w: 0 }))).map(h => h.ev).filter((x, i, s) => s.indexOf(x) === i && days(x.t, now) <= 21 && x.t <= now).sort((x, y) => y.t - x.t).slice(0, 5);
+    if (e && !evidence.includes(e)) evidence.unshift(e);
+    const due = p.deadline && p.deadline.t > now ? Math.min(p.deadline.t - 3 * DAY, now + 14 * DAY) : now + (d.action === 'service' ? 1 : d.action === 'call' ? 2 : 14) * DAY;
+    const wo = Object.assign({ id: 'WO-' + (++S.seq), adv, at: now, trigger: e ? e.id : null, evidence, due: Math.max(due, now + DAY), status: 'decided' }, d);
+    wo.needsWork = ['visit', 'call', 'campaign', 'service'].includes(wo.action);
+    wo.text = workText(wo, A);
+    wo.replay = SIGNAL_REPLAYS[`${adv}|${wo.action}`] || null;
+    return wo;
+  }
+  const dstr = t => new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const lc = x => x.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase());
+  /* the request the owner would have typed, written for them */
+  function workText(wo, A) {
+    const firm = FIRMS[A.firm].name, topics = wo.I.topics.filter(x => x.k !== 'access').slice(0, 2).map(x => lc(x.name)).join(' and ') || 'their current priorities';
+    const why = wo.evidence.slice(0, 3).map(x => `${dstr(x.t)}: ${x.what}`).join('; ');
+    if (wo.action === 'service') return `${A.short} can’t open what we sent (${firm}). ${why}. Fix the access problem, resend in a format the firm allows, and tell the coverage team.`;
+    if (wo.action === 'visit') return `Prepare me for an in-person visit with ${A.name} (${firm}) by ${dstr(wo.due)}: schedule it through SSC and build a brief on ${topics} with approved Seismic content. Why now: ${why}.`;
+    if (wo.action === 'call') return `Prepare me to call ${A.name} (${firm}) by ${dstr(wo.due)} about ${topics}. Why now: ${why}.`;
+    if (wo.action === 'campaign') return `Create a personalized digital follow-up for ${A.name} (${firm}) on ${topics} from approved Seismic content, checked by compliance. Why now: ${why}.`;
+    return '';
+  }
+  /* advance by one event: apply it, then decide if it calls for it */
+  function step() {
+    if (S.cursor >= S.events.length) return null;
+    const e = S.events[S.cursor++]; apply(e);
+    const res = { e, outcome: 'profile', note: SIG_TYPES[e.type].label };
+    if (!e.adv) { res.note = 'All advisors re-scored'; S.log.push(res); return res; }
+    const p = S.prof[e.adv], tr = trigger(e, p, e.t); res.note = tr.why;
+    if (tr.yes) {
+      const I = intentOf(p, e.t); p.lastIntentTrig = I.total;
+      const open = S.wos.find(w => w.adv === e.adv && !['dismissed', 'held'].includes(w.status) && days(w.at, e.t) <= POLICY.dedupeDays && w.action !== 'hold');
+      const newFriction = SIG_TYPES[e.type].friction && !(open && open.action === 'service');
+      if (open && !newFriction) { res.outcome = 'covered'; res.note = `Already handled by ${open.id} (${actName(open.action)})`; open.evidence.unshift(e); open.evidence = open.evidence.slice(0, 6); }
+      else { const wo = decide(e.adv, e.t, e); book(wo); S.wos.push(wo); res.outcome = wo.action === 'hold' ? 'held' : 'decision'; res.wo = wo; res.note = tr.why; }
+    } else p.lastIntentTrig = intentOf(p, e.t).total;
+    S.log.push(res); return res;
+  }
+  /* after a work order finishes, the advisor is looked at again (a fix can unblock a sale) */
+  /* a visit takes a slot (or bumps the least valuable booked visit); a call takes desk time */
+  function book(wo) {
+    if (wo.action === 'visit') { const c = S.cap['EMP-PRIYA']; if (c.booked < c.slots) c.booked++; else wo.bumped = c.bookedLow.shift(); }
+    if (wo.action === 'call') S.cap['EMP-SAM'].booked++;
+  }
+  function release(wo) {
+    if (wo.action === 'visit') { const c = S.cap['EMP-PRIYA']; if (wo.bumped) c.bookedLow.unshift(wo.bumped); else c.booked--; }
+    if (wo.action === 'call') S.cap['EMP-SAM'].booked--;
+  }
+  function after(wo, now) {
+    const p = S.prof[wo.adv];
+    if (wo.action === 'visit' || wo.action === 'call') p.touch = { t: now, by: wo.owner, what: wo.action === 'visit' ? 'Visit booked' : 'Call booked' };
+    if (wo.action === 'service') { p.friction = 0; const next = decide(wo.adv, now, null, { cleared: true }); next.followsUp = wo.id; next.why = 'Friction cleared; ' + next.why.charAt(0).toLowerCase() + next.why.slice(1); book(next); S.wos.push(next); return next; }
+    return null;
+  }
+  const actName = a => ({ visit: 'In-person visit', call: 'Internal call', campaign: 'Personalized digital follow-up', journey: 'Digital journey', service: 'Fix first', hold: 'Hold' }[a] || a);
+  return { S, reset, step, after, release, decide, intentOf, urgency, actName, fmtK, ts, dstr, DAY };
+})();
+
 /* ===== Agent Harness: the orchestration canvas =====
    A request goes through the real pipeline (pipeline.js over engine.js): the
    orchestrator plans it from the shared foundation (live AI, or a saved AI run
@@ -3153,7 +3565,8 @@ const P = {
   sparkles: 'M9 4l1.4 4.1L14.5 9.5l-4.1 1.4L9 15l-1.4-4.1L3.5 9.5l4.1-1.4zM17 13l.8 2.2 2.2.8-2.2.8L17 19l-.8-2.2L14 16l2.2-.8z',
   cpu: 'M8 8h8v8H8zM5 5h14v14H5zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3', link: 'M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1',
   undo: 'M9 14L4 9l5-5M4 9h11a5 5 0 010 10h-3', eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 100-6 3 3 0 000 6z', target: 'M12 21a9 9 0 100-18 9 9 0 000 18zM12 16a4 4 0 100-8 4 4 0 000 8zM12 12h.01',
-  msg: 'M4 5h16v11H8l-4 4z', pulse: 'M3 12h4l3-8 4 16 3-8h4', expand: 'M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7'
+  msg: 'M4 5h16v11H8l-4 4z', pulse: 'M3 12h4l3-8 4 16 3-8h4', expand: 'M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7',
+  bell: 'M6 16V11a6 6 0 0112 0v5l2 2H4zM10 21h4', chart: 'M4 20V4M4 20h16M8 16v-5M12 16V8M16 16v-3', globe: 'M12 21a9 9 0 100-18 9 9 0 000 18zM3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'
 };
 const I = (n, s = 16, cls = '') => `<svg class="i ${cls}" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${P[n] || P.doc}"/></svg>`;
 
@@ -3201,8 +3614,9 @@ const reusedIn = (t, i) => { const rec = F.memory.find(m => m.id === i.id) || F.
 /* ---------- requests ---------- */
 const recordedFor = who => RECORDED.filter(r => r.requester === who || (EMPLOYEES[r.requester] && EMPLOYEES[r.requester].team === EMPLOYEES[who].team));
 const suggestions = () => AI.mode === 'live' ? (SUGGESTIONS[EMPLOYEES[ME].team] || []).slice(0, 5) : [...new Set(recordedFor(ME).map(r => r.text))].slice(0, 6);
-function ask(text, clarified) {
+function ask(text, clarified, wo) {
   text = String(text || '').trim(); if (!text) return;
+  if (!wo && ST.mode === 'always') { if (AO.active) { toast('A work order is running; ask when it finishes.'); return; } ST.mode = 'ask'; AO.playing = false; AO.viewing = null; }
   if (busyPlanning() || anyRunning()) { toast('Still working on the current request.'); return; }
   const rec = RECORDED.find(r => r.text === text && r.requester === ME) || RECORDED.find(r => r.text === text);
   if (AI.mode !== 'live' && !rec) { ST.nokey = text; UI.run = null; paintAll(); return; }
@@ -3214,7 +3628,7 @@ function ask(text, clarified) {
 }
 function answer(v) {
   const r = run(); if (!r || r.status !== 'clarify' || !v) return;
-  ask(`${r.text.replace(/ \(clarification:.*\)$/, '')} (clarification: ${v})`, { question: r.clarify, answer: v });
+  ask(`${r.text.replace(/ \(clarification:.*\)$/, '')} (clarification: ${v})`, { question: r.clarify, answer: v }, AO.active);
 }
 
 /* ---------- running tickets ---------- */
@@ -3309,7 +3723,7 @@ function announcePlan(r) {
 function setHTML(node, html) { if (node && node._h !== html) { node.innerHTML = html; node._h = html; } }
 let raf = 0;
 HX.schedule = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; paintAll(); }); };
-function paintAll() { paintTop(); paintOrch(); paintFloor(); paintBench(); const r = run(); if (r) announcePlan(r); }
+function paintAll() { paintTop(); if (!paintAO()) { paintOrch(); paintFloor(); paintBench(); } const r = run(); if (r) announcePlan(r); }
 
 function paintTop() {
   const E = EMPLOYEES[ME];
@@ -3346,7 +3760,7 @@ function paintOrch() {
       <div class="prog"><i style="width:${done / r.tasks.length * 100}%"></i></div>
       ${ST.auto ? `<button type="button" class="btn subtle block" data-stop>${I('pause', 14)} Pause</button>` : ready ? `<button type="button" class="btn primary block lg" data-runall>${I('play', 14)} Run all agents</button><small class="note">Teams hand off through ${HUB}. Client-facing drafts wait for your sign-off.</small>` : ''}</div>`;
   setHTML(el('orch'), `<div class="ohead"><span class="omark${thinking ? ' pulse' : ''}">${I('branch', 16)}</span><div><b>${HUB}</b><small>${r.replay ? 'Replaying a saved AI run' : 'Planning and orchestration'}</small></div></div>
-    <div class="reqq">${avatar(EMPLOYEES[r.requester].name, EMPLOYEES[r.requester].team, 26)}<div><small>${h(EMPLOYEES[r.requester].name)}</small><p>${h(r.text.replace(/ \(clarification:.*\)$/, ''))}</p></div></div>
+    <div class="reqq">${avatar(EMPLOYEES[r.requester].name, EMPLOYEES[r.requester].team, 26)}<div><small>${h(EMPLOYEES[r.requester].name)}${AO.active && AO.active.run === undefined && UI.run === r ? ` · work order ${h(AO.active.id)} from Always-on` : ''}</small><p>${h(r.text.replace(/ \(clarification:.*\)$/, ''))}</p></div></div>
     ${stat}
     ${r.status === 'clarify' ? clarifyHTML(r) : ''}
     ${thinking && live.length ? `<div class="sh">Reasoning</div><div class="reason">${live.map(d => `<div class="rz"><span class="tag ${d.src === 'code' ? 'rule' : 'ai'}">${d.src === 'code' ? 'Rule' : 'AI'}</span><span>${h(d.title)}</span></div>`).join('')}</div>` : ''}
@@ -3716,9 +4130,261 @@ document.addEventListener('keydown', e => {
 el('composer').onsubmit = e => { e.preventDefault(); const v = el('ask').value; el('ask').value = ''; ask(v); };
 el('newChat').onclick = () => { if (busyPlanning() || anyRunning()) return; UI.run = null; ST.open = null; ST.nokey = null; ST.auto = false; ST.msgs = []; F.session.advisor = null; paintAll(); };
 
+/* ---------- Always-on: Intelligence listens to advisor activity and decides ----------
+   The engine is signals.js. This view plays the event stream on a simulated
+   clock: each event lands in the activity feed and updates that advisor's
+   profile on the radar. When one calls for a decision, the decision card shows
+   how Intelligence weighed the options (Sales Alpha, Digital Alpha, capacity,
+   guardrails). A decision that needs work becomes a work order, and in the demo
+   it runs on its own, visibly, through the same orchestration canvas. */
+const AO = { playing: false, speed: 1, auto: true, feed: [], cur: null, phase: 0, active: null, peek: false, done: false, count: 0, wait: null, started: false, base: SLEEP_SCALE, flash: {} };
+ST.mode = QS.get('mode') === 'ask' ? 'ask' : 'always';
+const SGS = SIGNALS.S;
+SIGNALS.reset();
+const ACT = { visit: ['users', 'In-person visit'], call: ['msg', 'Internal call'], campaign: ['mail', 'Digital follow-up'], journey: ['send', 'Digital journey'], service: ['tool', 'Fix first'], hold: ['pause', 'Hold'] };
+const WO_ST = { decided: ['ready', 'Decided'], waiting: ['review', 'Waiting for owner'], running: ['running', 'Running'], done: ['approved', 'Done'], held: ['blocked', 'Held'], enrolled: ['approved', 'Enrolled'], 'needs-ai': ['signoff', 'Needs live AI'], dismissed: ['blocked', 'Dismissed'], failed: ['failed', 'Failed'] };
+const SIG_ICON = { aem: 'eye', mcloud: 'mail', seismic: 'doc', sf: 'users', gen: 'bell', fund: 'chart', news: 'globe' };
+const advShort = a => a ? ADVISORS[a].name.replace(/,.*$/, '') : 'All advisors';
+const simDay = t => new Date(t).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+const simTime = t => new Date(t).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace('AM', 'a.m.').replace('PM', 'p.m.');
+const pace = ms => new Promise(r => setTimeout(r, ms / AO.speed * (AO.base < 1 ? 0.15 : 1)));
+const boardShown = () => ST.mode === 'always' && (!AO.active || AO.peek) && !AO.viewing;
+const firmShort = f => FIRMS[f].name.replace(/ Wealth Management| Advisors| \(RIA\)/, '');
+const ownerName = wo => wo.owner ? EMPLOYEES[wo.owner].name : 'Intelligence';
+
+/* ---- the loop ---- */
+async function play() {
+  if (AO.playing) return; if (AO.done) resetAO();
+  AO.playing = true; AO.started = true; paintAll();
+  while (AO.playing) {
+    if (AO.active || AO.wait) { await pace(300); continue; }
+    const r = SIGNALS.step();
+    if (!r) { AO.playing = false; AO.done = true; toast('Caught up: every event to today has been handled.'); break; }
+    AO.feed.unshift(r); AO.feed = AO.feed.slice(0, 60);
+    if (r.e.adv) AO.flash[r.e.adv] = performance.now();
+    logEvent('signal.' + r.e.type, `${advShort(r.e.adv)}: ${r.e.what}`, 'always-on', r.e.adv);
+    flashTile('events', 'read');
+    paintAll();
+    if (r.wo) await handle(r.wo);
+    await pace(r.e.adv ? 1500 : 900);
+  }
+  paintAll();
+}
+function pause() { AO.playing = false; paintAll(); }
+function resetAO() {
+  if (AO.active) return;
+  SIGNALS.reset(); Object.assign(AO, { playing: false, feed: [], cur: null, phase: 0, done: false, count: 0, wait: null, started: false, flash: {}, viewing: null });
+  paintAll();
+}
+/* how Intelligence reached it, one step at a time, then what happens next */
+async function handle(wo) {
+  AO.cur = wo; AO.phase = 0; paintAll();
+  for (let k = 1; k <= 5; k++) { await pace(420); if (AO.cur !== wo) return; AO.phase = k; paintAll(); }
+  logEvent('nba.decided', `${wo.id} ${SIGNALS.actName(wo.action)} for ${advShort(wo.adv)}`, 'always-on', wo.adv);
+  if (wo.action === 'hold') { wo.status = 'held'; paintAll(); await pace(2600); return; }
+  if (wo.action === 'journey') { wo.status = 'enrolled'; wo.outcome = `Enrolled in the ${(wo.I.topics[0] || { name: 'general' }).name.toLowerCase()} nurture track (pre-approved)`; paintAll(); await pace(2800); return; }
+  if (!AO.auto) {
+    wo.status = 'waiting'; paintAll();
+    const ok = await new Promise(res => { AO.wait = { wo, res }; });
+    AO.wait = null;
+    if (!ok) { wo.status = 'dismissed'; SIGNALS.release(wo); logEvent('nba.dismissed', `${wo.id} dismissed by ${ownerName(wo)}`, 'always-on', wo.adv); paintAll(); await pace(900); return; }
+  } else {
+    for (AO.count = 3; AO.count > 0; AO.count--) { paintAll(); await pace(1000); if (AO.cur !== wo) break; }
+    AO.count = 0;
+  }
+  await runWO(wo);
+}
+const until = async (f, ms = 180000) => { const t0 = Date.now(); while (!f()) { if (Date.now() - t0 > ms) return false; await new Promise(r => setTimeout(r, 150)); } return true; };
+async function runWO(wo) {
+  const live = AI.mode === 'live', rp = live ? null : wo.replay;
+  if (!live && !rp) { wo.status = 'needs-ai'; wo.outcome = 'Work order ready. Running it needs live AI: there is no saved AI run for this one.'; paintAll(); await pace(3200); SIGNALS.after(wo, SGS.now); return; }
+  wo.status = 'running'; AO.active = wo; AO.peek = false; AO.viewing = null;
+  ME = rp ? rp.requester : wo.owner;
+  ask(rp ? rp.text : wo.text, null, wo);
+  let r = null;
+  await until(() => (r = run()) && ['planned', 'clarify', 'failed', 'done'].includes(r.status), 120000);
+  if (r && r.status === 'clarify' && live) { answer('Make your best assumption and continue'); await until(() => (r = run()) && ['planned', 'failed', 'done'].includes(r.status), 120000); }
+  if (r && r.status === 'planned') {
+    await sleep(1800);
+    await runAll();
+    r.tasks.forEach(t => outputsOf(t).filter(o => o.status === 'Waiting for approval').forEach(o => signOff(o, `${EMPLOYEES[ME].name}, auto-approved under the demo policy`)));
+    await until(() => r.status === 'done' || r.status === 'failed', 30000);
+  }
+  wo.run = r; wo.status = r && r.status === 'done' ? 'done' : 'failed';
+  wo.outcome = r ? outcomeOf(r) : 'Did not start';
+  if (r && r.status === 'done') { ST.view = 'results'; ST.open = null; paintAll(); await pace(5200); }
+  ST.view = 'floor'; AO.active = null; paintAll();
+  const next = SIGNALS.after(wo, SGS.now + 20 * 60000);
+  if (next) { AO.feed.unshift({ e: null, outcome: 'decision', wo: next, note: `Looked again after ${wo.id}` }); paintAll(); await handle(next); }
+}
+function outcomeOf(r) {
+  const acts = r.tasks.flatMap(t => (t.calls || []).filter(c => c.rw === 'write' && !c.error).map(c => actionTile(c, t))).filter(Boolean);
+  const docs = r.tasks.filter(t => t.result && t.result.output && t.result.output.title).map(t => t.result.output.title);
+  const bits = acts.slice(0, 2).map(a => a.kind + (a.big ? ': ' + a.big : '')).concat(docs.slice(0, 2));
+  return bits.length ? bits.join(' · ') : `${r.tasks.length} tickets complete`;
+}
+
+/* ---- painting ---- */
+function paintAO() {
+  document.body.classList.toggle('aon', ST.mode === 'always');
+  document.body.classList.toggle('aoboard', boardShown());
+  el('composer').hidden = ST.mode === 'always';
+  setHTML(el('modes'), `<button type="button" class="${ST.mode === 'always' ? 'on' : ''}" data-mode="always">${I('pulse', 14)} Always-on</button><button type="button" class="${ST.mode === 'ask' ? 'on' : ''}" data-mode="ask">${I('send', 14)} Ask</button>`);
+  el('newChat').hidden = ST.mode === 'always';
+  paintCtl();
+  const sig = el('sig'); sig.hidden = !boardShown(); el('orch').hidden = boardShown(); el('floor').hidden = boardShown();
+  if (!boardShown()) return false;
+  el('bench').hidden = true;
+  paintBoard();
+  return true;
+}
+function paintCtl() {
+  const box = el('aoctl'); box.hidden = ST.mode !== 'always'; if (box.hidden) return;
+  const n = SGS.events.length - SGS.history, at = Math.max(0, SGS.cursor - SGS.history), wo = AO.active || AO.viewing;
+  if (wo && !AO.peek) {
+    const A = ADVISORS[wo.adv], [ic, nm] = ACT[wo.action];
+    setHTML(box, `<div class="aostrip"><span class="aobolt">${I('pulse', 14)}</span><span class="aoct"><small>${AO.viewing ? 'Work order' : 'Running a work order from Always-on'}</small><b><code>${wo.id}</code> ${I(ic, 13)} ${h(nm)} · ${h(advShort(wo.adv))} <span class="muted">(${h(firmShort(A.firm))})</span></b></span>${wo.replay && AI.mode !== 'live' ? `<span class="aorp" title="No live AI here, so the saved AI run of an equivalent request plays">${I('play', 11)} Saved run: “${h(wo.replay.text.slice(0, 48))}${wo.replay.text.length > 48 ? '…' : ''}”</span>` : ''}<button type="button" class="btn sm" data-aoboard>${I('target', 13)} Signals board</button></div>`);
+    return;
+  }
+  setHTML(box, `<div class="aoclock"><span class="aolive${AO.playing ? ' on' : ''}"><i></i>${AO.playing ? 'Listening' : AO.done ? 'Caught up' : 'Paused'}</span><b>${h(simDay(SGS.now))}</b><span>${h(simTime(SGS.now))}</span><span class="aoprog"><i style="width:${n ? at / n * 100 : 0}%"></i></span><small>${at}/${n} events</small></div>
+    <div class="aobtns">${AO.playing ? `<button type="button" class="btn sm" data-aopause>${I('pause', 13)} Pause</button>` : `<button type="button" class="btn primary sm" data-aoplay>${I('play', 13)} ${AO.done ? 'Replay' : AO.started ? 'Resume' : 'Start listening'}</button>`}
+      <div class="seg sm">${[1, 2, 4].map(x => `<button type="button" class="${AO.speed === x ? 'on' : ''}" data-aospeed="${x}">${x}×</button>`).join('')}</div>
+      <button type="button" class="tgl${AO.auto ? ' on' : ''}" data-aoauto title="On: work orders run on their own and you watch (demo). Off: each decision waits for its owner to accept (production)."><i></i>Auto-run</button>
+      ${AO.active && AO.peek ? `<button type="button" class="btn sm" data-aorun>${I('branch', 13)} Watch ${AO.active.id}</button>` : ''}
+      <button type="button" class="btn subtle sm" data-aoreset title="Start the stream again" ${AO.active ? 'disabled' : ''}>${I('undo', 13)}</button></div>`);
+}
+function paintBoard() {
+  const sig = el('sig');
+  if (!sig._init) {
+    sig.innerHTML = `<section class="sgcol sgfeed"><div class="sgh">${I('pulse', 14)}<b>Live advisor activity</b><small id="sgn"></small></div><div class="evl" id="evl"></div></section>
+      <section class="sgmid"><div class="radar" id="radar"></div><section class="dec" id="dec"><div class="dc-main"></div><div class="dc-foot"></div></section></section>
+      <section class="sgcol sgside"><div id="cap"></div><div class="sgh">${I('inbox', 14)}<b>Work orders</b><small id="won"></small></div><div class="wol" id="wol"></div><div id="lis"></div></section>`;
+    sig._init = 1;
+  }
+  paintFeedAO(); paintRadar(); paintDecision(); paintSide();
+}
+function evIcon(e) { return SIG_ICON[SIG_TYPES[e.type].sys] || 'db'; }
+const OUT_TAG = { profile: ['', 'Profile updated'], decision: ['od', 'Decision'], held: ['oh', 'Held'], covered: ['oc', 'Already covered'] };
+function paintFeedAO() {
+  const items = AO.feed.slice(0, 18);
+  el('sgn').textContent = AO.feed.length ? `${AO.feed.length} events` : '';
+  setHTML(el('evl'), items.length ? items.map((r, i) => {
+    if (!r.e) return `<div class="ev re${i === 0 ? ' new' : ''}"><span class="evs" style="--c:var(--pri)">${I('branch', 13)}</span><div><div class="evh"><b>${h(HUB)}</b><span>Re-evaluated</span></div><p>${h(advShort(r.wo.adv))}: ${h(r.note)}</p><small><span class="otag od">${I('arrow', 10)} ${h(r.wo.id)} · ${h(SIGNALS.actName(r.wo.action))}</span></small></div></div>`;
+    const e = r.e, T = SIG_TYPES[e.type], [cls, lbl] = OUT_TAG[r.outcome] || OUT_TAG.profile;
+    return `<div class="ev ${T.strength}${i === 0 ? ' new' : ''}"><span class="evs" style="--c:${SYS_COL[T.sys] || '#64748b'}">${I(evIcon(e), 13)}</span><div><div class="evh"><b>${h(advShort(e.adv))}</b><span>${h(T.label)}</span><time>${h(simDay(e.t).replace(/^\w+, /, ''))} · ${h(simTime(e.t))}</time></div><p>${h(e.what)}</p><small><span class="src">${h(e.src)}</span><span class="str ${T.strength}">${h(T.strength === 'info' ? 'context' : T.strength)}</span>${r.wo ? `<span class="otag ${cls}">${I('arrow', 10)} ${h(r.wo.id)} · ${h(SIGNALS.actName(r.wo.action))}</span>` : `<span class="otag ${cls}">${h(r.outcome === 'covered' ? r.note : r.note || lbl)}</span>`}</small></div></div>`;
+  }).join('') : `<div class="evempty">${I('pulse', 22)}<b>Waiting for activity</b><span>Events from ${new Set(Object.values(SIG_TYPES).map(t => t.sys)).size} connected systems stream in here: web visits, email, content views, calls, service contacts, daily transactions, dealer platforms and news.</span></div>`);
+}
+const lastWO = adv => SGS.wos.filter(w => w.adv === adv).slice(-1)[0];
+function advState(adv) {
+  const w = lastWO(adv), I0 = SIGNALS.intentOf(SGS.prof[adv], SGS.now);
+  if (w && w.status === 'running') return ['running', 'Running ' + w.id];
+  if (w && AO.cur === w && !['done', 'held', 'enrolled', 'dismissed', 'needs-ai', 'failed'].includes(w.status)) return ['review', 'Deciding'];
+  if (w && w.status === 'held') return ['blocked', 'Held'];
+  if (w && ['done', 'enrolled', 'needs-ai', 'waiting', 'decided'].includes(w.status)) return [w.status === 'needs-ai' ? 'signoff' : 'approved', ACT[w.action][1]];
+  if (I0.total >= 3) return ['ready', 'Warming'];
+  return ['idle', 'Watching'];
+}
+function paintRadar() {
+  const box = el('radar');
+  if (!box._init) {
+    box.innerHTML = `<div class="rh"><span>Advisor</span><span title="Weighted signals; each halves every 14 days. A decision is considered at 5.">Interest <small>threshold 5</small></span><span title="Sales Alpha: incremental sales from one in-person visit">Sales α/visit</span><span title="Digital Alpha: incremental sales from one digital engagement">Digital α</span><span>Last contact</span><span>State</span></div>` +
+      Object.keys(ADVISORS).map(a => `<div class="rrow" data-adv="${a}"><span class="rname">${avatar(ADVISORS[a].name, 'sales', 28)}<span class="rnt"><b>${h(advShort(a))}</b><small>${h(firmShort(ADVISORS[a].firm))} · ${h(TERRITORIES[ADVISORS[a].territory].name)}</small></span></span><span class="rint"><span class="ibar"><i class="fill"></i><i class="thr"></i></span><span class="rtps"></span></span><span class="rsa"></span><span class="rda"></span><span class="rlt"></span><span class="rsb"></span></div>`).join('');
+    box._init = 1;
+    /* a finished highlight must not replay when the board is shown again */
+    box.addEventListener('animationend', e => e.target.classList.remove('ping'));
+  }
+  const now = performance.now();
+  Object.keys(ADVISORS).forEach(a => {
+    const row = box.querySelector(`[data-adv="${a}"]`), p = SGS.prof[a], I0 = SIGNALS.intentOf(p, SGS.now), al = VISIT_ALPHA[a], [sc, sl] = advState(a);
+    row.querySelector('.fill').style.width = Math.min(100, I0.total / 10 * 100) + '%';
+    row.querySelector('.fill').className = 'fill' + (I0.total >= 5 ? ' hot' : I0.total >= 3 ? ' warm' : '');
+    setHTML(row.querySelector('.rtps'), I0.topics.slice(0, 2).map(x => `<span>${h(x.name)}</span>`).join('') + `<b>${I0.total.toFixed(1)}</b>`);
+    setHTML(row.querySelector('.rsa'), `<b>${SIGNALS.fmtK(al.sales)}</b>`);
+    setHTML(row.querySelector('.rda'), `${SIGNALS.fmtK(al.digital)}`);
+    setHTML(row.querySelector('.rlt'), p.touch ? `${Math.max(0, Math.floor((SGS.now - p.touch.t) / SIGNALS.DAY))}d${p.touch.by ? ' · ' + h(first(EMPLOYEES[p.touch.by].name)) : ''}` : '<span class="muted">–</span>');
+    setHTML(row.querySelector('.rsb'), `<span class="badge ${sc}">${h(sl)}</span>`);
+    row.classList.toggle('cur', !!(AO.cur && AO.cur.adv === a));
+    const f = AO.flash[a]; if (f && now - f < 120) { row.classList.remove('ping'); void row.offsetWidth; row.classList.add('ping'); }
+  });
+}
+const STEPS = ['Profile', 'Trigger', 'Options', 'Guardrails', 'Decision'];
+function paintDecision() {
+  const box = el('dec'), main = box.querySelector('.dc-main'), foot = box.querySelector('.dc-foot'), wo = AO.cur;
+  if (!wo) {
+    box.className = 'dec empty';
+    setHTML(main, `<div class="dempty"><span class="dorb">${I('branch', 22)}</span><h3>${h(HUB)} is ${AO.playing ? 'listening' : 'ready to listen'}</h3><p>Every event updates an advisor’s profile. Most stop there. A strong signal, or enough weaker ones together, asks ${h(HUB)} for the next best action.</p>
+      <div class="dlegend"><div><b>Sales Alpha</b><span>incremental sales from one in-person visit</span></div><div><b>Digital Alpha</b><span>incremental sales from one digital engagement</span></div><div><b>Capacity</b><span>200 visits a quarter; a new visit has to beat the least valuable one booked</span></div><div><b>Guardrails</b><span>fix friction first, contact cool-off, planned follow-ups, firm rules, approved content</span></div></div>
+      ${!AO.started ? `<button type="button" class="btn primary lg" data-aoplay>${I('play', 15)} Start listening</button>` : ''}</div>`);
+    setHTML(foot, ''); return;
+  }
+  const A = ADVISORS[wo.adv], [ic, nm] = ACT[wo.action], ph = AO.phase, max = Math.max(1, ...wo.options.map(o => o.value || 0));
+  box.className = `dec a-${wo.action} ph${ph}`;
+  const ev = wo.evidence.slice(0, 4);
+  setHTML(main, `<header class="dch"><span class="dci">${I(ic, 20)}</span><div class="dct"><small><code>${h(wo.id)}</code> · ${h(simDay(wo.at))}, ${h(simTime(wo.at))}${wo.followsUp ? ` · after ${h(wo.followsUp)}` : ''}</small><h3>${ph >= 5 ? h(nm) : 'Deciding…'} <span>· ${h(advShort(wo.adv))}</span></h3><p>${ph >= 5 ? h(wo.why) : `${h(A.title)}, ${h(FIRMS[A.firm].name)}`}</p></div>
+      <ol class="steps">${STEPS.map((s, i) => `<li class="${ph > i ? 'ok' : ph === i ? 'now' : ''}"><i>${ph > i ? I('check', 10) : ph === i ? '<span class="spin"></span>' : ''}</i>${h(s)}</li>`).join('')}</ol></header>
+    <div class="dcb">
+      <div class="dwhy"><div class="sh">Why now</div>${ev.map(e => `<div class="dwy"><span class="evs sm" style="--c:${SYS_COL[SIG_TYPES[e.type].sys] || '#64748b'}">${I(evIcon(e), 11)}</span><div><b>${h(SIG_TYPES[e.type].label)}</b> <time>${h(SIGNALS.dstr(e.t))}</time><p>${h(e.what)}</p></div></div>`).join('')}
+        <div class="dctx">${wo.options.some(o => o.action === 'hold' && !o.chosen) ? '<span class="tag rule">Hold: $0, also weighed</span>' : ''}<span class="tag">${h(wo.U.why)}</span>${wo.I.topics.slice(0, 2).map(x => `<span class="tag rule">${h(x.name)} ${x.v.toFixed(1)}</span>`).join('')}</div></div>
+      <div class="opts${ph >= 3 ? ' on' : ''}${ph === 3 ? ' grow' : ''}"><div class="sh">Options weighed <small>incremental sales, $K</small></div>${wo.options.filter(o => o.action !== 'hold' || o.chosen).map(o => `<div class="op${o.chosen && ph >= 5 ? ' win' : ''}${o.ok ? '' : ' no'}"><div class="oph"><b>${I(ACT[o.action][0], 12)} ${h(o.label)}</b><span>${o.value == null ? '' : SIGNALS.fmtK(o.value)}</span></div><div class="obar"><i style="width:${o.value == null ? 100 : Math.max(2, o.value / max * 100)}%"></i>${o.action === 'visit' && o.cutoff != null && o.cutoff <= max ? `<em style="left:${o.cutoff / max * 100}%" title="Capacity cut-off ${SIGNALS.fmtK(o.cutoff)}: the least valuable booked visit"></em>` : ''}</div><small>${h(o.note)}</small>${o.formula && o.chosen && ph >= 5 ? `<small class="fx">${h(o.formula)}</small>` : ''}</div>`).join('')}</div>
+    </div>
+    <div class="grd${ph >= 4 ? ' on' : ''}">${wo.guards.map(g => `<span class="gd ${g.ok ? 'ok' : 'no'}" title="${h(g.note)}">${I(g.ok ? 'check' : 'x', 11)}<b>${h(g.k)}</b><small>${h(g.note)}</small></span>`).join('')}</div>`);
+  /* the footer changes every second during the countdown, so it is painted on its own */
+  let f = '';
+  if (ph < 5) f = `<span class="busy"><span class="spin"></span> ${h(STEPS[Math.min(ph, 4)])}…</span>`;
+  else if (wo.status === 'held') f = `<span class="fo held">${I('pause', 14)}<b>Held.</b> ${h(HUB)} keeps watching ${h(advShort(wo.adv))}; the next strong signal is looked at again.</span>`;
+  else if (wo.status === 'enrolled') f = `<span class="fo ok">${I('check', 14)}<b>Done.</b> ${h(wo.outcome)}. No agents needed.</span>`;
+  else if (wo.status === 'needs-ai') f = `<span class="fo warn">${I('alert', 14)}<b>${h(wo.outcome)}</b></span>${woOwner(wo)}`;
+  else if (wo.status === 'waiting') f = `${woOwner(wo)}<span class="wtxt">${h(wo.text)}</span><button type="button" class="btn subtle" data-aodismiss>${I('x', 13)} Dismiss</button><button type="button" class="btn primary" data-aoaccept>${I('check', 13)} Accept and run</button>`;
+  else if (wo.status === 'running') f = `${woOwner(wo)}<span class="busy"><span class="spin"></span> Running on the orchestration canvas</span><button type="button" class="btn primary sm" data-aorun>${I('branch', 13)} Watch</button>`;
+  else if (wo.status === 'done' || wo.status === 'failed') f = `${woOwner(wo)}<span class="fo ${wo.status === 'done' ? 'ok' : 'warn'}">${I(wo.status === 'done' ? 'check' : 'alert', 14)}${h(wo.outcome)}</span>${wo.run ? `<button type="button" class="btn sm" data-aoview="${h(wo.id)}">${I('doc', 13)} Results</button>` : ''}`;
+  else if (wo.needsWork && AO.count) f = `${woOwner(wo)}<span class="wtxt">${h(wo.text)}</span><span class="cd"><i style="animation-duration:${3 / AO.speed}s"></i><b>Auto-run in ${AO.count}</b><small>demo policy</small></span>`;
+  else f = woOwner(wo);
+  foot.className = 'dc-foot' + (ph >= 5 ? ' on' : '');
+  setHTML(foot, f);
+}
+function woOwner(wo) {
+  if (!wo.owner) return '';
+  const E = EMPLOYEES[wo.owner];
+  return `<span class="own">${avatar(E.name, E.team, 26)}<span class="ownt"><small>Owner · by ${h(SIGNALS.dstr(wo.due))}</small><b>${h(E.name)}</b></span></span>`;
+}
+function paintSide() {
+  const c = SGS.cap['EMP-PRIYA'], open = c.slots - c.booked, mine = SGS.wos.filter(w => w.action === 'visit' && !['dismissed'].includes(w.status));
+  const segs = Array.from({ length: c.slots }, (_, i) => i < c.slots - (open + mine.filter(w => !w.bumped).length) ? 'b' : i < c.slots - open ? 'n' : 'o');
+  const sam = SGS.cap['EMP-SAM'];
+  setHTML(el('cap'), `<div class="capc"><div class="caph">${avatar('Priya Shah', 'sales', 26)}<div><b>Priya Shah · visits</b><small>${c.perQuarter} a quarter ≈ ${c.perWeek} a week · ${h(c.window)}</small></div><span class="capn"><b>${open}</b><small>open</small></span></div>
+      <div class="slots">${segs.map(x => `<i class="${x}"></i>`).join('')}</div>
+      <div class="capl"><span><i class="b"></i>Booked</span><span><i class="n"></i>Booked by ${h(HUB)}</span><span><i class="o"></i>Open</span></div>
+      <p class="cut">${open > 0 ? `${open} slot${open > 1 ? 's' : ''} left. When full, a new visit must beat <b>${SIGNALS.fmtK(c.bookedLow[0].value)}</b>, the least valuable booked visit.` : `Full. Cut-off now <b>${SIGNALS.fmtK(c.bookedLow[0] ? c.bookedLow[0].value : 0)}</b>${mine.some(w => w.bumped) ? `; ${mine.filter(w => w.bumped).map(w => `${h(w.bumped.what)} moved to digital`).join(', ')}` : ''}.`}</p></div>
+    <div class="capc sm"><div class="caph">${avatar('Sam Lee', 'sales', 22)}<div><b>Sam Lee · internal desk</b><small>${sam.perWeek - sam.booked} call slots this week · no internal model yet, so a call is valued at 35% of a visit</small></div></div></div>`);
+  el('won').textContent = SGS.wos.length ? `${SGS.wos.filter(w => w.action !== 'hold').length} decided · ${SGS.wos.filter(w => w.action === 'hold').length} held` : '';
+  setHTML(el('wol'), SGS.wos.length ? SGS.wos.slice().reverse().map(w => { const [ic, nm] = ACT[w.action], [bc, bl] = WO_ST[w.status] || WO_ST.decided; return `<button type="button" class="wo${AO.cur === w ? ' sel' : ''}" data-aowo="${h(w.id)}"><span class="woi a-${w.action}">${I(ic, 13)}</span><span class="wob"><b>${h(nm)} · ${h(advShort(w.adv))}</b><small><code>${h(w.id)}</code> ${w.owner ? h(first(EMPLOYEES[w.owner].name)) : h(HUB)}${w.value ? ' · ' + SIGNALS.fmtK(w.value) : ''}${w.outcome && ['done', 'enrolled'].includes(w.status) ? ' · ' + h(w.outcome.slice(0, 46)) + (w.outcome.length > 46 ? '…' : '') : ''}</small></span><span class="badge ${bc}">${h(bl)}</span></button>`; }).join('') : `<p class="muted sm">Decisions that need work become work orders here: an owner, a deadline, and the request ${h(HUB)} plans and runs.</p>`);
+  const cnt = {}; AO.feed.forEach(r => { if (r.e) { const k = SIG_TYPES[r.e.type].sys; cnt[k] = (cnt[k] || 0) + 1; } });
+  const sys = ['aem', 'mcloud', 'seismic', 'sf', 'gen', 'fund', 'news'];
+  setHTML(el('lis'), `<div class="sgh">${I('db', 14)}<b>Listening to</b></div><div class="lis">${sys.map(k => `<span style="--c:${SYS_COL[k]}"><i></i>${h(k === 'fund' ? 'Transactions & models' : k === 'aem' ? 'Website' : SYS_SHORT[k])}<b>${cnt[k] || 0}</b></span>`).join('')}</div>`);
+}
+setInterval(() => { if (boardShown() && AO.started) paintRadar(); }, 400);
+
+/* ---- controls ---- */
+document.addEventListener('click', e => {
+  const q = s => e.target.closest(s); let x;
+  if ((x = q('[data-mode]'))) { if (AO.active && x.dataset.mode === 'ask') { toast('A work order is running; switch when it finishes.'); return; } ST.mode = x.dataset.mode; if (ST.mode === 'always') AO.viewing = null; else { pause(); if (!AO.active) { UI.run = null; ST.msgs = []; } } paintAll(); return; }
+  if (q('[data-aoplay]')) { play(); return; }
+  if (q('[data-aopause]')) { pause(); return; }
+  if (q('[data-aoreset]')) { resetAO(); return; }
+  if ((x = q('[data-aospeed]'))) { AO.speed = +x.dataset.aospeed; SLEEP_SCALE = AO.base / AO.speed; paintAll(); return; }
+  if (q('[data-aoauto]')) { AO.auto = !AO.auto; paintAll(); return; }
+  if (q('[data-aoboard]')) { if (AO.active) AO.peek = true; AO.viewing = null; ST.open = null; paintAll(); return; }
+  if (q('[data-aorun]')) { AO.peek = false; AO.viewing = null; paintAll(); return; }
+  if (q('[data-aoaccept]')) { if (AO.wait) AO.wait.res(true); return; }
+  if (q('[data-aodismiss]')) { if (AO.wait) AO.wait.res(false); return; }
+  if ((x = q('[data-aoview]'))) { const w = SGS.wos.find(y => y.id === x.dataset.aoview); if (w && w.run && !AO.active) { UI.run = w.run; ST.view = 'results'; AO.viewing = w; ST.msgs = []; ST.approved = new Set(w.run.tasks.map(t => t.id)); paintAll(); } return; }
+  if ((x = q('[data-aowo]'))) { const w = SGS.wos.find(y => y.id === x.dataset.aowo); if (w && !AO.wait && !AO.count && (!AO.cur || AO.phase >= 5)) { AO.cur = w; AO.phase = 5; paintAll(); } return; }
+});
+
+
 UI.requester = ME; paintAll();
 initAI().then(paintAll);
-window.HARNESS = { ask, answer, startTask, approve, runAll, ST, status };
+window.HARNESS = { ask, answer, startTask, approve, runAll, ST, status, AO, play, pause };
 })();
 
 </script>

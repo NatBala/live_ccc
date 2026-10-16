@@ -30,6 +30,33 @@ You type a request as a real role (a wholesaler, a product specialist, a markete
 
 With an OpenAI or Azure OpenAI key on the server (see "Run it"), requests are planned and worked live. Without one, the saved AI runs in `src/replay.js` replay through the same foundation, tools and checks. Add `?fast=1` to the address to speed up the presentation.
 
+## Always-on Intelligence (the harness opens here)
+
+The harness opens in **Always-on** mode. Instead of waiting for someone to type a request, Intelligence listens to advisor activity from every connected system, decides the next best action, and hands the work to the teams. **Ask** (top left) switches to the request view described above.
+
+- **Live advisor activity (left).** Events stream in on a simulated clock, from Sep 14 to today (Sep 29, 2026). They come from the records the foundation already holds: website visits and article reads, webinars, Seismic LiveSend sends, opens and blocked links, logged calls and emails, coverage changes, practice changes and decision dates, service contacts, daily transactions, dealer-platform changes and client news. Marketing Cloud opens and clicks and the weekly model refreshes are added in `src/signals.js`. Each event is tagged weak, medium, strong or context, with what it did.
+- **Advisor radar (centre, top).** Each advisor's interest by topic, with weighted signals that halve every 14 days and a decision threshold of 5. Also shown: Sales Alpha (incremental sales from one in-person visit), Digital Alpha (from one digital engagement), last contact and current state.
+- **Decision card (centre).** When an event calls for one (a strong signal, interest crossing the threshold, or three opens with no clicks), Intelligence shows its steps: profile, trigger, options, guardrails, decision.
+  - *Why now* lists the evidence.
+  - *Options weighed* compares an in-person visit, an internal call, a digital follow-up or journey, and holding, each in dollars of incremental sales, with the formula behind the winner.
+  - *Guardrails* covers fixing friction first, contact cool-off, a follow-up already planned, firm rules, approved content only, and capacity.
+- **Capacity and work orders (right).** Priya has 200 visits a quarter (about 15 a week). When her slots are full, a new visit has to beat the least valuable visit already booked, which moves to digital. Sam's internal desk has no model yet, so a call is valued at 35% of a visit. Each decision that needs work becomes a work order with an owner, a due date and the request written for them.
+- **Auto-run.** In the demo, work orders run on their own after a three-second countdown. The top bar shows which work order is running, and the same orchestration canvas, results and foundation views follow. The board comes back when it finishes. Turn Auto-run off for production behaviour: each decision waits for its owner to accept or dismiss it, and a dismissed visit gives its slot back.
+
+**The scenarios in the data:**
+
+| Advisor | Decision | Why |
+|---|---|---|
+| Maya | In-person visit | Committee fee review, then a service question |
+| Daniel | In-person visit | CGGR added to his platform |
+| Sofia | Digital follow-up | ETF interest, but Priya's follow-up (TASK-303) is already planned |
+| Luis | Internal call | Client news; no external coverage |
+| Rachel | Held, then an in-person visit | Held for cool-off; then new households arrived, and the visit bumped a $45K check-in |
+| Jordan | Pre-approved digital journey | Opens without clicks |
+| Alex | Fix first, then Sam's call | A blocked link; coverage moves to Sam on Oct 1 |
+
+With live AI, every work order is planned from its own generated request. Without a key, the saved AI run of an equivalent request plays, and the one with no saved run (Luis) is marked as needing live AI.
+
 ## Background
 
 ### The problem
@@ -218,7 +245,10 @@ live_ccc/
 │  ├─ catalogue.js        Sales AI: intents, sub-agent routes, shared services, the query catalogue
 │  ├─ engine.js           foundation: tools, context packets, gatekeeper, AI connectors (Claude and OpenAI)
 │  ├─ graph.js            advisor knowledge graph
-│  ├─ ui.js               orchestration runtime and rendering
+│  ├─ signals.js          Always-on Intelligence: event stream, advisor profiles, next best action, work orders
+│  ├─ pipeline.js         shared run pipeline (planning, waves, tickets)
+│  ├─ ui.js               classic view rendering
+│  ├─ harness/            Agent Harness page: harness.js, alwayson.js (signals board), harness.css, template
 │  ├─ replay.js           saved runs, played with ▶ next to a suggestion
 │  └─ base.css, extra.css styles and themes
 ├─ scripts/

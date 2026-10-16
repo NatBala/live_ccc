@@ -53,7 +53,8 @@ const P = {
   sparkles: 'M9 4l1.4 4.1L14.5 9.5l-4.1 1.4L9 15l-1.4-4.1L3.5 9.5l4.1-1.4zM17 13l.8 2.2 2.2.8-2.2.8L17 19l-.8-2.2L14 16l2.2-.8z',
   cpu: 'M8 8h8v8H8zM5 5h14v14H5zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3', link: 'M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1',
   undo: 'M9 14L4 9l5-5M4 9h11a5 5 0 010 10h-3', eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 100-6 3 3 0 000 6z', target: 'M12 21a9 9 0 100-18 9 9 0 000 18zM12 16a4 4 0 100-8 4 4 0 000 8zM12 12h.01',
-  msg: 'M4 5h16v11H8l-4 4z', pulse: 'M3 12h4l3-8 4 16 3-8h4', expand: 'M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7'
+  msg: 'M4 5h16v11H8l-4 4z', pulse: 'M3 12h4l3-8 4 16 3-8h4', expand: 'M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7',
+  bell: 'M6 16V11a6 6 0 0112 0v5l2 2H4zM10 21h4', chart: 'M4 20V4M4 20h16M8 16v-5M12 16V8M16 16v-3', globe: 'M12 21a9 9 0 100-18 9 9 0 000 18zM3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'
 };
 const I = (n, s = 16, cls = '') => `<svg class="i ${cls}" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${P[n] || P.doc}"/></svg>`;
 
@@ -101,8 +102,9 @@ const reusedIn = (t, i) => { const rec = F.memory.find(m => m.id === i.id) || F.
 /* ---------- requests ---------- */
 const recordedFor = who => RECORDED.filter(r => r.requester === who || (EMPLOYEES[r.requester] && EMPLOYEES[r.requester].team === EMPLOYEES[who].team));
 const suggestions = () => AI.mode === 'live' ? (SUGGESTIONS[EMPLOYEES[ME].team] || []).slice(0, 5) : [...new Set(recordedFor(ME).map(r => r.text))].slice(0, 6);
-function ask(text, clarified) {
+function ask(text, clarified, wo) {
   text = String(text || '').trim(); if (!text) return;
+  if (!wo && ST.mode === 'always') { if (AO.active) { toast('A work order is running; ask when it finishes.'); return; } ST.mode = 'ask'; AO.playing = false; AO.viewing = null; }
   if (busyPlanning() || anyRunning()) { toast('Still working on the current request.'); return; }
   const rec = RECORDED.find(r => r.text === text && r.requester === ME) || RECORDED.find(r => r.text === text);
   if (AI.mode !== 'live' && !rec) { ST.nokey = text; UI.run = null; paintAll(); return; }
@@ -114,7 +116,7 @@ function ask(text, clarified) {
 }
 function answer(v) {
   const r = run(); if (!r || r.status !== 'clarify' || !v) return;
-  ask(`${r.text.replace(/ \(clarification:.*\)$/, '')} (clarification: ${v})`, { question: r.clarify, answer: v });
+  ask(`${r.text.replace(/ \(clarification:.*\)$/, '')} (clarification: ${v})`, { question: r.clarify, answer: v }, AO.active);
 }
 
 /* ---------- running tickets ---------- */
@@ -209,7 +211,7 @@ function announcePlan(r) {
 function setHTML(node, html) { if (node && node._h !== html) { node.innerHTML = html; node._h = html; } }
 let raf = 0;
 HX.schedule = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; paintAll(); }); };
-function paintAll() { paintTop(); paintOrch(); paintFloor(); paintBench(); const r = run(); if (r) announcePlan(r); }
+function paintAll() { paintTop(); if (!paintAO()) { paintOrch(); paintFloor(); paintBench(); } const r = run(); if (r) announcePlan(r); }
 
 function paintTop() {
   const E = EMPLOYEES[ME];
@@ -246,7 +248,7 @@ function paintOrch() {
       <div class="prog"><i style="width:${done / r.tasks.length * 100}%"></i></div>
       ${ST.auto ? `<button type="button" class="btn subtle block" data-stop>${I('pause', 14)} Pause</button>` : ready ? `<button type="button" class="btn primary block lg" data-runall>${I('play', 14)} Run all agents</button><small class="note">Teams hand off through ${HUB}. Client-facing drafts wait for your sign-off.</small>` : ''}</div>`;
   setHTML(el('orch'), `<div class="ohead"><span class="omark${thinking ? ' pulse' : ''}">${I('branch', 16)}</span><div><b>${HUB}</b><small>${r.replay ? 'Replaying a saved AI run' : 'Planning and orchestration'}</small></div></div>
-    <div class="reqq">${avatar(EMPLOYEES[r.requester].name, EMPLOYEES[r.requester].team, 26)}<div><small>${h(EMPLOYEES[r.requester].name)}</small><p>${h(r.text.replace(/ \(clarification:.*\)$/, ''))}</p></div></div>
+    <div class="reqq">${avatar(EMPLOYEES[r.requester].name, EMPLOYEES[r.requester].team, 26)}<div><small>${h(EMPLOYEES[r.requester].name)}${AO.active && AO.active.run === undefined && UI.run === r ? ` · work order ${h(AO.active.id)} from Always-on` : ''}</small><p>${h(r.text.replace(/ \(clarification:.*\)$/, ''))}</p></div></div>
     ${stat}
     ${r.status === 'clarify' ? clarifyHTML(r) : ''}
     ${thinking && live.length ? `<div class="sh">Reasoning</div><div class="reason">${live.map(d => `<div class="rz"><span class="tag ${d.src === 'code' ? 'rule' : 'ai'}">${d.src === 'code' ? 'Rule' : 'AI'}</span><span>${h(d.title)}</span></div>`).join('')}</div>` : ''}
@@ -616,7 +618,9 @@ document.addEventListener('keydown', e => {
 el('composer').onsubmit = e => { e.preventDefault(); const v = el('ask').value; el('ask').value = ''; ask(v); };
 el('newChat').onclick = () => { if (busyPlanning() || anyRunning()) return; UI.run = null; ST.open = null; ST.nokey = null; ST.auto = false; ST.msgs = []; F.session.advisor = null; paintAll(); };
 
+/*ALWAYSON*/
+
 UI.requester = ME; paintAll();
 initAI().then(paintAll);
-window.HARNESS = { ask, answer, startTask, approve, runAll, ST, status };
+window.HARNESS = { ask, answer, startTask, approve, runAll, ST, status, AO, play, pause };
 })();
