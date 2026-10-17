@@ -537,8 +537,8 @@ function makeSignals() {
   return { S, reset, step, after, release, decide, record, whatIf, planInputs, intentOf, urgency, actName, fmtK, ts, dstr, DAY, runToToday, takeaway, actionsFor, territory, engagement, momentum };
 }
 const SIGNALS = makeSignals();
-/* Without live AI, a plan plays as saved AI work: steps taken from saved runs, joined into one plan with the
-   dependencies the decision needs. With live AI, Intelligence plans it from the decision brief instead. */
+/* Scripted plans: steps taken from saved runs (or written here), joined into one plan with the
+   dependencies each decision needs. They play the same way with or without an AI key. */
 const PLAN_REPLAYS = {
   'ADV-105': { requester: 'EMP-PRIYA', parts: [
     { text: 'Which CG ETFs are available at Wells Fargo for Daniel?', tasks: ['T2', 'T3'], ask: 'Confirm which CG ETFs Daniel can use at Wells Fargo' },
@@ -556,24 +556,30 @@ const PLAN_REPLAYS = {
     links: { P2T2: ['P1T3'] } },
   'ADV-102': { requester: 'EMP-PRIYA', parts: [{ text: 'Prepare Maya’s retirement committee fee comparison review', tasks: ['T1', 'T2', 'T3'], ask: 'Prepare the committee fee review Maya asked to walk through' }], links: {} },
   'ADV-104': { requester: 'EMP-MARCUS', parts: [{ text: 'Create an ETF email campaign for Sofia', tasks: ['T1', 'T2', 'T3'], ask: 'Draft the details Sofia asked for' }], links: {} },
+  'ADV-107': { requester: 'EMP-SAM', inline: [
+    { k: 'task', id: 'T1', route: 'Prep.News', title: 'Read the Forsyth news', objective: 'Summarize the Forsyth Components news: the new CFO who ran a recordkeeper search before, and the incumbent recordkeeper’s 2027 fee increase.', depends_on: [], why: 'Client news on Sep 24 and Sep 28' },
+    { k: 'task', id: 'T2', route: 'Prep.Notes', title: 'What Luis told us', objective: 'Summarize Sam’s recent emails with Luis and anything he said about his small-business retirement plans.', depends_on: [], why: 'Emails with Sam on Sep 2 and Sep 25' },
+    { k: 'task', id: 'T3', route: 'Lead.Insights', title: 'Harbor Point plan opportunities', objective: 'Explain where Harbor Point’s retirement-plan business stands: the Forsyth 401(k) closed lost on Sep 10 and the Long Beach Marine SIMPLE IRA in discovery.', depends_on: [], why: 'OPP-512 and OPP-513' },
+    { k: 'task', id: 'T4', route: 'Prep.Agenda', title: 'Build Sam’s call agenda', objective: 'A short agenda for Sam’s call with Luis, built only from verified topics, with open questions and no product recommendations.', depends_on: ['T1', 'T2', 'T3'], why: 'Brings the three reads together' }] },
   territory: { requester: 'EMP-MARCUS', parts: [
     { text: 'Write a LinkedIn post on fee transparency for advisors', tasks: ['T1', 'T2', 'T3', 'T4'], ask: 'Draft the fee-transparency LinkedIn post' },
     { text: 'Identify the growing trends in LA territory', tasks: ['T1', 'T3'], ask: 'Confirm the LA territory trends' }], links: {} }
 };
 function composePlanReplay(plan) {
   const spec = PLAN_REPLAYS[plan.key]; if (!spec || typeof RECORDED === 'undefined') return null;
-  const J = o => JSON.stringify(o), lines = [], tasks = [], agents = {}, auths = [], E = EMPLOYEES[spec.requester];
+  const J = o => JSON.stringify(o), lines = [], tasks = [], agents = {}, auths = [], E = EMPLOYEES[spec.requester], parts = spec.parts || [];
   lines.push(J({ k: 'decision', type: 'requester', title: `${E.name}, ${TEAMS[E.team].name}`, detail: 'Owner of this relationship plan' }));
-  lines.push(J({ k: 'decision', type: 'asks', title: `${spec.parts.length} part${spec.parts.length > 1 ? 's' : ''} of one plan`, detail: spec.parts.map((p, i) => `${i + 1}. ${p.ask}`).join(' · '), asks: spec.parts.map(p => p.ask) }));
+  if (parts.length) lines.push(J({ k: 'decision', type: 'asks', title: `${parts.length} part${parts.length > 1 ? 's' : ''} of one plan`, detail: parts.map((p, i) => `${i + 1}. ${p.ask}`).join(' · '), asks: parts.map(p => p.ask) }));
   if (plan.adv) lines.push(J({ k: 'decision', type: 'entity', title: `${ADVISORS[plan.adv].short} → ${ADVISORS[plan.adv].name.replace(/,.*$/, '')}, ${FIRMS[ADVISORS[plan.adv].firm].name}`, detail: 'From the decision record', advisor: plan.adv }));
-  spec.parts.forEach((part, c) => {
+  (spec.inline || []).forEach(t => tasks.push(Object.assign({ ask: 1 }, t)));
+  parts.forEach((part, c) => {
     const rec = RECORDED.find(r => r.text === part.text && (!part.requester || r.requester === part.requester)); if (!rec) return;
     const objs = rec.orch.split('\n').filter(Boolean).map(l => JSON.parse(l)), keep = new Set(part.tasks), nid = id => `P${c + 1}${id}`;
     const it = objs.find(o => o.type === 'interpretation'); auths.push(it && it.authority ? it.authority : authorityFromText(rec.text, EMPLOYEES[rec.requester].team).authority);
     objs.filter(o => o.k === 'decision' && ['known', 'controls'].includes(o.type)).slice(0, 1).forEach(o => lines.push(J(o)));
     objs.filter(o => o.k === 'task' && keep.has(o.id)).forEach(o => {
       const t = Object.assign({}, o, { id: nid(o.id), ask: c + 1, depends_on: (o.depends_on || []).filter(d => keep.has(d)).map(nid) });
-      (spec.links[t.id] || []).forEach(d => { if (!t.depends_on.includes(d)) t.depends_on.push(d); });
+      ((spec.links || {})[t.id] || []).forEach(d => { if (!t.depends_on.includes(d)) t.depends_on.push(d); });
       tasks.push(t); agents[t.id] = rec.agents[o.id];
     });
   });
@@ -581,7 +587,7 @@ function composePlanReplay(plan) {
   lines.push(J({ k: 'decision', type: 'interpretation', title: plan.title, detail: 'One plan for the decisions Intelligence made', intent: 'prepare', subject: plan.adv ? { kind: 'advisor', id: plan.adv, label: ADVISORS[plan.adv].name } : null, output: 'One plan, run as tickets across the teams', constraints: ['No client contact beyond the decided actions', 'Approved content only'], missing: [], authority: auth }));
   tasks.forEach(t => lines.push(J(t)));
   lines.push(J({ k: 'end' }));
-  return { name: plan.title, requester: spec.requester, text: plan.text, orch: lines.join('\n'), agents, composed: true };
+  return { name: plan.title, requester: spec.requester, text: plan.text, orch: lines.join('\n'), agents, composed: true, orchOnly: !!spec.inline };
 }
 /* the leadership what-if on its own engine, as of the start of the stream */
 function sameSignal() { const Y = makeSignals(); Y.reset(); const r = Y.whatIf(SAME_SIGNAL, 1); r.engine = Y; return r; }

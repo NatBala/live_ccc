@@ -111,7 +111,7 @@ function ask(text, clarified, wo) {
   Object.assign(ST, { nokey: null, approved: new Set(), open: null, openTask: null, auto: false, announced: null, view: 'floor', msgs: [], type: {}, recent: [] });
   if (rec && AI.mode !== 'live' && rec.requester !== ME) ME = rec.requester;
   UI.requester = ME; UI.run = null;
-  runRequest(text, AI.mode === 'live' ? null : rec, Object.assign({ planOnly: true }, clarified ? { clarified } : {}, wo && wo.maxTasks ? { maxTasks: wo.maxTasks } : {}));
+  runRequest(text, AI.mode === 'live' && !(wo && wo.scripted) ? null : rec, Object.assign({ planOnly: true }, clarified ? { clarified } : {}, wo && wo.maxTasks ? { maxTasks: wo.maxTasks } : {}));
   setTimeout(() => comm('req', 'hub', `Request: “${text.replace(/ \(clarification:.*\)$/, '').slice(0, 60)}${text.length > 60 ? '…' : ''}”`, 'request'), 80);
 }
 function answer(v) {

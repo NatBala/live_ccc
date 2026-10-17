@@ -669,3 +669,5 @@ body.aoboard .stage{grid-template-columns:minmax(0,1fr)}
 .tkmore{border-top:1px solid var(--line2);padding-top:6px;margin-top:2px}.tkmore summary{cursor:pointer;font-size:12px;font-weight:600;color:var(--pri);list-style:none}.tkmore summary::-webkit-details-marker{display:none}
 .tkb{padding:12px 14px 10px}
 .topact{flex:none}.aoctl{overflow:hidden}.aoct{overflow:hidden;flex:0 1 auto}.aostrip{max-width:100%}
+.plgen{margin-left:auto}.plgen .btn{height:26px}
+.pidle{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--ink3);background:var(--sunk);border:1px dashed var(--line);border-radius:10px;padding:10px 12px}.pidle .i{color:var(--pri);margin-top:2px}

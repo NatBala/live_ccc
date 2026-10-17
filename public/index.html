@@ -678,6 +678,8 @@ body.aoboard .stage{grid-template-columns:minmax(0,1fr)}
 .tkmore{border-top:1px solid var(--line2);padding-top:6px;margin-top:2px}.tkmore summary{cursor:pointer;font-size:12px;font-weight:600;color:var(--pri);list-style:none}.tkmore summary::-webkit-details-marker{display:none}
 .tkb{padding:12px 14px 10px}
 .topact{flex:none}.aoctl{overflow:hidden}.aoct{overflow:hidden;flex:0 1 auto}.aostrip{max-width:100%}
+.plgen{margin-left:auto}.plgen .btn{height:26px}
+.pidle{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--ink3);background:var(--sunk);border:1px dashed var(--line);border-radius:10px;padding:10px 12px}.pidle .i{color:var(--pri);margin-top:2px}
 </style>
 </head>
 <body>
@@ -3901,8 +3903,8 @@ function makeSignals() {
   return { S, reset, step, after, release, decide, record, whatIf, planInputs, intentOf, urgency, actName, fmtK, ts, dstr, DAY, runToToday, takeaway, actionsFor, territory, engagement, momentum };
 }
 const SIGNALS = makeSignals();
-/* Without live AI, a plan plays as saved AI work: steps taken from saved runs, joined into one plan with the
-   dependencies the decision needs. With live AI, Intelligence plans it from the decision brief instead. */
+/* Scripted plans: steps taken from saved runs (or written here), joined into one plan with the
+   dependencies each decision needs. They play the same way with or without an AI key. */
 const PLAN_REPLAYS = {
   'ADV-105': { requester: 'EMP-PRIYA', parts: [
     { text: 'Which CG ETFs are available at Wells Fargo for Daniel?', tasks: ['T2', 'T3'], ask: 'Confirm which CG ETFs Daniel can use at Wells Fargo' },
@@ -3920,24 +3922,30 @@ const PLAN_REPLAYS = {
     links: { P2T2: ['P1T3'] } },
   'ADV-102': { requester: 'EMP-PRIYA', parts: [{ text: 'Prepare Maya’s retirement committee fee comparison review', tasks: ['T1', 'T2', 'T3'], ask: 'Prepare the committee fee review Maya asked to walk through' }], links: {} },
   'ADV-104': { requester: 'EMP-MARCUS', parts: [{ text: 'Create an ETF email campaign for Sofia', tasks: ['T1', 'T2', 'T3'], ask: 'Draft the details Sofia asked for' }], links: {} },
+  'ADV-107': { requester: 'EMP-SAM', inline: [
+    { k: 'task', id: 'T1', route: 'Prep.News', title: 'Read the Forsyth news', objective: 'Summarize the Forsyth Components news: the new CFO who ran a recordkeeper search before, and the incumbent recordkeeper’s 2027 fee increase.', depends_on: [], why: 'Client news on Sep 24 and Sep 28' },
+    { k: 'task', id: 'T2', route: 'Prep.Notes', title: 'What Luis told us', objective: 'Summarize Sam’s recent emails with Luis and anything he said about his small-business retirement plans.', depends_on: [], why: 'Emails with Sam on Sep 2 and Sep 25' },
+    { k: 'task', id: 'T3', route: 'Lead.Insights', title: 'Harbor Point plan opportunities', objective: 'Explain where Harbor Point’s retirement-plan business stands: the Forsyth 401(k) closed lost on Sep 10 and the Long Beach Marine SIMPLE IRA in discovery.', depends_on: [], why: 'OPP-512 and OPP-513' },
+    { k: 'task', id: 'T4', route: 'Prep.Agenda', title: 'Build Sam’s call agenda', objective: 'A short agenda for Sam’s call with Luis, built only from verified topics, with open questions and no product recommendations.', depends_on: ['T1', 'T2', 'T3'], why: 'Brings the three reads together' }] },
   territory: { requester: 'EMP-MARCUS', parts: [
     { text: 'Write a LinkedIn post on fee transparency for advisors', tasks: ['T1', 'T2', 'T3', 'T4'], ask: 'Draft the fee-transparency LinkedIn post' },
     { text: 'Identify the growing trends in LA territory', tasks: ['T1', 'T3'], ask: 'Confirm the LA territory trends' }], links: {} }
 };
 function composePlanReplay(plan) {
   const spec = PLAN_REPLAYS[plan.key]; if (!spec || typeof RECORDED === 'undefined') return null;
-  const J = o => JSON.stringify(o), lines = [], tasks = [], agents = {}, auths = [], E = EMPLOYEES[spec.requester];
+  const J = o => JSON.stringify(o), lines = [], tasks = [], agents = {}, auths = [], E = EMPLOYEES[spec.requester], parts = spec.parts || [];
   lines.push(J({ k: 'decision', type: 'requester', title: `${E.name}, ${TEAMS[E.team].name}`, detail: 'Owner of this relationship plan' }));
-  lines.push(J({ k: 'decision', type: 'asks', title: `${spec.parts.length} part${spec.parts.length > 1 ? 's' : ''} of one plan`, detail: spec.parts.map((p, i) => `${i + 1}. ${p.ask}`).join(' · '), asks: spec.parts.map(p => p.ask) }));
+  if (parts.length) lines.push(J({ k: 'decision', type: 'asks', title: `${parts.length} part${parts.length > 1 ? 's' : ''} of one plan`, detail: parts.map((p, i) => `${i + 1}. ${p.ask}`).join(' · '), asks: parts.map(p => p.ask) }));
   if (plan.adv) lines.push(J({ k: 'decision', type: 'entity', title: `${ADVISORS[plan.adv].short} → ${ADVISORS[plan.adv].name.replace(/,.*$/, '')}, ${FIRMS[ADVISORS[plan.adv].firm].name}`, detail: 'From the decision record', advisor: plan.adv }));
-  spec.parts.forEach((part, c) => {
+  (spec.inline || []).forEach(t => tasks.push(Object.assign({ ask: 1 }, t)));
+  parts.forEach((part, c) => {
     const rec = RECORDED.find(r => r.text === part.text && (!part.requester || r.requester === part.requester)); if (!rec) return;
     const objs = rec.orch.split('\n').filter(Boolean).map(l => JSON.parse(l)), keep = new Set(part.tasks), nid = id => `P${c + 1}${id}`;
     const it = objs.find(o => o.type === 'interpretation'); auths.push(it && it.authority ? it.authority : authorityFromText(rec.text, EMPLOYEES[rec.requester].team).authority);
     objs.filter(o => o.k === 'decision' && ['known', 'controls'].includes(o.type)).slice(0, 1).forEach(o => lines.push(J(o)));
     objs.filter(o => o.k === 'task' && keep.has(o.id)).forEach(o => {
       const t = Object.assign({}, o, { id: nid(o.id), ask: c + 1, depends_on: (o.depends_on || []).filter(d => keep.has(d)).map(nid) });
-      (spec.links[t.id] || []).forEach(d => { if (!t.depends_on.includes(d)) t.depends_on.push(d); });
+      ((spec.links || {})[t.id] || []).forEach(d => { if (!t.depends_on.includes(d)) t.depends_on.push(d); });
       tasks.push(t); agents[t.id] = rec.agents[o.id];
     });
   });
@@ -3945,7 +3953,7 @@ function composePlanReplay(plan) {
   lines.push(J({ k: 'decision', type: 'interpretation', title: plan.title, detail: 'One plan for the decisions Intelligence made', intent: 'prepare', subject: plan.adv ? { kind: 'advisor', id: plan.adv, label: ADVISORS[plan.adv].name } : null, output: 'One plan, run as tickets across the teams', constraints: ['No client contact beyond the decided actions', 'Approved content only'], missing: [], authority: auth }));
   tasks.forEach(t => lines.push(J(t)));
   lines.push(J({ k: 'end' }));
-  return { name: plan.title, requester: spec.requester, text: plan.text, orch: lines.join('\n'), agents, composed: true };
+  return { name: plan.title, requester: spec.requester, text: plan.text, orch: lines.join('\n'), agents, composed: true, orchOnly: !!spec.inline };
 }
 /* the leadership what-if on its own engine, as of the start of the stream */
 function sameSignal() { const Y = makeSignals(); Y.reset(); const r = Y.whatIf(SAME_SIGNAL, 1); r.engine = Y; return r; }
@@ -4063,7 +4071,7 @@ function ask(text, clarified, wo) {
   Object.assign(ST, { nokey: null, approved: new Set(), open: null, openTask: null, auto: false, announced: null, view: 'floor', msgs: [], type: {}, recent: [] });
   if (rec && AI.mode !== 'live' && rec.requester !== ME) ME = rec.requester;
   UI.requester = ME; UI.run = null;
-  runRequest(text, AI.mode === 'live' ? null : rec, Object.assign({ planOnly: true }, clarified ? { clarified } : {}, wo && wo.maxTasks ? { maxTasks: wo.maxTasks } : {}));
+  runRequest(text, AI.mode === 'live' && !(wo && wo.scripted) ? null : rec, Object.assign({ planOnly: true }, clarified ? { clarified } : {}, wo && wo.maxTasks ? { maxTasks: wo.maxTasks } : {}));
   setTimeout(() => comm('req', 'hub', `Request: “${text.replace(/ \(clarification:.*\)$/, '').slice(0, 60)}${text.length > 60 ? '…' : ''}”`, 'request'), 80);
 }
 function answer(v) {
@@ -4949,23 +4957,25 @@ function compareHTML() {
         <details class="recd"><summary>${I('shield', 12)} Decision record</summary>${recHTML(Y.record(d))}</details></article>`; }).join('')}</div>`;
 }
 
-/* ---------- What we're doing: one plan per advisor, inferred by Intelligence ----------
-   The decision service decides what to do; Intelligence plans how, from a decision brief
-   (live AI), or plays the saved plan when there is no AI key. One approval runs it. */
+/* ---------- What we're doing: one scripted plan per advisor ----------
+   The decision service decides what to do. Show plan plays Intelligence working out how,
+   from the decision brief, then reveals the scripted steps. One approval runs them. */
 AX.plans = {};
 function planOf(sel) {
   if (!sel || sel === 'compare') return null;
   if (!AX.plans[sel]) {
     const P = AOX().planInputs(sel);
-    const plan = Object.assign({ id: 'PLAN-' + (sel === 'territory' ? 'TER' : sel.slice(-3)), status: P.text ? 'idle' : 'none', removed: new Set(), explorer: true, isPlan: true, maxTasks: 8 }, P);
+    const plan = Object.assign({ id: 'PLAN-' + (sel === 'territory' ? 'TER' : sel.slice(-3)), status: P.text ? 'idle' : 'none', removed: new Set(), explorer: true, isPlan: true, scripted: true, maxTasks: 8 }, P);
     plan.replay = P.text ? composePlanReplay(plan) : null;
     AX.plans[sel] = plan;
   }
   return AX.plans[sel];
 }
 async function startPlan(p) {
-  if (AI.mode !== 'live' && !p.replay) { p.status = 'needs-ai'; paintAll(); return; }
-  if (p.replay && !RECORDED.includes(p.replay)) RECORDED.push(p.replay);
+  if (busyPlanning() || anyRunning() || AO.active || AO.planning) { toast('Intelligence is busy; try again in a moment.'); return; }
+  if (!p.replay) { p.status = 'needs-ai'; paintAll(); return; }
+  if (!RECORDED.includes(p.replay)) RECORDED.push(p.replay);
+  p.removed = new Set();
   p.status = 'planning'; AO.planning = p; ME = p.requester; UI.requester = ME;
   ask(p.text, null, p);
   p.run = UI.run && UI.run.text === p.text ? UI.run : null;
@@ -4980,11 +4990,6 @@ async function startPlan(p) {
   p.status = p.run.status === 'planned' ? 'ready' : 'failed';
   AO.planning = null; paintAll();
 }
-/* plan the selected advisor whenever Intelligence is free */
-setInterval(() => {
-  if (ST.mode !== 'advisors' || !boardShown() || busyPlanning() || anyRunning() || AO.active || AO.planning) return;
-  const p = planOf(AX.sel); if (p && p.status === 'idle') startPlan(p);
-}, 400);
 function rewave(r) {
   r.tasks.forEach(t => { t.wave = 0; });
   const waveOf = t => t.wave || (t.wave = 1 + Math.max(0, ...t.depends_on.map(d => r.tasks.find(x => x.id === d)).filter(Boolean).map(waveOf)));
@@ -5029,18 +5034,20 @@ function planHTML(sel) {
   const rows = tasks.map((t, i) => { const R = roleOfT(t), who = personOf(t), off = p.removed.has(t.id), deps = t.depends_on.map(d => tasks.findIndex(x => x.id === d) + 1).filter(n => n > 0);
     return `<div class="pst${off ? ' off' : ''}${busy && i === tasks.length - 1 ? ' fresh' : ''}" style="--c:${TCOL(R.team)}"><span class="psn">${i + 1}</span>${avatar(who, R.team, 26)}<div><b>${h(t.title)}</b><small>${h(who)} · ${h(R.name)}${deps.length ? ` · after ${deps.map(n => 'step ' + n).join(', ')}` : t.wave ? ' · starts right away' : ''}</small>${t.why || t.objective ? `<p>${h(String(t.why && !/^Catalogue/.test(t.why) ? t.why : t.objective).slice(0, 150))}</p>` : ''}</div>${ready ? `<button type="button" class="x" data-plrm="${h(t.id)}" title="${off ? 'Put this step back' : 'Remove this step before approving'}">${I(off ? 'undo' : 'x', 13)}</button>` : ''}</div>`; }).join('');
   const D = r && r.bts ? (DRAFTING[r.bts.drafting] || 'Planning') : 'Waiting for Intelligence';
-  const src = live ? 'Live: Intelligence plans from the decision brief' : p.replay ? 'Saved plan: steps from saved AI runs (no AI key here)' : 'Needs live AI';
+  const canRun = !(p.replay && p.replay.orchOnly) || live;
+  const genBtn = ['idle', 'ready', 'failed'].includes(p.status) ? `<button type="button" class="btn ${p.status === 'idle' ? 'primary' : 'subtle'} sm" data-plgen="${h(sel)}">${I('sparkles', 12)} ${p.status === 'idle' ? 'Show plan' : 'Plan again'}</button>` : '';
   let foot = '';
   if (p.status === 'needs-ai') foot = `<span class="fo warn">${I('alert', 13)} Planning this one needs live AI: there is no saved plan for it.</span>`;
-  else if (p.status === 'idle') foot = `<span class="busy"><span class="spin"></span> Queued: Intelligence plans it when it’s free</span>`;
+  else if (p.status === 'idle') foot = `<span class="muted">Press <b>Show plan</b> and ${h(HUB)} works out the steps from the decision.</span>`;
   else if (busy) foot = `<span class="busy"><span class="spin"></span> ${h(D)}…</span>`;
+  else if (ready && !canRun) foot = `<span class="fo warn">${I('alert', 13)} Running these steps needs live AI: there are no saved agent results for them.</span>`;
   else if (ready) { const n = tasks.length - p.removed.size; foot = `<span class="acn">${avatar(EMPLOYEES[p.requester].name, EMPLOYEES[p.requester].team, 20)} ${h(first(EMPLOYEES[p.requester].name))} approves</span><button type="button" class="btn primary" data-plrun="${h(sel)}">${I('play', 13)} Approve and run plan · ${n} step${n === 1 ? '' : 's'}</button>`; }
   else if (p.status === 'running') foot = `<span class="busy"><span class="spin"></span> Running on the orchestration canvas</span><button type="button" class="btn sm" data-aorun>${I('branch', 12)} Watch</button>`;
   else if (p.status === 'done' || p.status === 'failed') foot = `<span class="fo ${p.status === 'done' ? 'ok' : 'warn'}">${I(p.status === 'done' ? 'check' : 'alert', 13)} ${h(p.outcome || (p.status === 'failed' ? 'Planning failed' : 'Done'))}</span>${r && r.status === 'done' ? `<button type="button" class="btn sm" data-plres="${h(sel)}">${I('doc', 12)} Results</button>` : ''}`;
-  return `<section class="sgcol axac"><div class="sgh">${I('target', 14)}<b>What we’re doing</b><small>${h(src)}</small></div><div class="pl">
+  return `<section class="sgcol axac"><div class="sgh">${I('target', 14)}<b>What we’re doing</b><span class="plgen">${genBtn}</span></div><div class="pl">
     ${heads ? `<div class="pdh">${heads}</div>` : ''}${lead ? `<p class="plw">${h(lead)}</p>` : ''}
     <div class="psh"><span>${busy ? `${I('sparkles', 12)} ${h(HUB)} is planning the steps` : tasks.length ? `${tasks.length - p.removed.size} steps · ${waves.length} wave${waves.length === 1 ? '' : 's'} · ${new Set(tasks.map(t => roleOfT(t).team)).size} teams` : 'Steps'}</span>${p.removed.size && ready ? `<small>${p.removed.size} removed</small>` : ''}</div>
-    <div class="psl">${rows || (busy || p.status === 'idle' ? '<div class="pst sk"><span class="psn"></span><i></i></div><div class="pst sk"><span class="psn"></span><i></i></div><div class="pst sk"><span class="psn"></span><i></i></div>' : '')}${busy && rows ? '<div class="pst sk"><span class="psn"></span><i></i></div>' : ''}</div>
+    <div class="psl">${rows || (busy ? '<div class="pst sk"><span class="psn"></span><i></i></div><div class="pst sk"><span class="psn"></span><i></i></div><div class="pst sk"><span class="psn"></span><i></i></div>' : p.status === 'idle' ? `<div class="pidle">${I('sparkles', 16)}<span>The steps aren’t shown yet. <b>Show plan</b> has ${h(HUB)} read the decision brief, check open work and assign each step to a team.</span></div>` : '')}${busy && rows ? '<div class="pst sk"><span class="psn"></span><i></i></div>' : ''}</div>
     ${p.hints && p.hints.length && sel !== 'territory' ? `<div class="pin"><small>Evidence Intelligence was told to cover</small>${p.hints.map(x => `<span title="${h(x.why)}" style="--c:${ACT_COL[x.action]}"><i></i>${h(ACT[x.action][1])}</span>`).join('')}</div>` : ''}
     <details class="recd"><summary>${I('send', 12)} Decision brief sent to ${h(HUB)}</summary><p class="brief">${h(p.text)}</p></details>
     ${p.decisions[0] ? `<details class="recd"><summary>${I('shield', 12)} Decision record</summary>${recHTML(X.record(p.decisions[0]))}</details>` : ''}
@@ -5049,6 +5056,7 @@ function planHTML(sel) {
 document.addEventListener('click', e => {
   const q = s => e.target.closest(s); let x;
   if ((x = q('[data-plrm]'))) { const p = planOf(AX.sel); if (p && p.status === 'ready') { const id = x.dataset.plrm; p.removed.has(id) ? p.removed.delete(id) : p.removed.add(id); paintAll(); } return; }
+  if ((x = q('[data-plgen]'))) { const p = planOf(x.dataset.plgen); if (p && ['idle', 'ready', 'failed'].includes(p.status)) { p.status = 'idle'; startPlan(p); } return; }
   if ((x = q('[data-plrun]'))) { const p = planOf(x.dataset.plrun); if (p) runPlan(p); return; }
   if ((x = q('[data-plres]'))) { const p = planOf(x.dataset.plres); if (p && p.run && !AO.active) { UI.run = p.run; ST.view = 'results'; AO.viewing = p; ST.msgs = []; ST.approved = new Set(p.run.tasks.map(t => t.id)); paintAll(); } return; }
 });
