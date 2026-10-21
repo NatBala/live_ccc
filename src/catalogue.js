@@ -79,12 +79,12 @@ const SUBAGENTS = {
     'Response Formatter': ['product.format', 'Formats the verified answer for its audience'],
     QAR: ['product.qar', 'Verified answers; every number traced to a system of record'] } },
   Strategy: { name: 'Strategy Intel', subs: {
-    'ID Prep': ['product.idprep', 'Prepares an investment director for an advisor or client meeting'],
+    'Specialist Prep': ['product.idprep', 'Prepares an portfolio specialist for an advisor or client meeting'],
     Positioning: ['product.positioning', 'How a strategy is positioned: allocation changes, drivers, peers'],
     'Market Views': ['product.views', 'Approved house views and themes for the meeting'] } },
   InvContent: { name: 'Investment content generation', subs: {
     'Institutional Pitch Book': ['product.institutional', 'Institutional pitch books from approved strategy content'],
-    'SRG Pitch Book': ['product.srg', 'SRG pitch books for the retail advisor channel'] } },
+    'Intermediary Pitch Book': ['product.srg', 'Intermediary pitch books for the retail advisor channel'] } },
   Marketing: { name: 'Marketing content generation', subs: {
     'Resource Gatherer': ['marketing.gather', 'Finds approved content, messaging and pages'],
     'Document Analyzer': ['marketing.analyze', 'Extracts key points from approved documents'],
@@ -108,7 +108,7 @@ const routeOfTask = (agent, sub) => { for (const [fam, A] of Object.entries(SUBA
 
 /* Shared tools and services: [name] in a route. Not autonomous agents. */
 const SERVICES = {
-  assets: { name: 'Assets', status: 'simulated', tools: ['book.get_assets'], does: 'CG assets by vehicle and fund for each advisor’s team, as of a date, with the prior year' },
+  assets: { name: 'Assets', status: 'simulated', tools: ['book.get_assets'], does: 'Meridian assets by vehicle and fund for each advisor’s team, as of a date, with the prior year' },
   flows: { name: 'Flows', status: 'simulated', tools: ['book.get_flows'], does: 'Gross sales, redemptions and net flows by vehicle and channel, twelve months over twelve' },
   transactions: { name: 'Transactions', status: 'simulated', tools: ['book.get_fund_transactions'], does: 'Fund-level purchases and redemptions, Jul to Sep 2026' },
   'market share': { name: 'Market share', status: 'simulated', tools: ['book.get_market_share'], does: 'Metric definition, numerator, denominator and share by category' },
@@ -133,7 +133,7 @@ const SERVICES = {
   'plan inputs': { name: 'Plan inputs', status: 'simulated', tools: ['territory.get_plan_inputs'], does: 'Sales goals, year-to-date sales, capacity and priorities' },
   calendar: { name: 'Calendar', status: 'simulated', tools: ['calendar.find_times'], does: 'Open slots for advisors and colleagues' },
   zoning: { name: 'Zoning', status: 'simulated', tools: ['schedule.zone_visits'], does: 'Visit grouping by geography and drive time' },
-  'meeting rules': { name: 'Meeting rules', status: 'simulated', tools: ['schedule.check_rules'], does: 'Firm meeting rules plus Capital Group policy' },
+  'meeting rules': { name: 'Meeting rules', status: 'simulated', tools: ['schedule.check_rules'], does: 'Firm meeting rules plus Meridian Investments policy' },
   themes: { name: 'Themes', status: 'simulated', tools: ['content.get_themes'], does: 'This week’s approved themes, ranked for the advisor' },
   news: { name: 'News', status: 'simulated', tools: ['news.get_items'], does: 'Authorized news and commentary, last two weeks' },
   'recommendation trace': { name: 'Recommendation trace', status: 'simulated', tools: ['seismic.get_recommendations'], does: 'Why each piece was recommended: stated need or popularity' },
@@ -147,7 +147,7 @@ const SERVICES = {
   'approved search': { name: 'Approved search', status: 'foundation', tools: ['seismic.search_content'], does: 'Search over approved content only' },
   'change history': { name: 'Change history', status: 'simulated', tools: ['insights.changes_since'], does: 'Everything that changed since the last completed meeting (or a date): assets, flows, transactions, pipeline, platform, engagement, events' },
   activity: { name: 'Activity feed', status: 'simulated', tools: ['book.get_activity'], does: 'Daily purchases and redemptions for any advisor and period, generated from the advisor’s own book and trend' },
-  'relationship graph': { name: 'Relationship graph', status: 'foundation', tools: ['crm.get_team'], does: 'The advisor’s team, Capital Group’s coverage team, firms and units' },
+  'relationship graph': { name: 'Relationship graph', status: 'foundation', tools: ['crm.get_team'], does: 'The advisor’s team, Meridian’s coverage team, firms and units' },
   'action review': { name: 'Action review', status: 'foundation', tools: [], does: 'Human review of any change before it is made' },
   'evidence synthesis': { name: 'Evidence synthesis', status: 'simulated', tools: ['evidence.synthesize'], does: 'Demo evidence generated from the business context when no system holds it' }
 };
@@ -171,8 +171,8 @@ const SUB_USES = {
   'Coach.Simulation': ['call notes', 'memory'], 'Coach.Guide': ['objection playbook', 'fund facts'],
   'Product.Research Planner': ['platform eligibility', 'taxonomy', 'allocation versions', 'program rules'], 'Product.Tool Selection': ['approved comparison tool', 'assets'], 'Product.Response Formatter': ['taxonomy'], 'Product.QAR': ['fund facts', 'approved comparison tool'],
   'Marketing.Resource Gatherer': ['approved search'], 'Marketing.Document Analyzer': ['evidence resolver'], 'Marketing.Editor': [], 'Marketing.Audience Builder': ['engagements'], 'Marketing.Distribution': [],
-  'Strategy.ID Prep': ['relationship graph', 'call notes', 'assets', 'fund facts', 'allocation versions', 'news'], 'Strategy.Positioning': ['fund facts', 'allocation versions', 'approved comparison tool', 'evidence resolver'], 'Strategy.Market Views': ['themes', 'news', 'approved search'],
-  'InvContent.Institutional Pitch Book': ['approved search', 'fund facts', 'allocation versions'], 'InvContent.SRG Pitch Book': ['approved search', 'fund facts'],
+  'Strategy.Specialist Prep': ['relationship graph', 'call notes', 'assets', 'fund facts', 'allocation versions', 'news'], 'Strategy.Positioning': ['fund facts', 'allocation versions', 'approved comparison tool', 'evidence resolver'], 'Strategy.Market Views': ['themes', 'news', 'approved search'],
+  'InvContent.Institutional Pitch Book': ['approved search', 'fund facts', 'allocation versions'], 'InvContent.Intermediary Pitch Book': ['approved search', 'fund facts'],
   'Marketing.BAU Refresh': ['approved search', 'fund facts'], 'Marketing.Inventory': ['approved search', 'engagements'], 'Marketing.Standard Pitch Book': ['approved search', 'fund facts'], 'Marketing.Custom Pitch Book': ['approved search', 'assets', 'platform eligibility', 'call notes', 'approved comparison tool']
 };
 
@@ -221,7 +221,7 @@ const CATALOGUE = [
   [6, 'A', 'retrieve', 'What did we promise them that is still outstanding?', 'Retrieve commitments; verify current status.', 'Follow.Tasks + Prep.Notes → [task state] → open commitments, owners, deadlines.'],
   [7, 'A', 'prepare', 'Prepare the retirement discussion separately from their wealth business.', 'Split buying-unit or business-purpose context.', 'Prep.Profile → two scoped Prep.Notes/Content branches → Prep.Agenda → two distinct sections.', null, 'Prep.Profile → Prep.Notes + Prep.Content → Prep.Agenda → two distinct sections.'],
   [8, 'A', 'prepare', 'Give me three product topics and one practice-management topic.', 'Requested topic mix; relevant evidence required.', 'Lead.Products + Prep.Content → Prep.Agenda → supported topics; disclose when fewer qualify.'],
-  [9, 'B', 'retrieve', 'How much business do we have with this advisor, and where is it invested?', 'Define CG book, entity level, date, vehicle and fund breakdown.', 'Prep.Profile → [assets] → Prep.Fact Check → dated holdings summary with units and scope.'],
+  [9, 'B', 'retrieve', 'How much business do we have with this advisor, and where is it invested?', 'Define Meridian book, entity level, date, vehicle and fund breakdown.', 'Prep.Profile → [assets] → Prep.Fact Check → dated holdings summary with units and scope.'],
   [10, 'B', 'diagnose', 'Why are overall sales down when ETF sales are up?', 'Compare matching periods; distinguish percentage growth from dollar contribution.', 'Lead.Insights → [flows calculations] → Prep.Fact Check → contribution analysis and limitations.'],
   [11, 'B', 'diagnose', 'Are they redeeming, or are they simply buying less?', 'Separate gross sales, redemptions, and net flows.', 'Lead.Insights → [transactions/flows] → verified movement; unknown when redemption data is unavailable.'],
   [12, 'B', 'retrieve', 'How much of this book is in equity versus fixed income?', 'Resolve asset class independently of vehicle.', 'Product.Tool Selection → [taxonomy] + [positions] → Prep.Fact Check → classified exposure with unmapped items.'],
@@ -230,15 +230,15 @@ const CATALOGUE = [
   [15, 'B', 'compare', 'How does this buying unit compare with similar advisors?', 'Define a permitted peer cohort and comparison measures.', 'Territory.Calibration → [peer analytics] → Lead.Insights → comparison with cohort and coverage caveats.'],
   [16, 'B', 'prioritize', 'What are the three most significant changes in their book?', 'Define significance: dollar change, mix change, or net-flow change.', 'Lead.Insights → [assets/flows] → ranked changes with the ranking basis stated.'],
   [17, 'C', 'prioritize', 'Find my top 10 equity-fund leads.', 'Territory, equity taxonomy, activity window, lead objective, ranking criteria.', 'Territory.Health Check + [taxonomy] → Lead.Discover → Lead.Insights → ranked eligible relationships.'],
-  [18, 'C', 'prioritize', 'Who redeemed GFA and then revisited the fund page?', 'Identify posted redemptions and subsequent attributable visits within a window.', 'Lead.Discover → [transactions + engagement graph] → Lead.Insights → matching advisors and event chronology.'],
+  [18, 'C', 'prioritize', 'Who redeemed MGF and then revisited the fund page?', 'Identify posted redemptions and subsequent attributable visits within a window.', 'Lead.Discover → [transactions + engagement graph] → Lead.Insights → matching advisors and event chronology.'],
   [19, 'C', 'prioritize', 'Which advisors could benefit from a discussion about newly available products?', 'Platform change, eligible relationships, relevant business context.', '[platform eligibility] + Territory.Health Check → Lead.Products/Insights → discussion candidates, not suitability conclusions.'],
-  [20, 'C', 'prioritize', 'Find advisors with meaningful large-growth assets but low CG share.', 'Category, minimum assets, share threshold, comparable data coverage.', '[taxonomy/market share] → Lead.Discover → Lead.Insights → evidence-backed opportunity list.'],
+  [20, 'C', 'prioritize', 'Find advisors with meaningful large-growth assets but low Meridian share.', 'Category, minimum assets, share threshold, comparable data coverage.', '[taxonomy/market share] → Lead.Discover → Lead.Insights → evidence-backed opportunity list.'],
   [21, 'C', 'prioritize', 'Find relationships similar to this buying unit that I have not contacted in 90 days.', 'Professional similarity criteria plus coverage and last-contact filter.', 'Territory.Calibration + [engagements] → Lead.Discover → matched, uncontacted relationships.'],
   [22, 'C', 'prioritize', 'Separate retention conversations from potential new-business conversations.', 'Classify lead purpose using observed flows, requests, and current relationship state.', 'Lead.Insights + [service/task state] → [policy] → separate queues with reasons.'],
   [23, 'C', 'prioritize', 'Find retirement advisors, but do not include irrelevant wealth-product pitches.', 'Resolve retirement context and permitted vehicle/product scope.', 'Territory.Health Check → Lead.Discover → Lead.Products + [platform eligibility] → retirement-specific shortlist.'],
   [24, 'C', 'diagnose', 'Why did these three advisors rank highest, and who was excluded?', 'Explain the current ranked artifact—not generate a new ranking.', 'Lead.Insights → [ranking trace] → evidence, filters, exclusions, model contribution, and unknowns.'],
-  [25, 'D', 'verify', 'Which CG ETFs are available at Wells Fargo for this advisor?', 'Advisor’s actual platform, account context, product vehicle, effective date.', 'Prep.Profile → Product.Research Planner + [platform eligibility] → Product.QAR → scoped availability list.'],
-  [26, 'D', 'verify', 'Can I discuss CGUI for their Personalized UMA business?', 'Resolve fund, exact program, purpose, and current availability evidence.', 'Product.Research Planner → [platform eligibility] → Product.QAR → supported status or clarification required.'],
+  [25, 'D', 'verify', 'Which Meridian ETFs are available at Wells Fargo for this advisor?', 'Advisor’s actual platform, account context, product vehicle, effective date.', 'Prep.Profile → Product.Research Planner + [platform eligibility] → Product.QAR → scoped availability list.'],
+  [26, 'D', 'verify', 'Can I discuss MRUS for their Personalized UMA business?', 'Resolve fund, exact program, purpose, and current availability evidence.', 'Product.Research Planner → [platform eligibility] → Product.QAR → supported status or clarification required.'],
   [27, 'D', 'compare', 'What changed on their dealer shelf since my last visit?', 'Last visit date versus effective-dated availability changes.', 'Prep.Notes + [dealer changes] → Lead.Insights → relevant additions, removals, and restrictions.'],
   [28, 'D', 'verify', 'What minimum applies to this ETF model on their platform?', 'Distinguish product minimum from account/program minimum.', 'Product.Tool Selection → [program rules] → Product.QAR → exact scoped rule and source.'],
   [29, 'D', 'compare', 'What changed in the Moderate Growth model allocation?', 'Select correct model, dealer version, and two allocation dates.', 'Product.Research Planner → [allocation versions] → Product.QAR → component-level change comparison.'],
@@ -276,8 +276,8 @@ const CATALOGUE = [
 /* The catalogue entries closest to a request (word overlap, intent words weigh more). Shown to the planner as reference patterns. */
 function cataloguePatterns(text, k = 3) {
   const stop = new Set(['what', 'this', 'that', 'with', 'their', 'they', 'have', 'from', 'about', 'should', 'which', 'when', 'them', 'me', 'my', 'the', 'and', 'for', 'are', 'you', 'your', 'show', 'give', 'next', 'month', 'week', 'tomorrow', 'today', 'last', 'year']);
-  /* fund nicknames and tickers count as "fund", so "Compare BFA and AMBAL" matches fund comparisons */
-  const funds = /\b(gfa|bfa|ambal|wmif|ifa|gfffx|agthx|vwuax|vigax|abnfx|abndx|ambfx|awshx|abalx|amecx|cggr|cgdv|cgcp|cgui|cgxu)\b/g;
+  /* fund nicknames and tickers count as "fund", so "Compare MCB and MBAL" matches fund comparisons */
+  const funds = /\b(mgf|mcb|mbal|mgi|mif|mrgfx|mrgax|vwuax|vigax|mrbfx|mrbax|mrlfx|mrgix|mrlax|mrinx|mrgr|mrdv|mrcp|mrus|mrif)\b/g;
   const toks = s => new Set(String(s).toLowerCase().replace(funds, 'fund').replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 2 && !stop.has(w)).map(w => w.replace(/(ing|ed|es|s)$/, '')));
   const q = toks(text);
   return CATALOGUE.map(c => { const t = toks(c.ask + ' ' + c.decomp); let s = 0; q.forEach(w => { if (t.has(w)) s += 1; }); return { c, s: s / Math.sqrt(t.size + 1) }; })

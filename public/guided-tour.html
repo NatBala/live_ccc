@@ -546,8 +546,8 @@ button{font:inherit;color:inherit;cursor:pointer}
   <div class="intro-in">
     <div class="intro-l">
       <div class="who"><span class="bigav">AR</span><div><b>Alex Rivera, CFP®</b><span>Senior Vice President, Wealth Advisor · Morgan Stanley, Newport Beach</span></div></div>
-      <div class="bubble">“Before my committee on the 1st, can you send me a fee comparison of Growth Fund of America against the Vanguard growth funds, some ideas for building my growth sleeve, and help me understand why GFA has trailed?”</div>
-      <p class="bubble-meta">Call with Priya Shah, Capital Group wholesaler · Tuesday, September 22, 7:30 a.m. · recorded in Salesforce</p>
+      <div class="bubble">“Before my committee on the 1st, can you send me a fee comparison of Meridian Growth Fund against the Vanguard growth funds, some ideas for building my growth sleeve, and help me understand why MGF has trailed?”</div>
+      <p class="bubble-meta">Call with Priya Shah, Meridian Investments wholesaler · Tuesday, September 22, 7:30 a.m. · recorded in Salesforce</p>
     </div>
     <div class="intro-r">
       <h1>One advisor. Four teams. One shared foundation.</h1>
@@ -573,14 +573,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 <script>/* ===== Connected Client Experience: story data ===== */
 const TEAMS = {
   sales: { name: 'Sales', color: '#82b6ff', more: ['Lead Me', 'Coach Me', 'Territory Planning'] },
-  product: { name: 'Product', color: '#7fd4ab', more: ['Tone/Style Alignment', 'Contact Summarizer', 'Response Formatter', 'Institutional Pitch Books', 'SRG Product Pitch Books'] },
+  product: { name: 'Product', color: '#7fd4ab', more: ['Tone/Style Alignment', 'Contact Summarizer', 'Response Formatter', 'Institutional Pitch Books', 'Intermediary Product Pitch Books'] },
   marketing: { name: 'Marketing', color: '#f0b870', more: ['Document Analyzer', 'Audit Support', 'Image Analyzer', 'Audience Builder', 'Voice of Client', 'LinkedIn Post', 'Personalized Email'] },
   service: { name: 'Service', color: '#b9a5f5', more: ['Inquiry Classifier', 'Identity Verifier', 'Priority Scorer', 'Knowledge Retriever', 'Account Lookup', 'Escalate Me', 'Sentiment Analyzer', 'Cross-sell Detector', 'QA Logger'] }
 };
 const TEAM_ORDER = ['sales', 'product', 'marketing', 'service'];
 
 const AGENTS = {
-  priya: { name: 'Priya Shah', team: 'user', icon: 'mic', skill: 'Wholesaler · Capital Group', role: 'The employee. She asks the workbench for an outcome in plain words, and approves anything that goes to the advisor.' },
+  priya: { name: 'Priya Shah', team: 'user', icon: 'mic', skill: 'Wholesaler · Meridian Investments', role: 'The employee. She asks the workbench for an outcome in plain words, and approves anything that goes to the advisor.' },
   orch: { name: 'Intelligence & orchestration', team: 'orch', icon: 'network', role: 'Understands the request, resolves who and what it is about, plans the work, routes tasks to specialists, and tracks every task to completion.' },
   engage: { name: 'Engage Me', team: 'sales', icon: 'chat', skill: 'Meeting notes capture · Real-time Q&A', role: 'Listens in on advisor meetings (with consent), captures what was asked and decided, and answers questions live from verified material.' },
   prep: { name: 'Prep Me', team: 'sales', icon: 'file', skill: 'Profile creator · Agenda Creation', role: 'Builds the wholesaler’s brief: who the advisor is, what they asked, what to bring, and how to open the conversation.' },
@@ -619,13 +619,13 @@ const SYSTEMS = {
   sf: { name: 'Salesforce', sub: 'CRM · Service Cloud · call transcripts', icon: 'users', holds: 'Advisors, firms, teams, recorded call transcripts, activities, opportunities, service cases (including Email-to-Case).' },
   m365: { name: 'Microsoft 365', sub: 'Outlook · Calendar · SharePoint', icon: 'mail', holds: 'Outbound email, calendars, compliance libraries.' },
   seismic: { name: 'Seismic', sub: 'Approved content', icon: 'book', holds: 'Fact sheets, templates, attribution reports, LiveSend delivery.' },
-  fund: { name: 'Fund data platform', sub: 'Capital Group systems of record', icon: 'chart', holds: 'Expense ratios, holdings, standardized returns. The only source of fund numbers.' },
+  fund: { name: 'Fund data platform', sub: 'Meridian Investments systems of record', icon: 'chart', holds: 'Expense ratios, holdings, standardized returns. The only source of fund numbers.' },
   mstar: { name: 'Morningstar', sub: 'Licensed peer data', icon: 'globe', holds: 'Peer categories, competitor fund data, category medians.' }
 };
 const SYS_ORDER = ['sf', 'm365', 'seismic', 'fund', 'mstar'];
 
 /* ---- Advisor profile held in Shared Memory before the story starts ---- */
-const PROFILE_SECTIONS = ['Identity & role', 'Current priorities', 'Preferences', 'Practice & approach', 'Relationship with Capital Group', 'Personal (relationship team only)'];
+const PROFILE_SECTIONS = ['Identity & role', 'Current priorities', 'Preferences', 'Practice & approach', 'Relationship with Meridian Investments', 'Personal (relationship team only)'];
 const PROFILE_SEED = [
   ['Identity & role', 'Name', 'Alex Rivera, CFP®', 'Salesforce contact'],
   ['Identity & role', 'Position', 'Senior Vice President, Wealth Advisor · leads The Rivera Group', 'Salesforce contact'],
@@ -634,10 +634,10 @@ const PROFILE_SEED = [
   ['Practice & approach', 'Practice', 'About $1.1B across ~160 households: business owners and tech executives nearing retirement', 'Salesforce account'],
   ['Practice & approach', 'Investment strategy', 'Discretionary, core-satellite. Low-cost index core; active satellites only “where a manager earns the fee.”', 'Aug 14 meeting summary'],
   ['Practice & approach', 'Decision process', 'Team investment committee, first Thursday of the month', 'Aug 14 meeting summary'],
-  ['Practice & approach', 'Capital Group holdings', 'The Growth Fund of America in legacy client accounts (~$38M)', 'Salesforce holdings feed'],
-  ['Relationship with Capital Group', 'Coverage', 'Priya Shah (wholesaler) and Sam Lee (internal partner)', 'Salesforce coverage'],
-  ['Relationship with Capital Group', 'History', 'Client since 2019. Last meeting: quarterly review, Aug 14.', 'Salesforce activities'],
-  ['Relationship with Capital Group', 'Engagement', 'Opens quarterly attribution reports; joined a portfolio manager webinar in 2025', 'Seismic engagement data'],
+  ['Practice & approach', 'Meridian Investments holdings', 'Meridian Growth Fund in legacy client accounts (~$38M)', 'Salesforce holdings feed'],
+  ['Relationship with Meridian Investments', 'Coverage', 'Priya Shah (wholesaler) and Sam Lee (internal partner)', 'Salesforce coverage'],
+  ['Relationship with Meridian Investments', 'History', 'Client since 2019. Last meeting: quarterly review, Aug 14.', 'Salesforce activities'],
+  ['Relationship with Meridian Investments', 'Engagement', 'Opens quarterly attribution reports; joined a portfolio manager webinar in 2025', 'Seismic engagement data'],
   ['Preferences', 'Meetings', '30-minute Teams video, before market open (7:30 a.m. PT), Tuesdays or Thursdays', 'Past meeting patterns'],
   ['Preferences', 'Content', 'Data first, one page, no marketing language', 'Aug 14 meeting summary'],
   ['Preferences', 'Conversations', 'Wants manager insight and attribution. Tunes out sales pitches.', 'Priya’s notes'],
@@ -650,26 +650,26 @@ const PROFILE_SEED = [
 const GRAPH_SEED = {
   nodes: [
     ['alex', 'Alex Rivera', 'person'], ['ms', 'Morgan Stanley', 'firm'], ['team', 'The Rivera Group', 'team'], ['jamie', 'Jamie Cho', 'person'],
-    ['priya', 'Priya Shah', 'cg'], ['sam', 'Sam Lee', 'cg'], ['gfa', 'Growth Fund of America', 'fund'], ['model', 'New growth model', 'opp']
+    ['priya', 'Priya Shah', 'cg'], ['sam', 'Sam Lee', 'cg'], ['mgf', 'Meridian Growth Fund', 'fund'], ['model', 'New growth model', 'opp']
   ],
   edges: [
     ['alex', 'ms', 'works at'], ['alex', 'team', 'leads'], ['jamie', 'team', 'member of'], ['priya', 'alex', 'covers'], ['sam', 'priya', 'supports'],
-    ['alex', 'gfa', 'holds ~$38M'], ['team', 'model', 'building']
+    ['alex', 'mgf', 'holds ~$38M'], ['team', 'model', 'building']
   ]
 };
 
 /* ---- Records already in the foundation (from source systems) ---- */
 const SEED = {
   'memory.profile': { layer: 'memory', label: 'Alex Rivera · advisor profile', value: '17 facts: role, practice, strategy, preferences, relationship history.', src: 'sf' },
-  'graph.rel': { layer: 'graph', label: 'Alex’s relationship graph', value: 'Alex → Morgan Stanley, The Rivera Group, Jamie Cho, Priya Shah, GFA holdings, new growth model.', src: 'sf' },
+  'graph.rel': { layer: 'graph', label: 'Alex’s relationship graph', value: 'Alex → Morgan Stanley, The Rivera Group, Jamie Cho, Priya Shah, MGF holdings, new growth model.', src: 'sf' },
   'models.alpha': { layer: 'models', label: 'Sales Alpha signal', value: 'Alex ranks in the top decile for growth-sleeve opportunity this quarter. A signal, not a reason to sell.', src: 'fund' },
   'models.peer': { layer: 'models', label: 'Peer-match model', value: 'Matches funds on category, benchmark style and holdings overlap. Returns candidates with a rationale.', src: 'mstar' },
-  'k.gfa': { layer: 'knowledge', label: 'GFA F-2 fund facts', value: 'GFFFX. Expense ratio 0.40% (management 0.25%, other 0.15%, no 12b-1). Benchmark S&P 500. 282 issuers, 12 portfolio managers. Up to 25% outside the U.S.; 10.8% non-U.S. equities. As of 8/31/26; prospectus 11/1/25.', src: 'fund' },
+  'k.gfa': { layer: 'knowledge', label: 'MGF F fund facts', value: 'MRGFX. Expense ratio 0.40% (management 0.25%, other 0.15%, no 12b-1). Benchmark S&P 500. 282 issuers, 12 portfolio managers. Up to 25% outside the U.S.; 10.8% non-U.S. equities. As of 8/31/26; prospectus 11/1/25.', src: 'fund' },
   'k.vwuax': { layer: 'knowledge', label: 'Vanguard U.S. Growth Admiral facts', value: 'VWUAX. Expense ratio 0.25%. Benchmark Russell 1000 Growth. Multi-manager: Wellington, Baillie Gifford, Jennison. $35.2B (8/31/26).', src: 'mstar' },
   'k.vigax': { layer: 'knowledge', label: 'Vanguard Growth Index Admiral facts', value: 'VIGAX. Expense ratio 0.05%. Tracks the CRSP US Large Cap Growth Index; about 166 stocks; top three holdings roughly a third of assets.', src: 'mstar' },
   'k.median': { layer: 'knowledge', label: 'Category cost context', value: 'Morningstar Large Cap No Load median expense ratio: 0.75% (as of 6/30/26).', src: 'mstar' },
-  'k.attr': { layer: 'knowledge', label: 'GFA quarterly attribution report', value: 'Approved attribution commentary, quarter ended 9/26. Financial professional use only.', src: 'seismic' },
-  'k.capsys': { layer: 'knowledge', label: 'The Capital System explainer', value: 'Multiple portfolio managers each run a sleeve; collaborative research; long-term view.', src: 'seismic' },
+  'k.attr': { layer: 'knowledge', label: 'MGF quarterly attribution report', value: 'Approved attribution commentary, quarter ended 9/26. Financial professional use only.', src: 'seismic' },
+  'k.capsys': { layer: 'knowledge', label: 'The Meridian System explainer', value: 'Multiple portfolio managers each run a sleeve; collaborative research; long-term view.', src: 'seismic' },
   'k.pdfproc': { layer: 'knowledge', label: 'Delivery procedure', value: 'If a recipient firm blocks content links, resend the same approved version as a PDF attachment. Never re-edit.', src: 'm365' },
   'policy.rules': { layer: 'policy', label: 'Communication rules', value: 'Financial professional use only. Standardized performance from systems of record. Expense ratios as of prospectus. Personal notes never in client-facing content. Human approval before any external send.', src: 'm365' }
 };
@@ -694,21 +694,21 @@ const STEPS = [
     artifact: 'request' },
 
   { id: 's1', actor: 'engage', chapter: 'meet', when: 'Tue Sep 22 · 8:05 a.m.', title: 'Pull what Alex asked for from the call',
-    says: 'The call transcript is in Salesforce. Alex asked three things: a fee comparison of GFA against the Vanguard growth funds, how he could build his growth sleeve, and why GFA has trailed. He wants one page before his committee on October 1.',
+    says: 'The call transcript is in Salesforce. Alex asked three things: a fee comparison of MGF against the Vanguard growth funds, how he could build his growth sleeve, and why MGF has trailed. He wants one page before his committee on October 1.',
     reads: ['events.request', 'memory.profile', 'graph.rel'],
     calls: [['sf', 'MCP', 'crm.get_call_transcript(call="Rivera · Sep 22")', 'read'], ['sf', 'MCP', 'crm.log_meeting(contact="Alex Rivera")', 'write']],
     writes: [
-      { key: 'memory.request', layer: 'memory', label: 'Alex’s request', value: '1) Fee comparison: GFA vs. Vanguard large-growth funds. 2) Growth-sleeve construction options. 3) Why has GFA trailed? One page, before the Oct 1 committee.' },
+      { key: 'memory.request', layer: 'memory', label: 'Alex’s request', value: '1) Fee comparison: MGF vs. Vanguard large-growth funds. 2) Growth-sleeve construction options. 3) Why has MGF trailed? One page, before the Oct 1 committee.' },
       { key: 'events.meeting1', layer: 'events', label: 'call.captured', value: 'Rivera · Sep 22 · 30 min · transcript in Salesforce' }
     ],
     mem: [
-      ['Current priorities', 'Open request', 'Fee comparison vs. Vanguard, growth-sleeve options, and an explanation of GFA’s relative results'],
+      ['Current priorities', 'Open request', 'Fee comparison vs. Vanguard, growth-sleeve options, and an explanation of MGF’s relative results'],
       ['Current priorities', 'Deadline', 'Team investment committee, Thursday Oct 1'],
-      ['Current priorities', 'Decision at stake', 'Keep GFA in the new growth model, or replace it with a Vanguard fund'],
+      ['Current priorities', 'Decision at stake', 'Keep MGF in the new growth model, or replace it with a Vanguard fund'],
       ['Preferences', 'Fees', 'Wants fees in dollars on his assets, not just percentages']
     ],
-    graph: { nodes: [['m1', 'Meeting · Sep 22', 'meeting'], ['q1', 'Q: fee comparison', 'question'], ['q2', 'Q: why GFA trailed', 'question']],
-      edges: [['alex', 'm1', 'attended'], ['priya', 'm1', 'hosted'], ['m1', 'q1', 'raised'], ['m1', 'q2', 'raised'], ['q2', 'gfa', 'about']] },
+    graph: { nodes: [['m1', 'Meeting · Sep 22', 'meeting'], ['q1', 'Q: fee comparison', 'question'], ['q2', 'Q: why MGF trailed', 'question']],
+      edges: [['alex', 'm1', 'attended'], ['priya', 'm1', 'hosted'], ['m1', 'q1', 'raised'], ['m1', 'q2', 'raised'], ['q2', 'mgf', 'about']] },
     artifact: 'notes' },
 
   { id: 's2', actor: 'orch', chapter: 'plan', when: 'Tue Sep 22 · 8:06 a.m.', title: 'Plan and route the work',
@@ -720,11 +720,11 @@ const STEPS = [
     artifact: 'plan' },
 
   { id: 's3', actor: 'clarify', chapter: 'research', when: 'Tue Sep 22 · 8:07 a.m.', title: 'Make the question precise',
-    says: 'Alex runs fee-based discretionary accounts, so the right GFA share class is F-2, not A. And “the Vanguard growth funds” means two different things: an active one and an index one. I’ll compare against both.',
+    says: 'Alex runs fee-based discretionary accounts, so the right MGF share class is F, not A. And “the Vanguard growth funds” means two different things: an active one and an index one. I’ll compare against both.',
     reads: ['memory.request', 'memory.profile', 'events.plan'],
     calls: [['sf', 'MCP', 'crm.get_account_programs(team="The Rivera Group")', 'read']],
-    writes: [{ key: 'k.question', layer: 'knowledge', label: 'Clarified question', value: 'Compare GFA F-2 (GFFFX) with Vanguard U.S. Growth Admiral (VWUAX, active) and Vanguard Growth Index Admiral (VIGAX, index) on cost, approach and drivers of relative results.' }],
-    mem: [['Practice & approach', 'Share class', 'Fee-based discretionary accounts → GFA F-2 (GFFFX), no 12b-1 fee']] },
+    writes: [{ key: 'k.question', layer: 'knowledge', label: 'Clarified question', value: 'Compare MGF F (MRGFX) with Vanguard U.S. Growth Admiral (VWUAX, active) and Vanguard Growth Index Admiral (VIGAX, index) on cost, approach and drivers of relative results.' }],
+    mem: [['Practice & approach', 'Share class', 'Fee-based discretionary accounts → MGF F (MRGFX), no 12b-1 fee']] },
 
   { id: 's4', actor: 'planner', chapter: 'research', when: 'Tue Sep 22 · 8:07 a.m.', title: 'Plan the evidence',
     says: 'The peer model confirms both Vanguard funds sit in the same large-growth category. Costs come from fund data; approach from prospectuses; the “why” from attribution and holdings. No numbers from memory, only from systems of record.',
@@ -732,41 +732,41 @@ const STEPS = [
     calls: [['mstar', 'API', 'GET /peers?category=LargeGrowth&funds=VWUAX,VIGAX', 'read']],
     writes: [{ key: 'k.plan', layer: 'knowledge', label: 'Research plan', value: 'Costs: fund data platform + prospectus data. Approach: fund facts. Drivers: holdings concentration, benchmark, mandate. Returns: standardized, inserted at approval.' }],
     graph: { nodes: [['vwuax', 'Vanguard U.S. Growth', 'fund'], ['vigax', 'Vanguard Growth Index', 'fund']],
-      edges: [['q1', 'gfa', 'compares'], ['q1', 'vwuax', 'compares'], ['q1', 'vigax', 'compares']] } },
+      edges: [['q1', 'mgf', 'compares'], ['q1', 'vwuax', 'compares'], ['q1', 'vigax', 'compares']] } },
 
   { id: 's5', actor: 'tools', chapter: 'research', when: 'Tue Sep 22 · 8:08 a.m.', title: 'Run the fee math and construction options',
-    says: 'On Alex’s $38M, GFA F-2 costs about $152,000 a year, VWUAX about $95,000 and VIGAX about $19,000. The construction model gives three sleeve options; a 70/30 index-and-GFA mix brings the blended cost down to 0.155%.',
+    says: 'On Alex’s $38M, MGF F costs about $152,000 a year, VWUAX about $95,000 and VIGAX about $19,000. The construction model gives three sleeve options; a 70/30 index-and-MGF mix brings the blended cost down to 0.155%.',
     reads: ['k.plan', 'k.gfa', 'k.vwuax', 'k.vigax', 'k.median', 'memory.profile'],
-    calls: [['fund', 'API', 'GET /funds/GFFFX/fees', 'read'], ['fund', 'API', 'POST /models/portfolio-construction/run', 'read']],
+    calls: [['fund', 'API', 'GET /funds/MRGFX/fees', 'read'], ['fund', 'API', 'POST /models/portfolio-construction/run', 'read']],
     writes: [
-      { key: 'k.fees', layer: 'knowledge', label: 'Fee comparison', value: 'Expense ratios: GFA F-2 0.40%, VWUAX 0.25%, VIGAX 0.05% (category median 0.75%). Annual cost on $38M: $152,000 / $95,000 / $19,000.' },
-      { key: 'models.construct', layer: 'models', label: 'Growth-sleeve options', value: 'A: 70% VIGAX + 30% GFA, blended 0.155%. B: 50/50, blended 0.225%. C: 100% GFA, 0.40%.' }
+      { key: 'k.fees', layer: 'knowledge', label: 'Fee comparison', value: 'Expense ratios: MGF F 0.40%, VWUAX 0.25%, VIGAX 0.05% (category median 0.75%). Annual cost on $38M: $152,000 / $95,000 / $19,000.' },
+      { key: 'models.construct', layer: 'models', label: 'Growth-sleeve options', value: 'A: 70% VIGAX + 30% MGF, blended 0.155%. B: 50/50, blended 0.225%. C: 100% MGF, 0.40%.' }
     ],
     artifact: 'fees' },
 
-  { id: 's6', actor: 'qar', chapter: 'research', when: 'Tue Sep 22 · 8:09 a.m.', title: 'Verify why GFA has trailed',
-    says: 'Different jobs, different results. GFA is measured against the S&P 500 and spreads across 282 companies, cyclicals and some non-U.S. stocks. The growth index puts about a third of its money in three mega-caps. When a few giants lead, the index pulls ahead. I didn’t call a single system; everything I needed was already in the foundation.',
+  { id: 's6', actor: 'qar', chapter: 'research', when: 'Tue Sep 22 · 8:09 a.m.', title: 'Verify why MGF has trailed',
+    says: 'Different jobs, different results. MGF is measured against the S&P 500 and spreads across 282 companies, cyclicals and some non-U.S. stocks. The growth index puts about a third of its money in three mega-caps. When a few giants lead, the index pulls ahead. I didn’t call a single system; everything I needed was already in the foundation.',
     reads: ['k.question', 'k.fees', 'k.gfa', 'k.vigax', 'k.attr', 'k.capsys'],
     calls: [],
     writes: [
-      { key: 'k.finding', layer: 'knowledge', label: 'Verified answer: why GFA trailed', value: 'Mandate (S&P 500 benchmark, flexible growth, up to 25% non-U.S.), concentration (282 issuers vs. an index with ~1/3 in three stocks; NVIDIA 5.8% in GFA vs. 8.1% in the S&P 500), and cost (0.35 points more than VIGAX).' },
+      { key: 'k.finding', layer: 'knowledge', label: 'Verified answer: why MGF trailed', value: 'Mandate (S&P 500 benchmark, flexible growth, up to 25% non-U.S.), concentration (282 issuers vs. an index with ~1/3 in three stocks; NVIDIA 5.8% in MGF vs. 8.1% in the S&P 500), and cost (0.35 points more than VIGAX).' },
       { key: 'policy.trace', layer: 'policy', label: 'Numbers traced', value: 'Every figure links to the fund data platform or licensed peer data. No model-generated numbers.' }
     ],
-    graph: { nodes: [['f1', 'Finding · why GFA trailed', 'doc']], edges: [['f1', 'q2', 'answers'], ['f1', 'gfa', 'cites']] },
+    graph: { nodes: [['f1', 'Finding · why MGF trailed', 'doc']], edges: [['f1', 'q2', 'answers'], ['f1', 'mgf', 'cites']] },
     artifact: 'finding' },
 
   { id: 's7', actor: 'gather', chapter: 'create', when: 'Tue Sep 22 · 8:10 a.m.', title: 'Pick the right approved template',
     says: 'Alex wants one page and data first, so not the 12-page deck. The fund comparison one-pager is approved for financial professionals and has a slot for standardized returns. That’s the one.',
     reads: ['memory.profile', 'memory.request', 'k.finding'],
     calls: [['seismic', 'MCP', 'seismic.search_content(type="fund comparison", audience="financial professional")', 'read']],
-    writes: [{ key: 'k.template', layer: 'knowledge', label: 'Template chosen', value: 'Seismic · Fund comparison one-pager (financial professional use only). Rejected: 12-page GFA deck, retail fact sheet.' }],
+    writes: [{ key: 'k.template', layer: 'knowledge', label: 'Template chosen', value: 'Seismic · Fund comparison one-pager (financial professional use only). Rejected: 12-page MGF deck, retail fact sheet.' }],
     artifact: 'picker' },
 
   { id: 's8', actor: 'copy', chapter: 'create', when: 'Tue Sep 22 · 8:12 a.m.', title: 'Write it for Alex',
     says: 'One page, numbers first, dollars on his $38M, no adjectives. I wrote only from QAR’s verified finding and Tool Selection’s math, so there’s nothing new for compliance to chase.',
     reads: ['k.template', 'k.finding', 'k.fees', 'models.construct', 'memory.profile'],
     calls: [],
-    writes: [{ key: 'k.onepager', layer: 'knowledge', label: 'One-pager draft', value: '“Growth sleeve options: GFA vs. Vanguard large growth.” Costs, drivers of relative results, three construction options, standardized returns slot.' }],
+    writes: [{ key: 'k.onepager', layer: 'knowledge', label: 'One-pager draft', value: '“Growth sleeve options: MGF vs. Vanguard large growth.” Costs, drivers of relative results, three construction options, standardized returns slot.' }],
     artifact: 'onepager' },
 
   { id: 's9', actor: 'legal', chapter: 'create', when: 'Tue Sep 22 · 8:14 a.m.', title: 'Review before anything goes out',
@@ -781,7 +781,7 @@ const STEPS = [
     artifact: 'review' },
 
   { id: 's10', actor: 'prep', chapter: 'prepare', when: 'Tue Sep 22 · 8:16 a.m.', title: 'Brief Priya',
-    says: 'Priya, open with his marathon training, then get straight to numbers; he tunes out pitches. His real decision is keep or replace GFA in the new model. Lead with Option A and the dollar view. Jamie handles his calendar.',
+    says: 'Priya, open with his marathon training, then get straight to numbers; he tunes out pitches. His real decision is keep or replace MGF in the new model. Lead with Option A and the dollar view. Jamie handles his calendar.',
     reads: ['memory.profile', 'memory.request', 'k.finding', 'models.construct', 'graph.rel', 'events.approved'],
     calls: [['sf', 'MCP', 'crm.get_opportunity(name="Rivera growth model")', 'read']],
     writes: [{ key: 'memory.brief', layer: 'memory', label: 'Wholesaler brief', value: 'Opener, decision at stake, 3 talking points, what not to do, logistics through Jamie.' }],
@@ -792,7 +792,7 @@ const STEPS = [
     reads: ['memory.profile', 'graph.rel', 'memory.brief'],
     calls: [['m365', 'MCP', 'calendar.find_times(attendees=[Priya, Alex via Jamie])', 'read'], ['m365', 'MCP', 'calendar.create_event(Teams, 30 min)', 'write']],
     writes: [{ key: 'events.scheduled', layer: 'events', label: 'meeting.scheduled', value: 'Tue Sep 29 · 7:30 a.m. PT · Teams · booked with Jamie Cho' }],
-    mem: [['Relationship with Capital Group', 'Next meeting', 'Tue Sep 29, 7:30 a.m. PT (Teams), booked through Jamie']],
+    mem: [['Relationship with Meridian Investments', 'Next meeting', 'Tue Sep 29, 7:30 a.m. PT (Teams), booked through Jamie']],
     graph: { nodes: [['m2', 'Meeting · Sep 29', 'meeting']], edges: [['m2', 'alex', 'with'], ['jamie', 'm2', 'booked']] },
     artifact: 'invite' },
 
@@ -818,21 +818,21 @@ const STEPS = [
     artifact: 'reply' },
 
   { id: 's14', actor: 'engage', chapter: 'follow', when: 'Tue Sep 29 · 7:30 a.m.', title: 'The follow-up call, live',
-    says: 'Alex asked how he’d explain GFA’s fee to clients. I surfaced Option A from the construction model: 0.155% blended for the whole sleeve. He’s leaning that way, wants the same one-page format every quarter, and his marathon training is on track.',
+    says: 'Alex asked how he’d explain MGF’s fee to clients. I surfaced Option A from the construction model: 0.155% blended for the whole sleeve. He’s leaning that way, wants the same one-page format every quarter, and his marathon training is on track.',
     note: 'Time jump: a week later, on the call Schedule Me booked.',
     reads: ['memory.brief', 'memory.profile', 'k.finding', 'models.construct', 'k.fees'],
     calls: [['sf', 'MCP', 'crm.get_call_transcript(call="Rivera · Sep 29", live=true)', 'read']],
     writes: [
-      { key: 'memory.decision', layer: 'memory', label: 'Where Alex landed', value: 'Leaning to Option A (70% index core, 30% GFA). Takes it to committee Oct 1.' },
+      { key: 'memory.decision', layer: 'memory', label: 'Where Alex landed', value: 'Leaning to Option A (70% index core, 30% MGF). Takes it to committee Oct 1.' },
       { key: 'events.meeting2', layer: 'events', label: 'call.captured', value: 'Rivera · Sep 29 · 30 min · transcript in Salesforce · decision pending committee' },
       { key: 'feedback.meeting', layer: 'feedback', label: 'What landed', value: 'The dollar view of fees was the most useful part. Asked for an after-tax comparison, which the template doesn’t cover.' }
     ],
     mem: [
-      ['Current priorities', 'Decision at stake', 'Leaning to Option A: 70% index core, 30% GFA. Committee decides Oct 1.'],
+      ['Current priorities', 'Decision at stake', 'Leaning to Option A: 70% index core, 30% MGF. Committee decides Oct 1.'],
       ['Preferences', 'Content', 'Data first, one page, no marketing language. Wants the same format for quarterly attribution.'],
       ['Personal (relationship team only)', 'Recent', 'CIM training on track; mentioned a new personal best at 18 miles']
     ],
-    graph: { nodes: [['optA', 'Option A · 70/30', 'opp']], edges: [['m2', 'optA', 'leaning to'], ['optA', 'gfa', 'includes'], ['optA', 'vigax', 'includes']] } },
+    graph: { nodes: [['optA', 'Option A · 70/30', 'opp']], edges: [['m2', 'optA', 'leaning to'], ['optA', 'mgf', 'includes'], ['optA', 'vigax', 'includes']] } },
 
   { id: 's15', actor: 'follow', chapter: 'follow', when: 'Tue Sep 29 · 8:05 a.m.', title: 'Close the loop',
     says: 'Logged the call in Salesforce, moved the growth-model opportunity to “proposal,” and set three tasks: send the quarterly attribution in his format, ask Product about an after-tax view, and check in after his committee.',
@@ -842,7 +842,7 @@ const STEPS = [
       { key: 'events.crm', layer: 'events', label: 'opportunity.stage_changed', value: 'Rivera growth model → Proposal. 3 tasks assigned.' },
       { key: 'feedback.backlog', layer: 'feedback', label: 'Content request', value: 'After-tax version of the fund comparison one-pager. Routed to Product and Marketing.' }
     ],
-    mem: [['Relationship with Capital Group', 'Next touchpoint', 'Check in after Oct 1 committee; quarterly attribution in early January']],
+    mem: [['Relationship with Meridian Investments', 'Next touchpoint', 'Check in after Oct 1 committee; quarterly attribution in early January']],
     graph: { nodes: [], edges: [['model', 'optA', 'proposal']] },
     artifact: 'crm' },
 
@@ -950,7 +950,7 @@ const nodeLabel = (S, id) => (S.graph.nodes.find(n => n.id === id) || { label: i
 /* ---- Human gate ---- */
 function sendPayload(S) {
   const g = S.store;
-  return { action: 'SEND', to: 'Alex Rivera (Morgan Stanley)', cc: 'Jamie Cho', from: 'Priya Shah, Capital Group', document: 'OP-0922 v1 · Growth sleeve options: GFA vs. Vanguard large growth',
+  return { action: 'SEND', to: 'Alex Rivera (Morgan Stanley)', cc: 'Jamie Cho', from: 'Priya Shah, Meridian Investments', document: 'OP-0922 v1 · Growth sleeve options: MGF vs. Vanguard large growth',
     channel: 'Seismic LiveSend link in Outlook', review: g['policy.review'] ? g['policy.review'].value : null, audience: 'Financial professional use only' };
 }
 function fingerprint(p) { const s = JSON.stringify(p); let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return 'FP-' + h.toString(16).toUpperCase().padStart(8, '0'); }
@@ -1167,7 +1167,7 @@ const ICONS = {
 };
 const icon = (n, c = '') => `<svg class="ic ${c}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ICONS.file}</svg>`;
 const av = (id, c = '') => `<span class="av ${c}" style="background:${TC[AGENTS[id].team]}">${icon(AGENTS[id].icon)}</span>`;
-const teamName = id => AGENTS[id].team === 'orch' ? 'Orchestration' : AGENTS[id].team === 'user' ? 'Wholesaler · Capital Group' : TEAMS[AGENTS[id].team].name;
+const teamName = id => AGENTS[id].team === 'orch' ? 'Orchestration' : AGENTS[id].team === 'user' ? 'Wholesaler · Meridian Investments' : TEAMS[AGENTS[id].team].name;
 const originText = r => r.producedInRun && AGENTS[r.by] ? ((r.key === 'memory.profile' || r.key === 'graph.rel') ? 'last updated by ' : 'from ') + AGENTS[r.by].name : 'from ' + (SYSNAME[(r.by || '').replace('sys:', '')] || 'source system');
 
 const P = { S: null, approvals: {}, playing: false, speed: 1, hold: false, narrate: false, last: 0, raf: 0, tab: 'now', view: 'live', lab: null, labS: null, labA: null, fresh: null, particles: [], lastStats: {} };
@@ -1382,7 +1382,7 @@ function renderNow() {
   if (P.lab) { pane.innerHTML = labPanel(s); return; }
   if (s.phase === 'ready') {
     pane.innerHTML = `<div class="nw-meta"><span>How it starts · Tue Sep 22, 8:04 a.m.</span><span>${s.steps.length} steps</span></div>
-      <div class="entrycard"><div class="nw-actor">${av('priya')}<div><b>Priya Shah</b><small>Capital Group wholesaler · just off a call with Alex</small></div></div>
+      <div class="entrycard"><div class="nw-actor">${av('priya')}<div><b>Priya Shah</b><small>Meridian Investments wholesaler · just off a call with Alex</small></div></div>
       <p class="quote" style="margin:6px 0 4px">“Alex just asked me for three things on our call. Take care of it.”</p><p class="hint" style="margin:0">One sentence into her workbench. No forms, no tickets, no deciding which agent to ask.</p></div>
       <p style="font-size:14px;margin:12px 0">The foundation already knows who Alex is: 17 facts in his profile from Salesforce and past conversations, his relationships in the graph, and approved fund facts in knowledge. The call itself is recorded in Salesforce.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="lbtn primary" data-act="play">${icon('play')} Start the journey</button><button class="lbtn" data-tab="advisor">See Alex’s profile first</button></div>
@@ -1443,7 +1443,7 @@ function renderAdvisor() {
 }
 
 /* ---------- Foundation pane ---------- */
-const GPOS = { alex: [320, 230], ms: [120, 110], pol: [120, 30], team: [140, 250], jamie: [50, 340], priya: [520, 110], sam: [600, 40], m1: [450, 270], q1: [560, 350], q2: [400, 355], gfa: [300, 450], vwuax: [470, 470], vigax: [600, 455], f1: [600, 270], op: [590, 180], em: [410, 45], m2: [210, 365], optA: [170, 470], model: [55, 450] };
+const GPOS = { alex: [320, 230], ms: [120, 110], pol: [120, 30], team: [140, 250], jamie: [50, 340], priya: [520, 110], sam: [600, 40], m1: [450, 270], q1: [560, 350], q2: [400, 355], mgf: [300, 450], vwuax: [470, 470], vigax: [600, 455], f1: [600, 270], op: [590, 180], em: [410, 45], m2: [210, 365], optA: [170, 470], model: [55, 450] };
 const GCOL = { person: '#dce8f4', firm: '#9fb6cc', team: '#9fb6cc', cg: '#ffd27a', fund: '#7fd4ab', meeting: '#82b6ff', question: '#f0b870', doc: '#b9a5f5', opp: '#ffd27a', policy: '#ff7b67' };
 function graphSVG(s) {
   const P2 = id => GPOS[id] || [320, 250];
@@ -1470,7 +1470,7 @@ function renderFoundation() {
 }
 
 /* ---------- Outputs ---------- */
-const ART_NAMES = { request: 'Priya’s request in the workbench', notes: 'Meeting recap · Sep 22', plan: 'Orchestration plan', fees: 'Fee & cost comparison', finding: 'Verified answer: why GFA trailed', picker: 'Seismic template selection', onepager: 'One-pager OP-0922', review: 'Compliance review', brief: 'Wholesaler brief for Priya', invite: 'Calendar invite · Sep 29', email: 'Email to Alex', reply: 'Service: link blocked, PDF resent', crm: 'Salesforce: opportunity & tasks', summary: 'What the foundation kept' };
+const ART_NAMES = { request: 'Priya’s request in the workbench', notes: 'Meeting recap · Sep 22', plan: 'Orchestration plan', fees: 'Fee & cost comparison', finding: 'Verified answer: why MGF trailed', picker: 'Seismic template selection', onepager: 'One-pager OP-0922', review: 'Compliance review', brief: 'Wholesaler brief for Priya', invite: 'Calendar invite · Sep 29', email: 'Email to Alex', reply: 'Service: link blocked, PDF resent', crm: 'Salesforce: opportunity & tasks', summary: 'What the foundation kept' };
 function renderArtifacts() {
   const s = S(), done = s.steps.filter(st => st.artifact && s.completed.has(st.id)).reverse();
   byId('pane-artifacts').innerHTML = `<p class="hint" style="margin:0 2px 8px">Everything the specialists produced, in the tools people actually use.</p><div class="agrid">${done.length ? done.map(st => `<button class="acard2 ${P.fresh === st.id ? 'fresh' : ''}" data-art="${st.artifact}">${av(st.actor)}<span><b>${esc(ART_NAMES[st.artifact])}</b><small>${esc(AGENTS[st.actor].name)} · ${esc(st.when)}</small></span></button>`).join('') : '<p class="hint">Nothing yet. Outputs appear here as specialists finish.</p>'}</div>`;
@@ -1478,19 +1478,19 @@ function renderArtifacts() {
 function artifactHTML(t, s) {
   const has = k => !!s.store[k] && s.store[k].producedInRun;
   const F = { request: () => `<div class="art"><div class="sp-top" style="background:#16304a">${icon('mic')} Connected workbench · Priya Shah · 8:04 a.m.</div><div class="doc2"><p style="font:400 16px/1.45 var(--serif);margin:0 0 8px">“Alex just asked me for three things on our call. Take care of it: pull what he asked from the call in Salesforce, get the numbers right, and have it ready well before his committee.”</p><h6>Understood</h6><ul><li>Advisor: Alex Rivera · Morgan Stanley · The Rivera Group (resolved in the graph)</li><li>Source: the Sep 22 call transcript in Salesforce</li><li>Deadline: before the Oct 1 investment committee</li><li>Priya approves anything that goes to Alex</li></ul></div></div>`,
-    notes: () => `<div class="art"><div class="sf-h">${icon('users')} Salesforce · Call recap from the recorded transcript · Rivera · Sep 22 · 30 min</div><div class="doc2"><h5>Alex Rivera ↔ Priya Shah</h5><h6>What Alex asked for</h6><ol><li>A fee comparison of The Growth Fund of America against the Vanguard growth funds.</li><li>Ideas for building the growth sleeve of his new discretionary model.</li><li>An explanation of why GFA has trailed the Vanguard growth funds.</li></ol><h6>Context</h6><ul><li>Decision: keep GFA in the new model, or replace it. Team committee Thursday, Oct 1.</li><li>Wants it on one page, data first.</li><li>Asked to see fees in dollars on his ~$38M, not just percentages.</li></ul><h6>Follow-ups</h6><ul><li>Priya to send the comparison before the committee.</li><li>Book a short follow-up through Jamie.</li></ul></div></div>`,
+    notes: () => `<div class="art"><div class="sf-h">${icon('users')} Salesforce · Call recap from the recorded transcript · Rivera · Sep 22 · 30 min</div><div class="doc2"><h5>Alex Rivera ↔ Priya Shah</h5><h6>What Alex asked for</h6><ol><li>A fee comparison of Meridian Growth Fund against the Vanguard growth funds.</li><li>Ideas for building the growth sleeve of his new discretionary model.</li><li>An explanation of why MGF has trailed the Vanguard growth funds.</li></ol><h6>Context</h6><ul><li>Decision: keep MGF in the new model, or replace it. Team committee Thursday, Oct 1.</li><li>Wants it on one page, data first.</li><li>Asked to see fees in dollars on his ~$38M, not just percentages.</li></ul><h6>Follow-ups</h6><ul><li>Priya to send the comparison before the committee.</li><li>Book a short follow-up through Jamie.</li></ul></div></div>`,
     plan: () => `<div class="art"><div class="doc2"><h5>Plan · Alex Rivera, The Rivera Group</h5><p class="sig">Resolved: Alex Rivera → Morgan Stanley → The Rivera Group → growth-model opportunity. Deadline Oct 1.</p><ul class="planlist">${TASKS.map(([n, t, ids], k) => `<li><span style="width:10px;height:10px;border-radius:50%;background:${TC[t]}"></span><span>${esc(n)} <span class="dep">· ${esc(TEAMS[t].name)}${k === 0 ? '' : k < 3 ? ' · after “Clarify”' : k < 5 ? ' · after “Verified answer”' : k === 6 ? ' · after review · human approval' : k === 7 ? ' · on a delivery event' : ''}</span></span><span class="dep">${ids.join(', ')}</span></li>`).join('')}</ul></div></div>`,
-    fees: () => `<div class="art"><div class="op1"><h6 style="margin-top:0">Cost comparison · on ~$38M</h6><table><tr><th>Fund</th><th>Approach</th><th class="n">Expense ratio</th><th class="n">Per year</th></tr><tr><td>GFA F-2 (GFFFX)</td><td>Active, 12 managers</td><td class="n">0.40%</td><td class="n">$152,000</td></tr><tr><td>Vanguard U.S. Growth Adm (VWUAX)</td><td>Active, 3 sub-advisers</td><td class="n">0.25%</td><td class="n">$95,000</td></tr><tr><td>Vanguard Growth Index Adm (VIGAX)</td><td>Index</td><td class="n">0.05%</td><td class="n">$19,000</td></tr><tr><td colspan="2">Large-cap no-load median</td><td class="n">0.75%</td><td class="n">—</td></tr></table><h6>Growth-sleeve options (portfolio construction model)</h6><table><tr><th>Option</th><th>Mix</th><th class="n">Blended cost</th></tr><tr><td>A</td><td>70% VIGAX + 30% GFA</td><td class="n">0.155%</td></tr><tr><td>B</td><td>50% VIGAX + 50% GFA</td><td class="n">0.225%</td></tr><tr><td>C</td><td>100% GFA</td><td class="n">0.40%</td></tr></table><p class="sig">Expense ratios from the fund data platform and licensed peer data. GFA as of 8/31/26 (prospectus 11/1/25); category median as of 6/30/26.</p></div></div>`,
-    finding: () => `<div class="art"><div class="doc2"><h5>Why GFA has trailed the Vanguard large-growth funds</h5><p>They are built for different jobs, so they win in different markets.</p><ol><li><b>Mandate and benchmark.</b> GFA is measured against the S&P 500 and invests flexibly: traditional growth, cyclicals, turnarounds, and up to 25% outside the U.S. (10.8% today). The Vanguard funds are pure U.S. large growth.</li><li><b>Concentration.</b> GFA spreads across 282 companies and 12 managers. The growth index holds about a third of its assets in its top three stocks. When a handful of mega-caps lead, the concentrated index pulls ahead. NVIDIA is 5.8% of GFA versus 8.1% of the S&P 500.</li><li><b>Cost.</b> GFA F-2 costs 0.35 percentage points a year more than the index fund.</li></ol><h6>Sources</h6><ul class="sig"><li>GFA F-2 fund facts · fund data platform · 8/31/26</li><li>Vanguard fund data · licensed feed</li><li>GFA quarterly attribution report · Seismic · 9/26</li><li>The Capital System explainer · Seismic</li></ul><p class="sig">Standardized returns are inserted from the fund data platform at approval. No figure here was generated by a model.</p></div></div>`,
-    picker: () => `<div class="art"><div class="sp-top">${icon('search')} Seismic · “fund comparison” · audience: financial professional</div><div class="sp-grid"><div class="sp-card pick"><div class="th"></div><b>Fund comparison one-pager</b><div class="why">1 page · standardized returns slot · approved for financial professionals</div><span class="tag ok">Selected: matches Alex’s “one page, data first”</span></div><div class="sp-card"><div class="th"></div><b>GFA product presentation</b><div class="why">12 pages · narrative</div><span class="tag no">Too long for Alex</span></div><div class="sp-card"><div class="th"></div><b>GFA fact sheet (retail)</b><div class="why">Investor audience</div><span class="tag no">Wrong audience</span></div></div></div>`,
-    onepager: () => { const ok = has('policy.review'); return `<div class="art"><div class="op1">${ok ? '<span class="stamp">APPROVED · OP-0922 v1</span>' : ''}<div class="brandrow"><span>Capital Group | American Funds</span><span>For financial professional use only</span></div><h5>Growth sleeve options: GFA vs. Vanguard large growth</h5><div class="for">Prepared for Alex Rivera, The Rivera Group · by Priya Shah · for the Oct 1 investment committee</div><h6>What it costs on ~$38M</h6><table><tr><th></th><th class="n">GFA F-2</th><th class="n">VWUAX</th><th class="n">VIGAX</th></tr><tr><td>Expense ratio</td><td class="n">0.40%</td><td class="n">0.25%</td><td class="n">0.05%</td></tr><tr><td>Per year</td><td class="n">$152,000</td><td class="n">$95,000</td><td class="n">$19,000</td></tr><tr><td>Approach</td><td class="n">Active, flexible</td><td class="n">Active</td><td class="n">Index</td></tr></table><h6>Why results have differed</h6><ol><li>Different benchmark and mandate: S&P 500, flexible growth, some non-U.S.</li><li>Less concentration: 282 companies vs. an index with ~1/3 in three stocks</li><li>Cost: 0.35 points a year more than the index fund</li></ol><h6>Three ways to build the sleeve</h6><table><tr><td>A · 70% index + 30% GFA</td><td class="n">0.155%</td></tr><tr><td>B · 50% index + 50% GFA</td><td class="n">0.225%</td></tr><tr><td>C · 100% GFA</td><td class="n">0.40%</td></tr></table><h6>Standardized average annual returns (1, 5, 10 years)</h6><span class="live">Inserted from the fund data platform at approval</span>${ok ? `<div class="disc">Figures shown are past results and are not predictive of results in future periods. Expense ratios are as of each fund’s prospectus. Indexes are unmanaged; investors cannot invest directly in an index. Investors should carefully consider investment objectives, risks, charges and expenses, contained in the prospectus.</div>` : ''}</div></div>`; },
+    fees: () => `<div class="art"><div class="op1"><h6 style="margin-top:0">Cost comparison · on ~$38M</h6><table><tr><th>Fund</th><th>Approach</th><th class="n">Expense ratio</th><th class="n">Per year</th></tr><tr><td>MGF F (MRGFX)</td><td>Active, 12 managers</td><td class="n">0.40%</td><td class="n">$152,000</td></tr><tr><td>Vanguard U.S. Growth Adm (VWUAX)</td><td>Active, 3 sub-advisers</td><td class="n">0.25%</td><td class="n">$95,000</td></tr><tr><td>Vanguard Growth Index Adm (VIGAX)</td><td>Index</td><td class="n">0.05%</td><td class="n">$19,000</td></tr><tr><td colspan="2">Large-cap no-load median</td><td class="n">0.75%</td><td class="n">—</td></tr></table><h6>Growth-sleeve options (portfolio construction model)</h6><table><tr><th>Option</th><th>Mix</th><th class="n">Blended cost</th></tr><tr><td>A</td><td>70% VIGAX + 30% MGF</td><td class="n">0.155%</td></tr><tr><td>B</td><td>50% VIGAX + 50% MGF</td><td class="n">0.225%</td></tr><tr><td>C</td><td>100% MGF</td><td class="n">0.40%</td></tr></table><p class="sig">Expense ratios from the fund data platform and licensed peer data. MGF as of 8/31/26 (prospectus 11/1/25); category median as of 6/30/26.</p></div></div>`,
+    finding: () => `<div class="art"><div class="doc2"><h5>Why MGF has trailed the Vanguard large-growth funds</h5><p>They are built for different jobs, so they win in different markets.</p><ol><li><b>Mandate and benchmark.</b> MGF is measured against the S&P 500 and invests flexibly: traditional growth, cyclicals, turnarounds, and up to 25% outside the U.S. (10.8% today). The Vanguard funds are pure U.S. large growth.</li><li><b>Concentration.</b> MGF spreads across 282 companies and 12 managers. The growth index holds about a third of its assets in its top three stocks. When a handful of mega-caps lead, the concentrated index pulls ahead. NVIDIA is 5.8% of MGF versus 8.1% of the S&P 500.</li><li><b>Cost.</b> MGF F costs 0.35 percentage points a year more than the index fund.</li></ol><h6>Sources</h6><ul class="sig"><li>MGF F fund facts · fund data platform · 8/31/26</li><li>Vanguard fund data · licensed feed</li><li>MGF quarterly attribution report · Seismic · 9/26</li><li>The Meridian System explainer · Seismic</li></ul><p class="sig">Standardized returns are inserted from the fund data platform at approval. No figure here was generated by a model.</p></div></div>`,
+    picker: () => `<div class="art"><div class="sp-top">${icon('search')} Seismic · “fund comparison” · audience: financial professional</div><div class="sp-grid"><div class="sp-card pick"><div class="th"></div><b>Fund comparison one-pager</b><div class="why">1 page · standardized returns slot · approved for financial professionals</div><span class="tag ok">Selected: matches Alex’s “one page, data first”</span></div><div class="sp-card"><div class="th"></div><b>MGF product presentation</b><div class="why">12 pages · narrative</div><span class="tag no">Too long for Alex</span></div><div class="sp-card"><div class="th"></div><b>MGF fact sheet (retail)</b><div class="why">Investor audience</div><span class="tag no">Wrong audience</span></div></div></div>`,
+    onepager: () => { const ok = has('policy.review'); return `<div class="art"><div class="op1">${ok ? '<span class="stamp">APPROVED · OP-0922 v1</span>' : ''}<div class="brandrow"><span>Meridian Investments | Meridian Funds</span><span>For financial professional use only</span></div><h5>Growth sleeve options: MGF vs. Vanguard large growth</h5><div class="for">Prepared for Alex Rivera, The Rivera Group · by Priya Shah · for the Oct 1 investment committee</div><h6>What it costs on ~$38M</h6><table><tr><th></th><th class="n">MGF F</th><th class="n">VWUAX</th><th class="n">VIGAX</th></tr><tr><td>Expense ratio</td><td class="n">0.40%</td><td class="n">0.25%</td><td class="n">0.05%</td></tr><tr><td>Per year</td><td class="n">$152,000</td><td class="n">$95,000</td><td class="n">$19,000</td></tr><tr><td>Approach</td><td class="n">Active, flexible</td><td class="n">Active</td><td class="n">Index</td></tr></table><h6>Why results have differed</h6><ol><li>Different benchmark and mandate: S&P 500, flexible growth, some non-U.S.</li><li>Less concentration: 282 companies vs. an index with ~1/3 in three stocks</li><li>Cost: 0.35 points a year more than the index fund</li></ol><h6>Three ways to build the sleeve</h6><table><tr><td>A · 70% index + 30% MGF</td><td class="n">0.155%</td></tr><tr><td>B · 50% index + 50% MGF</td><td class="n">0.225%</td></tr><tr><td>C · 100% MGF</td><td class="n">0.40%</td></tr></table><h6>Standardized average annual returns (1, 5, 10 years)</h6><span class="live">Inserted from the fund data platform at approval</span>${ok ? `<div class="disc">Figures shown are past results and are not predictive of results in future periods. Expense ratios are as of each fund’s prospectus. Indexes are unmanaged; investors cannot invest directly in an index. Investors should carefully consider investment objectives, risks, charges and expenses, contained in the prospectus.</div>` : ''}</div></div>`; },
     review: () => `<div class="art"><div class="doc2"><h5>Compliance review · OP-0922 v1</h5>${['Every claim matches QAR’s verified finding', 'Every number traces to the fund data platform or licensed data', 'Expense ratios labeled as of the prospectus', 'Standardized returns inserted from the system of record', 'Four standard disclosures added', 'No personal notes in the content', 'Audience: financial professional use only'].map(x => `<div class="chk"><span class="ok">${icon('check')}</span>${esc(x)}</div>`).join('')}<p class="sig" style="margin-top:8px"><b>Approved.</b> Version locked; any edit requires a new review.</p></div></div>`,
-    brief: () => `<div class="art"><div class="doc2"><h5>Brief · Alex Rivera · for Priya</h5><h6>Open with</h6><p>His California International Marathon training (December). Keep it short, then get to numbers.</p><h6>The decision</h6><p>Keep or replace GFA in the new growth model. His committee decides Oct 1.</p><h6>Lead with</h6><ul><li>The dollar view: about $152K a year for GFA F-2 vs. $19K for the index, on $38M.</li><li>Option A: 70/30 index and GFA, 0.155% blended.</li><li>The “why,” in QAR’s verified words: mandate, concentration, cost.</li></ul><h6>Avoid</h6><ul><li>Pitching or adjectives. He tunes them out.</li><li>The 12-page deck.</li></ul><h6>Logistics</h6><p>Book through Jamie Cho. Teams, 7:30 a.m. PT.</p></div></div>`,
+    brief: () => `<div class="art"><div class="doc2"><h5>Brief · Alex Rivera · for Priya</h5><h6>Open with</h6><p>His California International Marathon training (December). Keep it short, then get to numbers.</p><h6>The decision</h6><p>Keep or replace MGF in the new growth model. His committee decides Oct 1.</p><h6>Lead with</h6><ul><li>The dollar view: about $152K a year for MGF F vs. $19K for the index, on $38M.</li><li>Option A: 70/30 index and MGF, 0.155% blended.</li><li>The “why,” in QAR’s verified words: mandate, concentration, cost.</li></ul><h6>Avoid</h6><ul><li>Pitching or adjectives. He tunes them out.</li><li>The 12-page deck.</li></ul><h6>Logistics</h6><p>Book through Jamie Cho. Teams, 7:30 a.m. PT.</p></div></div>`,
     invite: () => `<div class="art"><div class="ol-bar"><span>Outlook · Calendar</span><span>Sent to Jamie Cho</span></div><div class="cal"><div class="d">SEP<small>Tue</small>29</div><div><b>Growth sleeve follow-up · Alex Rivera / Priya Shah</b><div class="sig">7:30 – 8:00 a.m. PT · Microsoft Teams meeting</div><div class="sig">Attendees: Alex Rivera, Jamie Cho, Priya Shah</div><p style="margin:6px 0 0">1. Walk through the one-pager · 2. Construction options · 3. Questions for your committee</p></div></div></div>`,
-    email: () => `<div class="art"><div class="ol-bar"><span>Outlook</span><span>${has('events.sent') ? 'Sent' : 'Draft, waiting for approval'}</span></div><div class="ol-h"><h5>GFA vs. Vanguard growth: one page for your Oct 1 committee</h5><div><b>From</b> Priya Shah (Capital Group) · <b>To</b> Alex Rivera · <b>Cc</b> Jamie Cho</div></div><div class="ol-b"><p>Hi Alex,</p><p>As promised, here’s the one-page comparison for your committee:</p><ul><li>Cost on your ~$38M: GFA F-2 about $152K a year, Vanguard U.S. Growth about $95K, Vanguard Growth Index about $19K.</li><li>Why results have differed: benchmark and mandate, concentration in a few mega-caps, and cost. The page walks through each.</li><li>Three ways to build the growth sleeve, including a 70/30 index-and-GFA mix at 0.155% blended.</li></ul><p>Standardized returns and disclosures are on the page. Talk Tuesday at 7:30.</p><p>Priya</p><span class="att link"><i>LINK</i>OP-0922 v1 · Growth sleeve options (1 page) · Seismic LiveSend</span><p class="sig" style="margin-top:8px">For financial professional use only.</p></div></div>`,
-    reply: () => `<div class="art"><div class="sf-h">${icon('headphones')} Salesforce Service Cloud · Case 00481 · Email-to-Case · resolved in 6 min</div><div class="ol-h"><div><b>Jamie Cho</b> · 10:35 a.m.</div></div><div class="ol-b"><p>Hi Priya, Alex couldn’t open the link. Our email security blocks external content links. Could you send the PDF?</p></div><div class="ol-h"><div><b>Priya Shah (Capital Group)</b> · 10:41 a.m.</div></div><div class="ol-b"><p>Of course, Jamie. Attached is the same one-pager as a PDF. Nothing in it has changed.</p><span class="att"><i>PDF</i>OP-0922 v1 · Growth sleeve options.pdf</span><p class="sig" style="margin-top:8px">Sent from the case in Service Cloud. Future Morgan Stanley sends default to attachments.</p></div></div>`,
+    email: () => `<div class="art"><div class="ol-bar"><span>Outlook</span><span>${has('events.sent') ? 'Sent' : 'Draft, waiting for approval'}</span></div><div class="ol-h"><h5>MGF vs. Vanguard growth: one page for your Oct 1 committee</h5><div><b>From</b> Priya Shah (Meridian Investments) · <b>To</b> Alex Rivera · <b>Cc</b> Jamie Cho</div></div><div class="ol-b"><p>Hi Alex,</p><p>As promised, here’s the one-page comparison for your committee:</p><ul><li>Cost on your ~$38M: MGF F about $152K a year, Vanguard U.S. Growth about $95K, Vanguard Growth Index about $19K.</li><li>Why results have differed: benchmark and mandate, concentration in a few mega-caps, and cost. The page walks through each.</li><li>Three ways to build the growth sleeve, including a 70/30 index-and-MGF mix at 0.155% blended.</li></ul><p>Standardized returns and disclosures are on the page. Talk Tuesday at 7:30.</p><p>Priya</p><span class="att link"><i>LINK</i>OP-0922 v1 · Growth sleeve options (1 page) · Seismic LiveSend</span><p class="sig" style="margin-top:8px">For financial professional use only.</p></div></div>`,
+    reply: () => `<div class="art"><div class="sf-h">${icon('headphones')} Salesforce Service Cloud · Case 00481 · Email-to-Case · resolved in 6 min</div><div class="ol-h"><div><b>Jamie Cho</b> · 10:35 a.m.</div></div><div class="ol-b"><p>Hi Priya, Alex couldn’t open the link. Our email security blocks external content links. Could you send the PDF?</p></div><div class="ol-h"><div><b>Priya Shah (Meridian Investments)</b> · 10:41 a.m.</div></div><div class="ol-b"><p>Of course, Jamie. Attached is the same one-pager as a PDF. Nothing in it has changed.</p><span class="att"><i>PDF</i>OP-0922 v1 · Growth sleeve options.pdf</span><p class="sig" style="margin-top:8px">Sent from the case in Service Cloud. Future Morgan Stanley sends default to attachments.</p></div></div>`,
     crm: () => `<div class="art"><div class="sf-h">${icon('users')} Salesforce · Opportunity</div><div class="sf-b"><div class="sf-row"><span>Opportunity</span><b>Rivera growth model</b></div><div class="sf-row"><span>Stage</span><span><s style="color:#8a96a3">Discovery</s> → <b>Proposal</b></span></div><div class="sf-row"><span>Next step</span><span>Committee decision Oct 1 · leaning Option A</span></div><div class="sf-row"><span>Activity</span><span>Meeting Sep 29 · summary attached</span></div><h6 style="margin:10px 0 4px;font-size:12px">Tasks</h6><div class="sf-task"><i></i>Check in after the committee · Priya · Oct 2</div><div class="sf-task"><i></i>Ask Product for an after-tax comparison · Sam Lee · Oct 9</div><div class="sf-task"><i></i>Send Q4 attribution in the one-page format · Priya · Jan 8</div></div></div>`,
-    summary: () => `<div class="art"><div class="doc2"><h5>What the foundation kept</h5><ul><li><b>Memory:</b> Alex’s decision stage, his preference for dollar-based fees, his follow-up cadence, and when he’s next on the calendar.</li><li><b>Knowledge:</b> the verified “why GFA trailed” finding, ready for the next advisor who asks.</li><li><b>Graph:</b> Morgan Stanley blocks external links, so every Morgan Stanley advisor now gets attachments.</li><li><b>Feedback:</b> advisors want an after-tax version of the comparison; routed to Product and Marketing.</li><li><b>Events:</b> all nine planned tasks closed; the opportunity moved to Proposal.</li></ul></div></div>` };
+    summary: () => `<div class="art"><div class="doc2"><h5>What the foundation kept</h5><ul><li><b>Memory:</b> Alex’s decision stage, his preference for dollar-based fees, his follow-up cadence, and when he’s next on the calendar.</li><li><b>Knowledge:</b> the verified “why MGF trailed” finding, ready for the next advisor who asks.</li><li><b>Graph:</b> Morgan Stanley blocks external links, so every Morgan Stanley advisor now gets attachments.</li><li><b>Feedback:</b> advisors want an after-tax version of the comparison; routed to Product and Marketing.</li><li><b>Events:</b> all nine planned tasks closed; the opportunity moved to Proposal.</li></ul></div></div>` };
   return F[t] ? F[t]() : '';
 }
 

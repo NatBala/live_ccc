@@ -5,8 +5,8 @@
 
 const TEAMS = {
   sales: { name: 'Sales', color: '#82b6ff' },
-  product: { name: 'Product (PRP)', short: 'Product', color: '#7fd4ab' },
-  marketing: { name: 'Marketing Content Generation (Market Incubator)', short: 'Marketing', color: '#f0b870' },
+  product: { name: 'Product', short: 'Product', color: '#7fd4ab' },
+  marketing: { name: 'Marketing Content Generation', short: 'Marketing', color: '#f0b870' },
   service: { name: 'Service', color: '#b9a5f5' }
 };
 const TEAM_ORDER = ['sales', 'product', 'marketing', 'service'];
@@ -15,15 +15,15 @@ const TEAM_ORDER = ['sales', 'product', 'marketing', 'service'];
 const EMPLOYEES = {
   'EMP-PRIYA': { name: 'Priya Shah', team: 'sales', role: 'Wholesaler, Southern California (LA, Orange County, San Diego)', covers: ['ADV-101', 'ADV-102', 'ADV-104', 'ADV-105', 'ADV-106'] },
   'EMP-SAM': { name: 'Sam Lee', team: 'sales', role: 'Internal partner, Southern California', covers: ['ADV-101', 'ADV-102', 'ADV-103', 'ADV-104', 'ADV-105', 'ADV-106', 'ADV-107'] },
-  'EMP-DANA': { name: 'Dana Ortiz', team: 'product', role: 'Product Q&A, Product (PRP)', covers: [] },
+  'EMP-DANA': { name: 'Dana Ortiz', team: 'product', role: 'Product Q&A, Product', covers: [] },
   'EMP-MARCUS': { name: 'Marcus Bell', team: 'marketing', role: 'Advisor marketing lead', covers: [] },
   'EMP-KIM': { name: 'Kim Nguyen', team: 'service', role: 'Advisor service', covers: [] }
 };
 
 const SUGGESTIONS = {
-  sales: ['Identify the growing trends in LA territory', 'Compare BFA and AMBAL for Rachel and schedule a meeting with her next month', 'Prep me for my call with Alex tomorrow', 'Prepare Maya’s retirement committee fee comparison review', 'Sofia mentioned ETFs. What should I bring to our next meeting?', 'Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.', 'Why are Daniel’s overall sales down when his ETF sales are up?', 'Which CG ETFs are available at Wells Fargo for Daniel?', 'Prepare me for tomorrow’s meeting with Daniel’s team', 'What has changed since my last meeting with Rachel?'],
-  product: ['Compare BFA and AMBAL: costs, approach and who each suits', 'Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.', 'Compare GFA F-2 costs with VWUAX and VIGAX on $38M', 'Check whether our fee comparison for Maya is still current', 'Prep the investment director for Thursday’s meeting with Daniel’s team', 'Build the SRG pitch book on GFA for the advisor channel'],
-  marketing: ['Draft the follow-up email to Alex using Product’s verified comparison', 'Create an ETF email campaign for Sofia', 'Write a LinkedIn post on fee transparency for advisors', 'Refresh the standing GFA materials for the quarter and flag anything expiring', 'Create a custom pitch book on CG ETFs at Wells Fargo for Daniel’s team'],
+  sales: ['Identify the growing trends in LA territory', 'Compare MCB and MBAL for Rachel and schedule a meeting with her next month', 'Prep me for my call with Alex tomorrow', 'Prepare Maya’s retirement committee fee comparison review', 'Sofia mentioned ETFs. What should I bring to our next meeting?', 'Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.', 'Why are Daniel’s overall sales down when his ETF sales are up?', 'Which Meridian ETFs are available at Wells Fargo for Daniel?', 'Prepare me for tomorrow’s meeting with Daniel’s team', 'What has changed since my last meeting with Rachel?'],
+  product: ['Compare MCB and MBAL: costs, approach and who each suits', 'Why has MGF trailed the Vanguard growth index? I need an explanation advisors can use.', 'Compare MGF F costs with VWUAX and VIGAX on $38M', 'Check whether our fee comparison for Maya is still current', 'Prep the portfolio specialist for Thursday’s meeting with Daniel’s team', 'Build the Intermediary pitch book on MGF for the advisor channel'],
+  marketing: ['Draft the follow-up email to Alex using Product’s verified comparison', 'Create an ETF email campaign for Sofia', 'Write a LinkedIn post on fee transparency for advisors', 'Refresh the standing MGF materials for the quarter and flag anything expiring', 'Create a custom pitch book on Meridian ETFs at Wells Fargo for Daniel’s team'],
   service: ['Alex says the link in Priya’s email won’t open', 'Maya says the benchmark explanation is still unclear']
 };
 
@@ -43,11 +43,11 @@ const AGENTS = {
   'product.tone': { name: 'Tone/Style Alignment', team: 'product', does: 'Turns verified product answers into advisor-ready language using approved messaging', tools: ['seismic.get_approved_language'] },
   'product.format': { name: 'Response Formatter', team: 'product', does: 'Formats product answers for the channel', tools: ['taxonomy.resolve', 'fund.compare'] },
   'product.qar': { name: 'QAR', team: 'product', does: 'Produces verified answers; every number traced to a system of record', tools: ['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.cost_on_assets', 'models.plan_fee_comparison', 'seismic.search_content', 'platform.get_availability', 'taxonomy.resolve', 'fund.compare', 'models.get_allocations', 'platform.get_program_rules'] },
-  'product.idprep': { name: 'ID Prep Me', team: 'product', does: 'Prepares an investment director for an advisor or client meeting: who is in the room, what they hold and have asked, how the strategy is positioned and the questions to expect', tools: ['crm.get_contact', 'crm.get_call_notes', 'crm.get_team', 'book.get_assets', 'fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.get_allocations', 'news.get_items', 'content.get_themes', 'seismic.search_content', 'insights.changes_since'] },
+  'product.idprep': { name: 'Specialist Prep Me', team: 'product', does: 'Prepares an portfolio specialist for an advisor or client meeting: who is in the room, what they hold and have asked, how the strategy is positioned and the questions to expect', tools: ['crm.get_contact', 'crm.get_call_notes', 'crm.get_team', 'book.get_assets', 'fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.get_allocations', 'news.get_items', 'content.get_themes', 'seismic.search_content', 'insights.changes_since'] },
   'product.positioning': { name: 'Strategy Positioning', team: 'product', does: 'Explains how a strategy is positioned: allocation changes, what drove results and peer context, from verified data', tools: ['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.get_allocations', 'fund.compare', 'seismic.resolve_evidence'] },
   'product.views': { name: 'Market Views', team: 'product', does: 'Summarizes approved house views and market themes that matter for the meeting', tools: ['news.get_items', 'content.get_themes', 'seismic.search_content', 'seismic.get_approved_language'] },
   'product.institutional': { name: 'Institutional Pitch Books', team: 'product', does: 'Builds institutional pitch books from approved strategy content and verified data', tools: ['seismic.search_content', 'fund.get_facts', 'fund.get_performance', 'models.get_allocations', 'sharepoint.get_disclosures'] },
-  'product.srg': { name: 'SRG Pitch Books', team: 'product', does: 'Builds SRG pitch books for the retail advisor channel from approved content and verified data', tools: ['seismic.search_content', 'fund.get_facts', 'fund.get_performance', 'mstar.get_peers', 'sharepoint.get_disclosures'] },
+  'product.srg': { name: 'Intermediary Pitch Books', team: 'product', does: 'Builds Intermediary pitch books for the retail advisor channel from approved content and verified data', tools: ['seismic.search_content', 'fund.get_facts', 'fund.get_performance', 'mstar.get_peers', 'sharepoint.get_disclosures'] },
   'marketing.gather': { name: 'Resource Gatherer', team: 'marketing', does: 'Finds approved content, templates, messaging and landing pages', tools: ['seismic.search_content', 'seismic.get_approved_language', 'aem.get_page', 'mcloud.get_engagement'] },
   'marketing.analyze': { name: 'Document Analyzer', team: 'marketing', does: 'Extracts key points from approved documents', tools: ['seismic.search_content', 'service.get_insights', 'seismic.resolve_evidence'] },
   'marketing.copy': { name: 'Copywriter / Editor', team: 'marketing', does: 'Writes drafts in the audience’s preferred format from verified findings', tools: ['seismic.get_approved_language'] },
@@ -81,8 +81,8 @@ const ROLES = {
   'sales.ssc': { team: 'sales', name: 'SSC', person: 'Nina Alvarez', does: 'Scheduling and follow-up' },
   'sales.internal': { team: 'sales', name: 'Internal wholesalers', person: 'Sam Lee', does: 'Territory insight and prioritization' },
   'product.qa': { team: 'product', name: 'Product Q&A', person: 'Dana Ortiz', does: 'Fund questions, comparisons, analytics tools and verified answers' },
-  'product.strategy': { team: 'product', name: 'Strategy Intel', person: 'Wei Zhang', does: 'Investment director (ID) preparation: positioning, market views and meeting prep' },
-  'product.content': { team: 'product', name: 'Investment content generation', person: 'Elena Park', does: 'Institutional and SRG pitch books' },
+  'product.strategy': { team: 'product', name: 'Strategy Intel', person: 'Wei Zhang', does: 'Portfolio specialist preparation: positioning, market views and meeting prep' },
+  'product.content': { team: 'product', name: 'Investment content generation', person: 'Elena Park', does: 'Institutional and Intermediary pitch books' },
   'marketing.content': { team: 'marketing', name: 'Content generation', person: 'Marcus Bell', does: 'Approved content, drafts, personalized emails and posts' },
   'marketing.compliance': { team: 'marketing', name: 'Compliance review', person: 'Grace Liu', does: 'Claims, disclosures, sign-off' },
   'marketing.distribution': { team: 'marketing', name: 'Distribution', person: 'Omar Haddad', does: 'Audiences and approved sends' },
@@ -105,7 +105,7 @@ const AGENT_ROLE = {
 const roleOf = agent => AGENT_ROLE[agent] || (AGENTS[agent] ? { sales: 'sales.wholesalers', product: 'product.qa', marketing: 'marketing.content', service: 'service.advisor' }[AGENTS[agent].team] : null);
 /* Deterministic assignment rules the business asked for: they override the AI when they apply. */
 const ROLE_RULES = [
-  { test: /investment director|\bID (prep|meeting|brief)|prep(are)? (the |our )?ID\b/i, role: 'product.strategy', agent: () => 'product.idprep', why: 'Investment director preparation goes to Strategy Intel' },
+  { test: /portfolio specialist|\bID (prep|meeting|brief)|prep(are)? (the |our )?ID\b/i, role: 'product.strategy', agent: () => 'product.idprep', why: 'Portfolio specialist preparation goes to Strategy Intel' },
   { test: /schedul|follow.?up|book(ing)?\b|calendar|invite|reschedul|reminder|set up (a )?(call|meeting)/i, role: 'sales.ssc', agent: t => /schedul|book|calendar|invite|reschedul|set up/i.test(t) ? 'sales.schedule' : 'sales.follow', why: 'Scheduling and follow-up go to SSC' },
   { test: /\bprep|brief|agenda|talking points|meeting preparation|prepare (me|for)/i, role: 'sales.wholesalers', agent: () => 'sales.prep', why: 'Meeting preparation goes to the wholesaler' }
 ];
@@ -179,7 +179,7 @@ const MEMORY = [
   { id: 'MEM-011', adv: 'ADV-101', cat: 'content_pref', scope: 'BU-101A', attr: 'Committee materials format', value: 'One page, data first, no decks', src: 'CALL-0922', speaker: 'Alex Rivera', basis: 'Direct advisor statement', rev: 1, access: 'shared' },
   { id: 'MEM-012', adv: 'ADV-101', cat: 'communication_pref', scope: 'advisor', attr: 'Meetings', value: '30-min Teams video, 7:30 a.m. PT, Tuesdays or Thursdays; book through Jamie Cho', src: 'EMAIL-0719', speaker: 'Jamie Cho (for Alex)', basis: 'Direct statement from his team', rev: 1, access: 'shared' },
   { id: 'MEM-013', adv: 'ADV-101', cat: 'communication_pref', scope: 'FIRM-MS', attr: 'Delivery method', value: 'Send approved PDFs as attachments; firm blocks external content links', src: 'CASE-00481', speaker: 'Jamie Cho', basis: 'Verified service case', rev: 1, access: 'shared' },
-  { id: 'MEM-014', adv: 'ADV-101', cat: 'priority', scope: 'BU-101A', attr: 'Current decision', value: 'Keep or replace GFA in the new growth model; committee Oct 1', src: 'CALL-0922', speaker: 'Alex Rivera', basis: 'Direct advisor statement', rev: 1, access: 'shared', reviewBy: '2026-10-02' },
+  { id: 'MEM-014', adv: 'ADV-101', cat: 'priority', scope: 'BU-101A', attr: 'Current decision', value: 'Keep or replace MGF in the new growth model; committee Oct 1', src: 'CALL-0922', speaker: 'Alex Rivera', basis: 'Direct advisor statement', rev: 1, access: 'shared', reviewBy: '2026-10-02' },
   { id: 'MEM-015', adv: 'ADV-101', cat: 'personal', scope: 'advisor', attr: 'Interests', value: 'Marathon runner; training for the California International Marathon in December', src: 'CALL-0814', speaker: 'Alex Rivera', basis: 'Direct advisor statement', rev: 1, access: 'relationship' },
   { id: 'MEM-016', adv: 'ADV-101', cat: 'coaching', scope: 'advisor', attr: 'Coaching note', value: 'Lead with numbers; Alex disengages when pitched', src: 'COACH-07', speaker: 'Priya Shah', basis: 'Private coaching', rev: 1, access: 'owner:EMP-PRIYA' },
   { id: 'MEM-017', adv: 'ADV-101', cat: 'content_pref', scope: 'BU-101A', attr: 'Fee presentation', value: 'Show fees in dollars on his assets, not only percentages', src: 'CALL-0922', speaker: 'Alex Rivera', basis: 'Direct advisor statement', rev: 1, access: 'shared' },
@@ -206,24 +206,24 @@ const MEMORY = [
 ];
 /* Products each advisor holds, uses or is weighing (from Salesforce holdings and recorded calls) */
 const ADVISOR_PRODUCTS = {
-  'ADV-101': [{ fund: 'AMBFX', rel: 'Balanced option, PLAN-101 (Newport Tech 401(k))', src: 'Salesforce plan record' }, { fund: 'GFFFX', rel: 'Holds ~$38M in legacy accounts', src: 'Salesforce holdings' }, { fund: 'VIGAX', rel: 'Weighing as an index core', src: 'CALL-0922' }, { fund: 'VWUAX', rel: 'Comparing against GFA', src: 'CALL-0922' }],
-  'ADV-102': [{ fund: 'GFFFX', rel: 'Large-cap growth (active) option, PLAN-102', src: 'Salesforce plan record' }, { fund: 'VIGAX', rel: 'Large-cap growth (index) option, PLAN-102', src: 'Salesforce plan record' }, { fund: 'AMBFX', rel: 'Balanced option, PLAN-102', src: 'Salesforce plan record' }, { fund: 'ABNFX', rel: 'Core bond option, PLAN-102', src: 'Salesforce plan record' }],
-  'ADV-103': [{ fund: 'AMECX', rel: 'Core income holding for retirees', src: 'Salesforce holdings' }, { fund: 'AWSHX', rel: 'Holds for dividend growth', src: 'Salesforce holdings' }],
-  'ADV-104': [{ fund: 'GFFFX', rel: 'Satellite in two model portfolios', src: 'Salesforce holdings' }],
-  'ADV-105': [{ fund: 'GFFFX', rel: 'Active satellite in client models', src: 'CALL-0826' }, { fund: 'VIGAX', rel: 'Index core in client models', src: 'CALL-0826' }],
-  'ADV-106': [{ fund: 'AMBFX', rel: 'Reviewing for retiree income', src: 'CALL-0923' }, { fund: 'ABNFX', rel: 'Reviewing for retiree income', src: 'CALL-0923' }],
-  'ADV-107': [{ fund: 'ABNFX', rel: 'Considering as core bond', src: 'EMAIL-0925' }]
+  'ADV-101': [{ fund: 'MRLFX', rel: 'Balanced option, PLAN-101 (Newport Tech 401(k))', src: 'Salesforce plan record' }, { fund: 'MRGFX', rel: 'Holds ~$38M in legacy accounts', src: 'Salesforce holdings' }, { fund: 'VIGAX', rel: 'Weighing as an index core', src: 'CALL-0922' }, { fund: 'VWUAX', rel: 'Comparing against MGF', src: 'CALL-0922' }],
+  'ADV-102': [{ fund: 'MRGFX', rel: 'Large-cap growth (active) option, PLAN-102', src: 'Salesforce plan record' }, { fund: 'VIGAX', rel: 'Large-cap growth (index) option, PLAN-102', src: 'Salesforce plan record' }, { fund: 'MRLFX', rel: 'Balanced option, PLAN-102', src: 'Salesforce plan record' }, { fund: 'MRBFX', rel: 'Core bond option, PLAN-102', src: 'Salesforce plan record' }],
+  'ADV-103': [{ fund: 'MRINX', rel: 'Core income holding for retirees', src: 'Salesforce holdings' }, { fund: 'MRGIX', rel: 'Holds for dividend growth', src: 'Salesforce holdings' }],
+  'ADV-104': [{ fund: 'MRGFX', rel: 'Satellite in two model portfolios', src: 'Salesforce holdings' }],
+  'ADV-105': [{ fund: 'MRGFX', rel: 'Active satellite in client models', src: 'CALL-0826' }, { fund: 'VIGAX', rel: 'Index core in client models', src: 'CALL-0826' }],
+  'ADV-106': [{ fund: 'MRLFX', rel: 'Reviewing for retiree income', src: 'CALL-0923' }, { fund: 'MRBFX', rel: 'Reviewing for retiree income', src: 'CALL-0923' }],
+  'ADV-107': [{ fund: 'MRBFX', rel: 'Considering as core bond', src: 'EMAIL-0925' }]
 };
 /* Things the foundation knows it does NOT know yet (shown on purpose) */
 const UNKNOWNS = {
   'ADV-102': ['Ongoing committee-pack format for BU-102R: not confirmed', 'Any format preference for the wealth team (BU-102W): none recorded'],
-  'ADV-104': ['Whether Sofia wants Capital Group ETF material specifically: not stated']
+  'ADV-104': ['Whether Sofia wants Meridian Investments ETF material specifically: not stated']
 };
 
 /* Episodes: call transcripts and emails in Salesforce (episodic memory) */
 const EPISODES = [
   { id: 'CALL-0922', adv: 'ADV-101', scope: 'BU-101A', date: 'Sep 22, 2026', kind: 'Call transcript', with: 'Priya Shah',
-    text: 'Alex asked for (1) a fee comparison of GFA against the Vanguard growth funds, (2) options for his growth sleeve, (3) why GFA has trailed. Alex: "Going forward, send me one page, data first. No decks." Alex: "Show me the fees in dollars on my $38 million." Committee meets Thursday Oct 1.' },
+    text: 'Alex asked for (1) a fee comparison of MGF against the Vanguard growth funds, (2) options for his growth sleeve, (3) why MGF has trailed. Alex: "Going forward, send me one page, data first. No decks." Alex: "Show me the fees in dollars on my $38 million." Committee meets Thursday Oct 1.' },
   { id: 'CALL-0814', adv: 'ADV-101', scope: 'BU-101A', date: 'Aug 14, 2026', kind: 'Call transcript', with: 'Priya Shah',
     text: 'Quarterly review. Alex is launching a new discretionary growth model this quarter. Mentioned he is training for the California International Marathon.' },
   { id: 'EMAIL-0719', adv: 'ADV-101', scope: 'advisor', date: 'Jul 19, 2026', kind: 'Email', with: 'Jamie Cho',
@@ -243,7 +243,7 @@ const EPISODES = [
   { id: 'CALL-0918', adv: 'ADV-105', scope: 'BU-105', date: 'Sep 18, 2026', kind: 'Call transcript', with: 'Priya Shah',
     text: 'Daniel: "Clients keep asking about ETFs versus active funds." Wants model portfolio options with a lower blended cost. Asked for a core-satellite example.' },
   { id: 'CALL-0923', adv: 'ADV-106', scope: 'BU-106', date: 'Sep 23, 2026', kind: 'Call transcript', with: 'Priya Shah',
-    text: 'Rachel: "My retirees want reliable income, and I am reviewing balanced and bond funds for them." Asked how American Balanced and The Bond Fund of America fit an income plan.' },
+    text: 'Rachel: "My retirees want reliable income, and I am reviewing balanced and bond funds for them." Asked how Meridian Balanced and Meridian Core Bond Fund fit an income plan.' },
   { id: 'EMAIL-0925', adv: 'ADV-107', scope: 'BU-107', date: 'Sep 25, 2026', kind: 'Email', with: 'Sam Lee',
     text: 'Luis: "We are adding more fixed income as rates settle. Send me your core bond story, and keep an eye on fees."' },
   { id: 'EMAIL-0902', adv: 'ADV-107', scope: 'BU-107R', date: 'Sep 2, 2026', kind: 'Email', with: 'Sam Lee',
@@ -253,7 +253,7 @@ const EPISODES = [
   { id: 'MTG-0605', adv: 'ADV-105', scope: 'BU-105', date: 'Jun 5, 2026', kind: 'Meeting notes', with: 'Priya Shah',
     text: 'Kim Group model committee (Daniel, Hannah Lee). US large-cap core moving to index; active satellites kept for international equity and large-cap value. Hannah runs the quarterly satellite review; Daniel signs off. They avoid repeating the same manager across satellites.' },
   { id: 'CALL-0612', adv: 'ADV-103', scope: 'BU-103', date: 'Jun 12, 2026', kind: 'Call transcript', with: 'Sam Lee',
-    text: 'Jordan: "My retirees care about dividends they can count on." Asked for the dividend history of Washington Mutual and The Income Fund of America.' },
+    text: 'Jordan: "My retirees care about dividends they can count on." Asked for the dividend history of Meridian Growth and Income and Meridian Income Fund.' },
   { id: 'CALL-0618', adv: 'ADV-104', scope: 'BU-104', date: 'Jun 18, 2026', kind: 'Call transcript', with: 'Priya Shah',
     text: 'Sofia and Kevin Brooks reviewed the core models. Kevin trades the models; Sofia approves changes. She wants one-page summaries she can forward to Kevin.' },
   { id: 'CALL-0624', adv: 'ADV-106', scope: 'BU-106', date: 'Jun 24, 2026', kind: 'Call transcript', with: 'Priya Shah',
@@ -277,7 +277,7 @@ const OPPORTUNITIES = [
   { id: 'OPP-504', adv: 'ADV-105', scope: 'BU-105', name: 'Kim Group model refresh', stage: 'Discovery', note: 'Lower blended cost; core-satellite models' },
   { id: 'OPP-505', adv: 'ADV-106', scope: 'BU-106', name: 'Okafor income sleeve', stage: 'Discovery', note: 'Balanced and bond funds for retirees' },
   { id: 'OPP-506', adv: 'ADV-107', scope: 'BU-107', name: 'Harbor Point core bond', stage: 'Qualified', note: 'Adding fixed income as rates settle' },
-  { id: 'OPP-501', adv: 'ADV-101', scope: 'BU-101A', name: 'Rivera growth model', stage: 'Proposal', note: 'Deciding whether GFA stays in the growth sleeve' },
+  { id: 'OPP-501', adv: 'ADV-101', scope: 'BU-101A', name: 'Rivera growth model', stage: 'Proposal', note: 'Deciding whether MGF stays in the growth sleeve' },
   { id: 'OPP-502', adv: 'ADV-102', scope: 'BU-102R', name: 'Northstar retirement menu review', stage: 'Discovery', note: 'Committee reviewing fee comparisons for PLAN-102 before the Nov 12 meeting' },
   { id: 'OPP-503', adv: 'ADV-104', scope: 'BU-104', name: 'Martinez core allocation', stage: 'Discovery', note: 'Moving core to ETFs' },
   { id: 'OPP-507', adv: 'ADV-103', scope: 'BU-103', name: 'Patel income refresh', stage: 'Discovery', note: 'Reviewing dividend payers for retirees' },
@@ -290,17 +290,17 @@ const PLANS = {
   'PLAN-102': { adv: 'ADV-102', unit: 'BU-102R', name: 'Irvine Precision Manufacturing 401(k) Plan', assets_usd: 62000000, participants: 540,
     committee: 'Five-member investment committee; Northstar Advisory (Maya Chen) advises; Elena Park coordinates materials', next_meeting: 'Nov 12, 2026', materials_due: 'Nov 5, 2026',
     lineup: [
-      { option: 'Large-cap growth (active)', fund: 'GFFFX', assets_usd: 18500000, category: 'Large Growth' },
+      { option: 'Large-cap growth (active)', fund: 'MRGFX', assets_usd: 18500000, category: 'Large Growth' },
       { option: 'Large-cap growth (index)', fund: 'VIGAX', assets_usd: 9000000, category: 'Large Growth' },
-      { option: 'Balanced', fund: 'AMBFX', assets_usd: 14200000, category: 'Moderate Allocation' },
-      { option: 'Core bond', fund: 'ABNFX', assets_usd: 6800000, category: 'Intermediate Core Bond' }],
+      { option: 'Balanced', fund: 'MRLFX', assets_usd: 14200000, category: 'Moderate Allocation' },
+      { option: 'Core bond', fund: 'MRBFX', assets_usd: 6800000, category: 'Intermediate Core Bond' }],
     other: { label: 'Target-date series and stable value', assets_usd: 13500000, note: 'Expense data not in reference data' } },
   'PLAN-101': { adv: 'ADV-101', unit: 'BU-101B', name: 'Newport Tech 401(k) Plan', assets_usd: 90000000, participants: 760,
     committee: 'Newport Tech investment committee; Alex Rivera advises; Tara Nguyen is the plan consultant', next_meeting: 'Jan 20, 2027', materials_due: 'Jan 13, 2027',
     lineup: [
       { option: 'Large-cap growth (index)', fund: 'VIGAX', assets_usd: 21000000, category: 'Large Growth' },
-      { option: 'Balanced', fund: 'AMBFX', assets_usd: 8000000, category: 'Moderate Allocation' },
-      { option: 'Core bond', fund: 'ABNFX', assets_usd: 6500000, category: 'Intermediate Core Bond' }],
+      { option: 'Balanced', fund: 'MRLFX', assets_usd: 8000000, category: 'Moderate Allocation' },
+      { option: 'Core bond', fund: 'MRBFX', assets_usd: 6500000, category: 'Intermediate Core Bond' }],
     other: { label: 'Target-date series and stable value', assets_usd: 54500000, note: 'Expense data not in reference data' } }
 };
 /* Coverage changes between wholesalers (Salesforce) */
@@ -330,7 +330,7 @@ const DELIVERIES = [
 /* Genesys + Service Cloud, aggregated by topic; never advisor identifiers */
 const SERVICE_INSIGHTS = {
   fees: { period: 'Q3 2026 (Jul 1 to Sep 28)', source: 'Genesys Cloud contact reasons and Service Cloud cases, aggregated; no advisor identifiers', contacts_this_quarter: 46, contacts_last_quarter: 27,
-    top_questions: ['Why does the expense ratio on a client statement differ from the fact sheet? (usually the share class)', 'What is the cost difference between F-2 and Class A shares?', 'How do I show a client what a fee costs in dollars, not just percent?', 'Where is the current prospectus expense ratio published?'],
+    top_questions: ['Why does the expense ratio on a client statement differ from the fact sheet? (usually the share class)', 'What is the cost difference between F and Class A shares?', 'How do I show a client what a fee costs in dollars, not just percent?', 'Where is the current prospectus expense ratio published?'],
     takeaway: 'Advisors ask how to explain fees to clients, not whether fees are too high.' },
   access: { period: 'Q3 2026', source: 'Service Cloud cases, aggregated', contacts_this_quarter: 9, takeaway: 'Link-access cases come from firms whose web gateways block external file-sharing links; a PDF attachment resolves them.' }
 };
@@ -343,7 +343,7 @@ const ENGAGEMENT = {
 /* Adobe Experience Manager: published, approved web pages that posts may link to */
 const AEM_PAGES = [
   { id: 'AEM-FEES', title: 'Understanding fund expenses', path: '/advisor/insights/understanding-fund-expenses', status: 'Published', audience: 'Public', last_reviewed: 'Aug 2026', tags: 'fees expenses expense ratio share class transparency' },
-  { id: 'AEM-CAPSYS', title: 'How The Capital System works', path: '/advisor/insights/capital-system', status: 'Published', audience: 'Public', last_reviewed: 'Jun 2026', tags: 'capital system active managers' }
+  { id: 'AEM-CAPSYS', title: 'How The Meridian System works', path: '/advisor/insights/meridian-system', status: 'Published', audience: 'Public', last_reviewed: 'Jun 2026', tags: 'meridian system active managers' }
 ];
 /* Seismic messaging library: approved language, cited by id */
 const APPROVED_LANGUAGE = [
@@ -351,7 +351,7 @@ const APPROVED_LANGUAGE = [
   { id: 'MSG-202', topic: 'fees', text: 'A lower fee is one input. What you get for the fee (the approach, the people, the long-term results) is the rest of the story.', use: 'Advisor-facing' },
   { id: 'MSG-203', topic: 'fees', text: 'Ask for the expense ratio, the share class and the as-of date. All three belong in any fee comparison.', use: 'Social, education' },
   { id: 'MSG-211', topic: 'active index', text: 'Active and index funds do different jobs. An index fund aims to match its benchmark; an active fund aims to do something different, so it will lead and lag at different times.', use: 'Advisor-facing' },
-  { id: 'MSG-212', topic: 'active index capital system', text: 'The Capital System divides each portfolio among several managers who invest independently, so no single view dominates.', use: 'Advisor-facing, investor' },
+  { id: 'MSG-212', topic: 'active index meridian system', text: 'The Meridian System divides each portfolio among several managers who invest independently, so no single view dominates.', use: 'Advisor-facing, investor' },
   { id: 'MSG-213', topic: 'active index performance benchmark', text: 'Judge a fund over a full market cycle and against the benchmark it is managed to, not a single period or a different index.', use: 'Advisor-facing' }
 ];
 /* SharePoint compliance library: disclosures and rules by channel */
@@ -364,24 +364,24 @@ const DISCLOSURES = {
 
 /* ---------- Sales AI shared services (all values fictional; amounts in $ millions) ---------- */
 const MF = 'Mutual fund';
-/* [assets] CG assets for each advisor's team, two snapshots */
+/* [assets] Meridian assets for each advisor's team, two snapshots */
 const BOOK = {
-  'ADV-101': { entity: 'The Rivera Group (team level), Capital Group assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
-    funds: [['GFFFX', MF, 38.0], ['AWSHX', MF, 14.2], ['ABNFX', MF, 9.6], ['AMBFX', MF, 8.0], ['CGDV', 'ETF', 6.1], ['Global Equity SMA', 'SMA', 11.3]], prior_by_vehicle: { [MF]: 73.6, ETF: 2.0, SMA: 10.4 } },
-  'ADV-102': { entity: 'Northstar Advisory (firm level, plan and wealth assets), Capital Group assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
-    funds: [['GFFFX', MF, 18.5], ['AMBFX', MF, 22.6], ['ABNFX', MF, 6.8], ['CGCP', 'ETF', 5.0]], prior_by_vehicle: { [MF]: 44.0, ETF: 1.5 } },
-  'ADV-103': { entity: 'Patel Retirement Group (team level), Capital Group assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
-    funds: [['AMECX', MF, 24.5], ['AWSHX', MF, 17.8], ['ABNFX', MF, 6.2], ['CGDV', 'ETF', 3.4]], prior_by_vehicle: { [MF]: 50.2, ETF: 1.1 } },
-  'ADV-104': { entity: 'Martinez Wealth Partners (team level), Capital Group assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
-    funds: [['GFFFX', MF, 9.8], ['AWSHX', MF, 5.1], ['CGGR', 'ETF', 6.4], ['CGDV', 'ETF', 4.8], ['CGCP', 'ETF', 3.2]], prior_by_vehicle: { [MF]: 19.6, ETF: 6.1 } },
-  'ADV-105': { entity: 'The Kim Group (team level), Capital Group assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
-    funds: [['GFFFX', MF, 54.0], ['AMBFX', MF, 31.3], ['ABNFX', MF, 22.8], ['AWSHX', MF, 20.5], ['AMECX', MF, 19.6],
-      ['CGGR', 'ETF', 18.4], ['CGDV', 'ETF', 12.6], ['CGCP', 'ETF', 10.2], ['Global Equity SMA', 'SMA', 26.1], ['Municipal SMA', 'SMA', 16.5]],
+  'ADV-101': { entity: 'The Rivera Group (team level), Meridian Investments assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
+    funds: [['MRGFX', MF, 38.0], ['MRGIX', MF, 14.2], ['MRBFX', MF, 9.6], ['MRLFX', MF, 8.0], ['MRDV', 'ETF', 6.1], ['Global Equity SMA', 'SMA', 11.3]], prior_by_vehicle: { [MF]: 73.6, ETF: 2.0, SMA: 10.4 } },
+  'ADV-102': { entity: 'Northstar Advisory (firm level, plan and wealth assets), Meridian Investments assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
+    funds: [['MRGFX', MF, 18.5], ['MRLFX', MF, 22.6], ['MRBFX', MF, 6.8], ['MRCP', 'ETF', 5.0]], prior_by_vehicle: { [MF]: 44.0, ETF: 1.5 } },
+  'ADV-103': { entity: 'Patel Retirement Group (team level), Meridian Investments assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
+    funds: [['MRINX', MF, 24.5], ['MRGIX', MF, 17.8], ['MRBFX', MF, 6.2], ['MRDV', 'ETF', 3.4]], prior_by_vehicle: { [MF]: 50.2, ETF: 1.1 } },
+  'ADV-104': { entity: 'Martinez Wealth Partners (team level), Meridian Investments assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
+    funds: [['MRGFX', MF, 9.8], ['MRGIX', MF, 5.1], ['MRGR', 'ETF', 6.4], ['MRDV', 'ETF', 4.8], ['MRCP', 'ETF', 3.2]], prior_by_vehicle: { [MF]: 19.6, ETF: 6.1 } },
+  'ADV-105': { entity: 'The Kim Group (team level), Meridian Investments assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
+    funds: [['MRGFX', MF, 54.0], ['MRLFX', MF, 31.3], ['MRBFX', MF, 22.8], ['MRGIX', MF, 20.5], ['MRINX', MF, 19.6],
+      ['MRGR', 'ETF', 18.4], ['MRDV', 'ETF', 12.6], ['MRCP', 'ETF', 10.2], ['Global Equity SMA', 'SMA', 26.1], ['Municipal SMA', 'SMA', 16.5]],
     prior_by_vehicle: { [MF]: 171.5, ETF: 22.0, SMA: 44.0 } },
-  'ADV-106': { entity: 'Okafor Wealth Group (team level), Capital Group assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
-    funds: [['AMBFX', MF, 21.0], ['ABNFX', MF, 12.4], ['AMECX', MF, 9.7], ['CGCP', 'ETF', 2.1]], prior_by_vehicle: { [MF]: 41.8, ETF: 0 } },
-  'ADV-107': { entity: 'Harbor Point Wealth (firm level), Capital Group assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
-    funds: [['AMBFX', MF, 3.0], ['ABNFX', MF, 4.2], ['CGCP', 'ETF', 3.9], ['CGDV', 'ETF', 2.6]], prior_by_vehicle: { [MF]: 7.5, ETF: 3.1 } }
+  'ADV-106': { entity: 'Okafor Wealth Group (team level), Meridian Investments assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
+    funds: [['MRLFX', MF, 21.0], ['MRBFX', MF, 12.4], ['MRINX', MF, 9.7], ['MRCP', 'ETF', 2.1]], prior_by_vehicle: { [MF]: 41.8, ETF: 0 } },
+  'ADV-107': { entity: 'Harbor Point Wealth (firm level), Meridian Investments assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
+    funds: [['MRLFX', MF, 3.0], ['MRBFX', MF, 4.2], ['MRCP', 'ETF', 3.9], ['MRDV', 'ETF', 2.6]], prior_by_vehicle: { [MF]: 7.5, ETF: 3.1 } }
 };
 /* [flows] gross sales and redemptions by vehicle and channel: [trailing twelve months, the twelve before] */
 const FLOW_LIMITS = ['Twelve-month flows are by vehicle and channel; fund-level transactions are only available for Jul to Sep 2026 (transactions service).', 'Flows exclude in-kind transfers between share classes.'];
@@ -397,14 +397,14 @@ const FLOWS = {
 Object.values(FLOWS).forEach(f => Object.assign(f, { current: 'Sep 2025 to Aug 2026', prior: 'Sep 2024 to Aug 2025', limitations: FLOW_LIMITS }));
 /* [transactions] fund-level purchases and redemptions, Jul to Sep 2026 */
 const FUND_TRANSACTIONS = [
-  ['ADV-101', 'Jul 21, 2026', 'GFFFX', 'Redemption', 3.0], ['ADV-101', 'Aug 4, 2026', 'CGDV', 'Purchase', 1.8], ['ADV-101', 'Aug 18, 2026', 'GFFFX', 'Redemption', 2.0],
-  ['ADV-103', 'Jul 30, 2026', 'AMECX', 'Purchase', 0.9],
-  ['ADV-104', 'Aug 14, 2026', 'GFFFX', 'Redemption', 3.2], ['ADV-104', 'Aug 15, 2026', 'CGGR', 'Purchase', 2.9],
-  ['ADV-105', 'Jul 9, 2026', 'GFFFX', 'Redemption', 4.1], ['ADV-105', 'Jul 10, 2026', 'CGGR', 'Purchase', 3.6], ['ADV-105', 'Aug 2, 2026', 'AMBFX', 'Purchase', 1.2],
-  ['ADV-106', 'Sep 8, 2026', 'ABNFX', 'Purchase', 1.5], ['ADV-106', 'Sep 24, 2026', 'AMBFX', 'Purchase', 1.6], ['ADV-106', 'Sep 28, 2026', 'ABNFX', 'Purchase', 0.9], ['ADV-107', 'Aug 27, 2026', 'CGCP', 'Purchase', 0.7]
+  ['ADV-101', 'Jul 21, 2026', 'MRGFX', 'Redemption', 3.0], ['ADV-101', 'Aug 4, 2026', 'MRDV', 'Purchase', 1.8], ['ADV-101', 'Aug 18, 2026', 'MRGFX', 'Redemption', 2.0],
+  ['ADV-103', 'Jul 30, 2026', 'MRINX', 'Purchase', 0.9],
+  ['ADV-104', 'Aug 14, 2026', 'MRGFX', 'Redemption', 3.2], ['ADV-104', 'Aug 15, 2026', 'MRGR', 'Purchase', 2.9],
+  ['ADV-105', 'Jul 9, 2026', 'MRGFX', 'Redemption', 4.1], ['ADV-105', 'Jul 10, 2026', 'MRGR', 'Purchase', 3.6], ['ADV-105', 'Aug 2, 2026', 'MRLFX', 'Purchase', 1.2],
+  ['ADV-106', 'Sep 8, 2026', 'MRBFX', 'Purchase', 1.5], ['ADV-106', 'Sep 24, 2026', 'MRLFX', 'Purchase', 1.6], ['ADV-106', 'Sep 28, 2026', 'MRBFX', 'Purchase', 0.9], ['ADV-107', 'Aug 27, 2026', 'MRCP', 'Purchase', 0.7]
 ];
 /* [market share] the advisor's assets in each category across all managers (industry book, as of Jun 30, 2026) */
-const FUND_CATEGORY = { GFFFX: 'Large Growth', AGTHX: 'Large Growth', CGGR: 'Large Growth', AWSHX: 'Large Value and Blend', CGDV: 'Large Value and Blend', AMBFX: 'Moderate Allocation', AMECX: 'Moderate Allocation', ABNFX: 'Intermediate Core Bond', CGCP: 'Intermediate Core Bond' };
+const FUND_CATEGORY = { MRGFX: 'Large Growth', MRGAX: 'Large Growth', MRGR: 'Large Growth', MRGIX: 'Large Value and Blend', MRDV: 'Large Value and Blend', MRLFX: 'Moderate Allocation', MRINX: 'Moderate Allocation', MRBFX: 'Intermediate Core Bond', MRCP: 'Intermediate Core Bond' };
 const INDUSTRY_BOOK = {
   'ADV-101': { 'Large Growth': 96.0, 'Large Value and Blend': 70.0, 'Intermediate Core Bond': 55.0 },
   'ADV-102': { 'Large Growth': 64.0, 'Moderate Allocation': 48.0, 'Intermediate Core Bond': 40.0 },
@@ -415,32 +415,32 @@ const INDUSTRY_BOOK = {
   'ADV-107': { 'Moderate Allocation': 18.0, 'Intermediate Core Bond': 26.0, 'Large Value and Blend': 15.0 }
 };
 const MARKET_SHARE = Object.fromEntries(Object.entries(INDUSTRY_BOOK).map(([adv, cats]) => [adv, {
-  definition: 'CG share = CG mutual fund and ETF assets in a Morningstar category ÷ the advisor’s assets in that category across all managers (industry book). Excludes SMAs, cash and money market.',
+  definition: 'Meridian share = Meridian mutual fund and ETF assets in a Morningstar category ÷ the advisor’s assets in that category across all managers (industry book). Excludes SMAs, cash and money market.',
   numerator_as_of: 'Aug 31, 2026', denominator_as_of: 'Jun 30, 2026', denominator_source: 'Dealer industry-book feed',
   categories: Object.entries(cats).map(([c, ind]) => [c, BOOK[adv].funds.filter(f => FUND_CATEGORY[f[0]] === c).map(f => f[0]), ind]) }]));
 /* [platform eligibility] dealer shelf by program, with effective dates. RIAs use a custodian, not a dealer shelf. */
 const SHELF = {
   'FIRM-WF': { firm: 'Wells Fargo Advisors', as_of: 'Sep 28, 2026', source: 'Dealer intelligence feed', advisor_programs: { 'ADV-105': ['Personalized UMA', 'Brokerage'] },
     items: [
-      ['CGGR', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGGR', 'Personalized UMA', 'Available', 'Sep 22, 2026'],
-      ['CGDV', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGDV', 'Personalized UMA', 'Available', 'Jun 1, 2025'],
-      ['CGCP', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGCP', 'Personalized UMA', 'Under review', 'Aug 15, 2026'],
-      ['CGUI', 'Brokerage', 'Available', 'Nov 1, 2025'], ['CGUI', 'Personalized UMA', 'Not available', null],
-      ['CGXU', 'Brokerage', 'Available', 'Jan 15, 2026'], ['CGXU', 'Personalized UMA', 'Not available', null],
-      ['GFFFX', 'Personalized UMA', 'Available', 'Feb 1, 2019']] },
+      ['MRGR', 'Brokerage', 'Available', 'Mar 1, 2024'], ['MRGR', 'Personalized UMA', 'Available', 'Sep 22, 2026'],
+      ['MRDV', 'Brokerage', 'Available', 'Mar 1, 2024'], ['MRDV', 'Personalized UMA', 'Available', 'Jun 1, 2025'],
+      ['MRCP', 'Brokerage', 'Available', 'Mar 1, 2024'], ['MRCP', 'Personalized UMA', 'Under review', 'Aug 15, 2026'],
+      ['MRUS', 'Brokerage', 'Available', 'Nov 1, 2025'], ['MRUS', 'Personalized UMA', 'Not available', null],
+      ['MRIF', 'Brokerage', 'Available', 'Jan 15, 2026'], ['MRIF', 'Personalized UMA', 'Not available', null],
+      ['MRGFX', 'Personalized UMA', 'Available', 'Feb 1, 2019']] },
   'FIRM-MS': { firm: 'Morgan Stanley Wealth Management', as_of: 'Sep 28, 2026', source: 'Dealer intelligence feed', advisor_programs: { 'ADV-101': ['Portfolio Management', 'Brokerage'], 'ADV-104': ['Portfolio Management', 'Brokerage'] },
     items: [
-      ['CGGR', 'Portfolio Management', 'Available', 'Jan 15, 2025'], ['CGDV', 'Portfolio Management', 'Available', 'Jan 15, 2025'], ['CGCP', 'Portfolio Management', 'Available', 'Jan 15, 2025'],
-      ['CGUI', 'Portfolio Management', 'Available', 'Jul 1, 2026'], ['CGXU', 'Portfolio Management', 'Available', 'Jul 1, 2026'], ['GFFFX', 'Portfolio Management', 'Available', 'Mar 1, 2018'],
-      ['CGGR', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGDV', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGCP', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGUI', 'Brokerage', 'Available', 'Nov 1, 2025'], ['CGXU', 'Brokerage', 'Available', 'Jan 15, 2026']] },
+      ['MRGR', 'Portfolio Management', 'Available', 'Jan 15, 2025'], ['MRDV', 'Portfolio Management', 'Available', 'Jan 15, 2025'], ['MRCP', 'Portfolio Management', 'Available', 'Jan 15, 2025'],
+      ['MRUS', 'Portfolio Management', 'Available', 'Jul 1, 2026'], ['MRIF', 'Portfolio Management', 'Available', 'Jul 1, 2026'], ['MRGFX', 'Portfolio Management', 'Available', 'Mar 1, 2018'],
+      ['MRGR', 'Brokerage', 'Available', 'Mar 1, 2024'], ['MRDV', 'Brokerage', 'Available', 'Mar 1, 2024'], ['MRCP', 'Brokerage', 'Available', 'Mar 1, 2024'], ['MRUS', 'Brokerage', 'Available', 'Nov 1, 2025'], ['MRIF', 'Brokerage', 'Available', 'Jan 15, 2026']] },
   'FIRM-ML': { firm: 'Merrill', as_of: 'Sep 28, 2026', source: 'Dealer intelligence feed', advisor_programs: { 'ADV-103': ['Advisory program', 'Brokerage'] },
-    items: [['CGDV', 'Advisory program', 'Available', 'Apr 1, 2025'], ['CGCP', 'Advisory program', 'Available', 'Apr 1, 2025'], ['CGGR', 'Advisory program', 'Under review', 'Sep 1, 2026'], ['AMECX', 'Advisory program', 'Available', 'Jan 1, 2016'], ['CGDV', 'Brokerage', 'Available', 'Mar 1, 2024'], ['CGCP', 'Brokerage', 'Available', 'Mar 1, 2024']] },
+    items: [['MRDV', 'Advisory program', 'Available', 'Apr 1, 2025'], ['MRCP', 'Advisory program', 'Available', 'Apr 1, 2025'], ['MRGR', 'Advisory program', 'Under review', 'Sep 1, 2026'], ['MRINX', 'Advisory program', 'Available', 'Jan 1, 2016'], ['MRDV', 'Brokerage', 'Available', 'Mar 1, 2024'], ['MRCP', 'Brokerage', 'Available', 'Mar 1, 2024']] },
   'FIRM-UBS': { firm: 'UBS Wealth Management', as_of: 'Sep 28, 2026', source: 'Dealer intelligence feed', advisor_programs: { 'ADV-106': ['Advisory program', 'Brokerage'] },
-    items: [['AMBFX', 'Advisory program', 'Available', 'Jan 1, 2017'], ['ABNFX', 'Advisory program', 'Available', 'Jan 1, 2017'], ['CGCP', 'Advisory program', 'Available', 'May 1, 2026'], ['CGUI', 'Advisory program', 'Not available', null], ['CGCP', 'Brokerage', 'Available', 'Mar 1, 2024']] },
+    items: [['MRLFX', 'Advisory program', 'Available', 'Jan 1, 2017'], ['MRBFX', 'Advisory program', 'Available', 'Jan 1, 2017'], ['MRCP', 'Advisory program', 'Available', 'May 1, 2026'], ['MRUS', 'Advisory program', 'Not available', null], ['MRCP', 'Brokerage', 'Available', 'Mar 1, 2024']] },
   'FIRM-NS': { firm: 'Northstar Advisory (RIA)', as_of: 'Sep 28, 2026', source: 'Custodian platform; no dealer shelf', advisor_programs: { 'ADV-102': ['Custodian platform'] },
-    items: ['CGGR', 'CGDV', 'CGCP', 'CGUI', 'CGXU'].map(t => [t, 'Custodian platform', 'Available', 'Open architecture'] ) },
+    items: ['MRGR', 'MRDV', 'MRCP', 'MRUS', 'MRIF'].map(t => [t, 'Custodian platform', 'Available', 'Open architecture'] ) },
   'FIRM-HP': { firm: 'Harbor Point Wealth (RIA)', as_of: 'Sep 28, 2026', source: 'Custodian platform; no dealer shelf', advisor_programs: { 'ADV-107': ['Custodian platform'] },
-    items: ['CGGR', 'CGDV', 'CGCP', 'CGUI', 'CGXU'].map(t => [t, 'Custodian platform', 'Available', 'Open architecture']) }
+    items: ['MRGR', 'MRDV', 'MRCP', 'MRUS', 'MRIF'].map(t => [t, 'Custodian platform', 'Available', 'Open architecture']) }
 };
 /* [program rules] account and program rules on dealer platforms */
 const PROGRAM_RULES = {
@@ -451,16 +451,16 @@ const PROGRAM_RULES = {
 };
 /* [allocation versions] dated model allocations (percent of model), by firm */
 const MODEL_ALLOCATIONS = {
-  'Moderate Growth model (ETF)': { firm: 'FIRM-MS', program: 'Portfolio Management', versions: [['Mar 31, 2026', { CGGR: 22, CGDV: 18, CGXU: 15, CGCP: 30, CGUI: 15 }], ['Sep 15, 2026', { CGGR: 20, CGDV: 20, CGXU: 15, CGCP: 28, CGUI: 17 }]] },
-  'Growth model (ETF)': { firm: 'FIRM-MS', program: 'Portfolio Management', versions: [['Mar 31, 2026', { CGGR: 35, CGDV: 30, CGXU: 25, CGCP: 10 }], ['Sep 15, 2026', { CGGR: 33, CGDV: 30, CGXU: 27, CGCP: 10 }]] }
+  'Moderate Growth model (ETF)': { firm: 'FIRM-MS', program: 'Portfolio Management', versions: [['Mar 31, 2026', { MRGR: 22, MRDV: 18, MRIF: 15, MRCP: 30, MRUS: 15 }], ['Sep 15, 2026', { MRGR: 20, MRDV: 20, MRIF: 15, MRCP: 28, MRUS: 17 }]] },
+  'Growth model (ETF)': { firm: 'FIRM-MS', program: 'Portfolio Management', versions: [['Mar 31, 2026', { MRGR: 35, MRDV: 30, MRIF: 25, MRCP: 10 }], ['Sep 15, 2026', { MRGR: 33, MRDV: 30, MRIF: 27, MRCP: 10 }]] }
 };
 /* [taxonomy] what a category actually includes */
 const TAXONOMY = {
-  'equity funds': { include: ['GFFFX', 'AGTHX', 'AWSHX', 'CGGR', 'CGDV', 'CGXU'], exclude: [['AMBFX', 'Multi-asset: classified as allocation, not equity'], ['AMECX', 'Multi-asset: classified as allocation, not equity']], unmapped: ['Global Equity SMA (separately managed account, outside the fund taxonomy)'] },
-  'fixed income': { include: ['ABNFX', 'ABNDX', 'CGCP', 'CGUI'], exclude: [], unmapped: ['Municipal SMA (separately managed account, outside the fund taxonomy)'] },
-  etfs: { include: ['CGGR', 'CGDV', 'CGCP', 'CGUI', 'CGXU'], exclude: [], unmapped: [] },
-  'multi-asset': { include: ['AMBFX', 'ABALX', 'AMECX'], exclude: [], unmapped: [] },
-  'large growth': { include: ['GFFFX', 'AGTHX', 'CGGR'], exclude: [], unmapped: [] }
+  'equity funds': { include: ['MRGFX', 'MRGAX', 'MRGIX', 'MRGR', 'MRDV', 'MRIF'], exclude: [['MRLFX', 'Multi-asset: classified as allocation, not equity'], ['MRINX', 'Multi-asset: classified as allocation, not equity']], unmapped: ['Global Equity SMA (separately managed account, outside the fund taxonomy)'] },
+  'fixed income': { include: ['MRBFX', 'MRBAX', 'MRCP', 'MRUS'], exclude: [], unmapped: ['Municipal SMA (separately managed account, outside the fund taxonomy)'] },
+  etfs: { include: ['MRGR', 'MRDV', 'MRCP', 'MRUS', 'MRIF'], exclude: [], unmapped: [] },
+  'multi-asset': { include: ['MRLFX', 'MRLAX', 'MRINX'], exclude: [], unmapped: [] },
+  'large growth': { include: ['MRGFX', 'MRGAX', 'MRGR'], exclude: [], unmapped: [] }
 };
 const CATEGORY_GROUPS = { equity: ['Large Growth', 'Large Value and Blend'], 'fixed income': ['Intermediate Core Bond'], 'multi-asset': ['Moderate Allocation'], 'large growth': ['Large Growth'], 'large value': ['Large Value and Blend'] };
 /* [pipeline] status history, estimated size and last activity behind each opportunity */
@@ -482,20 +482,20 @@ const CHANGE_EVENTS = [
   ['ADV-101', 'Sep 1, 2026', 'Rivera Group launched its new discretionary growth model', 'Salesforce'],
   ['ADV-102', 'Sep 19, 2026', 'Committee set Nov 12 for the documented fee review', 'Salesforce'],
   ['ADV-105', 'Aug 1, 2026', 'Aaron Tran joined the Kim Group as a junior advisor', 'Salesforce'],
-  ['ADV-105', 'Sep 22, 2026', 'CGGR added to Wells Fargo Personalized UMA', 'Dealer intelligence feed'],
+  ['ADV-105', 'Sep 22, 2026', 'MRGR added to Wells Fargo Personalized UMA', 'Dealer intelligence feed'],
   ['ADV-106', 'Sep 26, 2026', 'Okafor Wealth Group took on two retiree households from a retiring colleague’s book', 'Salesforce'],
   ['ADV-107', 'Sep 24, 2026', 'Forsyth Components named a new CFO, who ran a recordkeeper search at her previous company', 'News feed'],
   ['ADV-107', 'Sep 28, 2026', 'Forsyth’s incumbent recordkeeper announced a fee increase for 2027', 'News feed']
 ];
 /* [engagement graph] attributable digital activity (logged-in advisors only), Marketing Cloud */
 const DIGITAL = [
-  ['ADV-101', 'Sep 24, 2026', 'Page visit', 'GFA quarterly attribution page'], ['ADV-101', 'Sep 25, 2026', 'Page visit', 'GFA fund page'],
+  ['ADV-101', 'Sep 24, 2026', 'Page visit', 'MGF quarterly attribution page'], ['ADV-101', 'Sep 25, 2026', 'Page visit', 'MGF fund page'],
   ['ADV-102', 'Sep 20, 2026', 'Article open', 'Understanding fund expenses (AEM-FEES)'],
-  ['ADV-104', 'Sep 9, 2026', 'Page visit', 'GFA fund page'], ['ADV-104', 'Sep 21, 2026', 'Page visit', 'GFA fund page'], ['ADV-104', 'Sep 22, 2026', 'Article open', 'Core-satellite: where active management fits (SEIS-117)'],
-  ['ADV-105', 'Sep 23, 2026', 'Page visit', 'CGGR ETF page'],
-  ['ADV-106', 'Sep 16, 2026', 'Webinar', 'Retirement income in a higher-rate world'], ['ADV-106', 'Sep 25, 2026', 'Article open', 'Balanced vs. bond funds in a retirement income plan (SEIS-123)'], ['ADV-106', 'Sep 27, 2026', 'Page visit', 'American Balanced Fund page']
+  ['ADV-104', 'Sep 9, 2026', 'Page visit', 'MGF fund page'], ['ADV-104', 'Sep 21, 2026', 'Page visit', 'MGF fund page'], ['ADV-104', 'Sep 22, 2026', 'Article open', 'Core-satellite: where active management fits (SEIS-117)'],
+  ['ADV-105', 'Sep 23, 2026', 'Page visit', 'MRGR ETF page'],
+  ['ADV-106', 'Sep 16, 2026', 'Webinar', 'Retirement income in a higher-rate world'], ['ADV-106', 'Sep 25, 2026', 'Article open', 'Balanced vs. bond funds in a retirement income plan (SEIS-123)'], ['ADV-106', 'Sep 27, 2026', 'Page visit', 'Meridian Balanced Fund page']
 ];
-/* [relationship graph] the advisor's own team, and Capital Group's coverage team */
+/* [relationship graph] the advisor's own team, and Meridian's coverage team */
 const ADVISOR_TEAMS = {
   'ADV-101': [['Alex Rivera, CFP®', 'Lead advisor; decides on the growth model'], ['Jamie Cho', 'Client service associate; books all meetings'], ['Mark Ellis, CFA', 'Portfolio analyst; builds the discretionary growth model'], ['Tara Nguyen', '401(k) plan consultant for BU-101B']],
   'ADV-102': [['Maya Chen', 'Principal; leads committee advice'], ['Elena Park', 'Primary contact; coordinates committee materials'], ['Ben Ortiz', 'Wealth team lead (BU-102W)']],
@@ -505,44 +505,44 @@ const ADVISOR_TEAMS = {
   'ADV-106': [['Rachel Okafor', 'Lead advisor'], ['Diane Hughes', 'Client service manager']],
   'ADV-107': [['Luis Herrera', 'Principal'], ['Paula Reyes', 'Operations; owns retirement plan paperwork']]
 };
-const COVERAGE_TEAM = [['Priya Shah', 'External wholesaler, Southern California'], ['Sam Lee', 'Internal partner, Southern California'], ['Nina Alvarez', 'SSC: scheduling and follow-up'], ['Dana Ortiz', 'Product Q&A, Product (PRP)'], ['Ravi Menon', 'Retirement plan specialist (joins plan and committee meetings)']];
+const COVERAGE_TEAM = [['Priya Shah', 'External wholesaler, Southern California'], ['Sam Lee', 'Internal partner, Southern California'], ['Nina Alvarez', 'SSC: scheduling and follow-up'], ['Dana Ortiz', 'Product Q&A, Product'], ['Ravi Menon', 'Retirement plan specialist (joins plan and committee meetings)']];
 /* [coverage analytics] coverage tier and target completed contacts per 90 days */
 const COVERAGE_TIERS = { 'ADV-101': ['A', 4], 'ADV-102': ['A', 4], 'ADV-104': ['A', 4], 'ADV-105': ['A', 4], 'ADV-103': ['B', 2], 'ADV-106': ['B', 2], 'ADV-107': ['C', 1] };
 /* [peer analytics] permitted cohorts: internal coverage data only, no client data */
 const PEER_COHORTS = { 'Model-portfolio practices': ['ADV-101', 'ADV-104', 'ADV-105', 'ADV-107'], 'Retirement and income practices': ['ADV-102', 'ADV-103', 'ADV-106'] };
 /* [plan inputs] goals and capacity for territory and business planning */
 const PLAN_INPUTS = {
-  'EMP-PRIYA': { year: 2026, sales_goal_usd_m: 120.0, ytd_sales_usd_m: 78.4, ytd_through: 'Aug 31, 2026', meetings_per_week: 10, q4_priorities: ['Grow ETF use inside advisor models', 'Retirement plan fee reviews', 'Keep GFA in growth sleeves where it fits'] },
+  'EMP-PRIYA': { year: 2026, sales_goal_usd_m: 120.0, ytd_sales_usd_m: 78.4, ytd_through: 'Aug 31, 2026', meetings_per_week: 10, q4_priorities: ['Grow ETF use inside advisor models', 'Retirement plan fee reviews', 'Keep MGF in growth sleeves where it fits'] },
   'EMP-SAM': { year: 2026, sales_goal_usd_m: 60.0, ytd_sales_usd_m: 41.0, ytd_through: 'Aug 31, 2026', meetings_per_week: 25, q4_priorities: ['Cover tier B and C advisors by phone', 'Take over Alex Rivera from Priya (HO-101)'] }
 };
 /* [zoning] office zones and drive time from the wholesaler's base in Irvine */
 const ZONES = { 'ADV-101': ['Coastal OC', 15], 'ADV-102': ['Central OC', 5], 'ADV-103': ['Central OC', 6], 'ADV-104': ['San Diego', 85], 'ADV-105': ['Westside LA', 60], 'ADV-106': ['San Gabriel Valley', 55], 'ADV-107': ['Long Beach', 30] };
-/* [meeting rules] firm rules a meeting must follow, plus Capital Group's own */
+/* [meeting rules] firm rules a meeting must follow, plus Meridian's own */
 const MEETING_RULES = {
   'FIRM-MS': ['Meals up to $100 per person', 'Entertainment needs branch manager pre-approval', 'Plan committee meetings follow the plan’s own vendor rules'],
   'FIRM-WF': ['Gifts up to $100 per advisor per year', 'Meals reasonable and infrequent', 'No entertainment attached to model reviews'],
   'FIRM-ML': ['Meals up to $100 per person', 'Home-office approval for seminars'], 'FIRM-UBS': ['Meals up to $100 per person', 'Log attendees for every meal'],
-  'FIRM-NS': ['RIA: follow Capital Group policy only'], 'FIRM-HP': ['RIA: follow Capital Group policy only'],
-  CG: ['Log every advisor meeting in Salesforce within 48 hours', 'Internal-only meetings need no compliance review', 'Advisor invites go out only after a person approves them']
+  'FIRM-NS': ['RIA: follow Meridian Investments policy only'], 'FIRM-HP': ['RIA: follow Meridian Investments policy only'],
+  Meridian: ['Log every advisor meeting in Salesforce within 48 hours', 'Internal-only meetings need no compliance review', 'Advisor invites go out only after a person approves them']
 };
 /* [themes] and [news]: this week's approved commentary and authorized news */
 const THEMES = [
-  ['TH-1', 'Mega-cap concentration in growth indexes', 'growth index gfa concentration active', 'SEIS-113'],
+  ['TH-1', 'Mega-cap concentration in growth indexes', 'growth index mgf concentration active', 'SEIS-113'],
   ['TH-2', 'Core bonds as rates settle', 'bond fixed income rates income core', 'SEIS-121'],
   ['TH-3', 'ETFs inside model portfolios', 'etf model core-satellite index', 'SEIS-117'],
   ['TH-4', 'Fee conversations clients understand', 'fee cost expense dollars', 'AEM-FEES'],
   ['TH-5', 'Documenting retirement plan fee reviews', 'retirement committee plan fee', 'SEIS-116']
 ];
 const NEWS = [
-  ['N-301', 'Sep 22, 2026', 'Wells Fargo adds CGGR to Personalized UMA', 'Dealer bulletin', 'wells fargo cggr etf uma'],
+  ['N-301', 'Sep 22, 2026', 'Wells Fargo adds MRGR to Personalized UMA', 'Dealer bulletin', 'wells fargo mrgr etf uma'],
   ['N-302', 'Sep 18, 2026', 'Annual fund fee study: average expense ratios fell again', 'Morningstar (licensed)', 'fee cost expense'],
-  ['N-303', 'Sep 24, 2026', 'Rates on hold; core bond yields steady', 'Capital Group Insights', 'rates bond fixed income'],
+  ['N-303', 'Sep 24, 2026', 'Rates on hold; core bond yields steady', 'Meridian Investments Insights', 'rates bond fixed income'],
   ['N-304', 'Sep 10, 2026', 'Plan sponsors put more weight on documenting fee reviews', 'Industry newsletter (licensed)', 'retirement committee plan fee'],
-  ['N-305', 'Sep 26, 2026', 'Growth index concentration stays near record levels', 'Capital Group Insights', 'growth index concentration']
+  ['N-305', 'Sep 26, 2026', 'Growth index concentration stays near record levels', 'Meridian Investments Insights', 'growth index concentration']
 ];
 /* [recommendation trace] why each piece was recommended: the advisor's stated need, or popularity */
 const CONTENT_RECS = {
-  'ADV-101': [['SEIS-113', 'stated_need', 'Alex asked why GFA has trailed', 'CALL-0922'], ['SEIS-110', 'stated_need', 'Alex asked for a fee comparison against the Vanguard growth funds', 'CALL-0922'], ['SEIS-124', 'popular', 'Opened by 41% of advisors with business-owner clients this month', null]],
+  'ADV-101': [['SEIS-113', 'stated_need', 'Alex asked why MGF has trailed', 'CALL-0922'], ['SEIS-110', 'stated_need', 'Alex asked for a fee comparison against the Vanguard growth funds', 'CALL-0922'], ['SEIS-124', 'popular', 'Opened by 41% of advisors with business-owner clients this month', null]],
   'ADV-102': [['SEIS-116', 'stated_need', 'Committee wants a documented fee review', 'CALL-0919'], ['SEIS-124', 'popular', 'Opened by 41% of advisors with business-owner clients this month', null]],
   'ADV-104': [['SEIS-117', 'stated_need', 'Sofia asked what active managers add in core-satellite', 'CALL-0915'], ['SEIS-120', 'popular', 'Most-opened ETF piece among model-portfolio advisors', null]],
   'ADV-105': [['SEIS-117', 'stated_need', 'Two models moved to an index core; satellites reviewed quarterly', 'CALL-0826'], ['SEIS-120', 'stated_need', 'Clients ask about ETFs versus active funds', 'CALL-0918'], ['SEIS-126', 'popular', 'Popular with teams that recently added an advisor', null]],
@@ -554,8 +554,8 @@ const CONTENT_RECS = {
 const DOC_PASSAGES = {
   'SEIS-117': { version: 'v3, Aug 2026', pages: [[2, 'In a core-satellite model, the core tracks a broad index at low cost; satellites are where active managers aim to add return or manage risk.'], [3, 'A typical allocation keeps 60% to 80% in the core and the rest in satellites.']] },
   'SEIS-116': { version: 'v2, Jun 2026', pages: [[1, 'Show each option against its category median and document the committee’s rationale in the minutes.']] },
-  'SEIS-122': { version: 'v4, Apr 2026', pages: [[1, 'American Balanced Fund invests at least 50% in stocks and at least 25% in bonds.']] },
-  'SEIS-120': { version: 'v2, Sep 2026', pages: [[1, 'Capital Group ETFs are actively managed and built on The Capital System.']] }
+  'SEIS-122': { version: 'v4, Apr 2026', pages: [[1, 'Meridian Balanced Fund invests at least 50% in stocks and at least 25% in bonds.']] },
+  'SEIS-120': { version: 'v2, Sep 2026', pages: [[1, 'Meridian Investments ETFs are actively managed and built on The Meridian System.']] }
 };
 /* [objection playbook] coaching guides grounded in approved messaging */
 const PLAYBOOK = {
@@ -572,47 +572,47 @@ const EXPENSES = {
 
 /* Fund facts: the only source of fund numbers. null = not in reference data. */
 const FUNDS = {
-  GFFFX: { name: 'The Growth Fund of America, Class F-2', family: 'Capital Group', er: 0.40, mgmt: 0.25, other: 0.15, bench: 'S&P 500', approach: 'Active, multi-manager (The Capital System); 282 issuers; up to 25% outside the U.S. (10.8% non-U.S. equities)', asOf: '8/31/26', src: 'capitalgroup.com fund page; prospectus 11/1/25', verified: true },
-  AGTHX: { name: 'The Growth Fund of America, Class A', family: 'Capital Group', er: 0.59, bench: 'S&P 500', approach: 'Same portfolio as F-2; sales charge may apply', asOf: '8/31/26', src: 'capitalgroup.com fund page', verified: true },
+  MRGFX: { name: 'Meridian Growth Fund, Class F', family: 'Meridian Investments', er: 0.40, mgmt: 0.25, other: 0.15, bench: 'S&P 500', approach: 'Active, multi-manager (The Meridian System); 282 issuers; up to 25% outside the U.S. (10.8% non-U.S. equities)', asOf: '8/31/26', src: 'meridianinvestments.example fund page; prospectus 11/1/25', verified: true },
+  MRGAX: { name: 'Meridian Growth Fund, Class A', family: 'Meridian Investments', er: 0.59, bench: 'S&P 500', approach: 'Same portfolio as F; sales charge may apply', asOf: '8/31/26', src: 'meridianinvestments.example fund page', verified: true },
   VWUAX: { name: 'Vanguard U.S. Growth Fund Admiral Shares', family: 'Vanguard', er: 0.25, bench: 'Russell 1000 Growth', approach: 'Active, multi-manager (Wellington, Baillie Gifford, Jennison)', asOf: '8/31/26', src: 'investor.vanguard.com', verified: true },
   VIGAX: { name: 'Vanguard Growth Index Fund Admiral Shares', family: 'Vanguard', er: 0.05, bench: 'CRSP US Large Cap Growth', approach: 'Index; about 166 stocks; top three holdings roughly a third of assets', asOf: 'latest', src: 'investor.vanguard.com', verified: true },
-  ABNFX: { name: 'The Bond Fund of America, Class F-2', family: 'Capital Group', er: 0.34, bench: 'Bloomberg U.S. Aggregate', category: 'Intermediate Core Bond', approach: 'Active, multi-manager core bond; managers run sleeves against the Aggregate index', asOf: 'Apr 2026', src: 'Morningstar prospectus-adjusted expense ratio', verified: true },
-  ABNDX: { name: 'The Bond Fund of America, Class A', family: 'Capital Group', er: 0.59, bench: 'Bloomberg U.S. Aggregate', category: 'Intermediate Core Bond', approach: 'Same portfolio as F-2; sales charge may apply', asOf: 'Apr 2026', src: 'Morningstar prospectus-adjusted expense ratio', verified: true },
-  AMBFX: { name: 'American Balanced Fund, Class F-2', family: 'Capital Group', er: 0.35, bench: '60% S&P 500 / 40% Bloomberg U.S. Aggregate', category: 'Moderate Allocation', approach: 'Active balanced: at least 50% stocks (mostly dividend payers) and at least 25% bonds; multi-manager', asOf: 'Apr 2026', src: 'Morningstar prospectus-adjusted expense ratio', verified: true },
-  AWSHX: { name: 'Washington Mutual Investors Fund', family: 'Capital Group', er: null, bench: 'S&P 500', approach: 'Active growth-and-income', asOf: null, src: 'Expense ratio not in reference data', verified: false },
-  ABALX: { name: 'American Balanced Fund, Class A', family: 'Capital Group', er: null, bench: '60% S&P 500 / 40% Bloomberg U.S. Aggregate', category: 'Moderate Allocation', approach: 'Same portfolio as F-2; sales charge may apply', asOf: null, src: 'Class A expense ratio not in reference data', verified: false },
-  CGGR: { name: 'Capital Group Growth ETF', family: 'Capital Group', vehicle: 'ETF', er: null, bench: 'S&P 500', approach: 'Active growth ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
-  CGDV: { name: 'Capital Group Dividend Value ETF', family: 'Capital Group', vehicle: 'ETF', er: null, bench: 'S&P 500', approach: 'Active dividend-oriented ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
-  CGCP: { name: 'Capital Group Core Plus Income ETF', family: 'Capital Group', vehicle: 'ETF', er: null, bench: 'Bloomberg U.S. Aggregate', approach: 'Active core-plus bond ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
-  CGUI: { name: 'Capital Group Ultra Short Income ETF', family: 'Capital Group', vehicle: 'ETF', er: null, bench: 'Ultra-short bond index', approach: 'Active ultra-short income ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
-  CGXU: { name: 'Capital Group International Focus Equity ETF', family: 'Capital Group', vehicle: 'ETF', er: null, bench: 'MSCI ACWI ex USA', approach: 'Active international equity ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
-  AMECX: { name: 'The Income Fund of America', family: 'Capital Group', er: null, bench: 'Blended equity/bond index', approach: 'Active income-focused', asOf: null, src: 'Expense ratio not in reference data', verified: false }
+  MRBFX: { name: 'Meridian Core Bond Fund, Class F', family: 'Meridian Investments', er: 0.34, bench: 'Bloomberg U.S. Aggregate', category: 'Intermediate Core Bond', approach: 'Active, multi-manager core bond; managers run sleeves against the Aggregate index', asOf: 'Apr 2026', src: 'Morningstar prospectus-adjusted expense ratio', verified: true },
+  MRBAX: { name: 'Meridian Core Bond Fund, Class A', family: 'Meridian Investments', er: 0.59, bench: 'Bloomberg U.S. Aggregate', category: 'Intermediate Core Bond', approach: 'Same portfolio as F; sales charge may apply', asOf: 'Apr 2026', src: 'Morningstar prospectus-adjusted expense ratio', verified: true },
+  MRLFX: { name: 'Meridian Balanced Fund, Class F', family: 'Meridian Investments', er: 0.35, bench: '60% S&P 500 / 40% Bloomberg U.S. Aggregate', category: 'Moderate Allocation', approach: 'Active balanced: at least 50% stocks (mostly dividend payers) and at least 25% bonds; multi-manager', asOf: 'Apr 2026', src: 'Morningstar prospectus-adjusted expense ratio', verified: true },
+  MRGIX: { name: 'Meridian Growth and Income Fund', family: 'Meridian Investments', er: null, bench: 'S&P 500', approach: 'Active growth-and-income', asOf: null, src: 'Expense ratio not in reference data', verified: false },
+  MRLAX: { name: 'Meridian Balanced Fund, Class A', family: 'Meridian Investments', er: null, bench: '60% S&P 500 / 40% Bloomberg U.S. Aggregate', category: 'Moderate Allocation', approach: 'Same portfolio as F; sales charge may apply', asOf: null, src: 'Class A expense ratio not in reference data', verified: false },
+  MRGR: { name: 'Meridian Growth ETF', family: 'Meridian Investments', vehicle: 'ETF', er: null, bench: 'S&P 500', approach: 'Active growth ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
+  MRDV: { name: 'Meridian Dividend Value ETF', family: 'Meridian Investments', vehicle: 'ETF', er: null, bench: 'S&P 500', approach: 'Active dividend-oriented ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
+  MRCP: { name: 'Meridian Core Plus Income ETF', family: 'Meridian Investments', vehicle: 'ETF', er: null, bench: 'Bloomberg U.S. Aggregate', approach: 'Active core-plus bond ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
+  MRUS: { name: 'Meridian Ultra Short Income ETF', family: 'Meridian Investments', vehicle: 'ETF', er: null, bench: 'Ultra-short bond index', approach: 'Active ultra-short income ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
+  MRIF: { name: 'Meridian International Focus Equity ETF', family: 'Meridian Investments', vehicle: 'ETF', er: null, bench: 'MSCI ACWI ex USA', approach: 'Active international equity ETF', asOf: null, src: 'Expense ratio not in reference data', verified: false },
+  MRINX: { name: 'Meridian Income Fund', family: 'Meridian Investments', er: null, bench: 'Blended equity/bond index', approach: 'Active income-focused', asOf: null, src: 'Expense ratio not in reference data', verified: false }
 };
 const PEERS = {
   'Large Growth': { medianEr: 0.75, note: 'Morningstar Large Cap No Load median expense ratio, as of 6/30/26', peers: ['VWUAX', 'VIGAX'] },
-  'Moderate Allocation': { medianEr: 0.9, note: 'Morningstar US Moderate Allocation category median fee', peers: ['AMBFX'] },
-  'Intermediate Core Bond': { medianEr: 0.46, note: 'Morningstar US Intermediate Core Bond category median fee', peers: ['ABNFX'] }
+  'Moderate Allocation': { medianEr: 0.9, note: 'Morningstar US Moderate Allocation category median fee', peers: ['MRLFX'] },
+  'Intermediate Core Bond': { medianEr: 0.46, note: 'Morningstar US Intermediate Core Bond category median fee', peers: ['MRBFX'] }
 };
 /* What people actually call the funds */
-const FUND_ALIASES = { gfa: 'GFFFX', 'growth fund of america': 'GFFFX', 'growth fund': 'GFFFX', bfa: 'ABNFX', 'bond fund of america': 'ABNFX', 'bond fund': 'ABNFX', ambal: 'AMBFX', 'american balanced': 'AMBFX', 'balanced fund': 'AMBFX', wmif: 'AWSHX', 'washington mutual': 'AWSHX', ifa: 'AMECX', 'income fund of america': 'AMECX', vwuax: 'VWUAX', 'vanguard u.s. growth': 'VWUAX', vigax: 'VIGAX', 'growth index': 'VIGAX' };
+const FUND_ALIASES = { mgf: 'MRGFX', 'meridian growth fund': 'MRGFX', 'growth fund': 'MRGFX', mcb: 'MRBFX', 'meridian core bond fund': 'MRBFX', 'bond fund': 'MRBFX', mbal: 'MRLFX', 'meridian balanced': 'MRLFX', 'balanced fund': 'MRLFX', mgi: 'MRGIX', 'meridian growth and income': 'MRGIX', mif: 'MRINX', 'meridian income fund': 'MRINX', vwuax: 'VWUAX', 'vanguard u.s. growth': 'VWUAX', vigax: 'VIGAX', 'growth index': 'VIGAX' };
 const ALPHA = { 'ADV-101': { score: 92, note: 'Top decile growth-sleeve opportunity' }, 'ADV-102': { score: 71, note: 'Mid: retirement menu review' }, 'ADV-103': { score: 64, note: 'Mid: income focus' }, 'ADV-104': { score: 88, note: 'High: core allocation shift' } };
 
 /* Seismic content */
 const CONTENT = [
-  { id: 'SEIS-110', title: 'Fund comparison one-pager', audience: 'Financial professional', format: '1 page', status: 'Approved', tags: 'comparison fees one-page gfa vanguard' },
-  { id: 'SEIS-111', title: 'GFA product presentation', audience: 'Financial professional', format: '12 pages', status: 'Approved', tags: 'gfa deck presentation' },
-  { id: 'SEIS-112', title: 'GFA fact sheet', audience: 'Investor (retail)', format: '2 pages', status: 'Approved', tags: 'gfa fact sheet' },
-  { id: 'SEIS-113', title: 'GFA quarterly attribution report (9/26)', audience: 'Financial professional', format: '4 pages', status: 'Approved', tags: 'gfa attribution performance why trailed' },
-  { id: 'SEIS-114', title: 'The Capital System explainer', audience: 'Financial professional and investor', format: '2 pages', status: 'Approved', tags: 'capital system managers active' },
+  { id: 'SEIS-110', title: 'Fund comparison one-pager', audience: 'Financial professional', format: '1 page', status: 'Approved', tags: 'comparison fees one-page mgf vanguard' },
+  { id: 'SEIS-111', title: 'MGF product presentation', audience: 'Financial professional', format: '12 pages', status: 'Approved', tags: 'mgf deck presentation' },
+  { id: 'SEIS-112', title: 'MGF fact sheet', audience: 'Investor (retail)', format: '2 pages', status: 'Approved', tags: 'mgf fact sheet' },
+  { id: 'SEIS-113', title: 'MGF quarterly attribution report (9/26)', audience: 'Financial professional', format: '4 pages', status: 'Approved', tags: 'mgf attribution performance why trailed' },
+  { id: 'SEIS-114', title: 'The Meridian System explainer', audience: 'Financial professional and investor', format: '2 pages', status: 'Approved', tags: 'meridian system managers active' },
   { id: 'SEIS-115', title: 'Fee transparency email template', audience: 'Financial professional', format: 'Email', status: 'Approved', tags: 'email fees transparency template' },
   { id: 'SEIS-116', title: 'Retirement committee pack template', audience: 'Plan committee', format: '2 pages + appendix', status: 'Approved', tags: 'retirement committee pack benchmark' },
   { id: 'SEIS-117', title: 'Core-satellite: where active management fits', audience: 'Financial professional', format: '3 pages', status: 'Approved', tags: 'core satellite active passive etf index' },
   { id: 'SEIS-118', title: 'LinkedIn post template: fee disclosure education', audience: 'Public', format: 'Social post', status: 'Approved', tags: 'linkedin public fees education' },
   { id: 'SEIS-119', title: 'Income strategies for retirees', audience: 'Financial professional', format: '4 pages', status: 'Approved', tags: 'income dividend retirees' },
-  { id: 'SEIS-120', title: 'Capital Group ETF lineup overview', audience: 'Financial professional', format: '2 pages', status: 'Approved', tags: 'etf lineup capital group etfs' },
-  { id: 'SEIS-121', title: 'The Bond Fund of America: core bond story', audience: 'Financial professional', format: '2 pages', status: 'Approved', tags: 'bfa bond fund core fixed income rates' },
-  { id: 'SEIS-122', title: 'American Balanced Fund overview', audience: 'Financial professional', format: '2 pages', status: 'Approved', tags: 'ambal balanced fund income retirees 60/40' },
-  { id: 'SEIS-123', title: 'Balanced vs. bond funds in a retirement income plan', audience: 'Financial professional', format: '1 page', status: 'Approved', tags: 'comparison balanced bond income retirement bfa ambal' },
+  { id: 'SEIS-120', title: 'Meridian Investments ETF lineup overview', audience: 'Financial professional', format: '2 pages', status: 'Approved', tags: 'etf lineup meridian investments etfs' },
+  { id: 'SEIS-121', title: 'Meridian Core Bond Fund: core bond story', audience: 'Financial professional', format: '2 pages', status: 'Approved', tags: 'mcb bond fund core fixed income rates' },
+  { id: 'SEIS-122', title: 'Meridian Balanced Fund overview', audience: 'Financial professional', format: '2 pages', status: 'Approved', tags: 'mbal balanced fund income retirees 60/40' },
+  { id: 'SEIS-123', title: 'Balanced vs. bond funds in a retirement income plan', audience: 'Financial professional', format: '1 page', status: 'Approved', tags: 'comparison balanced bond income retirement mcb mbal' },
   { id: 'SEIS-124', title: 'Estate planning conversations with business owners', audience: 'Financial professional', format: '3 pages', status: 'Approved', tags: 'estate planning business owners succession' },
   { id: 'SEIS-125', title: 'Practice management: pricing and packaging advice', audience: 'Financial professional', format: '4 pages', status: 'Approved', tags: 'practice management pricing packaging' },
   { id: 'SEIS-126', title: 'Practice management: growing a team with next-gen advisors', audience: 'Financial professional', format: '3 pages', status: 'Approved', tags: 'practice management team next-gen succession' }
@@ -620,11 +620,11 @@ const CONTENT = [
 
 /* Verified findings already in the foundation (reusable) */
 const FINDINGS = [
-  { id: 'K-201', label: 'Why GFA has trailed the Vanguard large-growth funds', value: 'Different mandates: GFA is benchmarked to the S&P 500 and invests flexibly (282 issuers, some non-U.S.); the growth index holds roughly a third in three stocks, so it leads when a few mega-caps lead; and GFA F-2 costs 0.35 points more a year than VIGAX.', by: 'product.qar', evidence: ['GFFFX', 'VIGAX', 'SEIS-113'], date: 'Sep 22, 2026' }
+  { id: 'K-201', label: 'Why MGF has trailed the Vanguard large-growth funds', value: 'Different mandates: MGF is benchmarked to the S&P 500 and invests flexibly (282 issuers, some non-U.S.); the growth index holds roughly a third in three stocks, so it leads when a few mega-caps lead; and MGF F costs 0.35 points more a year than VIGAX.', by: 'product.qar', evidence: ['MRGFX', 'VIGAX', 'SEIS-113'], date: 'Sep 22, 2026' }
 ];
 
 const POLICIES = [
-  { id: 'POL-1', text: 'Nothing is sent outside Capital Group without human approval of the exact payload.' },
+  { id: 'POL-1', text: 'Nothing is sent outside Meridian Investments without human approval of the exact payload.' },
   { id: 'POL-2', text: 'Fund numbers come only from the data platform or licensed data, never from generated text.' },
   { id: 'POL-3', text: 'Performance is standardized and inserted from the system of record at approval.' },
   { id: 'POL-4', text: 'Personal notes are for the relationship team only and never appear in client-facing content.' },

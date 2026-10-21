@@ -37,10 +37,10 @@ Workbench teams:
 | Team | Roles (workbench lanes) | Agents |
 |---|---|---|
 | Sales | Wholesalers, SSC, Internal wholesalers | Prep Me, Engage Me, Coach Me, Schedule Me, Follow Me, Lead Me, Territory Planning |
-| Product (PRP) | Product Q&A | Query Clarifier, Research Planner, Tool Selection, Contact Summarizer, Tone/Style Alignment, Response Formatter, QAR |
-| | Strategy Intel (investment director prep) | ID Prep Me, Strategy Positioning, Market Views |
-| | Investment content generation | Institutional Pitch Books, SRG Pitch Books |
-| Marketing Content Generation (Market Incubator) | Content generation | Resource Gatherer, Document Analyzer, Copywriter / Editor, Image Analyzer, Voice of Client, LinkedIn Post, Personalized Email |
+| Product | Product Q&A | Query Clarifier, Research Planner, Tool Selection, Contact Summarizer, Tone/Style Alignment, Response Formatter, QAR |
+| | Strategy Intel (portfolio specialist prep) | Specialist Prep Me, Strategy Positioning, Market Views |
+| | Investment content generation | Institutional Pitch Books, Intermediary Pitch Books |
+| Marketing Content Generation | Content generation | Resource Gatherer, Document Analyzer, Copywriter / Editor, Image Analyzer, Voice of Client, LinkedIn Post, Personalized Email |
 | | Compliance review | Legal & Compliance, Audit Support |
 | | Distribution | Distribution, Audience Builder |
 | | BAU content management | BAU Content Refresh, Content Inventory |
@@ -65,7 +65,7 @@ This branch puts the intelligence and orchestration layer at the center. Every r
 - **Action authority by rule:** “help me prepare” is read-only, so it never books, sends or updates anything; tools above the authority are removed at the gateway and follow-ups are proposed, not created.
 - **Catalogue tab:** 58 catalogued requests with their decomposition and route (`Prep.Notes` = Prep Me → Notes Summarizer). **Decompose** turns a route into a plan without an AI call; **Plan only** in the command bar shows the live AI’s own decomposition without running it.
 - **Shared services** in `[brackets]` are marked simulated, built into the foundation, or not connected; a step that needs a missing one says what it could not establish. Every catalogue service has simulated data, and each sub-agent lists the data it reads (Catalogue tab, and each agent’s details). Where no system holds evidence for a question, the demo generates plausible evidence from the business context (marked **DEMO** in the trace); fund numbers, availability and approved content are never generated.
-- Try (as Priya): `Why are Daniel’s overall sales down when his ETF sales are up?`, `Which CG ETFs are available at Wells Fargo for Daniel?`, `Prepare me for tomorrow’s meeting with Daniel’s team`. Each has a saved run (▶).
+- Try (as Priya): `Why are Daniel’s overall sales down when his ETF sales are up?`, `Which Meridian ETFs are available at Wells Fargo for Daniel?`, `Prepare me for tomorrow’s meeting with Daniel’s team`. Each has a saved run (▶).
 
 Details: [docs/sales-ai-query-catalogue.md](docs/sales-ai-query-catalogue.md).
 
@@ -85,13 +85,13 @@ Details: [docs/sales-ai-query-catalogue.md](docs/sales-ai-query-catalogue.md).
 
 **Good first requests** (as Priya Shah, Sales):
 1. `Identify the growing trends in LA territory`
-2. `Compare BFA and AMBAL for Rachel and schedule a meeting with her next month`
+2. `Compare MCB and MBAL for Rachel and schedule a meeting with her next month`
 3. `Prepare Maya’s retirement committee fee comparison review`
 4. `Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.` Watch it land as *pending*, not memory, then open Alex’s knowledge graph.
 
 **One request per role** (pick the person first):
 - Sam Lee, Sales: `Prep me for my call with Alex tomorrow`. Sam is taking over Alex from Priya (handover HO-101), so the brief reuses Priya’s calls and Product’s work, but Sam owns it.
-- Dana Ortiz, Product: `Why has GFA trailed the Vanguard growth index? I need an explanation advisors can use.`
+- Dana Ortiz, Product: `Why has MGF trailed the Vanguard growth index? I need an explanation advisors can use.`
 - Marcus Bell, Marketing: `Write a LinkedIn post on fee transparency for advisors`. Compliance flags the missing disclosures; add them with **Edit** and approve.
 - Kim Nguyen, Service: `Alex says the link in Priya’s email won’t open`. The diagnosis cites the Genesys call, the open case and the Seismic delivery log.
 
@@ -120,7 +120,7 @@ In `.env`, set `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_DE
 npm run mock        # terminal 1: a stand-in OpenAI API on port 9999
 npm run dev:mock    # terminal 2: the app, pointed at the stand-in
 ```
-The stand-in always returns one fixed plan, so use the prompt *Compare BFA and AMBAL for Rachel and schedule a meeting with her next month*. On Windows, set `OPENAI_API_KEY=mock` and `OPENAI_BASE_URL=http://localhost:9999/v1` in `.env` and run `npm start` instead of `dev:mock`.
+The stand-in always returns one fixed plan, so use the prompt *Compare MCB and MBAL for Rachel and schedule a meeting with her next month*. On Windows, set `OPENAI_API_KEY=mock` and `OPENAI_BASE_URL=http://localhost:9999/v1` in `.env` and run `npm start` instead of `dev:mock`.
 
 ---
 
@@ -215,5 +215,5 @@ live_ccc/
 
 ## Data notice
 - People, firms’ teams, conversations, holdings, retirement plans, books and flows, dealer shelves, pipeline, coverage, goals, expenses, news and themes, service contacts, delivery logs, campaign results and approved messaging in the reference data are **fictional**. Firm names are real only for context.
-- Fund expense ratios for GFA (F-2 0.40%), BFA (F-2 0.34%), AMBAL (F-2 0.35%), VWUAX (0.25%) and VIGAX (0.05%) come from public sources as of the dates shown in the app; other funds’ numbers are intentionally left out, and performance is never generated.
+- Fund expense ratios for MGF (F 0.40%), MCB (F 0.34%), MBAL (F 0.35%), VWUAX (0.25%) and VIGAX (0.05%) come from public sources as of the dates shown in the app; other funds’ numbers are intentionally left out, and performance is never generated.
 - Get compliance and security approval before connecting real client data or sending it to any AI provider.

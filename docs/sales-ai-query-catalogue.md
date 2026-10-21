@@ -21,7 +21,7 @@ The catalogue below is a set of application requirements and example prompts, no
 | Information visible in the screenshots | What users should be able to ask |
 |---|---|
 | Meeting notes and investment preferences, including buying-unit context and dated statements (4491.jpg) | “How does this team invest?” “What did they tell us?” “What should I avoid repeating?” |
-| CG assets, vehicle mix, industry-book information and market-share categories (4493.jpg, 4496.jpg) | “Where are we strong?” “What changed?” “Which category deserves further investigation?” |
+| Meridian assets, vehicle mix, industry-book information and market-share categories (4493.jpg, 4496.jpg) | “Where are we strong?” “What changed?” “Which category deserves further investigation?” |
 | Sales and year-over-year changes by vehicle and business channel (4492.jpg) | “Why are total sales down while ETF sales are growing?” “Which segment explains the decline?” |
 | Dealer and platform intelligence, including effective dates and availability (4499.jpg) | “What changed at Wells Fargo?” “Is this product available on this specific platform?” |
 | Retirement-plan information and pipeline status (4503.jpg, 4497.jpg) | “Which plans should we review?” “What is still open?” “Why does the narrative conflict with the opportunity status?” |
@@ -82,10 +82,10 @@ Every step returns its output, source references, as-of dates, unresolved issues
 | Engage Me | Q&A, Recommendations, Capture, Scenario |
 | Follow Me | Dictation, Tasks, Expenses |
 | Coach Me | Simulation, Guide |
-| Product Q&A (Product, PRP) | Research Planner, Tool Selection, Response Formatter, QAR |
-| Strategy Intel (Product, PRP) | ID Prep, Positioning, Market Views |
-| Investment content generation (Product, PRP) | Institutional Pitch Book, SRG Pitch Book |
-| Marketing content generation (Market Incubator) | Resource Gatherer, Document Analyzer, Editor, Audience Builder, Distribution, BAU Refresh, Inventory, Standard Pitch Book, Custom Pitch Book |
+| Product Q&A (Product) | Research Planner, Tool Selection, Response Formatter, QAR |
+| Strategy Intel (Product) | Specialist Prep, Positioning, Market Views |
+| Investment content generation (Product) | Institutional Pitch Book, Intermediary Pitch Book |
+| Marketing content generation | Resource Gatherer, Document Analyzer, Editor, Audience Builder, Distribution, BAU Refresh, Inventory, Standard Pitch Book, Custom Pitch Book |
 
 Names in `[brackets]` are shared tools or services, such as `[flows]`, `[platform eligibility]` or `[memory]`. They are not additional autonomous agents.
 
@@ -126,18 +126,18 @@ All of it is fictional and lives in `src/data.js`; amounts are in $ millions so 
 
 | Sub-agent | What it reads |
 |---|---|
-| Prep.Profile | Advisor and coverage teams with roles, CG book by vehicle and fund, retirement plans (Maya’s PLAN-102, Alex’s PLAN-101), dealer programs |
+| Prep.Profile | Advisor and coverage teams with roles, Meridian book by vehicle and fund, retirement plans (Maya’s PLAN-102, Alex’s PLAN-101), dealer programs |
 | Prep.Notes, Follow.Dictation, Coach.Simulation | Dated calls, meeting notes and emails (including older notes on how each team invests) |
 | Prep.Content, Engage.Recommendations | Approved content plus the recommendation trace: stated need (with the call that shows it) or popularity |
 | Prep.Fact Check | Fund facts and the evidence resolver (page, passage and version in approved documents) |
 | Prep.Themes, Prep.News | This week’s approved themes ranked for the advisor; authorized news from the last two weeks |
-| Lead.Discover | Ranks advisors by headroom (industry book minus CG assets) against explicit criteria; saves the trace with exclusions; engagement graph and fund-level transactions |
+| Lead.Discover | Ranks advisors by headroom (industry book minus Meridian assets) against explicit criteria; saves the trace with exclusions; engagement graph and fund-level transactions |
 | Lead.Insights | Change history since the last meeting, assets and flows for all seven advisors, transactions, pipeline with history, change events, the ranking trace |
 | Lead.Products, Product.Research Planner | Dealer shelves for every firm (custodian platforms for the RIAs), program rules, dated model allocations, taxonomy |
 | Territory.Health Check, Reviews | Coverage tiers and completed contacts in the last 90 days |
 | Territory.Calibration | Permitted peer cohorts and medians |
 | Territory.Strategy, Business Planning | Pipeline scoring with its basis; sales goals, year-to-date sales, capacity and priorities |
-| Schedule.Calendar, Zoning, Compliance | Open slots; visits grouped by zone with drive times; firm meeting rules plus Capital Group policy |
+| Schedule.Calendar, Zoning, Compliance | Open slots; visits grouped by zone with drive times; firm meeting rules plus Meridian Investments policy |
 | Follow.Tasks | Open commitments with owners and due dates |
 | Follow.Expenses | September receipts matched to visits, with policy checks |
 | Coach.Guide | Objection playbooks built on approved messaging |

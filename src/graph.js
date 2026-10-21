@@ -2,7 +2,7 @@
 const KG_CLUSTERS = {
   firm: { label: 'Firm & team', color: '#9fb6cc', icon: 'users' },
   units: { label: 'Buying units', color: '#82b6ff', icon: 'network' },
-  people: { label: 'Capital Group coverage', color: '#ffd27a', icon: 'users' },
+  people: { label: 'Meridian Investments coverage', color: '#ffd27a', icon: 'users' },
   priorities: { label: 'Priorities', color: '#f0b870', icon: 'bolt' },
   prefs: { label: 'Preferences', color: '#7fd4ab', icon: 'check' },
   interests: { label: 'Interests', color: '#ff9fc3', icon: 'globe' },

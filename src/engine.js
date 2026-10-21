@@ -22,7 +22,7 @@ function freshFoundation() {
   }
   F.memory.forEach(m => { N(m.id, m.attr, 'memory'); E(m.adv, m.id, 'has'); });
   F.findings.forEach(k => { N(k.id, k.label, 'finding'); k.evidence.forEach(ev => E(k.id, ev, 'cites')); });
-  N('GFFFX', 'Growth Fund of America', 'fund'); E('ADV-101', 'GFFFX', 'holds ~$38M');
+  N('MRGFX', 'Meridian Growth Fund', 'fund'); E('ADV-101', 'MRGFX', 'holds ~$38M');
   return F;
 }
 let F = freshFoundation();
@@ -55,7 +55,7 @@ function resolveEntities(text) {
     const hit = words.filter(w => t.includes(w)).length + (/(retire|committee|401)/.test(t) && /retire|committee|401/.test(l.toLowerCase()) ? 2 : 0) + (/wealth/.test(t) && /wealth/.test(l.toLowerCase()) ? 2 : 0);
     unitHints.push({ unit: u, label: l, advisor: c.advisor, hits: hit });
   }
-  const people = Object.entries(EMPLOYEES).filter(([, x]) => t.includes(' ' + x.name.split(' ')[0].toLowerCase() + ' ')).map(([id, x]) => ({ id, name: x.name, team: TEAMS[x.team].name, note: 'Capital Group colleague, not an advisor' }));
+  const people = Object.entries(EMPLOYEES).filter(([, x]) => t.includes(' ' + x.name.split(' ')[0].toLowerCase() + ' ')).map(([id, x]) => ({ id, name: x.name, team: TEAMS[x.team].name, note: 'Meridian Investments colleague, not an advisor' }));
   const territories = Object.entries(TERRITORIES).filter(([, x]) => x.aliases.some(a => t.includes(' ' + a + ' '))).map(([id, x]) => ({ id, name: x.name, advisors: x.advisors.map(a => ADVISORS[a].name) }));
   const funds = fundsIn(text).map(k => ({ ticker: k, name: FUNDS[k].name }));
   return { candidates: cands.filter(c => !people.some(p => p.name.split(' ')[0] === c.name.split(' ')[0])), units: unitHints.sort((a, b) => b.hits - a.hits), people, territories, funds };
@@ -82,13 +82,13 @@ function leadDiscover(a, save = true) {
   const ranked = [], excluded = [];
   for (const id of pool) {
     const ind = group.reduce((t, c) => t + ((INDUSTRY_BOOK[id] || {})[c] || 0), 0), cg = M1(BOOK[id].funds.filter(f => group.includes(FUND_CATEGORY[f[0]])).reduce((t, f) => t + f[2], 0)), share = ind ? M1(cg / ind * 100) : null, lc = lastContact(id);
-    const why = !ind ? 'No industry-book assets in ' + group.join(' or ') : ind < minA ? `Category assets $${ind}M below the $${minA}M minimum` : share > maxS ? `CG share ${share}% above the ${maxS}% limit` : days && lc != null && lc < days ? `Contacted ${lc} days ago, inside the ${days}-day window` : null;
+    const why = !ind ? 'No industry-book assets in ' + group.join(' or ') : ind < minA ? `Category assets $${ind}M below the $${minA}M minimum` : share > maxS ? `Meridian share ${share}% above the ${maxS}% limit` : days && lc != null && lc < days ? `Contacted ${lc} days ago, inside the ${days}-day window` : null;
     if (why) { excluded.push({ advisor: ADVISORS[id].name, reason: why }); continue; }
     ranked.push({ advisor: ADVISORS[id].name, advisor_id: id, category_assets_usd_m: ind, cg_assets_usd_m: cg, cg_share_pct: share, headroom_usd_m: M1(ind - cg), days_since_contact: lc, signal: ALPHA[id] ? `Sales Alpha ${ALPHA[id].score} (a signal, not intent)` : 'No Sales Alpha score' });
   }
   ranked.sort((x, y) => y.headroom_usd_m - x.headroom_usd_m).forEach((r, k) => { r.rank = k + 1; });
   const out = { ranking_id: 'RANK-' + (save && typeof F !== 'undefined' ? 900 + (++F.seq) : 928), produced: TODAY, criteria: { categories: group, min_category_assets_usd_m: minA, max_share_pct: maxS, territory: T ? TERRITORIES[T].name : 'All covered advisors', not_contacted_days: days || null },
-    basis: 'Ranked by headroom: the advisor’s category assets with other managers (industry book, Jun 30, 2026) minus CG assets (Aug 31, 2026).', ranked, excluded };
+    basis: 'Ranked by headroom: the advisor’s category assets with other managers (industry book, Jun 30, 2026) minus Meridian assets (Aug 31, 2026).', ranked, excluded };
   if (save && typeof F !== 'undefined') F.lastRanking = out;
   return out;
 }
@@ -190,7 +190,7 @@ function ctxOf(id) {
 }
 const synDay = (rnd, from = 'Jul 1, 2026', to = 'Sep 28, 2026') => fmtDay(dayMs(from) + Math.floor(rnd() * Math.max(1, (dayMs(to) - dayMs(from)) / 864e5)) * 864e5);
 const pick = (rnd, arr) => arr[Math.floor(rnd() * arr.length)];
-const fundName = t => FUNDS[t] ? FUNDS[t].name.split(',')[0] : 'Capital Group ' + t;
+const fundName = t => FUNDS[t] ? FUNDS[t].name.split(',')[0] : 'Meridian Investments ' + t;
 const topicOf = v => String(v).replace(/[.;].*$/, '').replace(/^(current (priority|decision)|focus): /i, '').toLowerCase();
 /* Deterministic generators by tool, keyed on the advisor and the arguments (same question, same evidence) */
 function synthesizeEvidence(name, args, run) {
@@ -229,12 +229,12 @@ function evidenceFor(need, id) {
   if (/meeting|note|said|told|conversation|call|asked/.test(n)) return synthesizeEvidence('crm.get_call_notes', { advisor_id: id });
   return make('Observations', [
     { id: 'OBS-' + (800 + Number(C.id.slice(-1)) * 3), date: synDay(rnd, 'Sep 1, 2026'), observation: `${member} raised ${topic} during a team call`, source: 'Salesforce activity' },
-    hold && { id: 'OBS-' + (801 + Number(C.id.slice(-1)) * 3), date: synDay(rnd, 'Sep 1, 2026'), observation: `${fundName(hold[0])} is ${C.first}’s largest Capital Group position at $${hold[2]}M`, source: 'Assets service' },
+    hold && { id: 'OBS-' + (801 + Number(C.id.slice(-1)) * 3), date: synDay(rnd, 'Sep 1, 2026'), observation: `${fundName(hold[0])} is ${C.first}’s largest Meridian Investments position at $${hold[2]}M`, source: 'Assets service' },
     { id: 'OBS-' + (802 + Number(C.id.slice(-1)) * 3), date: synDay(rnd, 'Sep 1, 2026'), observation: `${C.covering[0]} noted interest in a follow-up on ${topic}`, source: 'Salesforce activity' }].filter(Boolean));
 }
 function synthesisPrompt(name, args, run, task) {
   const id = advId(args && args.advisor_id) || run.advisor, C = id && ctxOf(id), T = TOOLS[name];
-  return `You generate realistic demo evidence for Capital Group's Connected Client Experience demo. ${name === 'evidence.synthesize' ? 'An agent needs evidence that no system holds.' : `The tool ${name} returned no data.`}
+  return `You generate realistic demo evidence for Meridian's Connected Client Experience demo. ${name === 'evidence.synthesize' ? 'An agent needs evidence that no system holds.' : `The tool ${name} returned no data.`}
 Create plausible records that fit the business context below and the step's purpose. Rules: ${name === 'evidence.synthesize' ? 'return {"evidence_type":"...","records":[...]} with 2 to 4 records, each with an id, a date and the fields that matter' : 'keep the tool’s usual output shape: ' + T.desc}; dates between Jul 1 and Sep 28, 2026; amounts in $ millions with one decimal and small relative to the advisor's book; name team members only from the context and use roles or "a client household" for clients; never invent fund expense ratios, returns, ratings, platform availability or compliance approvals. Reply with one JSON object only.
 Arguments: ${JSON.stringify(args || {})}
 What the step is doing: ${task ? task.objective : ''}
@@ -288,10 +288,10 @@ const TOOLS = {
     run: a => { const q = S(a.query).toLowerCase().split(/\W+/).filter(w => w.length > 2); return AEM_PAGES.filter(p => q.some(w => (p.tags + ' ' + p.title.toLowerCase()).includes(w))).map(({ tags, ...p }) => p); } },
   'seismic.export_pdf': { sys: 'seismic', via: 'API', rw: 'read', desc: 'Seismic: export an approved asset as a PDF attachment (same version).', props: { asset_id: 'string' },
     run: a => ({ asset: S(a.asset_id), file: S(a.asset_id) + '.pdf', version: 'unchanged' }) },
-  'fund.get_facts': { sys: 'fund', via: 'API', rw: 'read', desc: 'Fund data platform: verified facts for a ticker (GFFFX, AGTHX, VWUAX, VIGAX, AWSHX, ABALX, AMECX). Expense ratios in percent.', props: { ticker: 'string' },
+  'fund.get_facts': { sys: 'fund', via: 'API', rw: 'read', desc: 'Fund data platform: verified facts for a ticker (MRGFX, MRGAX, VWUAX, VIGAX, MRGIX, MRLAX, MRINX). Expense ratios in percent.', props: { ticker: 'string' },
     run: a => { const k = tickerOf(a.ticker); if (!k) throw new Error('Unknown fund. Try fund.lookup first. Known: ' + Object.keys(FUNDS).join(', ')); return Object.assign({ ticker: k }, FUNDS[k]); } },
-  'fund.lookup': { sys: 'fund', via: 'API', rw: 'read', desc: 'Fund data platform: resolve a fund nickname or name (GFA, BFA, AMBAL, WMIF, IFA) to tickers and share classes.', props: { name: 'string' },
-    run: a => { const k = tickerOf(a.name) || fundsIn(S(a.name))[0]; if (!k) return { match: null, note: 'No match. Known nicknames: GFA, BFA, AMBAL, WMIF, IFA' }; const base = FUNDS[k].name.split(',')[0]; return { match: k, fund: base, share_classes: Object.entries(FUNDS).filter(([, f]) => f.name.startsWith(base)).map(([t, f]) => ({ ticker: t, class: f.name.split(', ')[1] || '', expense_ratio_pct: f.er })) }; } },
+  'fund.lookup': { sys: 'fund', via: 'API', rw: 'read', desc: 'Fund data platform: resolve a fund nickname or name (MGF, MCB, MBAL, MGI, MIF) to tickers and share classes.', props: { name: 'string' },
+    run: a => { const k = tickerOf(a.name) || fundsIn(S(a.name))[0]; if (!k) return { match: null, note: 'No match. Known nicknames: MGF, MCB, MBAL, MGI, MIF' }; const base = FUNDS[k].name.split(',')[0]; return { match: k, fund: base, share_classes: Object.entries(FUNDS).filter(([, f]) => f.name.startsWith(base)).map(([t, f]) => ({ ticker: t, class: f.name.split(', ')[1] || '', expense_ratio_pct: f.er })) }; } },
   'fund.get_performance': { sys: 'fund', via: 'API', rw: 'read', desc: 'Fund data platform: standardized returns. Returned as a placeholder that is filled in at approval, never as numbers for drafting.', props: { ticker: 'string' },
     run: a => ({ ticker: S(a.ticker).toUpperCase(), standardized_returns: 'Inserted from the fund data platform at approval (1, 5, 10 years). Do not write return figures.' }) },
   'models.cost_on_assets': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model platform: annual cost in dollars of each fund’s expense ratio on an amount. Use for any dollar fee figure.', props: { tickers: 'array', amount_usd: 'number' },
@@ -309,13 +309,13 @@ const TOOLS = {
       const same = [...new Set(P.lineup.map(o => o.category))].map(cat => options.filter(o => o.category === cat)).filter(g => g.length > 1).map(g => { const base = Math.max(...g.map(o => o.assets_usd)); return { category: g[0].category, on_assets_usd: base, costs: g.map(o => ({ fund: o.fund, option: o.option, annual_cost_usd: Math.round(base * o.expense_ratio_pct / 100) })) }; });
       return { plan_id: id, plan: P.name, options, covered_assets_usd: covered, covered_annual_cost_usd: cost, covered_weighted_expense_ratio_pct: r2(cost / covered * 100), same_category_on_equal_assets: same, not_covered: P.other, sources: 'Expense ratios: fund data platform (as of dates shown). Category medians: Morningstar (' + [...new Set(P.lineup.map(o => PEERS[o.category].note))].join('; ') + ').' }; } },
   /* ---- Sales AI shared services: amounts in $ millions so every figure an agent quotes traces to the tool ---- */
-  'book.get_assets': { sys: 'fund', via: 'API', rw: 'read', desc: 'Assets service: Capital Group assets for an advisor’s team by vehicle and fund as of a date, with the prior-year snapshot and mix change. Amounts in $ millions.', props: { advisor_id: 'string' },
+  'book.get_assets': { sys: 'fund', via: 'API', rw: 'read', desc: 'Assets service: Meridian Investments assets for an advisor’s team by vehicle and fund as of a date, with the prior-year snapshot and mix change. Amounts in $ millions.', props: { advisor_id: 'string' },
     run: a => { const id = advId(a.advisor_id), B = BOOK[id]; if (!B) return { advisor: id ? ADVISORS[id].name : S(a.advisor_id), note: 'No book data for this advisor in the assets service.' };
       const veh = {}; B.funds.forEach(([, v, x]) => { veh[v] = M1((veh[v] || 0) + x); });
       const total = M1(Object.values(veh).reduce((t, x) => t + x, 0)), ptotal = M1(Object.values(B.prior_by_vehicle).reduce((t, x) => t + x, 0));
       return { advisor: ADVISORS[id].name, entity: B.entity, as_of: B.as_of, total_usd_m: total, prior_as_of: B.prior_as_of, prior_total_usd_m: ptotal,
         by_vehicle: Object.entries(veh).map(([v, x]) => { const p = B.prior_by_vehicle[v] || 0; return { vehicle: v, assets_usd_m: x, share_pct: M1(x / total * 100), prior_assets_usd_m: p, prior_share_pct: M1(p / ptotal * 100), change_usd_m: M1(x - p), share_change_pp: M1(x / total * 100 - p / ptotal * 100) }; }),
-        by_fund: B.funds.map(([f, v, x]) => ({ fund: f, name: FUNDS[f] ? FUNDS[f].name : 'Capital Group ' + f, vehicle: v, assets_usd_m: x })) }; } },
+        by_fund: B.funds.map(([f, v, x]) => ({ fund: f, name: FUNDS[f] ? FUNDS[f].name : 'Meridian Investments ' + f, vehicle: v, assets_usd_m: x })) }; } },
   'book.get_flows': { sys: 'fund', via: 'API', rw: 'read', desc: 'Flows service: gross sales, redemptions and net flows by vehicle and channel, trailing twelve months against the prior twelve, with each vehicle’s contribution to the change in sales. Amounts in $ millions.', props: { advisor_id: 'string' },
     run: a => { const id = advId(a.advisor_id), X = FLOWS[id]; if (!X) return { advisor: id ? ADVISORS[id].name : S(a.advisor_id), note: 'No flow data for this advisor in the flows service.' };
       const row = o => Object.entries(o).map(([k, [c, p]]) => ({ name: k, current_usd_m: c, prior_usd_m: p, change_usd_m: M1(c - p), change_pct: pct1(c, p) }));
@@ -333,7 +333,7 @@ const TOOLS = {
         categories: X.categories.map(([c, fs, ind]) => { const cg = M1(fs.reduce((t, f) => t + amt(f), 0)); return { category: c, cg_funds: fs, cg_assets_usd_m: cg, industry_assets_usd_m: ind, share_pct: M1(cg / ind * 100) }; }),
         excluded_usd_m: M1(B.funds.filter(f => f[1] === 'SMA').reduce((t, f) => t + f[2], 0)), excluded_note: 'SMA assets are excluded by the definition',
         discrepancy: X.numerator_as_of !== X.denominator_as_of ? `Numerator (${X.numerator_as_of}) and denominator (${X.denominator_as_of}) dates differ; shares can be off until the industry book refreshes.` : null }; } },
-  'platform.get_availability': { sys: 'fund', via: 'API', rw: 'read', desc: 'Platform eligibility: dealer platform and program availability for Capital Group funds and ETFs with effective dates. Pass advisor_id (uses their firm and programs), optionally ticker, program, or since (a date) to list changes after it.', props: { advisor_id: 'string', ticker: 'string', program: 'string', since: 'string' },
+  'platform.get_availability': { sys: 'fund', via: 'API', rw: 'read', desc: 'Platform eligibility: dealer platform and program availability for Meridian Investments funds and ETFs with effective dates. Pass advisor_id (uses their firm and programs), optionally ticker, program, or since (a date) to list changes after it.', props: { advisor_id: 'string', ticker: 'string', program: 'string', since: 'string' },
     run: a => { const id = advId(a.advisor_id), firm = id ? ADVISORS[id].firm : null, X = SHELF[firm]; if (!X) return { firm: firm ? FIRMS[firm].name : null, note: 'No platform data for this firm in the eligibility service.' };
       const tk = tickerOf(a.ticker), prog = S(a.program).toLowerCase(), since = Date.parse(S(a.since));
       const items = X.items.filter(([t, p]) => (!tk || t === tk) && (!prog || p.toLowerCase().includes(prog))).map(([t, p, st, eff]) => ({ ticker: t, name: FUNDS[t] ? FUNDS[t].name : t, program: p, status: st, effective: eff }));
@@ -360,17 +360,17 @@ const TOOLS = {
     run: a => { const id = advId(a.advisor_id), tk = tickerOf(a.fund); return { window: 'Jul 1 to Sep 28, 2026', transactions: FUND_TRANSACTIONS.filter(t => (!id || t[0] === id) && (!tk || t[2] === tk)).map(([adv, date, fund, type, amt]) => ({ advisor: ADVISORS[adv].name, date, fund, type, amount_usd_m: amt })) }; } },
   'engage.get_digital': { sys: 'mcloud', via: 'API', rw: 'read', desc: 'Marketing Cloud engagement graph: attributable page visits, article opens and webinars by logged-in advisors. An observed event, not intent.', props: { advisor_id: 'string', since: 'string' },
     run: a => { const id = advId(a.advisor_id), since = Date.parse(S(a.since)); return { note: 'Observed events only; a visit is not intent to buy.', events: DIGITAL.filter(d => (!id || d[0] === id) && (isNaN(since) || Date.parse(d[1]) > since)).map(([adv, date, kind, item]) => ({ advisor: ADVISORS[adv].name, date, kind, item })) }; } },
-  'lead.discover': { sys: 'fund', via: 'API', rw: 'read', desc: 'Lead discovery: ranks covered advisors against explicit criteria (category: equity, fixed income, multi-asset, large growth; minimum category assets; maximum CG share; territory; days since contact). Returns the ranking, its basis and exclusions, and saves the trace.', props: { category: 'string', min_category_assets_usd_m: 'number', max_share_pct: 'number', territory: 'string', not_contacted_days: 'number' },
+  'lead.discover': { sys: 'fund', via: 'API', rw: 'read', desc: 'Lead discovery: ranks covered advisors against explicit criteria (category: equity, fixed income, multi-asset, large growth; minimum category assets; maximum Meridian share; territory; days since contact). Returns the ranking, its basis and exclusions, and saves the trace.', props: { category: 'string', min_category_assets_usd_m: 'number', max_share_pct: 'number', territory: 'string', not_contacted_days: 'number' },
     run: a => leadDiscover(a) },
   'lead.get_ranking_trace': { sys: 'fund', via: 'API', rw: 'read', desc: 'Ranking trace: for the most recent lead ranking, the criteria, each advisor’s evidence and score, and who was excluded and why.', props: {},
     run: () => F.lastRanking || LEAD_RANKING_SAMPLE },
-  'peer.compare': { sys: 'fund', via: 'API', rw: 'read', desc: 'Peer analytics: compares an advisor with a permitted peer cohort (internal coverage data only) on CG assets, ETF share and net flows. Amounts in $ millions.', props: { advisor_id: 'string' },
+  'peer.compare': { sys: 'fund', via: 'API', rw: 'read', desc: 'Peer analytics: compares an advisor with a permitted peer cohort (internal coverage data only) on Meridian assets, ETF share and net flows. Amounts in $ millions.', props: { advisor_id: 'string' },
     run: a => peerCompare(advId(a.advisor_id)) },
   'pipeline.score': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Pipeline scoring: scores open opportunities by stage, estimated size and recency of activity, with the basis shown. Pass an advisor or a territory.', props: { advisor_id: 'string', territory: 'string' },
     run: a => pipelineScore(a) },
   'events.get_changes': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Change events: business events for an advisor or their clients’ plans after a date (new hires, model launches, plan sponsor changes, platform changes).', props: { advisor_id: 'string', since: 'string' },
     run: a => { const id = advId(a.advisor_id), since = Date.parse(S(a.since)); return { events: CHANGE_EVENTS.filter(e => (!id || e[0] === id) && (isNaN(since) || Date.parse(e[1]) > since)).map(([adv, date, what, src]) => ({ advisor: ADVISORS[adv].name, date, event: what, source: src })) }; } },
-  'crm.get_team': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce relationship graph: the advisor’s own team with roles, and Capital Group’s coverage team.', props: { advisor_id: 'string' },
+  'crm.get_team': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce relationship graph: the advisor’s own team with roles, and Meridian’s coverage team.', props: { advisor_id: 'string' },
     run: a => { const id = advId(a.advisor_id), ho = HANDOVERS.find(h => h.adv === id); return { advisor_team: (ADVISOR_TEAMS[id] || []).map(([name, role]) => ({ name, role })), coverage_team: COVERAGE_TEAM.filter(([n]) => !id || ADVISORS[id].coverage.some(c => EMPLOYEES[c].name === n) || !Object.values(EMPLOYEES).some(e => e.name === n && e.team === 'sales')).map(([name, role]) => ({ name, role })), coverage_change: ho ? `${EMPLOYEES[ho.from].name} → ${EMPLOYEES[ho.to].name}, effective ${ho.effective}` : null }; } },
   'crm.get_tasks': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce tasks: open and recent commitments for an advisor, with owner, due date and status.', props: { advisor_id: 'string' },
     run: a => { const id = advId(a.advisor_id); return { tasks: F.commitments.filter(c => !id || c.adv === id).map(c => ({ id: c.id, title: c.title, owner: c.owner, due: c.due, status: c.status, scope: c.scope })) }; } },
@@ -380,8 +380,8 @@ const TOOLS = {
     run: a => { const k = Object.keys(PLAN_INPUTS).find(e => e === S(a.wholesaler) || EMPLOYEES[e].name.toLowerCase().includes(S(a.wholesaler).toLowerCase())) || 'EMP-PRIYA', P = PLAN_INPUTS[k]; return Object.assign({ wholesaler: EMPLOYEES[k].name, remaining_to_goal_usd_m: M1(P.sales_goal_usd_m - P.ytd_sales_usd_m), pct_of_goal: M1(P.ytd_sales_usd_m / P.sales_goal_usd_m * 100) }, P); } },
   'schedule.zone_visits': { sys: 'm365', via: 'MCP', rw: 'read', desc: 'Zoning: groups advisor visits by geography with drive time from Irvine, and proposes visit days. Pass advisor ids or a territory (LA, OC, SD).', props: { advisor_ids: 'array', territory: 'string', month: 'string' },
     run: a => zoneVisits(a) },
-  'schedule.check_rules': { sys: 'm365', via: 'API', rw: 'read', desc: 'Meeting compliance: the advisor firm’s meeting rules plus Capital Group policy, for a meeting type.', props: { advisor_id: 'string', meeting_type: 'string' },
-    run: a => { const id = advId(a.advisor_id), firm = id ? ADVISORS[id].firm : null; return { firm: firm ? FIRMS[firm].name : 'Internal', meeting_type: S(a.meeting_type) || 'advisor meeting', firm_rules: firm ? MEETING_RULES[firm] : [], capital_group_rules: MEETING_RULES.CG }; } },
+  'schedule.check_rules': { sys: 'm365', via: 'API', rw: 'read', desc: 'Meeting compliance: the advisor firm’s meeting rules plus Meridian Investments policy, for a meeting type.', props: { advisor_id: 'string', meeting_type: 'string' },
+    run: a => { const id = advId(a.advisor_id), firm = id ? ADVISORS[id].firm : null; return { firm: firm ? FIRMS[firm].name : 'Internal', meeting_type: S(a.meeting_type) || 'advisor meeting', firm_rules: firm ? MEETING_RULES[firm] : [], capital_group_rules: MEETING_RULES.Meridian }; } },
   'content.get_themes': { sys: 'news', via: 'API', rw: 'read', desc: 'This week’s approved themes, ranked by relevance to an advisor’s recorded priorities and notes.', props: { advisor_id: 'string' },
     run: a => { const id = advId(a.advisor_id), txt = id ? [...F.memory.filter(m => m.adv === id && m.access === 'shared').map(m => m.value), ...F.episodes.filter(e => e.adv === id).map(e => e.text)].join(' ').toLowerCase() : ''; return { week_of: 'Sep 28, 2026', themes: THEMES.map(([tid, title, tags, src]) => { const hits = tags.split(' ').filter(w => txt.includes(w)); return { id: tid, title, source: src, relevance: hits.length, why: hits.length ? 'Matches recorded notes: ' + hits.join(', ') : 'General theme; nothing advisor-specific' }; }).sort((x, y) => y.relevance - x.relevance) }; } },
   'news.get_items': { sys: 'news', via: 'API', rw: 'read', desc: 'Authorized news and approved commentary from the last two weeks, filtered by topic words or an advisor’s context.', props: { topics: 'string', advisor_id: 'string' },
@@ -393,7 +393,7 @@ const TOOLS = {
       const best = D.pages.map(([pg, txt]) => ({ page: pg, passage: txt, score: q.filter(w => txt.toLowerCase().includes(w)).length })).sort((x, y) => y.score - x.score)[0]; return { asset: S(a.asset_id), version: D.version, found: best.score > 0, page: best.page, passage: best.passage }; } },
   'platform.get_program_rules': { sys: 'fund', via: 'API', rw: 'read', desc: 'Program rules: account and program minimums and rules for the advisor’s dealer programs.', props: { advisor_id: 'string', program: 'string' },
     run: a => { const id = advId(a.advisor_id), firm = id ? ADVISORS[id].firm : null, R = PROGRAM_RULES[firm]; if (!R) return { firm: firm ? FIRMS[firm].name : null, note: 'No dealer program rules: this firm uses a custodian platform.' }; const p = S(a.program).toLowerCase(); return { firm: FIRMS[firm].name, source: 'Dealer program guide (dealer feed)', programs: Object.entries(R).filter(([k]) => !p || k.toLowerCase().includes(p)).map(([k, rules]) => ({ program: k, rules })) }; } },
-  'models.get_allocations': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model allocations: dated versions of a Capital Group model on a dealer platform, with component weights (percent) and the change between versions.', props: { model: 'string', advisor_id: 'string' },
+  'models.get_allocations': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model allocations: dated versions of a Meridian Investments model on a dealer platform, with component weights (percent) and the change between versions.', props: { model: 'string', advisor_id: 'string' },
     run: a => { const k = Object.keys(MODEL_ALLOCATIONS).find(m => m.toLowerCase().includes(S(a.model).toLowerCase().replace(/ model.*$/, ''))) || null; if (!k) return { note: 'Unknown model. Known: ' + Object.keys(MODEL_ALLOCATIONS).join(', ') };
       const X = MODEL_ALLOCATIONS[k], [[d0, w0], [d1, w1]] = X.versions, id = advId(a.advisor_id); return { model: k, firm: FIRMS[X.firm].name, program: X.program, offered_to_advisor: id ? ADVISORS[id].firm === X.firm : null, from: d0, to: d1, components: [...new Set([...Object.keys(w0), ...Object.keys(w1)])].map(t => ({ ticker: t, name: FUNDS[t].name, from_pct: w0[t] || 0, to_pct: w1[t] || 0, change_pp: (w1[t] || 0) - (w0[t] || 0) })) }; } },
   'fund.compare': { sys: 'fund', via: 'API', rw: 'read', desc: 'Approved comparison tool: compares funds like for like (share class, expense ratio with its as-of date, benchmark, category, approach) and flags anything not on the same basis.', props: { tickers: 'array' },
@@ -407,7 +407,7 @@ const TOOLS = {
       return { wholesaler: EMPLOYEES[k].name, month: X.month, policy: X.policy, receipts: X.receipts.map(([date, type, amt, where, att, adv]) => { const per = att.length ? Math.round(amt / att.length * 100) / 100 : null, issues = [];
         if (type === 'Meal' && !att.length) issues.push('No attendees listed'); if (type === 'Meal' && per > 100) issues.push('Over $100 per person'); if (!adv) issues.push('No matching advisor visit');
         return { date, type, amount_usd: amt, merchant: where, attendees: att, per_person_usd: per, visit: adv ? ADVISORS[adv].name : null, issues }; }), total_usd: Math.round(X.receipts.reduce((t, r) => t + r[2], 0) * 100) / 100 }; } },
-  'models.portfolio_construction': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model platform: blended expense ratio for a mix, e.g. {"VIGAX":70,"GFFFX":30}.', props: { weights: 'object' },
+  'models.portfolio_construction': { sys: 'fund', via: 'API', rw: 'read', desc: 'Model platform: blended expense ratio for a mix, e.g. {"VIGAX":70,"MRGFX":30}.', props: { weights: 'object' },
     run: a => { const w = a.weights && typeof a.weights === 'object' ? a.weights : {}; let tot = 0, er = 0; const miss = [];
       for (const [k, v] of Object.entries(w)) { const f = FUNDS[tickerOf(k)]; if (!f || f.er == null) { miss.push(k); continue; } er += f.er * Number(v); tot += Number(v); }
       return { weights: w, blended_expense_ratio_pct: tot ? Math.round(er / tot * 1000) / 1000 : null, missing: miss }; } },
@@ -493,7 +493,7 @@ function buildPacket(task, run) {
       F.memory.filter(m => m.adv === adv && m.access !== 'shared').forEach(m => withheld.push({ id: m.id, why: 'Personal or private note, not needed for a territory view' }));
     }
   } else withheld.push({ id: 'advisor context', why: 'No advisor or territory in this request' });
-  (run.resolution && run.resolution.people || []).forEach(p => push('graph', p.id, 'Colleague', `${p.name}, ${p.team} (Capital Group). Internal attendee, not an advisor.`, 'Graph', 'internal'));
+  (run.resolution && run.resolution.people || []).forEach(p => push('graph', p.id, 'Colleague', `${p.name}, ${p.team} (Meridian Investments). Internal attendee, not an advisor.`, 'Graph', 'internal'));
   if (reads.has('knowledge') || team === 'product') {
     const tx = run.text + ' ' + task.objective;
     F.findings.forEach(k => { if (!k.adv || k.adv === advId) push('knowledge', k.id, k.label, k.value, AGENTS[k.by]?.name || 'QAR', k.adv ? (k.scope || 'advisor') : 'reusable'); });
@@ -658,7 +658,7 @@ function fallbackPlan(run) {
   const t = run.text.toLowerCase(), tasks = [];
   const add = (agent, objective, tools, deps) => tasks.push({ k: 'task', id: 'T' + (tasks.length + 1), agent, objective, depends_on: deps || [], reads: ['memory', 'knowledge', 'policy', 'models'], tools, why: 'Chosen by rule because the AI plan was unavailable.' });
   if (/territor|trend|growing/.test(t)) add('sales.territory', 'Summarize what is growing in the territory, with evidence', ['models.territory_trends']);
-  if (/compar|fee|cost|expense|fund|bfa|ambal|gfa|trail/.test(t)) add('product.qar', 'Answer from the data platform: costs, category and approach of the named funds', ['fund.lookup', 'fund.get_facts', 'mstar.get_peers']);
+  if (/compar|fee|cost|expense|fund|mcb|mbal|mgf|trail/.test(t)) add('product.qar', 'Answer from the data platform: costs, category and approach of the named funds', ['fund.lookup', 'fund.get_facts', 'mstar.get_peers']);
   if (/prep|brief/.test(t) && run.advisor) add('sales.prep', 'Build a one-page brief for the advisor', ['crm.get_call_notes', 'crm.get_opportunities'], tasks.map(x => x.id));
   if (/schedul|meeting|book|calendar/.test(t)) add('sales.schedule', 'Find times and place the meeting', ['calendar.find_times', 'calendar.create_event']);
   if (/email|campaign|follow.?up|draft/.test(t)) add('marketing.email', 'Draft the email from verified material', ['seismic.search_content', 'mail.draft'], tasks.map(x => x.id));
@@ -756,7 +756,7 @@ function serviceText() { return Object.entries(SERVICES).map(([k, v]) => `${k} [
 function orchestratorPrompt(run) {
   const E = EMPLOYEES[run.requester], first = E.name.split(' ')[0];
   const pats = cataloguePatterns(run.text);
-  return `You are the Intelligence & Orchestration layer of Capital Group's Connected Client Experience: an AI workbench where named specialist agents in Sales, Product, Marketing and Service share one governed AI foundation (memory, knowledge, verification, models, feedback, events, graph) connected to Salesforce, Microsoft 365, Seismic and the fund data platform. Today is ${TODAY}.
+  return `You are the Intelligence & Orchestration layer of Meridian's Connected Client Experience: an AI workbench where named specialist agents in Sales, Product, Marketing and Service share one governed AI foundation (memory, knowledge, verification, models, feedback, events, graph) connected to Salesforce, Microsoft 365, Seismic and the fund data platform. Today is ${TODAY}.
 
 REQUEST
 From: ${E.name}, ${TEAMS[E.team].name} · ${E.role}. Covers: ${E.covers.map(c => ADVISORS[c].name).join(', ') || 'no advisors directly'}.
@@ -774,13 +774,13 @@ Verified findings: ${F.findings.map(k => `${k.id} ${k.label}`).join('; ')}
 Content (Seismic): ${CONTENT.map(c => `${c.id} ${c.title} [${c.audience}]`).join('; ')}
 Funds (data platform): ${Object.entries(FUNDS).map(([k, f]) => `${k} ${f.name}`).join('; ')}
 Pending memory validations: ${F.pending.map(p => `${p.id} ${p.attr}`).join('; ') || 'none'}
-Capital Group colleagues (NOT advisors; a meeting with them is internal): ${Object.values(EMPLOYEES).map(x => `${x.name} (${TEAMS[x.team].name})`).join('; ')}
+Meridian Investments colleagues (NOT advisors; a meeting with them is internal): ${Object.values(EMPLOYEES).map(x => `${x.name} (${TEAMS[x.team].name})`).join('; ')}
 Territories: ${Object.entries(TERRITORIES).map(([k, t]) => `${k} ${t.name}: ${t.advisors.map(a => ADVISORS[a].short).join(', ')}`).join('; ')}
-Fund nicknames: GFA = Growth Fund of America (GFFFX F-2), BFA = The Bond Fund of America (ABNFX F-2), AMBAL = American Balanced Fund (AMBFX F-2), WMIF = Washington Mutual (AWSHX), IFA = Income Fund of America (AMECX)
+Fund nicknames: MGF = Meridian Growth Fund (MRGFX F), MCB = Meridian Core Bond Fund (MRBFX F), MBAL = Meridian Balanced Fund (MRLFX F), MGI = Meridian Growth and Income (MRGIX), MIF = Meridian Income Fund (MRINX)
 
 WORKBENCH TEAMS (every task is assigned to one of these roles and appears on that team's workbench)
 ${Object.entries(ROLES).map(([k, r]) => `${k} | ${TEAMS[r.team].name} · ${r.name} | ${r.does} | specialists: ${Object.keys(AGENTS).filter(a => roleOf(a) === k).join(', ')}`).join('\n')}
-Routing rules: meeting preparation goes to sales.wholesalers; scheduling and anything that is follow-up goes to sales.ssc; territory insight goes to sales.internal. Product (PRP): fund questions, comparisons, fee math and analytics tools go to product.qa; investment director (ID) preparation, strategy positioning and house views go to product.strategy; institutional and SRG pitch books go to product.content. Marketing Content Generation (Market Incubator): drafts, emails and posts go to marketing.content; refreshing or tracking standing material goes to marketing.bau; standardized or custom (advisor- or firm-specific) pitch books go to marketing.pitchbooks.
+Routing rules: meeting preparation goes to sales.wholesalers; scheduling and anything that is follow-up goes to sales.ssc; territory insight goes to sales.internal. Product: fund questions, comparisons, fee math and analytics tools go to product.qa; portfolio specialist (ID) preparation, strategy positioning and house views go to product.strategy; institutional and Intermediary pitch books go to product.content. Marketing Content Generation: drafts, emails and posts go to marketing.content; refreshing or tracking standing material goes to marketing.bau; standardized or custom (advisor- or firm-specific) pitch books go to marketing.pitchbooks.
 
 AGENT REGISTRY (choose only these ids)
 ${registryText()}
@@ -837,7 +837,7 @@ function agentPrompt(task, run, packet, upstream, withTools) {
   const up = upstream.length ? upstream.map(u => { const R = ROLES[roleOf(u.agent)]; return `${u.task} by ${R ? R.name + ' (' + TEAMS[R.team].name + ')' : AGENTS[u.agent].name}: ${u.title}\n${u.body}\nPublished: ${u.ids.join(', ') || 'nothing'}`; }).join('\n\n') : 'None.';
   const tl = withTools ? `\nYou can call your enterprise tools (Salesforce and Microsoft 365 through the MCP gateway; the data and model platform, Seismic exports and Morningstar through APIs). Call a tool only when the packet lacks what you need.` : `\nTool results fetched for you:\n${JSON.stringify(task.prefetched || {})}`;
   const ri = task.route && routeInfo(task.route), gaps = (task.services || []).filter(k => serviceStatus(k) === 'not connected');
-  return `You are ${ri ? `${ri.label} (route ${ri.route}), a skill of ${a.name},` : a.name + ','} a ${TEAMS[a.team].name} specialist agent working for the ${ROLES[task.role] ? ROLES[task.role].name : TEAMS[a.team].name} team in Capital Group's Connected Client Experience. Your job: ${ri ? ri.does : a.does}. Today is ${TODAY}.
+  return `You are ${ri ? `${ri.label} (route ${ri.route}), a skill of ${a.name},` : a.name + ','} a ${TEAMS[a.team].name} specialist agent working for the ${ROLES[task.role] ? ROLES[task.role].name : TEAMS[a.team].name} team in Meridian's Connected Client Experience. Your job: ${ri ? ri.does : a.does}. Today is ${TODAY}.
 Task from orchestration (${task.id}): ${task.objective}${task.returns ? `\nHand on: ${task.returns}` : ''}
 How the request was interpreted: ${JSON.stringify(run.interp ? { intent: run.interp.intent, scope: run.interp.scope, time: run.interp.time, constraints: run.interp.constraints, output: run.interp.output } : {})}. Action authority: ${run.authority || 'read_only'} (${AUTHORITY[run.authority || 'read_only'].does})
 Shared services for this step: ${(task.services || []).map(k => `${k} (${serviceStatus(k)})`).join(', ') || 'none'}.${gaps.length ? ` NOT CONNECTED: ${gaps.join(', ')}. Say plainly what you could not establish because of it, and set "status":"partial".` : ''}
