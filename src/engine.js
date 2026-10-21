@@ -78,7 +78,7 @@ const lastContact = id => { const d = EPISODES.filter(e => e.adv === id).map(e =
 function leadDiscover(a, save = true) {
   const cat = S(a.category).toLowerCase() || 'equity', group = CATEGORY_GROUPS[Object.keys(CATEGORY_GROUPS).find(k => cat.includes(k)) || 'equity'];
   const minA = Number(a.min_category_assets_usd_m) || 0, maxS = Number(a.max_share_pct) || 100, days = Number(a.not_contacted_days) || 0;
-  const T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === S(a.territory).toLowerCase()), pool = T ? TERRITORIES[T].advisors : Object.keys(ADVISORS);
+  const T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === S(a.territory).toLowerCase()), pool = T ? TERRITORIES[T].advisors : RETAIL_ADVISORS();
   const ranked = [], excluded = [];
   for (const id of pool) {
     const ind = group.reduce((t, c) => t + ((INDUSTRY_BOOK[id] || {})[c] || 0), 0), cg = M1(BOOK[id].funds.filter(f => group.includes(FUND_CATEGORY[f[0]])).reduce((t, f) => t + f[2], 0)), share = ind ? M1(cg / ind * 100) : null, lc = lastContact(id);
@@ -102,13 +102,13 @@ function peerCompare(id) {
     cohort_median: { cg_assets_usd_m: med(peers.map(p => p.cg_assets_usd_m)), etf_share_pct: med(peers.map(p => p.etf_share_pct)), net_flows_12m_usd_m: med(peers.map(p => p.net_flows_12m_usd_m)) }, caveat: 'Small cohort; treat as directional.' };
 }
 function pipelineScore(a) {
-  const id = advId(a.advisor_id), T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === S(a.territory).toLowerCase()), pool = id ? [id] : T ? TERRITORIES[T].advisors : Object.keys(ADVISORS), stageW = { Discovery: 10, Qualified: 20, Proposal: 30, Paperwork: 35 };
+  const id = advId(a.advisor_id), T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === S(a.territory).toLowerCase()), pool = id ? [id] : T ? TERRITORIES[T].advisors : RETAIL_ADVISORS(), stageW = { Discovery: 10, Qualified: 20, Proposal: 30, Paperwork: 35 };
   const rows = OPPORTUNITIES.filter(o => pool.includes(o.adv) && !/closed/i.test(o.stage)).map(o => { const D = PIPELINE_DETAIL[o.id] || {}, age = Math.round((Date.parse('Sep 29, 2026') - Date.parse(D.last_activity || 'Sep 29, 2026')) / 864e5), size = Math.min(40, Math.round((D.est_usd_m || 0) / 15 * 40)), fresh = age <= 14 ? 30 : age <= 30 ? 20 : 5, stage = stageW[o.stage] || 10;
     return { id: o.id, name: o.name, advisor: ADVISORS[o.adv].name, stage: o.stage, est_usd_m: D.est_usd_m, days_since_activity: age, next_action: D.next, score: stage + size + fresh, basis: { stage, size, recency: fresh } }; }).sort((x, y) => y.score - x.score);
   return { as_of: 'Sep 29, 2026', method: 'Score = stage (10 to 35) + size (up to 40, scaled to $15M) + recency (30 if active in 14 days, 20 within 30, else 5). Closed opportunities are excluded.', opportunities: rows };
 }
 function coverageReport(terr) {
-  const T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === terr.toLowerCase()), pool = T ? TERRITORIES[T].advisors : Object.keys(ADVISORS), now = Date.parse('Sep 29, 2026');
+  const T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === terr.toLowerCase()), pool = T ? TERRITORIES[T].advisors : RETAIL_ADVISORS(), now = Date.parse('Sep 29, 2026');
   return { window: 'Last 90 days to Sep 29, 2026', definition: 'Completed contacts recorded in Salesforce, against the coverage tier target for 90 days.', advisors: pool.map(id => { const [tier, target] = COVERAGE_TIERS[id], n = F.episodes.filter(e => e.adv === id && now - Date.parse(e.date) <= 90 * 864e5).length;
     return { advisor: ADVISORS[id].name, tier, target_contacts: target, completed_contacts: n, status: n > target ? 'Over-covered' : n < target / 2 ? 'Neglected' : n < target ? 'Under target' : 'On target', last_contact_days: lastContact(id) }; }) };
 }
@@ -170,6 +170,8 @@ function changesSince(a) {
 /* ---------- Demo evidence: when a system holds nothing for a question, generate plausible evidence from the business context ----------
    Generated evidence is marked synthesized and shown with a badge in the trace. Facts the checks depend on are never generated:
    fund numbers, availability, approved content and disclosures, evidence verification and computed rankings. */
+/* institutional clients sit outside the retail advisor pools that lead and territory tools rank */
+function RETAIL_ADVISORS() { return Object.keys(ADVISORS).filter(a => !ADVISORS[a].institutional); }
 const SYNTH_EXCLUDE = new Set(['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'fund.compare', 'models.cost_on_assets', 'models.portfolio_construction', 'models.plan_fee_comparison', 'mstar.get_peers',
   'platform.get_availability', 'platform.get_program_rules', 'models.get_allocations', 'seismic.search_content', 'seismic.resolve_evidence', 'seismic.get_approved_language', 'aem.get_page', 'sharepoint.get_disclosures',
   'taxonomy.resolve', 'crm.get_plan', 'lead.discover', 'lead.get_ranking_trace', 'pipeline.score', 'territory.coverage', 'peer.compare', 'models.territory_trends', 'models.sales_alpha', 'calendar.find_times', 'evidence.synthesize']);
@@ -274,7 +276,7 @@ const TOOLS = {
   'mail.draft': { sys: 'm365', via: 'MCP', rw: 'write', desc: 'Outlook: save an email draft (never sends). Returns the draft id.', props: { to: 'string', subject: 'string' },
     run: a => ({ draft_id: 'DRAFT-' + (400 + F.seq), to: S(a.to), subject: S(a.subject), status: 'Draft saved; sending needs human approval' }) },
   'sharepoint.get_disclosures': { sys: 'm365', via: 'API', rw: 'read', desc: 'SharePoint compliance library: required disclosures and channel rules for a content type (advisor email, LinkedIn post, committee pack).', props: { content_type: 'string' },
-    run: a => { const t = S(a.content_type).toLowerCase(), k = /linkedin|social|post|public/.test(t) ? 'social' : /committee|plan|retirement/.test(t) ? 'committee' : 'email';
+    run: a => { const t = S(a.content_type).toLowerCase(), k = /linkedin|social|post|public/.test(t) ? 'social' : /institutional|pension|separate account|consultant|mandate/.test(t) ? 'institutional' : /committee|plan|retirement/.test(t) ? 'committee' : 'email';
       return { channel: k, required_disclosures: DISCLOSURES[k].required, channel_rules: DISCLOSURES[k].rules }; } },
   'seismic.search_content': { sys: 'seismic', via: 'MCP', rw: 'read', desc: 'Seismic: search approved content by keywords and audience. Returns ids, titles, audience, format.', props: { query: 'string' },
     run: a => { const q = S(a.query).toLowerCase().split(/\W+/).filter(w => w.length > 2); return CONTENT.map(c => ({ c, s: q.filter(w => (c.tags + ' ' + c.title.toLowerCase()).includes(w)).length })).filter(x => x.s).sort((x, y) => y.s - x.s).slice(0, 4).map(x => ({ id: x.c.id, title: x.c.title, audience: x.c.audience, format: x.c.format, status: x.c.status })); } },
@@ -344,7 +346,7 @@ const TOOLS = {
   'pipeline.get': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce pipeline: an advisor’s opportunities with current stage, plan type and full status history.', props: { advisor_id: 'string' },
     run: a => { const id = advId(a.advisor_id); return { as_of: 'Sep 29, 2026', opportunities: OPPORTUNITIES.filter(o => o.adv === id).map(o => ({ id: o.id, name: o.name, unit: o.scope, plan_type: o.type || null, stage: o.stage, open: !/closed/i.test(o.stage), history: (PIPELINE_HISTORY[o.id] || []).map(([d, st]) => ({ date: d, stage: st })) })) }; } },
   'engage.get_history': { sys: 'sf', via: 'MCP', rw: 'read', desc: 'Salesforce engagements: last completed interaction and completed interactions in the last 90 days, for one advisor or a territory (LA, OC, SD).', props: { advisor_id: 'string', territory: 'string' },
-    run: a => { const T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === S(a.territory).toLowerCase()), one = advId(a.advisor_id), ids = one ? [one] : T ? TERRITORIES[T].advisors : Object.keys(ADVISORS), now = Date.parse('Sep 29, 2026');
+    run: a => { const T = Object.keys(TERRITORIES).find(k => k.toLowerCase() === S(a.territory).toLowerCase()), one = advId(a.advisor_id), ids = one ? [one] : T ? TERRITORIES[T].advisors : RETAIL_ADVISORS(), now = Date.parse('Sep 29, 2026');
       return { as_of: 'Sep 29, 2026', definition: 'Meaningful contact = a completed call, meeting or two-way email recorded in Salesforce; scheduled meetings do not count.',
         advisors: ids.map(id => { const eps = F.episodes.filter(e => e.adv === id).sort((x, y) => Date.parse(y.date) - Date.parse(x.date)), last = eps[0];
           return { advisor: ADVISORS[id].name, last_completed: last ? { id: last.id, date: last.date, kind: last.kind, with: last.with } : null, days_since: last ? Math.round((now - Date.parse(last.date)) / 864e5) : null, completed_last_90_days: eps.filter(e => now - Date.parse(e.date) <= 90 * 864e5).length }; }) }; } },

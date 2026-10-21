@@ -6,6 +6,42 @@ You type a request as a real role (a wholesaler, a product specialist, a markete
 
 ![Theme options](docs/theme-options.png)
 
+> **Generic edition (`sale_ai_noncg`).** The asset manager here, **Meridian Investments**, is fictional, as are its funds and tickers:
+>
+> | Fund | Nickname | Tickers |
+> |---|---|---|
+> | Meridian Growth | MGF | MRGFX, MRGAX |
+> | Meridian Balanced | MBAL | MRLFX, MRLAX |
+> | Meridian Core Bond | MCB | MRBFX, MRBAX |
+> | Meridian Income | | MRINX |
+> | Meridian Growth and Income | | MRGIX |
+> | Meridian ETFs | | MRGR, MRDV, MRCP, MRUS, MRIF |
+>
+> Advisors, firms and employees are fictional too. Public third parties (broker-dealer platforms, index funds used for comparison, Morningstar data, and vendor systems such as Salesforce and Seismic) keep their real names. Every story, saved run and check works exactly as in the original.
+
+## Institutional client: Pacific Coast Teachers' Retirement System
+
+A public-pension persona sits alongside the advisor relationships.
+
+- **Who serves it:** **Olivia Grant**, Institutional Relationship Manager, public funds (West). She's in the "ask as" list.
+- **The client:** Pacific Coast TRS, a $48B public pension. Contacts are CIO **Helen Moreau** and Deputy CIO **Raj Patel**, with **Ridgeline Advisors** as investment consultant and a seven-trustee investment committee.
+- **The mandate:** Meridian manages a **$1.2B core fixed income separate account** against the Bloomberg U.S. Aggregate. The committee is weighing a **$300M intermediate credit sleeve** (OPP-520).
+- **What the foundation holds:**
+  - August committee notes (MTG-0815) with returns and the committee's asks
+  - Raj Patel's email (EMAIL-0929) setting the **Nov 18 mandate review** and a **Nov 4 fee deadline** (TASK-311)
+  - Memory: the committee's template with no marketing slides (MEM-091), an ESG screen (MEM-092), and copy-the-consultant with a 24 bps fee benchmark (MEM-093)
+  - Public-pension meeting rules: no gifts or meals, every meeting logged
+  - Institutional disclosures
+- **Approved institutional content:**
+  - pitch book (SEIS-130)
+  - quarterly review template (SEIS-131)
+  - fee schedule with tier math (SEIS-132)
+  - intermediate credit strategy overview (SEIS-133)
+- **Two saved runs**, written by hand so they work without an AI key. Every number traces to the records:
+  - *Prepare the November mandate review for Pacific Coast TRS* (4 steps). Prep Me summarizes the committee's words, Product Q&A verifies performance and the credit composite, Institutional Pitch Books picks the materials, and Prep Me builds the agenda.
+  - *Draft the fee proposal Pacific Coast TRS asked for* (3 steps). Product Q&A applies the fee schedule: $2.55M a year (21.25 bps) on the core mandate and $0.82M (27.33 bps) on the credit sleeve. Institutional Pitch Books drafts the proposal, which waits for sign-off, and Compliance reviews it.
+- The client is marked institutional, so lead and territory tools leave it out of retail advisor rankings.
+
 ---
 
 ## Background

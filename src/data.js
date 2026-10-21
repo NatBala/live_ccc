@@ -17,11 +17,12 @@ const EMPLOYEES = {
   'EMP-SAM': { name: 'Sam Lee', team: 'sales', role: 'Internal partner, Southern California', covers: ['ADV-101', 'ADV-102', 'ADV-103', 'ADV-104', 'ADV-105', 'ADV-106', 'ADV-107'] },
   'EMP-DANA': { name: 'Dana Ortiz', team: 'product', role: 'Product Q&A, Product', covers: [] },
   'EMP-MARCUS': { name: 'Marcus Bell', team: 'marketing', role: 'Advisor marketing lead', covers: [] },
-  'EMP-KIM': { name: 'Kim Nguyen', team: 'service', role: 'Advisor service', covers: [] }
+  'EMP-KIM': { name: 'Kim Nguyen', team: 'service', role: 'Advisor service', covers: [] },
+  'EMP-OLIVIA': { name: 'Olivia Grant', team: 'sales', role: 'Institutional Relationship Manager, public funds (West)', covers: ['ADV-108'] }
 };
 
 const SUGGESTIONS = {
-  sales: ['Identify the growing trends in LA territory', 'Compare MCB and MBAL for Rachel and schedule a meeting with her next month', 'Prep me for my call with Alex tomorrow', 'Prepare Maya’s retirement committee fee comparison review', 'Sofia mentioned ETFs. What should I bring to our next meeting?', 'Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.', 'Why are Daniel’s overall sales down when his ETF sales are up?', 'Which Meridian ETFs are available at Wells Fargo for Daniel?', 'Prepare me for tomorrow’s meeting with Daniel’s team', 'What has changed since my last meeting with Rachel?'],
+  sales: ['Prepare the November mandate review for Pacific Coast TRS', 'Draft the fee proposal Pacific Coast TRS asked for', 'Identify the growing trends in LA territory', 'Compare MCB and MBAL for Rachel and schedule a meeting with her next month', 'Prep me for my call with Alex tomorrow', 'Prepare Maya’s retirement committee fee comparison review', 'Sofia mentioned ETFs. What should I bring to our next meeting?', 'Alex said on today’s call he wants the numbers in an appendix from now on. Update his profile.', 'Why are Daniel’s overall sales down when his ETF sales are up?', 'Which Meridian ETFs are available at Wells Fargo for Daniel?', 'Prepare me for tomorrow’s meeting with Daniel’s team', 'What has changed since my last meeting with Rachel?'],
   product: ['Compare MCB and MBAL: costs, approach and who each suits', 'Why has MGF trailed the Vanguard growth index? I need an explanation advisors can use.', 'Compare MGF F costs with VWUAX and VIGAX on $38M', 'Check whether our fee comparison for Maya is still current', 'Prep the portfolio specialist for Thursday’s meeting with Daniel’s team', 'Build the Intermediary pitch book on MGF for the advisor channel'],
   marketing: ['Draft the follow-up email to Alex using Product’s verified comparison', 'Create an ETF email campaign for Sofia', 'Write a LinkedIn post on fee transparency for advisors', 'Refresh the standing MGF materials for the quarter and flag anything expiring', 'Create a custom pitch book on Meridian ETFs at Wells Fargo for Daniel’s team'],
   service: ['Alex says the link in Priya’s email won’t open', 'Maya says the benchmark explanation is still unclear']
@@ -42,11 +43,11 @@ const AGENTS = {
   'product.summary': { name: 'Contact Summarizer', team: 'product', does: 'Summarizes the advisor context Product needs for a question', tools: [] },
   'product.tone': { name: 'Tone/Style Alignment', team: 'product', does: 'Turns verified product answers into advisor-ready language using approved messaging', tools: ['seismic.get_approved_language'] },
   'product.format': { name: 'Response Formatter', team: 'product', does: 'Formats product answers for the channel', tools: ['taxonomy.resolve', 'fund.compare'] },
-  'product.qar': { name: 'QAR', team: 'product', does: 'Produces verified answers; every number traced to a system of record', tools: ['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.cost_on_assets', 'models.plan_fee_comparison', 'seismic.search_content', 'platform.get_availability', 'taxonomy.resolve', 'fund.compare', 'models.get_allocations', 'platform.get_program_rules'] },
+  'product.qar': { name: 'QAR', team: 'product', does: 'Produces verified answers; every number traced to a system of record', tools: ['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.cost_on_assets', 'models.plan_fee_comparison', 'seismic.search_content', 'platform.get_availability', 'taxonomy.resolve', 'fund.compare', 'models.get_allocations', 'platform.get_program_rules', 'seismic.resolve_evidence'] },
   'product.idprep': { name: 'Specialist Prep Me', team: 'product', does: 'Prepares an portfolio specialist for an advisor or client meeting: who is in the room, what they hold and have asked, how the strategy is positioned and the questions to expect', tools: ['crm.get_contact', 'crm.get_call_notes', 'crm.get_team', 'book.get_assets', 'fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.get_allocations', 'news.get_items', 'content.get_themes', 'seismic.search_content', 'insights.changes_since'] },
   'product.positioning': { name: 'Strategy Positioning', team: 'product', does: 'Explains how a strategy is positioned: allocation changes, what drove results and peer context, from verified data', tools: ['fund.get_facts', 'fund.lookup', 'fund.get_performance', 'mstar.get_peers', 'models.get_allocations', 'fund.compare', 'seismic.resolve_evidence'] },
   'product.views': { name: 'Market Views', team: 'product', does: 'Summarizes approved house views and market themes that matter for the meeting', tools: ['news.get_items', 'content.get_themes', 'seismic.search_content', 'seismic.get_approved_language'] },
-  'product.institutional': { name: 'Institutional Pitch Books', team: 'product', does: 'Builds institutional pitch books from approved strategy content and verified data', tools: ['seismic.search_content', 'fund.get_facts', 'fund.get_performance', 'models.get_allocations', 'sharepoint.get_disclosures'] },
+  'product.institutional': { name: 'Institutional Pitch Books', team: 'product', does: 'Builds institutional pitch books from approved strategy content and verified data', tools: ['seismic.search_content', 'fund.get_facts', 'fund.get_performance', 'models.get_allocations', 'sharepoint.get_disclosures', 'seismic.resolve_evidence'] },
   'product.srg': { name: 'Intermediary Pitch Books', team: 'product', does: 'Builds Intermediary pitch books for the retail advisor channel from approved content and verified data', tools: ['seismic.search_content', 'fund.get_facts', 'fund.get_performance', 'mstar.get_peers', 'sharepoint.get_disclosures'] },
   'marketing.gather': { name: 'Resource Gatherer', team: 'marketing', does: 'Finds approved content, templates, messaging and landing pages', tools: ['seismic.search_content', 'seismic.get_approved_language', 'aem.get_page', 'mcloud.get_engagement'] },
   'marketing.analyze': { name: 'Document Analyzer', team: 'marketing', does: 'Extracts key points from approved documents', tools: ['seismic.search_content', 'service.get_insights', 'seismic.resolve_evidence'] },
@@ -143,7 +144,8 @@ const FIRMS = {
   'FIRM-ML': { name: 'Merrill', policy: null },
   'FIRM-WF': { name: 'Wells Fargo Advisors', policy: null },
   'FIRM-UBS': { name: 'UBS Wealth Management', policy: null },
-  'FIRM-HP': { name: 'Harbor Point Wealth (RIA)', policy: null }
+  'FIRM-HP': { name: 'Harbor Point Wealth (RIA)', policy: null },
+  'FIRM-PCT': { name: 'Pacific Coast Teachers’ Retirement System', policy: 'Public pension: no gifts, meals or entertainment; every meeting is logged for the public record' }
 };
 
 const ADVISORS = {
@@ -162,7 +164,11 @@ const ADVISORS = {
   'ADV-106': { name: 'Rachel Okafor', short: 'Rachel', title: 'Senior Vice President, Wealth Advisor', firm: 'FIRM-UBS', office: 'Pasadena, Los Angeles', territory: 'LA', team: 'Okafor Wealth Group',
     practice: 'Retirees and pre-retirees who need income', coverage: ['EMP-PRIYA', 'EMP-SAM'], units: { 'BU-106': 'Okafor retirement income portfolios' } },
   'ADV-107': { name: 'Luis Herrera', short: 'Luis', title: 'Principal', firm: 'FIRM-HP', office: 'Long Beach, Los Angeles', territory: 'LA', team: 'Harbor Point Wealth',
-    practice: 'Independent RIA; core portfolios for families and small businesses', coverage: ['EMP-SAM'], units: { 'BU-107': 'Harbor Point core portfolios', 'BU-107R': 'Harbor Point small-business retirement plans' } }
+    practice: 'Independent RIA; core portfolios for families and small businesses', coverage: ['EMP-SAM'], units: { 'BU-107': 'Harbor Point core portfolios', 'BU-107R': 'Harbor Point small-business retirement plans' } },
+  'ADV-108': { name: 'Helen Moreau, CFA', short: 'Helen', title: 'Chief Investment Officer', firm: 'FIRM-PCT', office: 'Sacramento, CA', territory: null, institutional: true, segment: 'Institutional client · public pension',
+    team: 'Investment Office (Deputy CIO Raj Patel; consultant Ridgeline Advisors); seven-trustee investment committee',
+    practice: '$48B public pension for about 310,000 California educators; Meridian Investments manages a $1.2B core fixed income separate account', coverage: ['EMP-OLIVIA'],
+    units: { 'BU-108F': 'Core fixed income mandate ($1.2B separate account)', 'BU-108C': 'Investment committee (seven trustees)' } }
 };
 const TERRITORIES = {
   LA: { name: 'Los Angeles', aliases: ['la', 'los angeles', 'l.a.'], advisors: ['ADV-105', 'ADV-106', 'ADV-107'], wholesaler: 'Priya Shah' },
@@ -202,7 +208,10 @@ const MEMORY = [
   { id: 'MEM-053', adv: 'ADV-105', cat: 'content_pref', scope: 'BU-105', attr: 'Review cadence', value: 'Reviews satellite funds every quarter', src: 'CALL-0826', speaker: 'Daniel Kim', basis: 'Direct advisor statement', rev: 1, access: 'shared' },
   { id: 'MEM-062', adv: 'ADV-106', cat: 'personal', scope: 'advisor', attr: 'Interests', value: 'Volunteers with a financial literacy program in Pasadena', src: 'Priya’s notes', speaker: 'Rachel Okafor', basis: 'Relationship note', rev: 1, access: 'relationship' },
   { id: 'MEM-072', adv: 'ADV-107', cat: 'personal', scope: 'advisor', attr: 'Interests', value: 'Sails out of Long Beach', src: 'Sam’s notes', speaker: 'Luis Herrera', basis: 'Relationship note', rev: 1, access: 'relationship' },
-  { id: 'MEM-042', adv: 'ADV-104', cat: 'communication_pref', scope: 'advisor', attr: 'Contact channel', value: 'Email first; usually replies in the evening', src: 'Salesforce', speaker: 'Activity pattern', basis: 'Observed pattern', rev: 1, access: 'shared' }
+  { id: 'MEM-042', adv: 'ADV-104', cat: 'communication_pref', scope: 'advisor', attr: 'Contact channel', value: 'Email first; usually replies in the evening', src: 'Salesforce', speaker: 'Activity pattern', basis: 'Observed pattern', rev: 1, access: 'shared' },
+  { id: 'MEM-091', adv: 'ADV-108', cat: 'content_pref', scope: 'BU-108C', attr: 'Committee materials', value: 'Use the committee’s own template: performance against the Bloomberg U.S. Aggregate, attribution, risk. No marketing slides', src: 'MTG-0815', speaker: 'Helen Moreau', basis: 'Direct client statement', rev: 1, access: 'shared' },
+  { id: 'MEM-092', adv: 'ADV-108', cat: 'priority', scope: 'BU-108F', attr: 'Investment restrictions', value: 'ESG screen: no thermal coal and no private prisons; the consultant checks it every quarter', src: 'MTG-0815', speaker: 'Helen Moreau', basis: 'Direct client statement', rev: 1, access: 'shared' },
+  { id: 'MEM-093', adv: 'ADV-108', cat: 'communication_pref', scope: 'advisor', attr: 'Consultant and fees', value: 'Copy Ridgeline Advisors on every mandate communication; Ridgeline scores fees against its universe median of 24 basis points for core fixed income', src: 'EMAIL-0929', speaker: 'Raj Patel (Deputy CIO)', basis: 'Direct client statement', rev: 1, access: 'shared' }
 ];
 /* Products each advisor holds, uses or is weighing (from Salesforce holdings and recorded calls) */
 const ADVISOR_PRODUCTS = {
@@ -257,14 +266,19 @@ const EPISODES = [
   { id: 'CALL-0618', adv: 'ADV-104', scope: 'BU-104', date: 'Jun 18, 2026', kind: 'Call transcript', with: 'Priya Shah',
     text: 'Sofia and Kevin Brooks reviewed the core models. Kevin trades the models; Sofia approves changes. She wants one-page summaries she can forward to Kevin.' },
   { id: 'CALL-0624', adv: 'ADV-106', scope: 'BU-106', date: 'Jun 24, 2026', kind: 'Call transcript', with: 'Priya Shah',
-    text: 'Rachel: "Clients want a paycheck they can plan around." Diane Hughes asked for client-friendly material on how income is paid out.' }
+    text: 'Rachel: "Clients want a paycheck they can plan around." Diane Hughes asked for client-friendly material on how income is paid out.' },
+  { id: 'EMAIL-0929', adv: 'ADV-108', scope: 'BU-108F', date: 'Sep 29, 2026', kind: 'Email', with: 'Olivia Grant',
+    text: 'Raj Patel (Deputy CIO): "The November 18 mandate review will cover the core fixed income mandate and the proposed $300 million intermediate credit sleeve. Ridgeline Advisors will score fees against their universe median of 24 basis points. Please send your fee proposal by November 4 and copy Ridgeline."' },
+  { id: 'MTG-0815', adv: 'ADV-108', scope: 'BU-108C', date: 'Aug 15, 2026', kind: 'Meeting notes', with: 'Olivia Grant',
+    text: 'Quarterly review with the investment committee. Mandate: $1.2 billion core fixed income separate account since 2019, benchmark Bloomberg U.S. Aggregate. Trailing 1-year return 4.9% against 4.4% for the benchmark; 3-year annualized 1.6% against 1.1%. Helen Moreau: "Next time use our template: performance, attribution, risk. No marketing slides." The committee asked for a fee proposal before the November mandate review, and whether Meridian could manage a $300 million intermediate credit sleeve. ESG screen continues: no thermal coal, no private prisons.' }
 ];
 
 /* Durable commitments (workflow state, not memory) */
 const COMMITMENTS = [
   { id: 'TASK-301', adv: 'ADV-101', scope: 'BU-101A', title: 'Send quarterly attribution in the one-page format', owner: 'Priya Shah', due: 'Jan 8, 2027', status: 'Open' },
   { id: 'TASK-302', adv: 'ADV-102', scope: 'BU-102R', title: 'Clarify what the benchmark represents', owner: 'Product Q&A', due: 'Before next committee', status: 'Open' },
-  { id: 'TASK-303', adv: 'ADV-104', scope: 'BU-104', title: 'Follow up on the role of active managers in her core-satellite model', owner: 'Priya Shah', due: 'Oct 9, 2026', status: 'Open' }
+  { id: 'TASK-303', adv: 'ADV-104', scope: 'BU-104', title: 'Follow up on the role of active managers in her core-satellite model', owner: 'Priya Shah', due: 'Oct 9, 2026', status: 'Open' },
+  { id: 'TASK-311', adv: 'ADV-108', scope: 'BU-108C', title: 'Deliver the fee proposal to the investment committee, copying Ridgeline Advisors', owner: 'Olivia Grant', due: 'Nov 4, 2026', status: 'Open' }
 ];
 
 const CASES = [
@@ -282,7 +296,8 @@ const OPPORTUNITIES = [
   { id: 'OPP-503', adv: 'ADV-104', scope: 'BU-104', name: 'Martinez core allocation', stage: 'Discovery', note: 'Moving core to ETFs' },
   { id: 'OPP-507', adv: 'ADV-103', scope: 'BU-103', name: 'Patel income refresh', stage: 'Discovery', note: 'Reviewing dividend payers for retirees' },
   { id: 'OPP-512', adv: 'ADV-107', scope: 'BU-107R', name: 'Forsyth Components 401(k)', stage: 'Closed lost', type: '401(k)', note: 'Small-business plan; sponsor decision Sep 10' },
-  { id: 'OPP-513', adv: 'ADV-107', scope: 'BU-107R', name: 'Long Beach Marine SIMPLE IRA', stage: 'Discovery', type: 'SIMPLE IRA', note: 'Owner asked about a plan for twelve employees' }
+  { id: 'OPP-513', adv: 'ADV-107', scope: 'BU-107R', name: 'Long Beach Marine SIMPLE IRA', stage: 'Discovery', type: 'SIMPLE IRA', note: 'Owner asked about a plan for twelve employees' },
+  { id: 'OPP-520', adv: 'ADV-108', scope: 'BU-108F', name: 'Pacific Coast TRS intermediate credit sleeve', stage: 'Proposal', note: '$300M add-on mandate; decision at the Nov 18 mandate review' }
 ];
 
 /* Retirement plans an advisor's committee oversees (Salesforce plan record). Plan and assets are fictional. */
@@ -359,7 +374,8 @@ const DISCLOSURES = {
   email: { required: ['Past results are not predictive of results in future periods.', 'Expense ratios are as of each fund’s prospectus.', 'Indexes are unmanaged; investors cannot invest directly in an index.', 'For financial professional use only.'], rules: ['Attach approved PDFs where the firm blocks links.', 'No performance figures unless inserted from the system of record at approval (POL-3).'] },
   social: { required: ['Investing involves risk, including loss of principal.', 'Expense ratios are as of each fund’s current prospectus.', 'Educational content, not investment advice.'],
     rules: ['Public audience: no advisor, firm or client names (POL-8).', 'Name the share class whenever an expense ratio appears.', 'No performance figures, rankings, ratings or forecasts.', 'Fee claims use approved messaging (MSG- ids); no new claims.', 'Link only to a published, approved page.', 'Disclosures go in the post itself, not in a comment.'] },
-  committee: { required: ['Past results are not predictive of results in future periods.', 'Expense ratios are as of each fund’s prospectus; share class shown.', 'Category medians are Morningstar data as of the date shown.', 'For financial professional and plan sponsor use only.'], rules: ['Show each option’s share class and as-of date.', 'Name the comparison category and data source.'] }
+  committee: { required: ['Past results are not predictive of results in future periods.', 'Expense ratios are as of each fund’s prospectus; share class shown.', 'Category medians are Morningstar data as of the date shown.', 'For financial professional and plan sponsor use only.'], rules: ['Show each option’s share class and as-of date.', 'Name the comparison category and data source.'] },
+  institutional: { required: ['Past results are not predictive of results in future periods.', 'Composite returns are gross of fees unless stated; a fee schedule is provided separately.', 'For institutional investors and their consultants only.'], rules: ['Name the composite, benchmark and as-of date with every return.', 'Fees come from the approved schedule (SEIS-132) with the tier math shown.', 'Copy the consultant on mandate communications.'] }
 };
 
 /* ---------- Sales AI shared services (all values fictional; amounts in $ millions) ---------- */
@@ -381,7 +397,9 @@ const BOOK = {
   'ADV-106': { entity: 'Okafor Wealth Group (team level), Meridian Investments assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
     funds: [['MRLFX', MF, 21.0], ['MRBFX', MF, 12.4], ['MRINX', MF, 9.7], ['MRCP', 'ETF', 2.1]], prior_by_vehicle: { [MF]: 41.8, ETF: 0 } },
   'ADV-107': { entity: 'Harbor Point Wealth (firm level), Meridian Investments assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
-    funds: [['MRLFX', MF, 3.0], ['MRBFX', MF, 4.2], ['MRCP', 'ETF', 3.9], ['MRDV', 'ETF', 2.6]], prior_by_vehicle: { [MF]: 7.5, ETF: 3.1 } }
+    funds: [['MRLFX', MF, 3.0], ['MRBFX', MF, 4.2], ['MRCP', 'ETF', 3.9], ['MRDV', 'ETF', 2.6]], prior_by_vehicle: { [MF]: 7.5, ETF: 3.1 } },
+  'ADV-108': { entity: 'Pacific Coast Teachers’ Retirement System (plan level), Meridian Investments assets only', as_of: 'Aug 31, 2026', prior_as_of: 'Aug 31, 2025',
+    funds: [['Meridian Core Fixed Income (separate account)', 'Separate account', 1200.0]], prior_by_vehicle: { 'Separate account': 1140.0 } }
 };
 /* [flows] gross sales and redemptions by vehicle and channel: [trailing twelve months, the twelve before] */
 const FLOW_LIMITS = ['Twelve-month flows are by vehicle and channel; fund-level transactions are only available for Jul to Sep 2026 (transactions service).', 'Flows exclude in-kind transfers between share classes.'];
@@ -485,7 +503,8 @@ const CHANGE_EVENTS = [
   ['ADV-105', 'Sep 22, 2026', 'MRGR added to Wells Fargo Personalized UMA', 'Dealer intelligence feed'],
   ['ADV-106', 'Sep 26, 2026', 'Okafor Wealth Group took on two retiree households from a retiring colleague’s book', 'Salesforce'],
   ['ADV-107', 'Sep 24, 2026', 'Forsyth Components named a new CFO, who ran a recordkeeper search at her previous company', 'News feed'],
-  ['ADV-107', 'Sep 28, 2026', 'Forsyth’s incumbent recordkeeper announced a fee increase for 2027', 'News feed']
+  ['ADV-107', 'Sep 28, 2026', 'Forsyth’s incumbent recordkeeper announced a fee increase for 2027', 'News feed'],
+  ['ADV-108', 'Sep 29, 2026', 'Investment committee set Nov 18 for the mandate review, with fee proposals due Nov 4', 'Salesforce']
 ];
 /* [engagement graph] attributable digital activity (logged-in advisors only), Marketing Cloud */
 const DIGITAL = [
@@ -503,7 +522,8 @@ const ADVISOR_TEAMS = {
   'ADV-104': [['Sofia Martinez', 'Lead advisor'], ['Kevin Brooks', 'Associate advisor; trades the core models']],
   'ADV-105': [['Daniel Kim', 'Managing Director; chairs the model committee'], ['Hannah Lee', 'Portfolio manager; runs the quarterly satellite review'], ['Aaron Tran', 'Junior advisor; joined Aug 2026']],
   'ADV-106': [['Rachel Okafor', 'Lead advisor'], ['Diane Hughes', 'Client service manager']],
-  'ADV-107': [['Luis Herrera', 'Principal'], ['Paula Reyes', 'Operations; owns retirement plan paperwork']]
+  'ADV-107': [['Luis Herrera', 'Principal'], ['Paula Reyes', 'Operations; owns retirement plan paperwork']],
+  'ADV-108': [['Helen Moreau, CFA', 'Chief Investment Officer; chairs staff recommendations to the committee'], ['Raj Patel', 'Deputy CIO; runs the mandate review'], ['Ridgeline Advisors', 'Investment consultant; scores managers and fees'], ['Investment committee', 'Seven trustees; decides mandates']]
 };
 const COVERAGE_TEAM = [['Priya Shah', 'External wholesaler, Southern California'], ['Sam Lee', 'Internal partner, Southern California'], ['Nina Alvarez', 'SSC: scheduling and follow-up'], ['Dana Ortiz', 'Product Q&A, Product'], ['Ravi Menon', 'Retirement plan specialist (joins plan and committee meetings)']];
 /* [coverage analytics] coverage tier and target completed contacts per 90 days */
@@ -523,7 +543,8 @@ const MEETING_RULES = {
   'FIRM-WF': ['Gifts up to $100 per advisor per year', 'Meals reasonable and infrequent', 'No entertainment attached to model reviews'],
   'FIRM-ML': ['Meals up to $100 per person', 'Home-office approval for seminars'], 'FIRM-UBS': ['Meals up to $100 per person', 'Log attendees for every meal'],
   'FIRM-NS': ['RIA: follow Meridian Investments policy only'], 'FIRM-HP': ['RIA: follow Meridian Investments policy only'],
-  Meridian: ['Log every advisor meeting in Salesforce within 48 hours', 'Internal-only meetings need no compliance review', 'Advisor invites go out only after a person approves them']
+  Meridian: ['Log every advisor meeting in Salesforce within 48 hours', 'Internal-only meetings need no compliance review', 'Advisor invites go out only after a person approves them'],
+  'FIRM-PCT': ['No gifts, meals or entertainment for staff or trustees', 'Every meeting with staff or trustees is logged for the public record', 'Copy the consultant (Ridgeline Advisors) on all mandate communications']
 };
 /* [themes] and [news]: this week's approved commentary and authorized news */
 const THEMES = [
@@ -548,14 +569,17 @@ const CONTENT_RECS = {
   'ADV-105': [['SEIS-117', 'stated_need', 'Two models moved to an index core; satellites reviewed quarterly', 'CALL-0826'], ['SEIS-120', 'stated_need', 'Clients ask about ETFs versus active funds', 'CALL-0918'], ['SEIS-126', 'popular', 'Popular with teams that recently added an advisor', null]],
   'ADV-106': [['SEIS-123', 'stated_need', 'Rachel asked how balanced and bond funds fit an income plan', 'CALL-0923'], ['SEIS-124', 'popular', 'Opened by 41% of advisors with business-owner clients this month', null]],
   'ADV-103': [['SEIS-119', 'stated_need', 'Jordan focuses on income and dividends for retirees', 'CALL-0910']],
-  'ADV-107': [['SEIS-121', 'stated_need', 'Luis asked for the core bond story', 'EMAIL-0925']]
+  'ADV-107': [['SEIS-121', 'stated_need', 'Luis asked for the core bond story', 'EMAIL-0925']],
+  'ADV-108': [['SEIS-131', 'stated_need', 'Helen asked for the committee’s own template', 'MTG-0815'], ['SEIS-132', 'stated_need', 'The committee asked for a fee proposal', 'EMAIL-0929'], ['SEIS-133', 'stated_need', 'The committee asked about a $300 million credit sleeve', 'MTG-0815']]
 };
 /* [evidence resolver] passages in approved documents, by version and page (fictional excerpts) */
 const DOC_PASSAGES = {
   'SEIS-117': { version: 'v3, Aug 2026', pages: [[2, 'In a core-satellite model, the core tracks a broad index at low cost; satellites are where active managers aim to add return or manage risk.'], [3, 'A typical allocation keeps 60% to 80% in the core and the rest in satellites.']] },
   'SEIS-116': { version: 'v2, Jun 2026', pages: [[1, 'Show each option against its category median and document the committee’s rationale in the minutes.']] },
   'SEIS-122': { version: 'v4, Apr 2026', pages: [[1, 'Meridian Balanced Fund invests at least 50% in stocks and at least 25% in bonds.']] },
-  'SEIS-120': { version: 'v2, Sep 2026', pages: [[1, 'Meridian Investments ETFs are actively managed and built on The Meridian System.']] }
+  'SEIS-120': { version: 'v2, Sep 2026', pages: [[1, 'Meridian Investments ETFs are actively managed and built on The Meridian System.']] },
+  'SEIS-132': { version: 'v5, Jul 2026', pages: [[1, 'Core fixed income separate accounts: 0.25% on the first $500 million, 0.20% on the next $500 million and 0.15% above $1 billion. Example: a $1.2 billion account pays about $2.55 million a year, an effective 0.2125% (21.25 basis points).'], [2, 'Intermediate credit separate accounts: 0.28% on the first $250 million and 0.24% above. Example: a $300 million account pays about $0.82 million a year, an effective 0.2733% (27.33 basis points).']] },
+  'SEIS-133': { version: 'v2, Jul 2026', pages: [[3, 'Intermediate credit composite, as of Jun 30, 2026: 5.6% trailing 1-year and 2.1% 3-year annualized, against 5.0% and 1.5% for the Bloomberg U.S. Intermediate Credit Index.']] }
 };
 /* [objection playbook] coaching guides grounded in approved messaging */
 const PLAYBOOK = {
@@ -615,7 +639,11 @@ const CONTENT = [
   { id: 'SEIS-123', title: 'Balanced vs. bond funds in a retirement income plan', audience: 'Financial professional', format: '1 page', status: 'Approved', tags: 'comparison balanced bond income retirement mcb mbal' },
   { id: 'SEIS-124', title: 'Estate planning conversations with business owners', audience: 'Financial professional', format: '3 pages', status: 'Approved', tags: 'estate planning business owners succession' },
   { id: 'SEIS-125', title: 'Practice management: pricing and packaging advice', audience: 'Financial professional', format: '4 pages', status: 'Approved', tags: 'practice management pricing packaging' },
-  { id: 'SEIS-126', title: 'Practice management: growing a team with next-gen advisors', audience: 'Financial professional', format: '3 pages', status: 'Approved', tags: 'practice management team next-gen succession' }
+  { id: 'SEIS-126', title: 'Practice management: growing a team with next-gen advisors', audience: 'Financial professional', format: '3 pages', status: 'Approved', tags: 'practice management team next-gen succession' },
+  { id: 'SEIS-130', title: 'Core fixed income: institutional pitch book', audience: 'Institutional (consultant and committee)', format: '24 pages', status: 'Approved', tags: 'institutional pitch book core fixed income pension mandate separate account' },
+  { id: 'SEIS-131', title: 'Quarterly review template: core fixed income separate account', audience: 'Institutional client', format: '14 pages', status: 'Approved', tags: 'institutional quarterly review template committee performance attribution risk' },
+  { id: 'SEIS-132', title: 'Institutional fee schedule: fixed income separate accounts', audience: 'Institutional (consultant and committee)', format: '2 pages', status: 'Approved', tags: 'institutional fee schedule proposal separate account basis points tiers' },
+  { id: 'SEIS-133', title: 'Intermediate credit strategy overview', audience: 'Institutional', format: '8 pages', status: 'Approved', tags: 'institutional credit sleeve intermediate credit strategy composite' }
 ];
 
 /* Verified findings already in the foundation (reusable) */
